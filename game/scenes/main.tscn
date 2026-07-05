@@ -1,0 +1,16 @@
+[gd_scene load_steps=1 format=3]
+
+[node name="Main" type="Node2D"]
+
+[node name="Background" type="ColorRect" parent="."]
+offset_right = 240.0
+offset_bottom = 160.0
+color = Color(0.1, 0.15, 0.2, 1)
+
+[node name="WorldContainer" type="Node2D" parent="."]
+
+[node name="CombatContainer" type="Node2D" parent="."]
+
+[node name="UILayer" type="CanvasLayer" parent="."]
+
+[node name="TransitionLayer" type="CanvasLayer" parent="."]
