@@ -15,6 +15,9 @@ const SUITES := [
 	"res://tests/test_data_resources.gd",
 	"res://tests/test_dialogue_box.gd",
 	"res://tests/test_overworld_enemy.gd",
+	"res://tests/test_scene_manager.gd",
+	"res://tests/test_enemy_ai.gd",
+	"res://tests/test_dialogue_cooldown.gd",
 ]
 
 
@@ -44,7 +47,9 @@ func _ready() -> void:
 
 		for m_name in method_names:
 			suite.set_context("%s.%s" % [suite_name, m_name])
-			suite.call(m_name)
+			# await handles both plain and coroutine test methods (the timing
+			# suites await real timers); a synchronous test just returns at once.
+			await suite.call(m_name)
 			tests_run += 1
 
 		total_checks += suite.checks

@@ -102,26 +102,42 @@ func start_encounter(enemy: OverworldEnemy) -> void:
 	world_container.process_mode = Node.PROCESS_MODE_INHERIT
 	await _fade_to(0.0)
 	if victory:
-		total_xp += enemy.stats.xp_reward
-		var drops: PackedStringArray = enemy.stats.loot_table
-		for item in drops:
-			if not inventory.has(item):
-				inventory.append(item)
-		var msg := "Victory! Gained %d XP." % enemy.stats.xp_reward
-		if drops.size() > 0:
-			msg += " The %s dropped: %s!" % [enemy.stats.display_name, ", ".join(drops)]
+		var msg := apply_victory_rewards(enemy.stats)
 		enemy.defeated()
 		in_encounter = false
 		encounter_finished.emit(true)
 		await show_dialogue([msg])
 	else:
-		hero_hp = hero_stats.max_hp
+		heal_hero_to_full()
 		in_encounter = false
 		encounter_finished.emit(false)
 		await show_dialogue([
 			"You were defeated...",
 			"You wake up back in the forest, restored.",
 		])
+
+
+## Grant XP and loot for a defeated enemy and return the victory banner text.
+## Loot is de-duplicated (you never pick up a second identical key). Extracted
+## from start_encounter so the reward rules can be unit tested without running
+## a whole battle (see /RUNBOOK.md -> Unit tests).
+func apply_victory_rewards(enemy_stats: EnemyStats) -> String:
+	total_xp += enemy_stats.xp_reward
+	var drops: PackedStringArray = enemy_stats.loot_table
+	for item in drops:
+		if not inventory.has(item):
+			inventory.append(item)
+	var msg := "Victory! Gained %d XP." % enemy_stats.xp_reward
+	if drops.size() > 0:
+		msg += " The %s dropped: %s!" % [enemy_stats.display_name, ", ".join(drops)]
+	return msg
+
+
+## Restore the hero to full HP. Shared by the healer NPC and the post-defeat
+## recovery so both apply the exact same rule.
+func heal_hero_to_full() -> void:
+	if hero_stats:
+		hero_hp = hero_stats.max_hp
 
 
 func _fade_to(alpha: float) -> void:
