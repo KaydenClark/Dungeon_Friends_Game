@@ -3,10 +3,10 @@
 > Generated from LLM Workbench v2.1. See `RUNBOOK.md` -> Upgrading The
 > Harness.
 
-**Current focus:** First-playable slice is built and headlessly verified
-(2026-07-05, second session) - Kayden's manual play-check is the gate before
-returning to M0.3 (export presets) and the real art/LDtk pipeline (T-003/
-T-004/T-011).
+**Current focus:** First-playable slice is built, windowed play-checked by
+Kayden, and promoted `integration` -> `main` (2026-07-05, second session).
+Next up: M0.3 (export presets) and the real art/LDtk pipeline (T-003/T-004/
+T-011).
 **Owner:** Kayden
 **Last updated:** 2026-07-05 (second session)
 
@@ -24,19 +24,20 @@ commands and verification procedures in `RUNBOOK.md`.
   position return, a key drop, a locked door, and a goal path behind it. All
   placeholder ColorRect art (real art is T-003; LDtk authoring is T-004/
   T-011).
-- **Health:** green - verified on Kayden's actual Mac this session (Godot
-  4.6.3): headless `--import`, `main.tscn --quit-after`, and a 26/26-check
-  end-to-end smoke test (`scenes/dev/slice_smoke_test.tscn`) all exit 0 with
-  no errors. The prior session's pending T-005/T-006/T-007 re-verification
-  was also run for real (see Proof Log). Remaining human gate: Kayden has not
-  yet played it windowed - the visual/feel check is his.
+- **Health:** green - verified on Kayden's actual Mac (Godot 4.6.3): headless
+  `--import`, `main.tscn --quit-after`, and a 26/26-check end-to-end smoke
+  test (`scenes/dev/slice_smoke_test.tscn`) all exit 0 with no errors, on
+  both `integration` and, after the fast-forward merge, `main`. Kayden has
+  also completed his windowed play-check. The prior session's pending
+  T-005/T-006/T-007 re-verification was run for real too (see Proof Log).
 - **Decision needed:** none open. Note: T-013 was deliberately built past its
   "empty shell" scope (a real minimal battle, not just a transition) on
-  Kayden's explicit "get to play-testable" instruction this session.
+  Kayden's explicit "get to play-testable" instruction. `integration` was
+  fast-forwarded into `main` with Kayden's explicit go-ahead once his
+  windowed play-check passed - no conflicts, no rebase needed.
 - **Blocked on:** nothing.
-- **Next milestone:** Kayden's manual play-check of the slice, then M0.3
-  (export presets) and the content pipeline (T-003 art, T-004 LDtk importer,
-  T-011 real forest map).
+- **Next milestone:** M0.3 (export presets) and the content pipeline (T-003
+  art, T-004 LDtk importer, T-011 real forest map).
 - **Design update (2026-07-05):** Kayden locked in the visual language
   (GBA-fantasy-adventure look, 8x8/16x16 tile logic), confirmed the general
   explore -> interact -> act -> consequence loop, and defined combat as
@@ -138,16 +139,17 @@ MVP given this project's emphasis on weapon variety and magic (see
 | ID | Task | Completed | Result | Proof row |
 |---|---|---|---|---|
 | T-001 | M0.2: Godot project scaffold - Mobile renderer, Nearest filter, 240x160 viewport/integer scale, `main.tscn` with `SceneManager` autoload + placeholder background | 2026-07-05 | pass | See Proof Log row 2026-07-05 |
-| T-005 | Repo doc update: replace fixed 240x160/GBA-locked resolution language with flexible HD/ultrawide display language | 2026-07-05 | pass (docs); underlying resolution switch itself pending Kayden's manual headless re-verification, see Health above | See Proof Log row 2026-07-05 (T-005/T-006/T-007) |
-| T-006 | Project settings: `game/project.godot` updated to `canvas_items`/`expand`/`fractional` at a 1280x720 design reference (Nearest filter unchanged) | 2026-07-05 | pass (file change); **not yet confirmed by an actual headless Godot run** - this sandbox has no Godot/macOS runtime, see Health above | See Proof Log row 2026-07-05 (T-005/T-006/T-007) |
-| T-007 | Display test scene: `game/scenes/dev/display_scaling_spike.tscn` + `game/scripts/dev/display_scaling_spike.gd` - placeholder tile grid + resolution label, sized dynamically to `get_viewport_rect().size` | 2026-07-05 | pass (file change); **not yet confirmed by an actual headless Godot run at each resolution** - see Health above; exact commands are in the Proof Log row and in `RUNBOOK.md` -> Display-scaling spike | See Proof Log row 2026-07-05 (T-005/T-006/T-007) |
+| T-005 | Repo doc update: replace fixed 240x160/GBA-locked resolution language with flexible HD/ultrawide display language | 2026-07-05 | pass (docs); resolution switch confirmed by a real headless run in the second session | See Proof Log rows 2026-07-05 (T-005/T-006/T-007) and (T-005/T-006/T-007 follow-up) |
+| T-006 | Project settings: `game/project.godot` updated to `canvas_items`/`expand`/`fractional` at a 1280x720 design reference (Nearest filter unchanged) | 2026-07-05 | pass - confirmed by a real headless run in the second session (`--import` + `main.tscn --quit-after 1` both exit 0) | See Proof Log rows 2026-07-05 (T-005/T-006/T-007) and (T-005/T-006/T-007 follow-up) |
+| T-007 | Display test scene: `game/scenes/dev/display_scaling_spike.tscn` + `game/scripts/dev/display_scaling_spike.gd` - placeholder tile grid + resolution label, sized dynamically to `get_viewport_rect().size` | 2026-07-05 | pass - confirmed by a real headless run at all 3 resolutions in the second session; note headless mode can't actually validate per-resolution viewport sizing (see RUNBOOK caveat) | See Proof Log rows 2026-07-05 (T-005/T-006/T-007) and (T-005/T-006/T-007 follow-up) |
 | T-015 | Design clarification: lock in GBA-fantasy-adventure visual language (8x8/16x16 tile logic), confirm the general explore -> interact -> act -> consequence loop, and define grid-based/per-unit-initiative/d10 combat | 2026-07-05 | pass (docs only, no code touched) | See Proof Log row 2026-07-05 (T-015) |
 | T-009 | Input map: 8 actions (`move_up/down/left/right`, `interact`, `confirm`, `cancel`, `menu`) with keyboard bindings in `game/project.godot` | 2026-07-05 | pass - smoke test asserts all 8 exist with >=1 binding | See Proof Log row 2026-07-05 (T-009) |
 | T-010 | Grid-snapped player movement, wall collision, camera follow (`GridActor`/`Player` + `RoomGrid`, Tween-based, AStarGrid2D no-diagonal pathfinding) | 2026-07-05 | pass - headless smoke-verified | See Proof Log row 2026-07-05 (T-010) |
 | T-012 | Interaction system: faced-cell `interact` (NPC dialogue via `DialogueBox`, locked door), bump-contact enemy encounter trigger. Cell-occupancy checks used instead of `Area2D` (fits the everything-rests-on-grid invariant); revisit if free-positioned triggers are ever needed | 2026-07-05 | pass - headless smoke-verified | See Proof Log row 2026-07-05 (T-012) |
 | T-013 | Combat scene + transition - deliberately built past the "empty shell" scope on Kayden's play-testable instruction: minimal but real grid battle (initiative by speed, AStarGrid2D movement, melee-adjacent, d10 rolls, Attack/Defend) with fade transition and exact-position overworld restore | 2026-07-05 | pass - headless smoke-verified; formulas are placeholders pending Phase 3/4 red/green | See Proof Log row 2026-07-05 (T-013) |
 | T-014 | Proof log rows for the completed task batch | 2026-07-05 | pass - rows appended below | This row |
-| T-016 | First-playable slice integration (forest room + NPC + enemy + combat + key + door + goal) with end-to-end headless smoke test | 2026-07-05 | pass - 26/26 checks, exit 0; windowed play-check still owed by Kayden | See Proof Log row 2026-07-05 (T-016) |
+| T-016 | First-playable slice integration (forest room + NPC + enemy + combat + key + door + goal) with end-to-end headless smoke test | 2026-07-05 | pass - 26/26 checks, exit 0; Kayden's windowed play-check also passed | See Proof Log row 2026-07-05 (T-016) |
+| T-017 | Promote `integration` -> `main`: committed the slice to a new `integration` branch, Kayden play-checked it, then fast-forward-merged into `main` on his explicit go-ahead | 2026-07-05 | pass - `main` at `097ced0`, all 3 headless checks re-confirmed post-merge | See Proof Log row 2026-07-05 (T-017) |
 
 ## Documentation Check
 
@@ -187,3 +189,4 @@ dated heading.
 | 2026-07-05 | T-012 | Claude | Smoke test: NPC dialogue opened via faced-cell interact and closed after advancing; locked-door interact shows locked/unlock dialogues; enemy bump started an encounter. Implementation is grid-occupancy-based (`interact` targets `cell + facing`), not `Area2D` - simpler and consistent with the everything-on-grid invariant | Walk to the NPC and press E | pass | Done-lane note records the Area2D deviation | Chest pickup as a distinct interactable type not yet built (key comes from combat loot) |
 | 2026-07-05 | T-013 | Claude | Smoke test: enemy contact faded into `CombatScene` (CanvasLayer, camera-independent), battle ran per-unit initiative with AStarGrid2D approach movement and d10 rolls (log lines printed each roll), victory returned to the overworld with the player at the exact pre-combat cell and 19-20/20 HP carried back. Scope note: built as a real minimal battle, not an empty shell, per Kayden's instruction | Bump the slime in `main.tscn` | pass | `BLUEPRINT.md` combat scene row updated; formulas marked placeholder for Phase 3/4 | Real Phase 4 combat: two-layer FSM states as classes, Ability/Item commands, multi-unit parties, camera-zoom transition |
 | 2026-07-05 | T-016 | Claude | `Godot --headless --path game scenes/dev/slice_smoke_test.tscn` -> `SLICE SMOKE TEST: PASS (26/26 checks)`, exit 0 (seeded RNG 1234; covers input map, movement/collision, NPC dialogue, encounter, combat victory, key drop, enemy removal, HP carry-back, world restore, door unlock, goal completion flag). Known noise: benign `ObjectDB instances leaked` warning at test exit (quit mid-coroutines). Also re-ran `--import` (exit 0) and `main.tscn --quit-after 3` (exit 0, no errors) | One command, ~15s: `cd game && /Applications/Godot.app/Contents/MacOS/Godot --headless --path . scenes/dev/slice_smoke_test.tscn` | pass | `TASKBOARD.md`, `BLUEPRINT.md`, `RUNBOOK.md`, `README.md` updated this session | Kayden's windowed play-check (feel, readability, combat pacing); no save/load, single party member, one enemy type - all later phases |
+| 2026-07-05 | T-017 | Claude | Kayden completed his windowed play-check of the first-playable slice and confirmed it's ready. Committed the slice to a new `integration` branch (commit `097ced0`), then fast-forward-merged `integration` -> `main` (`git merge --ff-only integration`, 199561c..097ced0, no conflicts) on Kayden's explicit "promote integration" instruction. Re-ran all 3 headless checks (`--import`, `main.tscn --quit-after 3`, `slice_smoke_test.tscn`) on `main` post-merge - all exit 0, smoke test still 26/26 | Local `main` now at 097ced0, matches what Kayden play-tested on `integration` | pass | `AGENTS.md`/`RUNBOOK.md`/`BLUEPRINT.md` branch-flow rows updated to the `integration`-staging convention prior to this merge; this row | `main` is 5 commits ahead of `origin/main` - not yet pushed, pending Kayden's confirmation |
