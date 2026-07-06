@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EnemyStats" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/enemy_stats.gd" id="1_boss"]
+
+[resource]
+script = ExtResource("1_boss")
+id = "boss_slime"
+display_name = "Boss Slime"
+max_hp = 16
+attack = 3
+defense = 2
+speed = 3
+ai_behavior = 1
+xp_reward = 25
+loot_table = PackedStringArray("forest_key")

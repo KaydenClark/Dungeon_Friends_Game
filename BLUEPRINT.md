@@ -135,12 +135,14 @@ above (no full dungeon, no boss, no save/load, no party-of-three depth
 required) - treat it as the walking skeleton the fuller Phase 6 slice builds
 on top of, not a replacement for it.
 
-**Status (2026-07-05, second session): this walking skeleton now exists and
-is playable from `main.tscn`** - placeholder ColorRect art, a code-built room
-(`game/scripts/dev/forest_slice.gd`), one NPC, one slime, a minimal d10 grid
-battle, a key drop, and a locked door with goal tiles behind it. Verified by
-a 26/26-check headless smoke test (`game/scenes/dev/slice_smoke_test.tscn`);
-Kayden's windowed play-check is still owed. Real art (T-003) and LDtk
+**Status (2026-07-05, fourth session): the walking skeleton has grown into a
+~5-minute expanded playtest, playable from `main.tscn`** - still placeholder
+art, but now a 34x20 code-built forest (`game/scripts/dev/forest_slice.gd`)
+with tree clusters, seven roaming slimes (red triangles - enemies read as
+hostile at a glance), a quest NPC, a healer NPC (full HP restore), a leashed
+Boss Slime guarding the locked east door with the key, a small HP/XP/key HUD,
+and goal tiles behind the door. Verified by a 34/34-check headless smoke test
+(`game/scenes/dev/slice_smoke_test.tscn`). Real art (T-003) and LDtk
 authoring (T-004/T-011) replace the placeholders without changing the
 entity/RoomGrid logic.
 
@@ -247,7 +249,7 @@ Dungeon_Friends_Game/
 |---|---|---|---|
 | `game/scenes/main.tscn` | Root: `SceneManager` wiring, `WorldContainer`/`CombatContainer`/`UILayer`/`TransitionLayer` | working - `scripts/main.gd` registers the containers with `SceneManager` and boots the forest slice into `WorldContainer` | `game/scenes/main.tscn`, `game/scripts/main.gd` |
 | Overworld / Dungeon (LDtk-instanced) | Grid movement, puzzles, visible enemies | walking skeleton: `RoomGrid` runtime grid model + code-built placeholder room (`ForestSlice`); LDtk authoring still missing (T-004/T-011) | `game/scripts/overworld/`, `game/scripts/dev/forest_slice.gd` |
-| Combat | Turn-based party-vs-enemy encounter | MVP walking skeleton (2026-07-05): per-unit initiative, AStarGrid2D arena movement, melee-adjacent d10 attacks, Attack/Defend menu, fade transition; built in code (`CombatScene`), no .tscn yet; formulas are placeholders pending Phase 3/4 | `game/scripts/combat/combat.gd` |
+| Combat | Turn-based party-vs-enemy encounter | MVP walking skeleton (2026-07-05): per-unit initiative, AStarGrid2D arena movement, melee-adjacent d10 attacks, Pokemon-style two-tier command menu (Fight/Defend -> move list) with step-in/swing/step-back per turn, fade transition; built in code (`CombatScene`), no .tscn yet; formulas are placeholders pending Phase 3/4 | `game/scripts/combat/combat.gd` |
 | UI (HUD, dialogue, pause, party menu) | Player-facing menus and status | dialogue box exists (`DialogueBox`, code-built); HUD/pause/party menus missing | `game/scripts/ui/dialogue_box.gd` |
 | `game/scenes/dev/display_scaling_spike.tscn` | Throwaway diagnostic - proves the new flexible HD/ultrawide stretch settings render an undistorted tile grid at 1280x720/1920x1080/3440x1440 | working (placeholder ColorRect tiles, no real art yet) | `game/scenes/dev/display_scaling_spike.tscn`, `game/scripts/dev/display_scaling_spike.gd` |
 
@@ -318,9 +320,13 @@ Rules:
   whole-team "all players, then all enemies" phase - this retires the old
   `PlayerPhase -> EnemyPhase` Battle-FSM state names, which had drifted out of
   sync with the `TurnManager`'s always-interleaved-by-speed behavior.
-- **Enemies** are visible on the overworld map, move only when the player
-  moves (synchronized turns), and trigger combat on contact. No random or
-  invisible encounters.
+- **Enemies** are visible on the overworld map, move on their own clock
+  (autonomous real-time stepping - revised 2026-07-05 after playtest feedback,
+  supersedes the old synchronized-turn/Lufia-II model), and trigger combat on
+  contact. They wander until the player is within a notice radius, then path
+  toward them. Movement is still grid-snapped Tween stepping (the locked
+  movement invariant is unchanged - only the *trigger* moved from player-steps
+  to a timer). No random or invisible encounters.
 - **Combat transition**: touching an enemy pauses the overworld, instances
   Combat with party/enemy refs plus the return position, and on victory/defeat
   frees Combat and restores the overworld at the exact pre-combat position.
@@ -388,7 +394,7 @@ Rules:
 | Flexible HD/ultrawide base resolution (1280x720 design reference), nearest filter, `canvas_items` stretch mode, `expand` aspect, `fractional` scale mode, unrestricted palette | Kayden decided to drop the fixed low-res GBA-locked canvas in favor of native HD/ultrawide rendering while keeping the retro sprite-art look (nearest-neighbor filtering, chunky pixel silhouettes); `canvas_items`+`expand` shows more world on wider displays (e.g. 3440x1440) instead of pillarboxing, validated by the T-007 display-scaling spike at 1280x720/1920x1080/3440x1440 | 2026-07-05 / this session, supersedes the 2026-06-11 row above |
 | No global palette-swap shader / `SCREEN_TEXTURE` post-process in MVP | Was the source of a Compatibility-renderer bug risk; no longer needed once the palette isn't artificially constrained | 2026-06-11 / audited_research.md section 4.1, section 8 decision #2 |
 | Single Autoload (`SceneManager`); all other state on `Resource` objects | Keeps global state from becoming a junk drawer; save/load becomes trivial since `GameState` is itself a `Resource` | Gameplan.md section 3.1 |
-| Enemies visible on map, synchronized-turn movement, no random encounters | Matches the audit's Lufia-II-confirmed pattern; simpler to implement and matches the intended feel | Gameplan.md section 8 |
+| Enemies visible on map, ~~synchronized-turn movement~~ **autonomous real-time movement** (revised 2026-07-05), no random encounters | Originally synchronized (audit's Lufia-II pattern) for simplicity; changed after Kayden's playtest - the slime freezing whenever the player stood still felt unnatural. Enemies now step on their own timer (wander, then chase on sight); still grid-snapped, still visible-on-map, still no random encounters | Gameplan.md section 8; revised 2026-07-05 (playtest) |
 | Aseprite primary art tool (Lua/CLI-scriptable), Pixelorama fallback | Scriptable batch export lets an agent drive the art pipeline without manual GUI steps | 2026-06-11 / audited_research.md section 8.1 |
 | Furnace Tracker for audio *sound*, not a literal hardware-channel-emulation engine | Authenticity of sound, not of engine architecture - the hardware-emulation idea was dropped entirely, not deferred | 2026-06-11 / audited_research.md section 8 decision #4 |
 | `game/` subfolder holds the entire Godot project; docs/config live at repo root | Keeps `.godot/` cache and Godot-specific concerns cleanly separated from `docs/`/agent config | Gameplan.md section 4 |

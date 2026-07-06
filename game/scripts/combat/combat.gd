@@ -6,7 +6,8 @@ extends Node2D
 ##   (TurnManager behavior; never a whole-team phase);
 ## - units occupy arena cells, move via AStarGrid2D (no diagonals) up to
 ##   MOVE_RANGE, melee = adjacent tile;
-## - d10 percentage resolution: roll 1-10 vs a stat-derived threshold.
+## - d10 percentage resolution: roll 1-10, hit on a HIGH roll at/above a
+##   stat-derived target (roll-high-good; see _attack).
 ## The threshold/damage formula below is a PLACEHOLDER pending the Phase 3/4
 ## red/green combat-math implementation; the full two-layer FSM and
 ## Attack/Ability/Item/Defend menu land in Phase 4. Rendering is screen-space
@@ -21,6 +22,11 @@ const ARENA_H := 5
 const MOVE_RANGE := 3
 const ARENA_ORIGIN := Vector2(352, 184)
 
+# Pokemon-style two-tier command menu. Root asks the verb; picking Fight opens
+# the move list. (One move for this demo; Ability/Item slots arrive in Phase 4.)
+const ROOT_OPTIONS := ["Fight", "Defend"]
+const MOVE_OPTIONS := ["Swing Sword", "Back"]
+
 
 class CombatUnit:
 	var display_name := ""
@@ -31,6 +37,7 @@ class CombatUnit:
 	var hp := 0
 	var cell := Vector2i.ZERO
 	var is_player := false
+	var is_boss := false
 	var defending := false
 	var node: Node2D
 	var info: Label
@@ -41,11 +48,17 @@ var rng: RandomNumberGenerator
 var auto_play := false
 var battle_over := false
 var awaiting_choice := false
+var awaiting_continue := false
+var menu_level := 0    # 0 = root (Fight/Defend), 1 = move list
 var menu_index := 0
+var _active_hero: CombatUnit
 var astar := AStarGrid2D.new()
 var layer: CanvasLayer
 var log_label: Label
+var menu_panel: ColorRect
+var prompt_label: Label
 var menu_label: Label
+var continue_label: Label
 
 
 func setup(hero: CharacterStats, hero_hp: int, enemy: EnemyStats,
@@ -70,6 +83,7 @@ func setup(hero: CharacterStats, hero_hp: int, enemy: EnemyStats,
 	e.max_hp = enemy.max_hp
 	e.hp = enemy.max_hp
 	e.cell = Vector2i(6, 2)
+	e.is_boss = enemy.id == "boss_slime"
 	units.append(e)
 
 
@@ -101,13 +115,25 @@ func _build_view() -> void:
 	for u in units:
 		u.node = Node2D.new()
 		u.node.position = _cell_pos(u.cell)
-		var rect := ColorRect.new()
-		rect.color = Color(0.25, 0.5, 0.95) if u.is_player else Color(0.62, 0.3, 0.72)
-		rect.position = Vector2(-24, -24)
-		rect.size = Vector2(48, 48)
-		u.node.add_child(rect)
+		if u.is_player:
+			var rect := ColorRect.new()
+			rect.color = Color(0.25, 0.5, 0.95)
+			rect.position = Vector2(-24, -24)
+			rect.size = Vector2(48, 48)
+			u.node.add_child(rect)
+		else:
+			# Same placeholder language as the overworld: enemies are red
+			# triangles (the boss bigger and darker), so combat matches the map.
+			var tri := Polygon2D.new()
+			var s := 30.0 if u.is_boss else 24.0
+			tri.polygon = PackedVector2Array([
+				Vector2(0, -s), Vector2(s, s), Vector2(-s, s)])
+			tri.color = Color(0.55, 0.08, 0.12) if u.is_boss else Color(0.85, 0.18, 0.18)
+			u.node.add_child(tri)
 		u.info = Label.new()
-		u.info.position = Vector2(-40, -56)
+		# Stagger the hero's readout higher than the enemy's so the two labels
+		# never collide when the units stand on adjacent cells.
+		u.info.position = Vector2(-40, -74 if u.is_player else -50)
 		u.info.add_theme_font_size_override("font_size", 15)
 		u.node.add_child(u.info)
 		_update_info(u)
@@ -118,11 +144,33 @@ func _build_view() -> void:
 	log_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	log_label.add_theme_font_size_override("font_size", 24)
 	layer.add_child(log_label)
+	# Command menu (bottom-left), hidden until it's the hero's turn.
+	menu_panel = ColorRect.new()
+	menu_panel.color = Color(0.05, 0.04, 0.09, 0.82)
+	menu_panel.position = Vector2(56, 516)
+	menu_panel.size = Vector2(372, 168)
+	menu_panel.visible = false
+	layer.add_child(menu_panel)
+	prompt_label = Label.new()
+	prompt_label.position = Vector2(76, 528)
+	prompt_label.add_theme_font_size_override("font_size", 24)
+	prompt_label.modulate = Color(1, 0.95, 0.7)
+	prompt_label.visible = false
+	layer.add_child(prompt_label)
 	menu_label = Label.new()
-	menu_label.position = Vector2(80, 560)
+	menu_label.position = Vector2(92, 574)
 	menu_label.add_theme_font_size_override("font_size", 26)
 	menu_label.visible = false
 	layer.add_child(menu_label)
+	# Shown after each attack resolves; play pauses here so the roll and damage
+	# stay on screen until the player presses confirm/interact.
+	continue_label = Label.new()
+	continue_label.position = Vector2(432, 466)
+	continue_label.add_theme_font_size_override("font_size", 22)
+	continue_label.modulate = Color(0.75, 1.0, 0.75)
+	continue_label.text = "▶  Press E / Space to continue"
+	continue_label.visible = false
+	layer.add_child(continue_label)
 
 
 func _run_battle() -> void:
@@ -153,12 +201,15 @@ func _take_turn(u: CombatUnit) -> void:
 	await _wait(0.4)
 	var action := "attack"
 	if u.is_player and not auto_play:
-		action = await _player_choose()
+		action = await _player_choose(u)
 	if action == "defend":
 		u.defending = true
 		_log("%s braces for impact." % u.display_name)
 		await _wait(0.5)
 		return
+	# Step in, swing, step back to their own side, so each turn reads as a
+	# discrete attack rather than units drifting together into a clump.
+	var home := u.cell
 	var target := _foe_of(u)
 	await _approach(u, target)
 	if _adjacent(u.cell, target.cell):
@@ -166,32 +217,85 @@ func _take_turn(u: CombatUnit) -> void:
 	else:
 		_log("%s moves closer." % u.display_name)
 		await _wait(0.4)
+	if not battle_over and u.hp > 0:
+		await _return_to(u, home)
 
 
-func _player_choose() -> String:
+func _player_choose(u: CombatUnit) -> String:
 	awaiting_choice = true
+	_active_hero = u
+	menu_level = 0
 	menu_index = 0
 	_update_menu()
-	menu_label.visible = true
+	_set_menu_visible(true)
+	# Returns "attack" (Swing Sword) or "defend"; navigation between the two
+	# tiers is handled entirely in _unhandled_input.
 	var action: String = await choice_made
-	menu_label.visible = false
+	_set_menu_visible(false)
 	awaiting_choice = false
 	return action
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if awaiting_continue:
+		if event.is_action_pressed("confirm") or event.is_action_pressed("interact"):
+			get_viewport().set_input_as_handled()
+			awaiting_continue = false
+		return
 	if not awaiting_choice:
 		return
-	if event.is_action_pressed("move_up") or event.is_action_pressed("move_down"):
-		menu_index = 1 - menu_index
+	var opts: Array = ROOT_OPTIONS if menu_level == 0 else MOVE_OPTIONS
+	if event.is_action_pressed("move_up"):
+		get_viewport().set_input_as_handled()
+		menu_index = (menu_index - 1 + opts.size()) % opts.size()
+		_update_menu()
+	elif event.is_action_pressed("move_down"):
+		get_viewport().set_input_as_handled()
+		menu_index = (menu_index + 1) % opts.size()
 		_update_menu()
 	elif event.is_action_pressed("confirm") or event.is_action_pressed("interact"):
 		get_viewport().set_input_as_handled()
-		choice_made.emit("attack" if menu_index == 0 else "defend")
+		_confirm_menu()
+	elif event.is_action_pressed("cancel"):
+		get_viewport().set_input_as_handled()
+		if menu_level == 1:  # back out of the move list to the root
+			menu_level = 0
+			menu_index = 0
+			_update_menu()
+
+
+func _confirm_menu() -> void:
+	if menu_level == 0:
+		if menu_index == 0:  # Fight -> open the move list
+			menu_level = 1
+			menu_index = 0
+			_update_menu()
+		else:  # Defend
+			choice_made.emit("defend")
+	else:
+		if menu_index == 0:  # Swing Sword
+			choice_made.emit("attack")
+		else:  # Back -> return to the root menu
+			menu_level = 0
+			menu_index = 0
+			_update_menu()
+
+
+func _set_menu_visible(v: bool) -> void:
+	menu_panel.visible = v
+	prompt_label.visible = v
+	menu_label.visible = v
 
 
 func _update_menu() -> void:
-	menu_label.text = "▶ Attack\n   Defend" if menu_index == 0 else "   Attack\n▶ Defend"
+	var opts: Array = ROOT_OPTIONS if menu_level == 0 else MOVE_OPTIONS
+	var hero_name := _active_hero.display_name if _active_hero else "Hero"
+	prompt_label.text = "What will %s do?" % hero_name if menu_level == 0 \
+			else "%s — choose a move:" % hero_name
+	var text := ""
+	for i in opts.size():
+		text += ("▶ " if i == menu_index else "    ") + str(opts[i]) + "\n"
+	menu_label.text = text
 
 
 func _approach(u: CombatUnit, target: CombatUnit) -> void:
@@ -221,28 +325,66 @@ func _approach(u: CombatUnit, target: CombatUnit) -> void:
 		await tw.finished
 
 
+func _return_to(u: CombatUnit, home: Vector2i) -> void:
+	if u.cell == home:
+		return
+	# Path back over the now-current occupancy (the foe may have moved).
+	astar.fill_solid_region(astar.region, false)
+	for other in units:
+		if other != u and other.hp > 0:
+			astar.set_point_solid(other.cell, true)
+	var path := astar.get_id_path(u.cell, home)
+	if path.size() < 2:
+		u.cell = home  # boxed out of a clean path - snap home so state stays sane
+		var snap := create_tween()
+		snap.tween_property(u.node, "position", _cell_pos(home), 0.02 if auto_play else 0.12)
+		await snap.finished
+		return
+	for i in range(1, path.size()):
+		u.cell = path[i]
+		var tw := create_tween()
+		tw.tween_property(u.node, "position", _cell_pos(u.cell), 0.02 if auto_play else 0.10)
+		await tw.finished
+
+
 func _attack(atk: CombatUnit, def: CombatUnit) -> void:
 	# PLACEHOLDER d10 formula (Phase 3/4 decides the real one, red/green):
-	# threshold = 5 + attack - defense (-2 if defending), clamped 1..9;
-	# a threshold of 7 reads as a 70% chance to hit.
+	# threshold = 5 + attack - defense (-2 if defending), clamped 1..9; it is
+	# the percent chance to hit (7 -> 70%). You roll a d10 and HIT ON A HIGH
+	# ROLL - you need to roll `needed` (= 11 - threshold) or higher. So a 70%
+	# chance means "roll a 4 or higher". (Revised 2026-07-05: this used to be a
+	# roll-UNDER check, which read as backwards - low rolls hitting - during
+	# playtest; flipped to roll-high-good, same odds.)
 	var threshold := clampi(5 + atk.attack - def.defense - (2 if def.defending else 0), 1, 9)
+	var needed := 11 - threshold
 	var roll := rng.randi_range(1, 10)
-	_log("%s attacks %s (%d0%% to hit)... rolled %d." % [
-		atk.display_name, def.display_name, threshold, roll])
-	await _wait(0.7)
-	if roll <= threshold:
+	var hit := roll >= needed
+	# Two-beat reveal, but keep the attack line + odds on screen so that at the
+	# continue prompt the whole exchange is visible together (who attacked, the
+	# odds, the roll, hit/miss, damage) - nothing flashes away before you read it.
+	var intro := "%s attacks %s!\n%d0%% to hit — roll %d+ on a d10" % [
+		atk.display_name, def.display_name, threshold, needed]
+	_log(intro)
+	await _wait(0.6)
+	var result := ""
+	if hit:
 		var dmg := maxi(1, atk.attack - int(def.defense / 2.0))
 		if def.defending:
 			dmg = maxi(1, int(dmg / 2.0))
 		def.hp = maxi(0, def.hp - dmg)
 		_update_info(def)
-		_log("Hit! %d damage. %s: %d/%d HP." % [dmg, def.display_name, def.hp, def.max_hp])
+		result = "Rolled %d — HIT!  %d damage.  %s: %d/%d HP." % [
+			roll, dmg, def.display_name, def.hp, def.max_hp]
 		if def.hp <= 0:
 			def.node.visible = false
 			battle_over = true
 	else:
-		_log("Miss!")
-	await _wait(0.7)
+		result = "Rolled %d — MISS!  (needed %d+)" % [roll, needed]
+	# Append the result under the intro (don't replace it) and hold for continue.
+	if log_label:
+		log_label.text = intro + "\n" + result
+	print("[combat] ", result)
+	await _wait_for_continue()
 
 
 func _foe_of(u: CombatUnit) -> CombatUnit:
@@ -279,3 +421,16 @@ func _log(msg: String) -> void:
 
 func _wait(t: float) -> void:
 	await get_tree().create_timer(0.02 if auto_play else t).timeout
+
+
+## Pause until the player acknowledges the attack result (so they can read the
+## roll and damage). Skipped during auto_play (headless smoke test).
+func _wait_for_continue() -> void:
+	if auto_play:
+		await _wait(0.2)
+		return
+	continue_label.visible = true
+	awaiting_continue = true
+	while awaiting_continue:
+		await get_tree().process_frame
+	continue_label.visible = false

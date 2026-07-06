@@ -31,6 +31,9 @@ var total_xp := 0
 var flags := {}
 
 var ui_busy := false
+## Set when a dialogue closes. The player polls interact each frame, so without
+## this the same keypress that closes a box re-opens it on the next frame.
+var last_ui_close_ms := 0
 var in_encounter := false
 var current_dialogue: DialogueBox
 
@@ -76,6 +79,7 @@ func show_dialogue(lines: PackedStringArray) -> void:
 	current_dialogue = null
 	box.queue_free()
 	ui_busy = false
+	last_ui_close_ms = Time.get_ticks_msec()
 
 
 func start_encounter(enemy: OverworldEnemy) -> void:

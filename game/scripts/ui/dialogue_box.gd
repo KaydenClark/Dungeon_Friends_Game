@@ -6,11 +6,16 @@ extends PanelContainer
 
 signal finished
 
+## Minimum time between accepted presses. Stops a couple of quick E taps from
+## flushing every line at once (and dumping the player straight back out); each
+## line now needs its own deliberate press.
+const ADVANCE_COOLDOWN_MS := 220
+
 var lines := PackedStringArray()
 var idx := 0
 var label: Label
 var hint: Label
-var _opened_ms := 0
+var _last_input_ms := 0
 
 
 func _init() -> void:
@@ -36,7 +41,9 @@ func _init() -> void:
 func open(p_lines: PackedStringArray) -> void:
 	lines = p_lines
 	idx = 0
-	_opened_ms = Time.get_ticks_msec()
+	# Seed the cooldown from open time so the keypress that opened the dialogue
+	# can't also advance it on the same/next frame.
+	_last_input_ms = Time.get_ticks_msec()
 	_show_line()
 
 
@@ -54,12 +61,16 @@ func _show_line() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	# Small cooldown so the keypress that opened the dialogue can't also
-	# advance it on the same frame.
-	if Time.get_ticks_msec() - _opened_ms < 200:
-		return
-	if event.is_action_pressed("confirm") \
+	if not (event.is_action_pressed("confirm") \
 			or event.is_action_pressed("interact") \
-			or event.is_action_pressed("cancel"):
-		get_viewport().set_input_as_handled()
-		advance()
+			or event.is_action_pressed("cancel")):
+		return
+	# Always consume the press so it never leaks to the overworld/player, even
+	# while the per-line cooldown is swallowing it.
+	get_viewport().set_input_as_handled()
+	# Per-line cooldown: each advance needs its own deliberate press, so mashing
+	# E can't flush multiple lines (or close the box) in one burst.
+	if Time.get_ticks_msec() - _last_input_ms < ADVANCE_COOLDOWN_MS:
+		return
+	_last_input_ms = Time.get_ticks_msec()
+	advance()

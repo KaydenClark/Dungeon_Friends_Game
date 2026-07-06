@@ -105,11 +105,14 @@ cd game
 /Applications/Godot.app/Contents/MacOS/Godot --headless --path . scenes/dev/slice_smoke_test.tscn
 ```
 
-Expected result: exit `0` and a final `SLICE SMOKE TEST: PASS (26/26 checks)`
-line (~15s). A benign `ObjectDB instances leaked` warning at exit is known
-noise from quitting mid-coroutines; any `CHECK FAILED:` line or exit `1` is a
-real failure. Run this after any change to movement, interaction, combat, or
-SceneManager.
+Expected result: exit `0` and a final `SLICE SMOKE TEST: PASS (34/34 checks)`
+line (~20-40s; the expanded forest walk and multiple fights take longer than
+the original 26-check slice). A benign `ObjectDB instances leaked` warning at
+exit is known noise from quitting mid-coroutines; any `CHECK FAILED:` line or
+exit `1` is a real failure. Because roaming enemies move on real-time timers,
+run it a few times in a row when touching enemy AI or movement (`for i in 1 2
+3 4 5; do ...; done`). Run this after any change to movement, interaction,
+combat, or SceneManager.
 
 ### Display-scaling spike (T-007)
 
