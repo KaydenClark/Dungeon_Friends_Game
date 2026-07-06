@@ -115,5 +115,5 @@ func _on_player_moved() -> void:
 		SceneManager.flags["slice_complete"] = true
 		SceneManager.show_dialogue([
 			"The path beyond the door is open!",
-			"First playable slice complete - thanks for testing, Kayden!",
+			"The adventure continues...",
 		])
