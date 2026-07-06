@@ -135,20 +135,54 @@ resolution" confirmation only works in a *windowed* run (drop `--headless`,
 keep `--resolution`, eyeball the label in the corner). This is a throwaway
 diagnostic scene (`game/scenes/dev/`), not shipped gameplay.
 
+### Unit tests
+
+Headless unit suites for the pure/deterministic logic (combat math, the grid
+model, movement, the data resources, dialogue advancement). No third-party
+framework is pulled in - `game/tests/gd_test.gd` is a ~60-line assertion base
+and `tests/run_tests.gd` a reflective runner, both first-party so nothing lands
+in `game/addons/`.
+
+```bash
+cd game
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path . tests/run_tests.tscn
+```
+
+Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
+per-suite tally (e.g. `UNIT TESTS: 6 suites, 38 tests, 129 checks, 0 failed`).
+Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in ~1-2s (pure
+logic, no real-time timers, unlike the slice smoke test). Run this after any
+change to combat math, the grid/pathfinding model, `GridActor` movement, the
+`.tres` data, or `DialogueBox`.
+
+Coverage lives in `game/tests/`, one suite per area:
+`test_combat_math` (the d10 `hit_threshold`/`needed_roll`/`attack_damage` rules
+the live `_attack` path calls), `test_room_grid` (bounds, blocking, occupancy,
+Manhattan pathfinding, avoid-occupants routing), `test_grid_actor`
+(`try_step` reservation/bump/refusal), `test_data_resources` (the shipped
+hero/slime/boss `.tres` values + the boss-key/locked-door invariant),
+`test_dialogue_box` (line advancement + `finished`), and `test_overworld_enemy`
+(`_manhattan` + `defeated()` cleanup). Add a suite path to the `SUITES` list in
+`run_tests.gd` to register new tests.
+
 ### Test Coverage Policy
 
-Until GUT (Godot Unit Test) or an equivalent GDScript test framework is
-introduced (a Stretch-adjacent decision, not yet made), the headless
-import/run check above is the project's baseline verification, backed up by a
-concrete manual check of whatever feature actually changed (open the project
-and exercise it directly).
+Verification has three layers, cheapest first: (1) the headless import/run
+check above (project/resources valid, autoloads boot); (2) the unit suites
+(`tests/run_tests.tscn`) for pure logic; (3) the slice smoke test
+(`scenes/dev/slice_smoke_test.tscn`) for the end-to-end loop. All three plus a
+concrete manual check of whatever feature changed are the standard for a
+completed gameplay task.
 
-Introduce automated unit tests starting with Phase 3 (Data Model) -
-`Resource` classes and combat-math functions (the `AttackCommand` damage
-formula, the XP curve) are the highest-value first candidates since they're
-pure logic with no scene/rendering dependency. Once that framework exists,
-use red/green/refactor for that code: write the failing test first, confirm
-it fails for the expected reason, then implement the smallest fix.
+The unit layer favors testing the *real* code path over a re-implementation:
+e.g. the combat math lives in static functions on `CombatScene` that `_attack`
+itself calls, so a formula change can't pass the test while breaking the game.
+Keep it that way - when a system has pure logic worth testing, extract it to a
+callable function the game uses rather than copying the formula into a test.
+Use red/green/refactor: write the failing check first, confirm it fails for the
+expected reason, then implement the smallest fix. The eventual move to GUT (or
+an equivalent) remains a Stretch-adjacent decision; this first-party harness is
+deliberately minimal until that call is made.
 
 ## Build/Export
 

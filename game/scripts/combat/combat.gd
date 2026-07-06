@@ -28,6 +28,33 @@ const ROOT_OPTIONS := ["Fight", "Defend"]
 const MOVE_OPTIONS := ["Swing Sword", "Back"]
 
 
+## Pure d10 combat math (Phase 3/4 red-green target - see RUNBOOK -> Test
+## Coverage Policy). Extracted as static functions so the hit/damage rules can
+## be unit tested without standing up the whole combat scene. _attack() below
+## is the only caller; keep the two in sync.
+
+## Percent-to-hit tier (also the tens digit shown to the player): 5 + attack
+## - defense, minus 2 when the defender is bracing, clamped to a 10%..90% band
+## so nothing is ever a guaranteed hit or a certain miss.
+static func hit_threshold(attack: int, defense: int, defending: bool) -> int:
+	return clampi(5 + attack - defense - (2 if defending else 0), 1, 9)
+
+
+## The d10 value the attacker must meet or beat (roll-high-good): a 70% tier
+## (threshold 7) means "roll a 4 or higher".
+static func needed_roll(threshold: int) -> int:
+	return 11 - threshold
+
+
+## Damage on a hit: attack minus half the defender's defense (min 1), then
+## halved again (min 1) when the defender is bracing.
+static func attack_damage(attack: int, defense: int, defending: bool) -> int:
+	var dmg := maxi(1, attack - int(defense / 2.0))
+	if defending:
+		dmg = maxi(1, int(dmg / 2.0))
+	return dmg
+
+
 class CombatUnit:
 	var display_name := ""
 	var attack := 0
@@ -355,8 +382,8 @@ func _attack(atk: CombatUnit, def: CombatUnit) -> void:
 	# chance means "roll a 4 or higher". (Revised 2026-07-05: this used to be a
 	# roll-UNDER check, which read as backwards - low rolls hitting - during
 	# playtest; flipped to roll-high-good, same odds.)
-	var threshold := clampi(5 + atk.attack - def.defense - (2 if def.defending else 0), 1, 9)
-	var needed := 11 - threshold
+	var threshold := hit_threshold(atk.attack, def.defense, def.defending)
+	var needed := needed_roll(threshold)
 	var roll := rng.randi_range(1, 10)
 	var hit := roll >= needed
 	# Two-beat reveal, but keep the attack line + odds on screen so that at the
@@ -368,9 +395,7 @@ func _attack(atk: CombatUnit, def: CombatUnit) -> void:
 	await _wait(0.6)
 	var result := ""
 	if hit:
-		var dmg := maxi(1, atk.attack - int(def.defense / 2.0))
-		if def.defending:
-			dmg = maxi(1, int(dmg / 2.0))
+		var dmg := attack_damage(atk.attack, def.defense, def.defending)
 		def.hp = maxi(0, def.hp - dmg)
 		_update_info(def)
 		result = "Rolled %d — HIT!  %d damage.  %s: %d/%d HP." % [
