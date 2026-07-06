@@ -4,9 +4,11 @@
 > Harness.
 
 **Current focus:** First-playable slice shipped to `main`. Third session: a
-bug-fix pass from Kayden's playtest (dialogue exit, slime AI, combat "auto"
-feel - see Bugs lane, B-01/B-02/B-03) is implemented on `fix/playtest-bugs`
-and `gated` on his windowed feel-check. After that lands, next up is M0.3
+bug-fix pass from Kayden's playtests (dialogue exit, slime AI, combat "auto"
+feel, double-step movement - see Bugs lane, B-01..B-04) is on
+`fix/playtest-bugs` and **open as a PR into `integration`** (awaiting merge;
+B-04 movement left `needs-review` for later feel-tuning). After that lands,
+next up is M0.3
 (export presets, T-002) and the real art/LDtk pipeline (T-003/T-004/T-011) -
 with T-002 deprioritized vs. content per Kayden's 2026-07-05 call (distribution
 is premature while the slice is still placeholder art).
@@ -104,16 +106,18 @@ Session Control.
 
 ## Bugs
 
-From Kayden's first windowed playtest of the slice (2026-07-05, third session).
+From Kayden's windowed playtests of the slice (2026-07-05, third session).
 Fixes implemented on branch `fix/playtest-bugs` (off `integration`),
-headless-verified (26/26 smoke test still green), and `gated` on Kayden's
-windowed feel-check before promotion to `integration`.
+headless-verified (26/26 smoke test), and **opened as a PR into
+`integration`** ([#2](https://github.com/KaydenClark/Dungeon_Friends_Game/pull/2)).
+Kayden confirmed B-01/B-02/B-03 in windowed play; B-04 movement is "good
+enough" and left `needs-review` for a later feel-tuning pass.
 
 | ID | Priority | Bug (reported) | Root cause | Fix | Touches | Status |
 |---|---:|---|---|---|---|---|
 | B-01 | 1 | NPC dialogue was hard to exit - "no gap or pause"; and (2nd report) still couldn't exit unless walking away as the last line ended | (1) No per-line advance debounce. (2) Deeper cause: the player *polls* interact each frame, so the same press that closed the box re-opened it the next frame (walking away worked because movement out-prioritizes interact) | (1) Per-line `ADVANCE_COOLDOWN_MS` (220ms). (2) `SceneManager.last_ui_close_ms` + a 250ms interact lockout in `player.gd` after any dialogue closes | `game/scripts/ui/dialogue_box.gd`, `game/scripts/autoload/scene_manager.gd`, `game/scripts/overworld/player.gd` | gated |
 | B-02 | 2 | Slime "moved opposite of me" and engaged too soon; and (2nd report) it only moves when the player moves - freezes when you stand still | (1) Pure random-walker (the "opposite" was coincidence). (2) It stepped only on `player_moved` (the synchronized-turn model), so it froze whenever the player did | (1)+(2) Autonomous timer-driven movement (`STEP_INTERVAL` 0.35s): wander until player within `TRACK_RADIUS` (4 tiles), then A*-chase continuously; spawn moved (9,4)->(14,4). **Retires the documented synchronized-turn invariant** (BLUEPRINT updated) | `game/scripts/overworld/overworld_enemy.gd`, `game/scripts/dev/forest_slice.gd` | gated |
-| B-04 | 1 | Walking sometimes moved two cells from a single tap | Player read movement with `is_action_pressed` (held) and re-stepped the instant the 0.15s move tween finished, so any tap held longer than ~0.15s produced a second step | Delayed-auto-shift: a fresh press is always exactly one step; continuous walking only engages after the direction is held past `MOVE_REPEAT_DELAY` (0.2s), then repeats at move cadence | `game/scripts/overworld/player.gd` | gated |
+| B-04 | 1 | Walking sometimes moved two cells from a single tap | Player read movement with `is_action_pressed` (held) and re-stepped the instant the 0.15s move tween finished, so any tap held longer than ~0.15s produced a second step | Delayed-auto-shift: a fresh press is always exactly one step; continuous walking only engages after the direction is held past `MOVE_REPEAT_DELAY` (0.2s), then repeats at move cadence. Kayden: "good enough" - **left flagged for a later feel-review pass** (repeat delay/cadence may want tuning) | `game/scripts/overworld/player.gd` | needs-review |
 | B-03 | 3 | Combat felt "auto" / hard to track | Only input was a tiny bottom-left Attack/Defend toggle; everything else auto-ran on fixed timers, so it read as a cutscene | Pokemon-style two-tier menu ("What will Hero do?" -> Fight/Defend; Fight -> Swing Sword / Back) with a panel + prompt; hero now steps in, swings, and returns to their side each turn | `game/scripts/combat/combat.gd` | gated |
 
 ## In Progress
