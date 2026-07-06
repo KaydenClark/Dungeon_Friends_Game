@@ -75,8 +75,10 @@ ripple effects across the data model, scene structure, and milestones. Full
 list and rationale: `BLUEPRINT.md` -> Core Logic And Invariants and Design
 Decisions.
 
-Quick reference: Godot 4.6.x / GDScript / Mobile renderer; 240x160 base
-resolution, nearest filter, integer scaling, unrestricted palette; `TileMapLayer`
+Quick reference: Godot 4.6.x / GDScript / Mobile renderer; flexible HD/
+ultrawide base resolution (1280x720 design reference, `canvas_items`/`expand`
+scaling - revised 2026-07-05, supersedes the old 240x160-locked decision),
+nearest filter, unrestricted palette; `TileMapLayer`
 only, never the deprecated `TileMap` node; grid-snapped `Tween` movement only
 (never velocity-based free movement); `AStarGrid2D` pathfinding (no diagonals);
 all game data as `Resource` (`.tres`) subclasses; single Autoload
@@ -176,10 +178,13 @@ command you did not execute is not proof.
   flag it to Kayden as a product tradeoff (what changes, why, cost) rather
   than just building it - these were resolved deliberately after an audit and
   have ripple effects across the data model, scene structure, and milestones.
-- Branch and PR flow: branch per task/milestone (see `RUNBOOK.md` -> Version
-  Control), PR directly into `main`. Kayden is the sole merger into `main`;
-  agents open PRs for review but do not merge them without explicit approval.
-  Never force-push or rewrite published history without explicit approval.
+- Branch and PR flow: `integration` is the staging branch (revised
+  2026-07-05, see `RUNBOOK.md` -> Version Control) - work lands there first;
+  Kayden explicitly syncs `integration` -> `main` when ready. Branch per
+  task/milestone off of `integration` for anything that isn't a direct
+  in-session commit. Kayden is the sole merger into `main`; agents do not
+  merge into `main` without explicit approval. Never force-push or rewrite
+  published history without explicit approval.
 
 ## Output Format
 

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CharacterStats" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/character_stats.gd" id="1_hero"]
+
+[resource]
+script = ExtResource("1_hero")
+id = "hero"
+display_name = "Hero"
+max_hp = 20
+max_mp = 5
+attack = 4
+defense = 2
+speed = 5

@@ -3,15 +3,20 @@
 > Generated from LLM Workbench v2.1. See `RUNBOOK.md` -> Upgrading The
 > Harness.
 
-A Gameboy-inspired 2D top-down Zelda-style adventure game where you recruit a
-team and fight through turn-based combat across dungeons and the overworld.
+A retro-pixel-art-inspired 2D top-down Zelda-style adventure game where you
+recruit a team and fight through turn-based combat across dungeons and the
+overworld, rendered natively at flexible HD/ultrawide resolutions rather than
+a locked handheld-style canvas.
 
 A solo, AI-assisted Godot 4.6 project: grid-based overworld and dungeon
 exploration (Zelda-style block/switch/key puzzles), Baldur's-Gate/Fire-Emblem-
 inspired turn-based party combat, and recruitable "Dungeon Friends" party
 members. The world starts in a fantasy forest and later expands into a castle
-city, mountains, and rivers. Currently in Phase 0 (Foundation) - a running
-project scaffold exists; no gameplay is built yet.
+city, mountains, and rivers. Current state: a first-playable walking
+skeleton exists on placeholder art - walk a forest test room, talk to an
+NPC, bump a visible enemy into a turn-based d10 battle, win a key, and open
+a locked path. Real art, LDtk-authored maps, and the full combat system are
+next.
 
 ## How This Project Is Run
 

@@ -56,8 +56,19 @@ Or run the main scene directly without opening the editor UI:
 /Applications/Godot.app/Contents/MacOS/Godot --path game scenes/main.tscn
 ```
 
-Expected result: a 240x160 (integer-scaled) window opens showing the
-placeholder dark background. No console errors.
+Expected result: a 1280x720 window opens (flexible HD/ultrawide `canvas_items`/
+`expand` scaling, revised 2026-07-05 - see `BLUEPRINT.md` -> Design Decisions)
+showing the first-playable forest slice (placeholder ColorRect art). No
+console errors.
+
+Playing the slice (2026-07-05 second session; controls are the T-009 input
+map):
+
+- WASD / arrow keys: grid-snapped movement. E / Space: talk & interact;
+  Enter / Space advances dialogue.
+- Loop: talk to the yellow NPC -> walk into the purple slime -> turn-based
+  battle (Up/Down selects Attack/Defend, Enter confirms) -> win the Forest
+  Key -> open the brown door on the east side -> step onto the gold tiles.
 
 ## Test And Build
 
@@ -83,6 +94,43 @@ cd game
 Expected result: both commands exit `0` with no `ERROR:`/`SCRIPT ERROR:` lines;
 the second command's output includes `SceneManager ready.`, confirming the
 autoload initialized.
+
+### First-playable slice smoke test (T-016)
+
+End-to-end scripted run of the whole slice (input map, movement/collision,
+NPC dialogue, enemy encounter, seeded d10 combat, key/door/goal):
+
+```bash
+cd game
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path . scenes/dev/slice_smoke_test.tscn
+```
+
+Expected result: exit `0` and a final `SLICE SMOKE TEST: PASS (26/26 checks)`
+line (~15s). A benign `ObjectDB instances leaked` warning at exit is known
+noise from quitting mid-coroutines; any `CHECK FAILED:` line or exit `1` is a
+real failure. Run this after any change to movement, interaction, combat, or
+SceneManager.
+
+### Display-scaling spike (T-007)
+
+Checks the flexible HD/ultrawide stretch settings (revised 2026-07-05, see
+`BLUEPRINT.md` -> Design Decisions) at each target display case:
+
+```bash
+cd game
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path . scenes/dev/display_scaling_spike.tscn --resolution 1280x720 --quit-after 1
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path . scenes/dev/display_scaling_spike.tscn --resolution 1920x1080 --quit-after 1
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path . scenes/dev/display_scaling_spike.tscn --resolution 3440x1440 --quit-after 1
+```
+
+Expected result: each command exits `0` with no `ERROR:`/`SCRIPT ERROR:`
+lines and prints a `DisplayScalingSpike: viewport=... tiles=...` line.
+Caveat (verified 2026-07-05): in headless mode there is no real window, so
+`--resolution` is ignored and the viewport reports the 1280-based design
+reference at all three sizes - the "viewport matches the requested
+resolution" confirmation only works in a *windowed* run (drop `--headless`,
+keep `--resolution`, eyeball the label in the corner). This is a throwaway
+diagnostic scene (`game/scenes/dev/`), not shipped gameplay.
 
 ### Test Coverage Policy
 
@@ -136,19 +184,26 @@ the same placeholder scene as the editor.
 
 ## Version Control
 
-- Branch from `main`; do not commit directly to it. Branch names:
-  `type/short-description` (e.g. `feat/pushable-block`, or the Gameplan
-  milestone ID where applicable, e.g. `m2.1/pushable-block`).
+- **`integration` is now the staging branch (revised 2026-07-05, supersedes
+  the "no separate integration branch" row below)** - work lands on
+  `integration` first; Kayden syncs `integration` -> `main` explicitly once
+  he's happy with what's accumulated there. Do not commit directly to
+  `main`, and do not merge `integration` into `main` without Kayden's
+  explicit go-ahead.
+~~No separate integration branch - PR directly into `main`~~ - superseded;
+  kept here for history. Branch-per-task/milestone naming still applies for
+  work branched off of `integration`: `type/short-description` (e.g.
+  `feat/pushable-block`, or the Gameplan milestone ID where applicable, e.g.
+  `m2.1/pushable-block`).
 - Commit messages: imperative subject <= 72 chars, referencing the Gameplan
   milestone where relevant (e.g. "M2.1: implement PushableBlock +
   PressurePlate"). One logical change per commit.
 - Run `git status` before committing.
 - Never commit secrets, Android keystores (`.jks`/`.keystore`), local
   databases, logs, build output, or generated artifacts (see `.gitignore`).
-- No separate integration branch - this is a solo project. Branch per task/
-  milestone, PR directly into `main`. Kayden is the sole merger of any PR into
-  `main`; agents open PRs for review but do not merge them without explicit
-  approval.
+- Kayden is the sole merger of anything into `main`; agents open PRs
+  targeting `integration` (or push directly to `integration` when Kayden is
+  driving in-session) and do not merge into `main` without explicit approval.
 - Open a pull request when the task is complete and verified, even if it will
   be merged promptly, so there is a reviewable record. The PR description
   states what changed, why, risks, and how it was verified.

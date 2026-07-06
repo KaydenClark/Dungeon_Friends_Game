@@ -1,18 +1,20 @@
 # Dungeon Friends — Gameplan
 
 Status: Draft v2, 2026-06-11 — all 5 open decisions from the audit resolved (see audit §8)
+**Revision, 2026-07-05:** §3.2's fixed 240x160 base resolution has been superseded — see §3.2 and BLUEPRINT.md → Design Decisions. The rest of this document (loop, architecture, data model, combat, milestones) is unaffected; only the rendering/resolution decision changed.
+**Revision, 2026-07-05 (2):** Combat is now confirmed grid-based with per-unit movement/range, strict per-character initiative order (§7's `TurnManager` already sorted all combatants by speed — only this document's §7 `PlayerPhase → EnemyPhase` Battle-FSM state names implied team-phasing, and that reading is retired), and a d10 percentage resolution system in place of flat deterministic damage math. Visual language is narrowed to a GBA-fantasy-adventure look built from 8x8/16x16 tile units. See BLUEPRINT.md → Visual Language, → Current Product Shape, and → Core Logic And Invariants for the current detail — this document's §2/§7 prose itself is not yet rewritten to match.
 Companion document: `docs/research/audited_research.md` (read that first — this plan builds on its conclusions)
 Engine target: Godot 4.6.x (GDScript), Mobile renderer
 Platforms: macOS, Windows, Android (desktop-first development)
-Base resolution: 240x160 (GBA-like, 3:2), nearest-neighbor filtering, integer scaling, unrestricted palette
+Base resolution: flexible HD/ultrawide (1280x720 design reference, scaling cleanly to 1920x1080 and 3440x1440), nearest-neighbor filtering, unrestricted palette — see §3.2
 
 ---
 
 ## 1. Game Vision
 
-A Game Boy-*inspired* (not Game Boy-accurate) 2D top-down adventure RPG. The player explores a grid-based overworld and dungeons in the structural tradition of classic Zelda games — block-pushing, switches, locked doors, key items that unlock new areas — while recruiting party members ("Dungeon Friends") who fight alongside them in turn-based combat encounters.
+A retro-pixel-art-*inspired* (not any specific handheld-accurate) 2D top-down adventure RPG. The player explores a grid-based overworld and dungeons in the structural tradition of classic Zelda games — block-pushing, switches, locked doors, key items that unlock new areas — while recruiting party members ("Dungeon Friends") who fight alongside them in turn-based combat encounters.
 
-Tone: readable, chunky, retro-pixel, **GBA-like** rather than GBC-like — richer color than a literal Game Boy, but still low-resolution, grid-based, and tile-based. Not a hardware recreation — a *modern* small game wearing retro clothes. "Retro" describes the silhouette (resolution, grid movement, tile-based dungeons), not a literal emulation target or a forced color-count limit.
+Tone: readable, chunky, retro-pixel, rendered natively at flexible HD/ultrawide resolutions rather than a fixed low-res canvas — richer color and more screen real estate than a literal handheld console, but still grid-based and tile-based. Not a hardware recreation — a *modern* small game wearing retro clothes. "Retro" describes the silhouette (chunky pixel sprites, grid movement, tile-based dungeons), not a literal emulation target, a forced color-count limit, or a locked low resolution.
 
 Design pillars (in priority order):
 1. **Movement and puzzles must feel precise.** Every action snaps to the grid. No floaty physics.
@@ -64,14 +66,27 @@ Main (persistent root)
 
 **Why only one Autoload:** the audit confirms Resource-based data (`.tres` files for character/enemy/item stats) decouples data from nodes. With Resources doing the data-decoupling job, SceneManager only needs to hold *transient* state (current map path, player spawn point, active party array reference, pending encounter data) — not become a junk drawer of global variables. `GameState` (party roster, inventory, flags, position) is itself a `Resource` held *by* SceneManager, which makes save/load trivial (see §12).
 
-### 3.2 Rendering configuration (locked — resolved 2026-06-11)
+### 3.2 Rendering configuration (revised 2026-07-05 — supersedes the 2026-06-11 240x160 decision)
+
+The original 240x160/GBA-locked canvas (below, kept for history) has been dropped in favor of flexible HD/ultrawide rendering. Kayden confirmed this switch explicitly; see BLUEPRINT.md → Design Decisions for the full rationale. The retro *sprite-art* direction (chunky pixel art, nearest-neighbor filtering, no anti-aliasing) is unchanged — only the fixed low-resolution canvas is gone.
 
 - Project Settings → Rendering → Renderer: **Mobile**
-- Default Texture Filter: **Nearest**
-- Stretch Mode: **viewport**, Aspect: **keep** (revisit `expand` only if 240x160 pillarboxes badly on common phone aspect ratios)
-- Stretch Scale Mode: **integer**
-- Base resolution: **240x160** (GBA-native, 3:2 aspect ratio). Resolved in favor of "GBA-like, not GBC-like" — Kayden isn't targeting a literal Game Boy look, and 240x160 gives more screen real estate than 160x144 while staying low-res and grid-friendly (240 = 15 × 16px tiles, 160 = 10 × 16px tiles).
+- Default Texture Filter: **Nearest** (unchanged — this is what keeps sprites crisp/retro at any resolution)
+- Stretch Mode: **canvas_items** (renders UI/2D content at the display's native resolution, using the base resolution below as a design-time reference — not a tiny internal framebuffer scaled up)
+- Stretch Aspect: **expand** (wider displays show more world horizontally instead of pillarboxing — this is what makes 3440x1440 ultrawide work cleanly)
+- Stretch Scale Mode: **fractional** (smooth scaling across arbitrary resolutions; `integer` no longer applies now that the base canvas isn't a tiny fixed grid)
+- Base resolution (design reference, not a hard limit): **1280x720** (16:9). Target display cases to validate against: **1280x720**, **1920x1080**, and **3440x1440** (21:9 ultrawide) — see the T-007 display-scaling spike scene (`game/scenes/dev/display_scaling_spike.tscn`) and RUNBOOK.md for how to check each one.
 - Palette: **unrestricted**. No forced 4-color palette and **no global `SCREEN_TEXTURE` palette-swap shader in MVP** — this was the source of the Compatibility-renderer bug risk (audit §4.1), and it's no longer needed once the palette isn't artificially constrained. Author sprites/tiles with whatever colors look good. A CRT/scanline-style cosmetic shader remains a possible Stretch Goal (see §17), tested per-platform with a settings toggle.
+- Tile grid unit: **TBD when M1.1 art lands** — 16x16 (the old GBA-locked default) would read as tiny at a 1280x720+ canvas; the T-007 spike uses 64px placeholder tiles as a reasonable starting ratio, but the real grid size is an art decision for M1.1, not a rendering-settings one.
+
+<details>
+<summary>Superseded 2026-06-11 decision (kept for history — do not follow)</summary>
+
+- Stretch Mode: viewport, Aspect: keep (revisit `expand` only if 240x160 pillarboxes badly on common phone aspect ratios)
+- Stretch Scale Mode: integer
+- Base resolution: 240x160 (GBA-native, 3:2 aspect ratio). Resolved in favor of "GBA-like, not GBC-like" — 240x160 gives more screen real estate than 160x144 while staying low-res and grid-friendly (240 = 15 × 16px tiles, 160 = 10 × 16px tiles).
+
+</details>
 
 ### 3.3 Core engineering patterns (all confirmed sound in the audit)
 
@@ -357,7 +372,7 @@ Built entirely from a small set of reusable, LDtk-driven primitives (per audit's
 
 ## 10. Party/Team System Architecture
 
-- `SaveData.party_roster` is an ordered array of character IDs (max active party size — recommend **3** for MVP, matching typical GBC-era party sizes and keeping combat UI simple).
+- `SaveData.party_roster` is an ordered array of character IDs (max active party size — recommend **3** for MVP, a common small-party-JRPG size that keeps combat UI simple).
 - A separate **reserve roster** (recruited but not active) is just "any character ID not in `party_roster`" — no separate data structure needed.
 - **Recruitment**: an NPC/event in the overworld adds a character ID to the reserve roster (and `SaveData.flags`) when triggered. No combat/recruitment minigame at MVP — recruitment is a dialogue/cutscene event.
 - **Party management UI** (Stretch beyond absolute MVP, but cheap): a menu screen listing all recruited characters, allowing the player to swap which 3 are active. Active party members' `OverworldActor` instances follow the player in a "snake" formation (each follower targets the previous unit's position-N-frames-ago — simple and well-documented Godot pattern).
@@ -398,7 +413,7 @@ Use Godot's **Input Map** (Project Settings → Input Map) as the single source 
 ## 13. Art and Audio Pipeline
 
 ### Art
-1. Author sprites/tiles in **Aseprite** (resolved primary tool, decision #3 — see audit §8.1 for the pros/cons table), at the 240x160 base resolution (§3.2), on a 16x16 grid unit, with no palette restriction.
+1. Author sprites/tiles in **Aseprite** (resolved primary tool, decision #3 — see audit §8.1 for the pros/cons table), against the 1280x720 flexible HD/ultrawide design reference (§3.2, revised 2026-07-05), on a grid unit TBD at M1.1 (larger than the old 16x16 GBA-locked default — see §3.2), with no palette restriction.
 2. Use Aseprite's **Lua scripting + CLI batch mode** (`aseprite -b script.lua`) to script repetitive asset-pipeline work — slicing sprite sheets, batch-exporting animation frames, regenerating exports after edits — so Claude/Codex can drive the art pipeline without manual GUI steps. Keep these scripts in `game/assets/art/_scripts/`.
 3. Export tilesets as PNG sprite sheets, sized as exact multiples of the grid unit (per audit's confirmed best practice — prevents sub-pixel artifacting).
 4. Import tilesets into **LDtk**, build levels there (IntGrid for collision/logic, AutoLayers for visual tiling).
@@ -444,14 +459,14 @@ Each milestone is sized for a single AI-assisted working session. Milestones are
 
 ### Phase 0 — Foundation (this audit's deliverables + project skeleton)
 - **M0.1** (this work): Audit research docs, create branch, write Gameplan — *done by this commit*.
-- **M0.2**: Create Godot 4.6 project in `game/`, set Mobile renderer, Nearest filtering, viewport stretch + integer scaling, placeholder base resolution. Commit empty project that runs and shows a colored background.
+- **M0.2**: Create Godot 4.6 project in `game/`, set Mobile renderer, Nearest filtering, flexible HD/ultrawide stretch settings (§3.2, revised 2026-07-05). Commit empty project that runs and shows a colored background.
 - **M0.3**: Set up export presets for macOS, Windows, Android (debug). Produce one trivial build per platform to confirm the pipeline works end-to-end. Test on real Android device if available.
 
 ### Phase 1 — Movement & World Skeleton
-- **M1.1**: Draw a tiny test tileset (floor, wall, 1 character) in Aseprite at 240x160 base resolution / 16x16 grid (per locked §3.2 settings). Set up the Aseprite batch-export script (`game/assets/art/_scripts/`).
+- **M1.1**: Draw a tiny test tileset (floor, wall, 1 character) in Aseprite against the flexible HD/ultrawide design reference, grid unit decided at this milestone (per revised §3.2 settings). Set up the Aseprite batch-export script (`game/assets/art/_scripts/`).
 - **M1.2**: Build a minimal LDtk project (one small room) with a Wall IntGrid layer; install `heygleeson/godot-ldtk-importer`; import into Godot, confirm `TileMapLayer` + collision generate correctly.
 - **M1.3**: Implement grid-snapped player movement (Tween-based, raycast-checked) per §3.3. Player can walk around the test room and collide with walls.
-- **M1.4**: Confirm the 240x160 viewport + integer scaling looks correct at common desktop and phone aspect ratios (test `keep` vs `expand` aspect with the test tileset). No palette shader work needed here — that's been removed from MVP (§3.2).
+- **M1.4**: Confirm the flexible HD/ultrawide `canvas_items`/`expand` stretch settings look correct with the real M1.1 test tileset at 1280x720, 1920x1080, and 3440x1440 (the T-007 spike already validated this with placeholder tiles — this milestone re-validates with real art). No palette shader work needed here — that's been removed from MVP (§3.2).
 
 ### Phase 2 — Puzzle Primitives & Room Transitions
 - **M2.1**: Implement `PushableBlock` + `PressurePlate` + simple `PuzzleController` wiring (§9). Build one test puzzle room.
@@ -496,7 +511,7 @@ The MVP is **everything in Phases 0-6 above**, summarized:
 - Save/load with multiple slots, persisted flags and defeated-enemy state.
 - Keyboard + controller + Android touch input all working.
 - Builds run on macOS, Windows, and Android.
-- GBA-like visuals (240x160, integer-scaled, unrestricted palette) and Furnace-composed music/SFX for this one dungeon.
+- Retro pixel-art visuals rendered at flexible HD/ultrawide resolution (1280x720 design reference, `canvas_items`/`expand` scaling, unrestricted palette — revised 2026-07-05, see §3.2) and Furnace-composed music/SFX for this one dungeon.
 
 **Explicitly NOT in MVP** (see Stretch Goals): equipment system, elemental counters, traversal/Psynergy-style abilities, Ikari/Djinn-style resource mechanics, telegraphed "perfect information" combat UI, roguelike postgame, multiple dungeons/full overworld, any global palette/CRT shader.
 
@@ -529,8 +544,8 @@ Note: the "literal 4-channel hardware audio engine" item from the original seque
 | Solo + AI-assisted dev underestimates UI work (menus, inventory, party management) | Medium | Medium | UI-heavy phases (4, 5) are scheduled with dedicated milestones rather than bundled into "just add combat" — UI is consistently the most underestimated part of RPGs. |
 | Android export friction (SDK/JDK setup, device-specific quirks) | Medium | Medium | Address in Phase 0 (M0.3), not deferred to the end — surface problems while the codebase is still trivial. |
 | LDtk importer (`heygleeson/godot-ldtk-importer`) is a community plugin — could have breaking changes on Godot updates | Low-Medium | Medium | Pin the Godot version per project (4.6.x) and the importer version; check the importer's GitHub issues before any Godot engine upgrade. |
-| 240x160 doesn't read well on some target screen (e.g., heavy pillarboxing on certain phone aspect ratios) | Low-Medium | Low | Validate in Milestone 1.4 with the test tileset, before producing more than placeholder art. Integer scaling + `keep` aspect is the default; `expand` is the fallback. |
-| "Authentic GB constraint" scope creep (audit §5.3) — spending time on hardware-accuracy that doesn't serve gameplay | Low (mostly resolved by dropping GB-accuracy targets, decisions #1/#2/#4) | Low | Any remaining literal-hardware ideas (e.g., the CRT shader, §17 #7) are optional cosmetic Stretch Goals only, never load-bearing. |
+| Ultrawide (21:9) or unusual aspect ratios show too much/too little world at the screen edges under `expand` | Low-Medium | Low | Validated by the T-007 display-scaling spike at 1280x720/1920x1080/3440x1440 before this change landed; re-validate in Milestone 1.4 with the real M1.1 test tileset. `expand` is the current default; `keep`+letterbox is the fallback if it reads poorly with real art. |
+| "Authentic hardware constraint" scope creep (audit §5.3) — spending time on GB/GBA-accuracy that doesn't serve gameplay | Low (mostly resolved by dropping hardware-accuracy targets, decisions #1/#2/#4, and by dropping the fixed low-res canvas entirely on 2026-07-05) | Low | Any remaining literal-hardware ideas (e.g., the CRT shader, §17 #7) are optional cosmetic Stretch Goals only, never load-bearing. |
 | Aseprite CLI/Lua automation has a learning curve before it pays off | Low | Low | Start with simple batch-export scripts in Milestone 1.1; expand only as repetitive tasks emerge. Pixelorama remains a no-cost manual fallback. |
 
 ---
@@ -539,6 +554,6 @@ Note: the "literal 4-channel hardware audio engine" item from the original seque
 
 1. All 5 open decisions from `audited_research.md` §8 are resolved (2026-06-11) — no remaining blockers to starting Phase 0.
 2. Merge or review this branch (`research-audit-and-gameplan`) — see PR/branch info at the end of this work's summary.
-3. Start **Phase 0** (M0.2/M0.3): create the Godot 4.6 project skeleton inside `game/`, configure rendering settings per §3.2 (240x160, Mobile renderer, integer scaling, no palette shader), and get a trivial build running on all three target platforms.
+3. Start **Phase 0** (M0.2/M0.3): create the Godot 4.6 project skeleton inside `game/`, configure rendering settings per §3.2 (flexible HD/ultrawide, Mobile renderer, `canvas_items`/`expand` scaling, no palette shader), and get a trivial build running on all three target platforms.
 4. Once Phase 0 is green, proceed through Phases 1-6 in order — each milestone is sized to be a self-contained AI-assisted session with a clear "done" condition (stated in §15).
 5. Set up `CLAUDE.md`/`AGENTS.md` conventions (repo root) before Phase 0 so Claude/Codex sessions start with consistent project context from the first commit.

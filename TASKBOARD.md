@@ -3,11 +3,12 @@
 > Generated from LLM Workbench v2.1. See `RUNBOOK.md` -> Upgrading The
 > Harness.
 
-**Current focus:** Stand up a running Godot 4.6 project skeleton (M0.2/M0.3)
-so Phase 1 (movement/world skeleton) can start on a verified-working
-foundation.
+**Current focus:** First-playable slice is built and headlessly verified
+(2026-07-05, second session) - Kayden's manual play-check is the gate before
+returning to M0.3 (export presets) and the real art/LDtk pipeline (T-003/
+T-004/T-011).
 **Owner:** Kayden
-**Last updated:** 2026-07-05
+**Last updated:** 2026-07-05 (second session)
 
 This is the live work queue and proof ledger. Agents use it to decide what to
 work on next. Keep strategy and long-term direction in `BLUEPRINT.md`; keep
@@ -15,17 +16,35 @@ commands and verification procedures in `RUNBOOK.md`.
 
 ## Executive Brief
 
-- **Shipping now:** An empty Godot project scaffold that opens headlessly with
-  zero errors, showing a placeholder background at the locked 240x160/
-  Mobile/integer-scale settings.
-- **Health:** green - scaffold verified via headless import + one-frame scene
-  run (see Proof Log).
-- **Decision needed:** none. All 5 open decisions from the original toolchain
-  audit were resolved before this Adoption run (see `BLUEPRINT.md` -> Design
-  Decisions).
+- **Shipping now:** The first-playable forest slice (Kayden's 2026-07-05
+  walking-skeleton scenario, see `BLUEPRINT.md` -> Current Product Shape),
+  playable from `main.tscn`: grid-snapped movement with camera follow, one
+  NPC with dialogue, a visible slime that moves when you move, bump-to-fight
+  turn-based d10 combat on a small grid arena with fade transition and exact
+  position return, a key drop, a locked door, and a goal path behind it. All
+  placeholder ColorRect art (real art is T-003; LDtk authoring is T-004/
+  T-011).
+- **Health:** green - verified on Kayden's actual Mac this session (Godot
+  4.6.3): headless `--import`, `main.tscn --quit-after`, and a 26/26-check
+  end-to-end smoke test (`scenes/dev/slice_smoke_test.tscn`) all exit 0 with
+  no errors. The prior session's pending T-005/T-006/T-007 re-verification
+  was also run for real (see Proof Log). Remaining human gate: Kayden has not
+  yet played it windowed - the visual/feel check is his.
+- **Decision needed:** none open. Note: T-013 was deliberately built past its
+  "empty shell" scope (a real minimal battle, not just a transition) on
+  Kayden's explicit "get to play-testable" instruction this session.
 - **Blocked on:** nothing.
-- **Next milestone:** M0.3 (export presets for macOS/Windows/Android) -
-  targeted next session.
+- **Next milestone:** Kayden's manual play-check of the slice, then M0.3
+  (export presets) and the content pipeline (T-003 art, T-004 LDtk importer,
+  T-011 real forest map).
+- **Design update (2026-07-05):** Kayden locked in the visual language
+  (GBA-fantasy-adventure look, 8x8/16x16 tile logic), confirmed the general
+  explore -> interact -> act -> consequence loop, and defined combat as
+  grid-based with per-unit movement/range, strict per-character initiative
+  order (never team-phase), and a d10 percentage resolution system. See
+  `BLUEPRINT.md` -> Design Decisions (2026-07-05 rows) and -> Core Logic And
+  Invariants. Doesn't change what's next (still M0.3) - informs Phase 1 art
+  (M1.1 tile grid) and the eventual Phase 4 combat build (T-013 and beyond).
 
 ## Pending Decisions
 
@@ -74,8 +93,10 @@ Session Control.
 | ID | Priority | Task | Source / why now | Touches | Proof required | Docs impact | Owner | Status | Last update |
 |---|---:|---|---|---|---|---|---|---|---|
 | T-002 | 1 | M0.3: set up export presets for macOS, Windows, Android (debug); produce one trivial build per platform | Gameplan.md §15 Phase 0 | `game/export_presets.cfg` | One exported build per platform runs and shows the placeholder scene | `TASKBOARD.md` proof row | agent | ready | 2026-07-05 |
-| T-003 | 2 | M1.1: draw a test tileset (floor, wall, 1 character) in Aseprite at 240x160/16x16 grid; set up the Aseprite batch-export script | Gameplan.md §15 Phase 1 | `game/assets/art/`, `game/assets/art/_scripts/` | Exported sprite sheet imports into Godot with no errors | `TASKBOARD.md` proof row | agent | ready | 2026-07-05 |
+| T-003 | 2 | M1.1: draw a test tileset (floor, wall, 1 character) in Aseprite against the flexible HD/ultrawide design reference (grid unit narrowed to 8x8/16x16 GBA-style units by the Visual Language decision - exact pixel size still decided at this milestone; see `BLUEPRINT.md` -> Visual Language, 2026-07-05); set up the Aseprite batch-export script | Gameplan.md §15 Phase 1 | `game/assets/art/`, `game/assets/art/_scripts/` | Exported sprite sheet imports into Godot with no errors | `TASKBOARD.md` proof row | agent | ready | 2026-07-05 |
 | T-004 | 3 | M1.2: install `heygleeson/godot-ldtk-importer`; build a minimal one-room LDtk project with a Wall IntGrid layer; confirm `TileMapLayer` + collision import correctly | Gameplan.md §15 Phase 1 | `game/addons/`, `game/assets/levels/` | Headless import succeeds; `TileMapLayer` + collision visible in editor | `BLUEPRINT.md` Architecture row (LDtk "not yet installed" note) | agent | ready | 2026-07-05 |
+| T-008 | 7 | Folder structure: establish/maintain clean Godot folders under `game/` (`scenes/`, `scripts/`, `data/`, `assets/`, `addons/`, `tests/`) | Hygiene baseline before Phase 1 feature work lands on top of it | `game/` directory tree | Folder tree matches the `BLUEPRINT.md` Toolchain table; no stray files at `game/` root | `BLUEPRINT.md` Toolchain table confirmed or updated if paths change | agent | ready | 2026-07-05 |
+| T-011 | 10 | Forest map: build the first test room/map using the LDtk pipeline (replaces the code-built placeholder room in `game/scripts/dev/forest_slice.gd` - keep the entities/RoomGrid logic, swap the layout authoring) | Gameplan.md §15 Phase 1; depends on T-004 LDtk importer | `game/assets/levels/forest_test.ldtk` + imported `TileMapLayer` | Headless import succeeds; player (T-010) can walk the room and collide with walls | `TASKBOARD.md` proof row | agent | ready | 2026-07-05 |
 
 ## In Progress
 
@@ -117,6 +138,16 @@ MVP given this project's emphasis on weapon variety and magic (see
 | ID | Task | Completed | Result | Proof row |
 |---|---|---|---|---|
 | T-001 | M0.2: Godot project scaffold - Mobile renderer, Nearest filter, 240x160 viewport/integer scale, `main.tscn` with `SceneManager` autoload + placeholder background | 2026-07-05 | pass | See Proof Log row 2026-07-05 |
+| T-005 | Repo doc update: replace fixed 240x160/GBA-locked resolution language with flexible HD/ultrawide display language | 2026-07-05 | pass (docs); underlying resolution switch itself pending Kayden's manual headless re-verification, see Health above | See Proof Log row 2026-07-05 (T-005/T-006/T-007) |
+| T-006 | Project settings: `game/project.godot` updated to `canvas_items`/`expand`/`fractional` at a 1280x720 design reference (Nearest filter unchanged) | 2026-07-05 | pass (file change); **not yet confirmed by an actual headless Godot run** - this sandbox has no Godot/macOS runtime, see Health above | See Proof Log row 2026-07-05 (T-005/T-006/T-007) |
+| T-007 | Display test scene: `game/scenes/dev/display_scaling_spike.tscn` + `game/scripts/dev/display_scaling_spike.gd` - placeholder tile grid + resolution label, sized dynamically to `get_viewport_rect().size` | 2026-07-05 | pass (file change); **not yet confirmed by an actual headless Godot run at each resolution** - see Health above; exact commands are in the Proof Log row and in `RUNBOOK.md` -> Display-scaling spike | See Proof Log row 2026-07-05 (T-005/T-006/T-007) |
+| T-015 | Design clarification: lock in GBA-fantasy-adventure visual language (8x8/16x16 tile logic), confirm the general explore -> interact -> act -> consequence loop, and define grid-based/per-unit-initiative/d10 combat | 2026-07-05 | pass (docs only, no code touched) | See Proof Log row 2026-07-05 (T-015) |
+| T-009 | Input map: 8 actions (`move_up/down/left/right`, `interact`, `confirm`, `cancel`, `menu`) with keyboard bindings in `game/project.godot` | 2026-07-05 | pass - smoke test asserts all 8 exist with >=1 binding | See Proof Log row 2026-07-05 (T-009) |
+| T-010 | Grid-snapped player movement, wall collision, camera follow (`GridActor`/`Player` + `RoomGrid`, Tween-based, AStarGrid2D no-diagonal pathfinding) | 2026-07-05 | pass - headless smoke-verified | See Proof Log row 2026-07-05 (T-010) |
+| T-012 | Interaction system: faced-cell `interact` (NPC dialogue via `DialogueBox`, locked door), bump-contact enemy encounter trigger. Cell-occupancy checks used instead of `Area2D` (fits the everything-rests-on-grid invariant); revisit if free-positioned triggers are ever needed | 2026-07-05 | pass - headless smoke-verified | See Proof Log row 2026-07-05 (T-012) |
+| T-013 | Combat scene + transition - deliberately built past the "empty shell" scope on Kayden's play-testable instruction: minimal but real grid battle (initiative by speed, AStarGrid2D movement, melee-adjacent, d10 rolls, Attack/Defend) with fade transition and exact-position overworld restore | 2026-07-05 | pass - headless smoke-verified; formulas are placeholders pending Phase 3/4 red/green | See Proof Log row 2026-07-05 (T-013) |
+| T-014 | Proof log rows for the completed task batch | 2026-07-05 | pass - rows appended below | This row |
+| T-016 | First-playable slice integration (forest room + NPC + enemy + combat + key + door + goal) with end-to-end headless smoke test | 2026-07-05 | pass - 26/26 checks, exit 0; windowed play-check still owed by Kayden | See Proof Log row 2026-07-05 (T-016) |
 
 ## Documentation Check
 
@@ -148,3 +179,11 @@ dated heading.
 | Date | Task ID | Agent | Proof | Demo | Result | Docs | Remaining gap |
 |---|---|---|---|---|---|---|---|
 | 2026-07-05 | T-001 | Claude | `Godot --headless --path . --import` (exit 0, no errors) + `Godot --headless --path . scenes/main.tscn --quit-after 1` (exit 0, no errors, `SceneManager ready.` printed) | Placeholder `main.tscn` scene (dark background, 240x160 integer-scaled) confirmed via headless run log | pass | updated (`BLUEPRINT.md`, `AGENTS.md`, `CLAUDE.md`, `RUNBOOK.md`, `TASKBOARD.md`, `HARNESS_FEEDBACK.md`, `README.md`, `.claude/settings.json` created via Adoption; old `AGENTS.md`/`CLAUDE.md` archived to `docs/LEGACY_HARNESS.md`; `docs/planning/Gameplan.md`/`docs/research/audited_research.md` kept as linked references) | Export presets (M0.3) not yet configured - next task (T-002) |
+| 2026-07-05 | T-005/T-006/T-007 | Claude | Commands to run (not yet run by an agent - see Result): `cd game && Godot --headless --path . --import` ; `Godot --headless --path . scenes/main.tscn --quit-after 1` ; `Godot --headless --path . scenes/dev/display_scaling_spike.tscn --resolution 1280x720 --quit-after 1` ; `Godot --headless --path . scenes/dev/display_scaling_spike.tscn --resolution 1920x1080 --quit-after 1` ; `Godot --headless --path . scenes/dev/display_scaling_spike.tscn --resolution 3440x1440 --quit-after 1`. What Claude actually verified: (1) `grep -rni "240x160\|GBA\|Game ?Boy" BLUEPRINT.md Gameplan.md TASKBOARD.md README.md AGENTS.md RUNBOOK.md` returns no hits except the explicitly-marked superseded/historical rows in `BLUEPRINT.md`/`Gameplan.md`; (2) manual review of the edited `project.godot`, `main.tscn`, `display_scaling_spike.tscn`/`.gd` for syntax correctness | n/a - no screenshot/recording possible without a display or Godot runtime in this environment | **pending** - this sandbox has no Godot binary and no macOS runtime, so the 5 commands above have not actually been executed. Do not treat this as a passing headless run. Kayden: please run the 5 commands on your Mac and append the real exit codes/output as a follow-up proof row (or tell an agent to) before trusting this settings change | updated (`BLUEPRINT.md`, `docs/planning/Gameplan.md`, `README.md`, `TASKBOARD.md`, `AGENTS.md`, `RUNBOOK.md`; new files `game/scenes/dev/display_scaling_spike.tscn`, `game/scripts/dev/display_scaling_spike.gd`; edited `game/project.godot`, `game/scenes/main.tscn`) | Real headless verification of the resolution switch on Kayden's Mac; grid-unit decision still TBD at M1.1; folder-structure task (T-008) untouched |
+| 2026-07-05 | T-015 | Claude | Read `BLUEPRINT.md`, `TASKBOARD.md`, `docs/planning/Gameplan.md` in full; checked Kayden's visual-language table, first-playable-loop statement, and combat-loop statement against locked decisions (flexible-HD rendering, two-layer combat FSM) - confirmed no contradiction; the only stale detail was the Battle FSM's `PlayerPhase`/`EnemyPhase` state names, which had drifted out of sync with the `TurnManager`'s always-described sort-all-combatants-by-speed behavior, now corrected to match | n/a - docs-only change, no runnable demo | pass | updated (`BLUEPRINT.md`: What This Project Is, new Visual Language section, Current Product Shape, Core Logic And Invariants, Data Model note, Known Risks, Design Decisions, Non-Goals; `TASKBOARD.md`: this row, Executive Brief, T-003/T-013 descriptions, Done lane; `docs/planning/Gameplan.md`: short revision-pointer note only, matching the precedent set by the 2026-07-05 resolution-switch revision line) | Exact d10 threshold/damage formula, move/attack-range numeric values, and combat-grid arena sizing all remain open for Phase 3/4 implementation (flagged as TBD, not invented here); Gameplan.md §2/§7 prose itself not rewritten, pointer only |
+| 2026-07-05 | T-005/T-006/T-007 (follow-up) | Claude | Ran all 5 pending commands for real on Kayden's Mac (Godot 4.6.3.stable.official.7d41c59c4): `--import` exit 0; `main.tscn --quit-after 1` exit 0 with `SceneManager ready.`; spike scene at `--resolution` 1280x720 / 1920x1080 / 3440x1440 all exit 0, no ERROR/SCRIPT ERROR lines. Caveat discovered: headless mode has no real window, so `--resolution` is ignored and the spike prints `viewport=(1280.0, 1280.0)` at all three sizes - the RUNBOOK's "viewport matches requested resolution" expectation is only checkable in a windowed run | n/a (headless) | pass (settings valid, no errors); windowed visual confirmation of the three resolutions still Kayden's to do | RUNBOOK spike expectation corrected | Windowed multi-resolution visual check |
+| 2026-07-05 | T-009 | Claude | Smoke test (`scenes/dev/slice_smoke_test.tscn`) asserts `InputMap.has_action` + at least one bound event for all 8 actions - 8/8 ok, part of the 26/26 pass | n/a | pass | `BLUEPRINT.md` Commands table already matched; no update needed | Controller/touch bindings deferred (keyboard only so far) |
+| 2026-07-05 | T-010 | Claude | Smoke test: player walked exactly 3 grid steps up from spawn, was blocked by the tree wall at y=1, `player.position == room.cell_to_pos(player.cell)` after movement (rests exactly on grid), camera is current. Movement is Tween-based (0.15s/step) via `GridActor`; `RoomGrid` wraps AStarGrid2D (DIAGONAL_MODE_NEVER, Manhattan) | Run `main.tscn` and walk around (WASD/arrows) | pass | `BLUEPRINT.md` scene contracts updated | Held-key repeat feel needs Kayden's windowed judgment |
+| 2026-07-05 | T-012 | Claude | Smoke test: NPC dialogue opened via faced-cell interact and closed after advancing; locked-door interact shows locked/unlock dialogues; enemy bump started an encounter. Implementation is grid-occupancy-based (`interact` targets `cell + facing`), not `Area2D` - simpler and consistent with the everything-on-grid invariant | Walk to the NPC and press E | pass | Done-lane note records the Area2D deviation | Chest pickup as a distinct interactable type not yet built (key comes from combat loot) |
+| 2026-07-05 | T-013 | Claude | Smoke test: enemy contact faded into `CombatScene` (CanvasLayer, camera-independent), battle ran per-unit initiative with AStarGrid2D approach movement and d10 rolls (log lines printed each roll), victory returned to the overworld with the player at the exact pre-combat cell and 19-20/20 HP carried back. Scope note: built as a real minimal battle, not an empty shell, per Kayden's instruction | Bump the slime in `main.tscn` | pass | `BLUEPRINT.md` combat scene row updated; formulas marked placeholder for Phase 3/4 | Real Phase 4 combat: two-layer FSM states as classes, Ability/Item commands, multi-unit parties, camera-zoom transition |
+| 2026-07-05 | T-016 | Claude | `Godot --headless --path game scenes/dev/slice_smoke_test.tscn` -> `SLICE SMOKE TEST: PASS (26/26 checks)`, exit 0 (seeded RNG 1234; covers input map, movement/collision, NPC dialogue, encounter, combat victory, key drop, enemy removal, HP carry-back, world restore, door unlock, goal completion flag). Known noise: benign `ObjectDB instances leaked` warning at test exit (quit mid-coroutines). Also re-ran `--import` (exit 0) and `main.tscn --quit-after 3` (exit 0, no errors) | One command, ~15s: `cd game && /Applications/Godot.app/Contents/MacOS/Godot --headless --path . scenes/dev/slice_smoke_test.tscn` | pass | `TASKBOARD.md`, `BLUEPRINT.md`, `RUNBOOK.md`, `README.md` updated this session | Kayden's windowed play-check (feel, readability, combat pacing); no save/load, single party member, one enemy type - all later phases |
