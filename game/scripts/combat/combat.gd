@@ -131,7 +131,9 @@ func _build_view() -> void:
 			tri.color = Color(0.55, 0.08, 0.12) if u.is_boss else Color(0.85, 0.18, 0.18)
 			u.node.add_child(tri)
 		u.info = Label.new()
-		u.info.position = Vector2(-40, -56)
+		# Stagger the hero's readout higher than the enemy's so the two labels
+		# never collide when the units stand on adjacent cells.
+		u.info.position = Vector2(-40, -74 if u.is_player else -50)
 		u.info.add_theme_font_size_override("font_size", 15)
 		u.node.add_child(u.info)
 		_update_info(u)
@@ -357,22 +359,31 @@ func _attack(atk: CombatUnit, def: CombatUnit) -> void:
 	var needed := 11 - threshold
 	var roll := rng.randi_range(1, 10)
 	var hit := roll >= needed
-	_log("%s attacks %s!  (%d0%% to hit — roll %d+ on a d10)" % [
-		atk.display_name, def.display_name, threshold, needed])
+	# Two-beat reveal, but keep the attack line + odds on screen so that at the
+	# continue prompt the whole exchange is visible together (who attacked, the
+	# odds, the roll, hit/miss, damage) - nothing flashes away before you read it.
+	var intro := "%s attacks %s!\n%d0%% to hit — roll %d+ on a d10" % [
+		atk.display_name, def.display_name, threshold, needed]
+	_log(intro)
 	await _wait(0.6)
+	var result := ""
 	if hit:
 		var dmg := maxi(1, atk.attack - int(def.defense / 2.0))
 		if def.defending:
 			dmg = maxi(1, int(dmg / 2.0))
 		def.hp = maxi(0, def.hp - dmg)
 		_update_info(def)
-		_log("Rolled %d — HIT!  %d damage.  %s: %d/%d HP." % [
-			roll, dmg, def.display_name, def.hp, def.max_hp])
+		result = "Rolled %d — HIT!  %d damage.  %s: %d/%d HP." % [
+			roll, dmg, def.display_name, def.hp, def.max_hp]
 		if def.hp <= 0:
 			def.node.visible = false
 			battle_over = true
 	else:
-		_log("Rolled %d — MISS!  (needed %d+)" % [roll, needed])
+		result = "Rolled %d — MISS!  (needed %d+)" % [roll, needed]
+	# Append the result under the intro (don't replace it) and hold for continue.
+	if log_label:
+		log_label.text = intro + "\n" + result
+	print("[combat] ", result)
 	await _wait_for_continue()
 
 
