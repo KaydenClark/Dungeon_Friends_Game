@@ -3,10 +3,13 @@
 > Generated from LLM Workbench v2.1. See `RUNBOOK.md` -> Upgrading The
 > Harness.
 
-**Current focus:** First-playable slice is built, windowed play-checked by
-Kayden, and promoted `integration` -> `main` (2026-07-05, second session).
-Next up: M0.3 (export presets) and the real art/LDtk pipeline (T-003/T-004/
-T-011).
+**Current focus:** First-playable slice shipped to `main`. Third session: a
+bug-fix pass from Kayden's playtest (dialogue exit, slime AI, combat "auto"
+feel - see Bugs lane, B-01/B-02/B-03) is implemented on `fix/playtest-bugs`
+and `gated` on his windowed feel-check. After that lands, next up is M0.3
+(export presets, T-002) and the real art/LDtk pipeline (T-003/T-004/T-011) -
+with T-002 deprioritized vs. content per Kayden's 2026-07-05 call (distribution
+is premature while the slice is still placeholder art).
 **Owner:** Kayden
 **Last updated:** 2026-07-05 (second session)
 
@@ -99,6 +102,19 @@ Session Control.
 | T-008 | 7 | Folder structure: establish/maintain clean Godot folders under `game/` (`scenes/`, `scripts/`, `data/`, `assets/`, `addons/`, `tests/`) | Hygiene baseline before Phase 1 feature work lands on top of it | `game/` directory tree | Folder tree matches the `BLUEPRINT.md` Toolchain table; no stray files at `game/` root | `BLUEPRINT.md` Toolchain table confirmed or updated if paths change | agent | ready | 2026-07-05 |
 | T-011 | 10 | Forest map: build the first test room/map using the LDtk pipeline (replaces the code-built placeholder room in `game/scripts/dev/forest_slice.gd` - keep the entities/RoomGrid logic, swap the layout authoring) | Gameplan.md §15 Phase 1; depends on T-004 LDtk importer | `game/assets/levels/forest_test.ldtk` + imported `TileMapLayer` | Headless import succeeds; player (T-010) can walk the room and collide with walls | `TASKBOARD.md` proof row | agent | ready | 2026-07-05 |
 
+## Bugs
+
+From Kayden's first windowed playtest of the slice (2026-07-05, third session).
+Fixes implemented on branch `fix/playtest-bugs` (off `integration`),
+headless-verified (26/26 smoke test still green), and `gated` on Kayden's
+windowed feel-check before promotion to `integration`.
+
+| ID | Priority | Bug (reported) | Root cause | Fix | Touches | Status |
+|---|---:|---|---|---|---|---|
+| B-01 | 1 | NPC dialogue was hard to exit - "no gap or pause"; a couple of E taps flushed all lines and dumped you out | Advance had a cooldown only on the *first* press (200ms open-guard); no per-line debounce, so mashing E blew through every line at once | Per-line `ADVANCE_COOLDOWN_MS` (220ms) between accepted presses; every press is now consumed so it never leaks to the overworld | `game/scripts/ui/dialogue_box.gd` | gated |
+| B-02 | 2 | Slime "moved opposite of me" and engaged too soon | Coincidence - it was a pure random-walker (no mirroring logic); the real issue was arbitrary wander + spawning close to the player | Hybrid AI: random wander until player within `TRACK_RADIUS` (4 tiles), then A*-path toward them; slime spawn moved from (9,4) to (14,4), near the east door | `game/scripts/overworld/overworld_enemy.gd`, `game/scripts/dev/forest_slice.gd` | gated |
+| B-03 | 3 | Combat felt "auto" / hard to track | Only input was a tiny bottom-left Attack/Defend toggle; everything else auto-ran on fixed timers, so it read as a cutscene | Pokemon-style two-tier menu ("What will Hero do?" -> Fight/Defend; Fight -> Swing Sword / Back) with a panel + prompt; hero now steps in, swings, and returns to their side each turn | `game/scripts/combat/combat.gd` | gated |
+
 ## In Progress
 
 | ID | Priority | Task | Owner | Started | Touches | Current note | Proof required | Status |
@@ -189,4 +205,5 @@ dated heading.
 | 2026-07-05 | T-012 | Claude | Smoke test: NPC dialogue opened via faced-cell interact and closed after advancing; locked-door interact shows locked/unlock dialogues; enemy bump started an encounter. Implementation is grid-occupancy-based (`interact` targets `cell + facing`), not `Area2D` - simpler and consistent with the everything-on-grid invariant | Walk to the NPC and press E | pass | Done-lane note records the Area2D deviation | Chest pickup as a distinct interactable type not yet built (key comes from combat loot) |
 | 2026-07-05 | T-013 | Claude | Smoke test: enemy contact faded into `CombatScene` (CanvasLayer, camera-independent), battle ran per-unit initiative with AStarGrid2D approach movement and d10 rolls (log lines printed each roll), victory returned to the overworld with the player at the exact pre-combat cell and 19-20/20 HP carried back. Scope note: built as a real minimal battle, not an empty shell, per Kayden's instruction | Bump the slime in `main.tscn` | pass | `BLUEPRINT.md` combat scene row updated; formulas marked placeholder for Phase 3/4 | Real Phase 4 combat: two-layer FSM states as classes, Ability/Item commands, multi-unit parties, camera-zoom transition |
 | 2026-07-05 | T-016 | Claude | `Godot --headless --path game scenes/dev/slice_smoke_test.tscn` -> `SLICE SMOKE TEST: PASS (26/26 checks)`, exit 0 (seeded RNG 1234; covers input map, movement/collision, NPC dialogue, encounter, combat victory, key drop, enemy removal, HP carry-back, world restore, door unlock, goal completion flag). Known noise: benign `ObjectDB instances leaked` warning at test exit (quit mid-coroutines). Also re-ran `--import` (exit 0) and `main.tscn --quit-after 3` (exit 0, no errors) | One command, ~15s: `cd game && /Applications/Godot.app/Contents/MacOS/Godot --headless --path . scenes/dev/slice_smoke_test.tscn` | pass | `TASKBOARD.md`, `BLUEPRINT.md`, `RUNBOOK.md`, `README.md` updated this session | Kayden's windowed play-check (feel, readability, combat pacing); no save/load, single party member, one enemy type - all later phases |
+| 2026-07-05 | B-01/B-02/B-03 | Claude | Bug-fix pass from Kayden's playtest, on branch `fix/playtest-bugs` off `integration`. Headless re-verified on the branch: `--import` clean (no script errors); `main.tscn --quit-after 3` boots clean (`SceneManager ready.`, no ERROR lines); `slice_smoke_test.tscn` -> `SLICE SMOKE TEST: PASS (26/26 checks)`, exit 0 (seeded RNG 1234). B-01 dialogue debounce, B-02 slime hybrid random-then-track AI + spawn moved to (14,4), B-03 Pokemon-style two-tier combat menu + swing-and-return. | `cd game && /Applications/Godot.app/Contents/MacOS/Godot --headless --path . scenes/dev/slice_smoke_test.tscn` (26/26) | pass (headless); windowed feel-check is Kayden's | `TASKBOARD.md` Bugs lane + Executive Brief updated; scene contracts unchanged (no `BLUEPRINT.md` edit needed - combat is still the same MVP shape, just clearer UI) | Windowed confirmation of dialogue feel, slime approach, and combat menu/readability; then promote `fix/playtest-bugs` -> `integration` |
 | 2026-07-05 | T-017 | Claude | Kayden completed his windowed play-check of the first-playable slice and confirmed it's ready. Committed the slice to a new `integration` branch (commit `097ced0`), then fast-forward-merged `integration` -> `main` (`git merge --ff-only integration`, 199561c..097ced0, no conflicts) on Kayden's explicit "promote integration" instruction. Re-ran all 3 headless checks (`--import`, `main.tscn --quit-after 3`, `slice_smoke_test.tscn`) on `main` post-merge - all exit 0, smoke test still 26/26 | Local `main` now at 097ced0, matches what Kayden play-tested on `integration` | pass | `AGENTS.md`/`RUNBOOK.md`/`BLUEPRINT.md` branch-flow rows updated to the `integration`-staging convention prior to this merge; this row | `main` is 5 commits ahead of `origin/main` - not yet pushed, pending Kayden's confirmation |

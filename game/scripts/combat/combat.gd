@@ -21,6 +21,11 @@ const ARENA_H := 5
 const MOVE_RANGE := 3
 const ARENA_ORIGIN := Vector2(352, 184)
 
+# Pokemon-style two-tier command menu. Root asks the verb; picking Fight opens
+# the move list. (One move for this demo; Ability/Item slots arrive in Phase 4.)
+const ROOT_OPTIONS := ["Fight", "Defend"]
+const MOVE_OPTIONS := ["Swing Sword", "Back"]
+
 
 class CombatUnit:
 	var display_name := ""
@@ -41,10 +46,14 @@ var rng: RandomNumberGenerator
 var auto_play := false
 var battle_over := false
 var awaiting_choice := false
+var menu_level := 0    # 0 = root (Fight/Defend), 1 = move list
 var menu_index := 0
+var _active_hero: CombatUnit
 var astar := AStarGrid2D.new()
 var layer: CanvasLayer
 var log_label: Label
+var menu_panel: ColorRect
+var prompt_label: Label
 var menu_label: Label
 
 
@@ -118,8 +127,21 @@ func _build_view() -> void:
 	log_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	log_label.add_theme_font_size_override("font_size", 24)
 	layer.add_child(log_label)
+	# Command menu (bottom-left), hidden until it's the hero's turn.
+	menu_panel = ColorRect.new()
+	menu_panel.color = Color(0.05, 0.04, 0.09, 0.82)
+	menu_panel.position = Vector2(56, 516)
+	menu_panel.size = Vector2(372, 168)
+	menu_panel.visible = false
+	layer.add_child(menu_panel)
+	prompt_label = Label.new()
+	prompt_label.position = Vector2(76, 528)
+	prompt_label.add_theme_font_size_override("font_size", 24)
+	prompt_label.modulate = Color(1, 0.95, 0.7)
+	prompt_label.visible = false
+	layer.add_child(prompt_label)
 	menu_label = Label.new()
-	menu_label.position = Vector2(80, 560)
+	menu_label.position = Vector2(92, 574)
 	menu_label.add_theme_font_size_override("font_size", 26)
 	menu_label.visible = false
 	layer.add_child(menu_label)
@@ -153,12 +175,15 @@ func _take_turn(u: CombatUnit) -> void:
 	await _wait(0.4)
 	var action := "attack"
 	if u.is_player and not auto_play:
-		action = await _player_choose()
+		action = await _player_choose(u)
 	if action == "defend":
 		u.defending = true
 		_log("%s braces for impact." % u.display_name)
 		await _wait(0.5)
 		return
+	# Step in, swing, step back to their own side, so each turn reads as a
+	# discrete attack rather than units drifting together into a clump.
+	var home := u.cell
 	var target := _foe_of(u)
 	await _approach(u, target)
 	if _adjacent(u.cell, target.cell):
@@ -166,15 +191,21 @@ func _take_turn(u: CombatUnit) -> void:
 	else:
 		_log("%s moves closer." % u.display_name)
 		await _wait(0.4)
+	if not battle_over and u.hp > 0:
+		await _return_to(u, home)
 
 
-func _player_choose() -> String:
+func _player_choose(u: CombatUnit) -> String:
 	awaiting_choice = true
+	_active_hero = u
+	menu_level = 0
 	menu_index = 0
 	_update_menu()
-	menu_label.visible = true
+	_set_menu_visible(true)
+	# Returns "attack" (Swing Sword) or "defend"; navigation between the two
+	# tiers is handled entirely in _unhandled_input.
 	var action: String = await choice_made
-	menu_label.visible = false
+	_set_menu_visible(false)
 	awaiting_choice = false
 	return action
 
@@ -182,16 +213,58 @@ func _player_choose() -> String:
 func _unhandled_input(event: InputEvent) -> void:
 	if not awaiting_choice:
 		return
-	if event.is_action_pressed("move_up") or event.is_action_pressed("move_down"):
-		menu_index = 1 - menu_index
+	var opts: Array = ROOT_OPTIONS if menu_level == 0 else MOVE_OPTIONS
+	if event.is_action_pressed("move_up"):
+		get_viewport().set_input_as_handled()
+		menu_index = (menu_index - 1 + opts.size()) % opts.size()
+		_update_menu()
+	elif event.is_action_pressed("move_down"):
+		get_viewport().set_input_as_handled()
+		menu_index = (menu_index + 1) % opts.size()
 		_update_menu()
 	elif event.is_action_pressed("confirm") or event.is_action_pressed("interact"):
 		get_viewport().set_input_as_handled()
-		choice_made.emit("attack" if menu_index == 0 else "defend")
+		_confirm_menu()
+	elif event.is_action_pressed("cancel"):
+		get_viewport().set_input_as_handled()
+		if menu_level == 1:  # back out of the move list to the root
+			menu_level = 0
+			menu_index = 0
+			_update_menu()
+
+
+func _confirm_menu() -> void:
+	if menu_level == 0:
+		if menu_index == 0:  # Fight -> open the move list
+			menu_level = 1
+			menu_index = 0
+			_update_menu()
+		else:  # Defend
+			choice_made.emit("defend")
+	else:
+		if menu_index == 0:  # Swing Sword
+			choice_made.emit("attack")
+		else:  # Back -> return to the root menu
+			menu_level = 0
+			menu_index = 0
+			_update_menu()
+
+
+func _set_menu_visible(v: bool) -> void:
+	menu_panel.visible = v
+	prompt_label.visible = v
+	menu_label.visible = v
 
 
 func _update_menu() -> void:
-	menu_label.text = "▶ Attack\n   Defend" if menu_index == 0 else "   Attack\n▶ Defend"
+	var opts: Array = ROOT_OPTIONS if menu_level == 0 else MOVE_OPTIONS
+	var hero_name := _active_hero.display_name if _active_hero else "Hero"
+	prompt_label.text = "What will %s do?" % hero_name if menu_level == 0 \
+			else "%s — choose a move:" % hero_name
+	var text := ""
+	for i in opts.size():
+		text += ("▶ " if i == menu_index else "    ") + str(opts[i]) + "\n"
+	menu_label.text = text
 
 
 func _approach(u: CombatUnit, target: CombatUnit) -> void:
@@ -218,6 +291,28 @@ func _approach(u: CombatUnit, target: CombatUnit) -> void:
 		u.cell = best[i]
 		var tw := create_tween()
 		tw.tween_property(u.node, "position", _cell_pos(u.cell), 0.02 if auto_play else 0.12)
+		await tw.finished
+
+
+func _return_to(u: CombatUnit, home: Vector2i) -> void:
+	if u.cell == home:
+		return
+	# Path back over the now-current occupancy (the foe may have moved).
+	astar.fill_solid_region(astar.region, false)
+	for other in units:
+		if other != u and other.hp > 0:
+			astar.set_point_solid(other.cell, true)
+	var path := astar.get_id_path(u.cell, home)
+	if path.size() < 2:
+		u.cell = home  # boxed out of a clean path - snap home so state stays sane
+		var snap := create_tween()
+		snap.tween_property(u.node, "position", _cell_pos(home), 0.02 if auto_play else 0.12)
+		await snap.finished
+		return
+	for i in range(1, path.size()):
+		u.cell = path[i]
+		var tw := create_tween()
+		tw.tween_property(u.node, "position", _cell_pos(u.cell), 0.02 if auto_play else 0.10)
 		await tw.finished
 
 
