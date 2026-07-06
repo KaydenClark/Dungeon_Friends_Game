@@ -1,32 +1,49 @@
 class_name OverworldEnemy
 extends GridActor
-## Enemy visible on the map (no random/invisible encounters - locked
-## decision). Moves only when the player moves (synchronized turns) and
-## triggers combat on contact.
+## Enemy visible on the map (no random/invisible encounters). Moves on its own
+## clock (not tied to the player's steps - revised 2026-07-05, supersedes the
+## old synchronized-turn model): it wanders on a timer until the player comes
+## within TRACK_RADIUS, then paths toward them and triggers combat on contact.
 
 ## Manhattan distance (in tiles) at which the enemy notices the player and
 ## starts closing in. Outside this it just wanders, so it reads as ambient
-## until you choose to approach.
+## until it spots you.
 const TRACK_RADIUS := 4
+## Seconds between steps (the tween itself takes `move_time` on top of this).
+const STEP_INTERVAL := 0.35
 
 var stats: EnemyStats
+var target_player: Player
+var _step_accum := 0.0
 
 
 func _ready() -> void:
 	_make_body(Color(0.62, 0.3, 0.72))
 
 
-func take_overworld_turn(player: Player) -> void:
-	if moving or stats == null or SceneManager.in_encounter:
+func _process(delta: float) -> void:
+	# Autonomous stepping: accumulate real time and take a grid step whenever the
+	# interval elapses, independent of the player. Frozen during combat, dialogue,
+	# or while a previous tween is still running.
+	if target_player == null or moving or stats == null \
+			or SceneManager.in_encounter or SceneManager.ui_busy:
 		return
+	_step_accum += delta
+	if _step_accum < STEP_INTERVAL:
+		return
+	_step_accum = 0.0
+	_act()
+
+
+func _act() -> void:
 	# MVP overworld AI: wander randomly until the player is within TRACK_RADIUS,
 	# then path toward them and bump into combat. Strict per-behavior AI
 	# (dedicated BIASED_TRACKING / PATTERN routines) is a Phase 4 concern; for
 	# now the one forest slime uses this hybrid regardless of ai_behavior.
-	var to_player: Vector2i = player.cell - cell
+	var to_player: Vector2i = target_player.cell - cell
 	var dist: int = absi(to_player.x) + absi(to_player.y)
 	if dist <= TRACK_RADIUS:
-		_step_toward(player)
+		_step_toward(target_player)
 	else:
 		_wander()
 

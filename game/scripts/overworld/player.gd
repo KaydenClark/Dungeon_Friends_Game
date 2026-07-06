@@ -30,7 +30,10 @@ func _process(_delta: float) -> void:
 	if dir != Vector2i.ZERO:
 		try_step(dir)
 	elif Input.is_action_just_pressed("interact"):
-		interact()
+		# Ignore the interact press for a moment after a dialogue closes, so the
+		# same keypress that dismissed a box can't immediately re-open it.
+		if Time.get_ticks_msec() - SceneManager.last_ui_close_ms >= 250:
+			interact()
 
 
 func interact() -> void:

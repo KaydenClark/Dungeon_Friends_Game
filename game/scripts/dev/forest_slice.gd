@@ -78,6 +78,7 @@ func _ready() -> void:
 	var enemy := OverworldEnemy.new()
 	enemy.stats = load("res://data/enemies/forest_slime.tres")
 	register(enemy, enemy_cell)
+	enemy.target_player = player  # enemy moves autonomously; needs the player ref
 	enemies.append(enemy)
 
 	door = LockedDoor.new()
@@ -108,11 +109,8 @@ func _add_tile(parent: Node2D, c: Vector2i, ch: String) -> void:
 
 
 func _on_player_moved() -> void:
-	# Synchronized turns: enemies step only when the player steps (locked
-	# decision - see BLUEPRINT.md -> Core Logic And Invariants).
-	for e in enemies.duplicate():
-		if is_instance_valid(e):
-			e.take_overworld_turn(player)
+	# Enemies now move on their own clock (see OverworldEnemy._process), so this
+	# only reacts to where the player lands - here, reaching the goal tiles.
 	if goal_cells.has(player.cell) and not SceneManager.flags.get("slice_complete", false):
 		SceneManager.flags["slice_complete"] = true
 		SceneManager.show_dialogue([

@@ -318,9 +318,13 @@ Rules:
   whole-team "all players, then all enemies" phase - this retires the old
   `PlayerPhase -> EnemyPhase` Battle-FSM state names, which had drifted out of
   sync with the `TurnManager`'s always-interleaved-by-speed behavior.
-- **Enemies** are visible on the overworld map, move only when the player
-  moves (synchronized turns), and trigger combat on contact. No random or
-  invisible encounters.
+- **Enemies** are visible on the overworld map, move on their own clock
+  (autonomous real-time stepping - revised 2026-07-05 after playtest feedback,
+  supersedes the old synchronized-turn/Lufia-II model), and trigger combat on
+  contact. They wander until the player is within a notice radius, then path
+  toward them. Movement is still grid-snapped Tween stepping (the locked
+  movement invariant is unchanged - only the *trigger* moved from player-steps
+  to a timer). No random or invisible encounters.
 - **Combat transition**: touching an enemy pauses the overworld, instances
   Combat with party/enemy refs plus the return position, and on victory/defeat
   frees Combat and restores the overworld at the exact pre-combat position.
@@ -388,7 +392,7 @@ Rules:
 | Flexible HD/ultrawide base resolution (1280x720 design reference), nearest filter, `canvas_items` stretch mode, `expand` aspect, `fractional` scale mode, unrestricted palette | Kayden decided to drop the fixed low-res GBA-locked canvas in favor of native HD/ultrawide rendering while keeping the retro sprite-art look (nearest-neighbor filtering, chunky pixel silhouettes); `canvas_items`+`expand` shows more world on wider displays (e.g. 3440x1440) instead of pillarboxing, validated by the T-007 display-scaling spike at 1280x720/1920x1080/3440x1440 | 2026-07-05 / this session, supersedes the 2026-06-11 row above |
 | No global palette-swap shader / `SCREEN_TEXTURE` post-process in MVP | Was the source of a Compatibility-renderer bug risk; no longer needed once the palette isn't artificially constrained | 2026-06-11 / audited_research.md section 4.1, section 8 decision #2 |
 | Single Autoload (`SceneManager`); all other state on `Resource` objects | Keeps global state from becoming a junk drawer; save/load becomes trivial since `GameState` is itself a `Resource` | Gameplan.md section 3.1 |
-| Enemies visible on map, synchronized-turn movement, no random encounters | Matches the audit's Lufia-II-confirmed pattern; simpler to implement and matches the intended feel | Gameplan.md section 8 |
+| Enemies visible on map, ~~synchronized-turn movement~~ **autonomous real-time movement** (revised 2026-07-05), no random encounters | Originally synchronized (audit's Lufia-II pattern) for simplicity; changed after Kayden's playtest - the slime freezing whenever the player stood still felt unnatural. Enemies now step on their own timer (wander, then chase on sight); still grid-snapped, still visible-on-map, still no random encounters | Gameplan.md section 8; revised 2026-07-05 (playtest) |
 | Aseprite primary art tool (Lua/CLI-scriptable), Pixelorama fallback | Scriptable batch export lets an agent drive the art pipeline without manual GUI steps | 2026-06-11 / audited_research.md section 8.1 |
 | Furnace Tracker for audio *sound*, not a literal hardware-channel-emulation engine | Authenticity of sound, not of engine architecture - the hardware-emulation idea was dropped entirely, not deferred | 2026-06-11 / audited_research.md section 8 decision #4 |
 | `game/` subfolder holds the entire Godot project; docs/config live at repo root | Keeps `.godot/` cache and Godot-specific concerns cleanly separated from `docs/`/agent config | Gameplan.md section 4 |
