@@ -1,0 +1,150 @@
+# Dungeon Friends - Taskboard
+
+> Generated from LLM Workbench v2.1. See `RUNBOOK.md` -> Upgrading The
+> Harness.
+
+**Current focus:** Stand up a running Godot 4.6 project skeleton (M0.2/M0.3)
+so Phase 1 (movement/world skeleton) can start on a verified-working
+foundation.
+**Owner:** Kayden
+**Last updated:** 2026-07-05
+
+This is the live work queue and proof ledger. Agents use it to decide what to
+work on next. Keep strategy and long-term direction in `BLUEPRINT.md`; keep
+commands and verification procedures in `RUNBOOK.md`.
+
+## Executive Brief
+
+- **Shipping now:** An empty Godot project scaffold that opens headlessly with
+  zero errors, showing a placeholder background at the locked 240x160/
+  Mobile/integer-scale settings.
+- **Health:** green - scaffold verified via headless import + one-frame scene
+  run (see Proof Log).
+- **Decision needed:** none. All 5 open decisions from the original toolchain
+  audit were resolved before this Adoption run (see `BLUEPRINT.md` -> Design
+  Decisions).
+- **Blocked on:** nothing.
+- **Next milestone:** M0.3 (export presets for macOS/Windows/Android) -
+  targeted next session.
+
+## Pending Decisions
+
+None open right now. The architecture/toolchain decisions were resolved in
+the original research audit (2026-06-11); the creative-direction additions
+from this session (world-progression order, combat-zoom framing, stretch-goal
+reprioritization) were folded directly into `BLUEPRINT.md` rather than left as
+open questions - see `BLUEPRINT.md` -> Design Decisions for each with its
+rationale.
+
+| ID | Decision | Options | Recommendation | Cost / impact | Owner | Status |
+|---|---|---|---|---|---|---|
+| - | none open | - | - | - | - | - |
+
+## How To Use This Board
+
+1. Read `BLUEPRINT.md` for context.
+2. Pick the highest-priority `ready` task that is in scope and unclaimed.
+3. Move it to `claimed` or `in-progress` before editing.
+4. Do the smallest correct change.
+5. Run the task's required proof and the relevant `RUNBOOK.md` checks.
+6. Move the task to `done`, `blocked`, `deferred`, or `needs-review`.
+7. Append one proof row with the actual result.
+
+Do not rewrite existing proof rows. Append only.
+
+## Status Values
+
+| Status | Meaning |
+|---|---|
+| `ready` | Clear enough for the next agent to start. |
+| `claimed` | An agent has picked it but has not edited yet. |
+| `in-progress` | Work is underway. |
+| `gated` | Implementation is done and waiting on verification, review, or merge. |
+| `needs-review` | Needs human or manager review before more work. |
+| `blocked` | Cannot proceed until the blocker is resolved. |
+| `deferred` | Valid work, intentionally not next. |
+| `done` | Proof exists and docs impact is resolved. |
+
+A `claimed` or `in-progress` task that has gone stale (no update past one
+working day) may be reclaimed per the reclaim rule in `AGENTS.md` -> Long
+Session Control.
+
+## Ready
+
+| ID | Priority | Task | Source / why now | Touches | Proof required | Docs impact | Owner | Status | Last update |
+|---|---:|---|---|---|---|---|---|---|---|
+| T-002 | 1 | M0.3: set up export presets for macOS, Windows, Android (debug); produce one trivial build per platform | Gameplan.md §15 Phase 0 | `game/export_presets.cfg` | One exported build per platform runs and shows the placeholder scene | `TASKBOARD.md` proof row | agent | ready | 2026-07-05 |
+| T-003 | 2 | M1.1: draw a test tileset (floor, wall, 1 character) in Aseprite at 240x160/16x16 grid; set up the Aseprite batch-export script | Gameplan.md §15 Phase 1 | `game/assets/art/`, `game/assets/art/_scripts/` | Exported sprite sheet imports into Godot with no errors | `TASKBOARD.md` proof row | agent | ready | 2026-07-05 |
+| T-004 | 3 | M1.2: install `heygleeson/godot-ldtk-importer`; build a minimal one-room LDtk project with a Wall IntGrid layer; confirm `TileMapLayer` + collision import correctly | Gameplan.md §15 Phase 1 | `game/addons/`, `game/assets/levels/` | Headless import succeeds; `TileMapLayer` + collision visible in editor | `BLUEPRINT.md` Architecture row (LDtk "not yet installed" note) | agent | ready | 2026-07-05 |
+
+## In Progress
+
+| ID | Priority | Task | Owner | Started | Touches | Current note | Proof required | Status |
+|---|---:|---|---|---|---|---|---|---|
+| - | - | none in progress | - | - | - | - | - | - |
+
+## Blocked
+
+Use this lane for roadblocks, slowdowns, and risks that affect current or
+near-term work. If a blocker becomes a stable architectural risk, summarize it
+in `BLUEPRINT.md`.
+
+| ID | Task / area | Blocked on | Evidence | Next action | Owner | Status |
+|---|---|---|---|---|---|---|
+| - | none blocked | - | - | - | - | - |
+
+## Deferred
+
+Valid work that should not be started yet - the Gameplan §17 stretch goals,
+sequenced. Equipment and elemental/magic are flagged highest-priority-after-
+MVP given this project's emphasis on weapon variety and magic (see
+`BLUEPRINT.md` -> Design Decisions), but none of these start before the MVP
+(Phases 0-6) is complete - see `AGENTS.md` -> Work Selection.
+
+| ID | Task | Deferred until | Why it matters | Revisit trigger |
+|---|---|---|---|---|
+| S-001 | Equipment system: extend `ItemData` (`equip_slot`, `stat_modifiers`) + an equipment menu | MVP (Phases 0-6) complete | Highest-priority stretch given the founding vision's weapon-variety emphasis; pure UI+data work on existing `CharacterStats` | After M6.5 polish pass |
+| S-002 | Elemental counter-system: populate `AbilityData.element` + enemy weaknesses; damage-multiplier checks | MVP (Phases 0-6) complete | Highest-priority stretch given the founding vision's magic emphasis; additive to the existing damage formula | After M6.5 polish pass |
+| S-003 | Telegraphed combat UI (show enemy intended target/action before the player commits) | MVP (Phases 0-6) complete | Mostly UI + an extra "decide enemy actions" sub-phase; doesn't change the Battle FSM's shape | After M6.5 polish pass |
+| S-004 | Traversal/Psynergy-style abilities (mark `AbilityData.overworld_use`, interact with tagged overworld objects) | MVP (Phases 0-6) complete | Builds on the Phase 2 puzzle primitives | After M6.5 polish pass |
+| S-005 | Ikari/Djinn-style resource-gauge mechanics tied to equipment/party collection | MVP (Phases 0-6) complete | Most architecturally involved stretch item - tackle only after S-001 to S-004 are stable | After S-001 to S-004 land |
+| S-006 | More dungeons + full overworld map (castle city, mountains, rivers) | MVP (Phases 0-6) complete | Pure content work on the established pipeline; ties directly to the founding vision's world-progression arc | After M6.5 polish pass |
+| S-007 | Cosmetic CRT/scanline/color-grading shader (optional, screen-space post-process) | MVP (Phases 0-6) complete | Purely optional polish, never load-bearing; test per-platform with a settings toggle | After M6.5 polish pass |
+| S-008 | Roguelike postgame (randomized dungeon generator, stripped-stats mode) | Core game feature-complete | Large, separate system - long-tail replayability only | Once core game is feature-complete |
+
+## Done
+
+| ID | Task | Completed | Result | Proof row |
+|---|---|---|---|---|
+| T-001 | M0.2: Godot project scaffold - Mobile renderer, Nearest filter, 240x160 viewport/integer scale, `main.tscn` with `SceneManager` autoload + placeholder background | 2026-07-05 | pass | See Proof Log row 2026-07-05 |
+
+## Documentation Check
+
+Documentation is part of done. Before marking a task complete, check:
+
+| If the task changed... | Update or confirm |
+|---|---|
+| Vision, architecture, data model, invariants, design decisions | `BLUEPRINT.md` |
+| Task queue, blockers, deferred work, proof of completed work | `TASKBOARD.md` |
+| Setup, run, build/export, verification procedure | `RUNBOOK.md` |
+| Public-facing usage, project description | `README.md` |
+| Agent rules, scope, authority, verification policy | `AGENTS.md` |
+
+If no docs need edits, record `Docs checked; no update needed` in the final
+response and in the proof row's `Docs` field.
+
+## Proof Log
+
+Append a row when a task changes durable project state or produces durable
+verification evidence. Use actual results, not stale claims. Milestone tasks
+must fill the Demo column with a <1-minute demo artifact; non-milestone rows
+may use `n/a`.
+
+**Archival policy.** The proof log is append-only, but it should not grow
+without bound. When it passes ~30 rows, move the oldest rows (keep the most
+recent ~30 here) into `TASKBOARD_ARCHIVE.md`, preserving them verbatim under a
+dated heading.
+
+| Date | Task ID | Agent | Proof | Demo | Result | Docs | Remaining gap |
+|---|---|---|---|---|---|---|---|
+| 2026-07-05 | T-001 | Claude | `Godot --headless --path . --import` (exit 0, no errors) + `Godot --headless --path . scenes/main.tscn --quit-after 1` (exit 0, no errors, `SceneManager ready.` printed) | Placeholder `main.tscn` scene (dark background, 240x160 integer-scaled) confirmed via headless run log | pass | updated (`BLUEPRINT.md`, `AGENTS.md`, `CLAUDE.md`, `RUNBOOK.md`, `TASKBOARD.md`, `HARNESS_FEEDBACK.md`, `README.md`, `.claude/settings.json` created via Adoption; old `AGENTS.md`/`CLAUDE.md` archived to `docs/LEGACY_HARNESS.md`; `docs/planning/Gameplan.md`/`docs/research/audited_research.md` kept as linked references) | Export presets (M0.3) not yet configured - next task (T-002) |
