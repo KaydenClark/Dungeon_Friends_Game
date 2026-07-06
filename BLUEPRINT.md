@@ -135,12 +135,14 @@ above (no full dungeon, no boss, no save/load, no party-of-three depth
 required) - treat it as the walking skeleton the fuller Phase 6 slice builds
 on top of, not a replacement for it.
 
-**Status (2026-07-05, second session): this walking skeleton now exists and
-is playable from `main.tscn`** - placeholder ColorRect art, a code-built room
-(`game/scripts/dev/forest_slice.gd`), one NPC, one slime, a minimal d10 grid
-battle, a key drop, and a locked door with goal tiles behind it. Verified by
-a 26/26-check headless smoke test (`game/scenes/dev/slice_smoke_test.tscn`);
-Kayden's windowed play-check is still owed. Real art (T-003) and LDtk
+**Status (2026-07-05, fourth session): the walking skeleton has grown into a
+~5-minute expanded playtest, playable from `main.tscn`** - still placeholder
+art, but now a 34x20 code-built forest (`game/scripts/dev/forest_slice.gd`)
+with tree clusters, seven roaming slimes (red triangles - enemies read as
+hostile at a glance), a quest NPC, a healer NPC (full HP restore), a leashed
+Boss Slime guarding the locked east door with the key, a small HP/XP/key HUD,
+and goal tiles behind the door. Verified by a 34/34-check headless smoke test
+(`game/scenes/dev/slice_smoke_test.tscn`). Real art (T-003) and LDtk
 authoring (T-004/T-011) replace the placeholders without changing the
 entity/RoomGrid logic.
 

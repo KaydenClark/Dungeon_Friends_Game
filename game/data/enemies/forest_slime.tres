@@ -6,10 +6,10 @@
 script = ExtResource("1_slime")
 id = "forest_slime"
 display_name = "Forest Slime"
-max_hp = 8
+max_hp = 6
 attack = 2
 defense = 1
 speed = 2
 ai_behavior = 0
 xp_reward = 5
-loot_table = PackedStringArray("forest_key")
+loot_table = PackedStringArray()

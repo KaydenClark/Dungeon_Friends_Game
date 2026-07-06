@@ -36,6 +36,7 @@ class CombatUnit:
 	var hp := 0
 	var cell := Vector2i.ZERO
 	var is_player := false
+	var is_boss := false
 	var defending := false
 	var node: Node2D
 	var info: Label
@@ -79,6 +80,7 @@ func setup(hero: CharacterStats, hero_hp: int, enemy: EnemyStats,
 	e.max_hp = enemy.max_hp
 	e.hp = enemy.max_hp
 	e.cell = Vector2i(6, 2)
+	e.is_boss = enemy.id == "boss_slime"
 	units.append(e)
 
 
@@ -110,11 +112,21 @@ func _build_view() -> void:
 	for u in units:
 		u.node = Node2D.new()
 		u.node.position = _cell_pos(u.cell)
-		var rect := ColorRect.new()
-		rect.color = Color(0.25, 0.5, 0.95) if u.is_player else Color(0.62, 0.3, 0.72)
-		rect.position = Vector2(-24, -24)
-		rect.size = Vector2(48, 48)
-		u.node.add_child(rect)
+		if u.is_player:
+			var rect := ColorRect.new()
+			rect.color = Color(0.25, 0.5, 0.95)
+			rect.position = Vector2(-24, -24)
+			rect.size = Vector2(48, 48)
+			u.node.add_child(rect)
+		else:
+			# Same placeholder language as the overworld: enemies are red
+			# triangles (the boss bigger and darker), so combat matches the map.
+			var tri := Polygon2D.new()
+			var s := 30.0 if u.is_boss else 24.0
+			tri.polygon = PackedVector2Array([
+				Vector2(0, -s), Vector2(s, s), Vector2(-s, s)])
+			tri.color = Color(0.55, 0.08, 0.12) if u.is_boss else Color(0.85, 0.18, 0.18)
+			u.node.add_child(tri)
 		u.info = Label.new()
 		u.info.position = Vector2(-40, -56)
 		u.info.add_theme_font_size_override("font_size", 15)
