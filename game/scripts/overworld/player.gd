@@ -16,9 +16,13 @@ var _repeating := false
 
 func _ready() -> void:
 	_make_body(Color(0.25, 0.5, 0.95))
+	# Snappier per-step tween than the default so grid movement reads as crisp
+	# steps rather than a laggy glide (playtest feedback 2026-07-05).
+	move_time = 0.12
 	camera = Camera2D.new()
 	camera.position_smoothing_enabled = true
-	camera.position_smoothing_speed = 8.0
+	# Tighter follow (was 8.0) so the camera doesn't visibly trail the player.
+	camera.position_smoothing_speed = 12.0
 	add_child(camera)
 	camera.make_current()
 

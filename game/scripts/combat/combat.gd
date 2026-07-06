@@ -6,7 +6,8 @@ extends Node2D
 ##   (TurnManager behavior; never a whole-team phase);
 ## - units occupy arena cells, move via AStarGrid2D (no diagonals) up to
 ##   MOVE_RANGE, melee = adjacent tile;
-## - d10 percentage resolution: roll 1-10 vs a stat-derived threshold.
+## - d10 percentage resolution: roll 1-10, hit on a HIGH roll at/above a
+##   stat-derived target (roll-high-good; see _attack).
 ## The threshold/damage formula below is a PLACEHOLDER pending the Phase 3/4
 ## red/green combat-math implementation; the full two-layer FSM and
 ## Attack/Ability/Item/Defend menu land in Phase 4. Rendering is screen-space
@@ -47,6 +48,7 @@ var rng: RandomNumberGenerator
 var auto_play := false
 var battle_over := false
 var awaiting_choice := false
+var awaiting_continue := false
 var menu_level := 0    # 0 = root (Fight/Defend), 1 = move list
 var menu_index := 0
 var _active_hero: CombatUnit
@@ -56,6 +58,7 @@ var log_label: Label
 var menu_panel: ColorRect
 var prompt_label: Label
 var menu_label: Label
+var continue_label: Label
 
 
 func setup(hero: CharacterStats, hero_hp: int, enemy: EnemyStats,
@@ -157,6 +160,15 @@ func _build_view() -> void:
 	menu_label.add_theme_font_size_override("font_size", 26)
 	menu_label.visible = false
 	layer.add_child(menu_label)
+	# Shown after each attack resolves; play pauses here so the roll and damage
+	# stay on screen until the player presses confirm/interact.
+	continue_label = Label.new()
+	continue_label.position = Vector2(432, 466)
+	continue_label.add_theme_font_size_override("font_size", 22)
+	continue_label.modulate = Color(0.75, 1.0, 0.75)
+	continue_label.text = "▶  Press E / Space to continue"
+	continue_label.visible = false
+	layer.add_child(continue_label)
 
 
 func _run_battle() -> void:
@@ -223,6 +235,11 @@ func _player_choose(u: CombatUnit) -> String:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if awaiting_continue:
+		if event.is_action_pressed("confirm") or event.is_action_pressed("interact"):
+			get_viewport().set_input_as_handled()
+			awaiting_continue = false
+		return
 	if not awaiting_choice:
 		return
 	var opts: Array = ROOT_OPTIONS if menu_level == 0 else MOVE_OPTIONS
@@ -330,26 +347,33 @@ func _return_to(u: CombatUnit, home: Vector2i) -> void:
 
 func _attack(atk: CombatUnit, def: CombatUnit) -> void:
 	# PLACEHOLDER d10 formula (Phase 3/4 decides the real one, red/green):
-	# threshold = 5 + attack - defense (-2 if defending), clamped 1..9;
-	# a threshold of 7 reads as a 70% chance to hit.
+	# threshold = 5 + attack - defense (-2 if defending), clamped 1..9; it is
+	# the percent chance to hit (7 -> 70%). You roll a d10 and HIT ON A HIGH
+	# ROLL - you need to roll `needed` (= 11 - threshold) or higher. So a 70%
+	# chance means "roll a 4 or higher". (Revised 2026-07-05: this used to be a
+	# roll-UNDER check, which read as backwards - low rolls hitting - during
+	# playtest; flipped to roll-high-good, same odds.)
 	var threshold := clampi(5 + atk.attack - def.defense - (2 if def.defending else 0), 1, 9)
+	var needed := 11 - threshold
 	var roll := rng.randi_range(1, 10)
-	_log("%s attacks %s (%d0%% to hit)... rolled %d." % [
-		atk.display_name, def.display_name, threshold, roll])
-	await _wait(0.7)
-	if roll <= threshold:
+	var hit := roll >= needed
+	_log("%s attacks %s!  (%d0%% to hit — roll %d+ on a d10)" % [
+		atk.display_name, def.display_name, threshold, needed])
+	await _wait(0.6)
+	if hit:
 		var dmg := maxi(1, atk.attack - int(def.defense / 2.0))
 		if def.defending:
 			dmg = maxi(1, int(dmg / 2.0))
 		def.hp = maxi(0, def.hp - dmg)
 		_update_info(def)
-		_log("Hit! %d damage. %s: %d/%d HP." % [dmg, def.display_name, def.hp, def.max_hp])
+		_log("Rolled %d — HIT!  %d damage.  %s: %d/%d HP." % [
+			roll, dmg, def.display_name, def.hp, def.max_hp])
 		if def.hp <= 0:
 			def.node.visible = false
 			battle_over = true
 	else:
-		_log("Miss!")
-	await _wait(0.7)
+		_log("Rolled %d — MISS!  (needed %d+)" % [roll, needed])
+	await _wait_for_continue()
 
 
 func _foe_of(u: CombatUnit) -> CombatUnit:
@@ -386,3 +410,16 @@ func _log(msg: String) -> void:
 
 func _wait(t: float) -> void:
 	await get_tree().create_timer(0.02 if auto_play else t).timeout
+
+
+## Pause until the player acknowledges the attack result (so they can read the
+## roll and damage). Skipped during auto_play (headless smoke test).
+func _wait_for_continue() -> void:
+	if auto_play:
+		await _wait(0.2)
+		return
+	continue_label.visible = true
+	awaiting_continue = true
+	while awaiting_continue:
+		await get_tree().process_frame
+	continue_label.visible = false
