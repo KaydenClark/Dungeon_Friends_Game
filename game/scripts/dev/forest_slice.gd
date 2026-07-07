@@ -155,10 +155,9 @@ func _add_tile(parent: Node2D, c: Vector2i, ch: String) -> void:
 
 func _on_player_moved() -> void:
 	# Enemies move on their own clock (see OverworldEnemy._process), so this
-	# only reacts to where the player lands - here, reaching the goal tiles.
-	if goal_cells.has(player.cell) and not SceneManager.flags.get("slice_complete", false):
-		SceneManager.flags["slice_complete"] = true
-		SceneManager.show_dialogue([
-			"The path beyond the door is open!",
-			"The adventure continues...",
-		])
+	# only reacts to where the player lands - here, stepping into the opened
+	# doorway, which leads into the tutorial dungeon (T-022; stub room until
+	# T-027 builds the real hub). The goal tiles beyond are now the cave mouth.
+	if player.cell == door.cell and not SceneManager.transitioning:
+		SceneManager.flags["entered_dungeon"] = true
+		SceneManager.enter_room(DungeonStubRoom.new())
