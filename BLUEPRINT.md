@@ -63,7 +63,7 @@ natively at 1280x720+, but the *art* is built from small GBA-style tile units.
 |---|---|
 | Camera | Top-down / slight 3/4 overhead - the player reads space like a board, not a painting |
 | World scale | Compressed, symbolic maps - towns, forests, rivers, mountains simplified into clear, readable chunks |
-| Tiles | Strong grid logic, built from reusable 8x8 or 16x16 tile pieces (narrows the "TBD at M1.1" tile-grid-unit question in Architecture below to this range - exact pixel size is still an M1.1 art decision) |
+| Tiles | Strong grid logic, built from reusable 16x16 tile pieces rendered at 4x (decided at M1.1, 2026-07-06 - resolves the former "TBD" within the 8x8/16x16 range this table set) |
 | Palette | Bright greens, tans, blues, soft shadows - friendly adventure tone even where danger exists |
 | Texture | Repeating grass/path/roof/water/tree patterns - visually active but still readable |
 | Sprites | Small characters, oversized heads, clear outlines - identity from silhouette and color, not fine detail |
@@ -264,8 +264,8 @@ same primitives underneath.
 | UI | Godot `Control` nodes + `CanvasLayer` (HUD, dialogue, menus) | `game/scenes/ui/` |
 | Backend | None - fully local, no server, no accounts | |
 | Storage | `Resource` (`.tres`) files for game data; `SaveData` to `user://saves/` | `game/data/`, section 12 of Gameplan.md |
-| Levels | LDtk, single `world.ldtk`, imported via `heygleeson/godot-ldtk-importer` | Not yet installed - Milestone M1.2 |
-| Art | Aseprite (primary, Lua/CLI-scriptable), Pixelorama (fallback) | 1280x720 design-reference base, flexible HD/ultrawide scaling (see Design Decisions); tile grid unit TBD when M1.1 art lands - the T-007 display spike uses 64px placeholder tiles as a reasonable ratio for this base |
+| Levels | LDtk, single `world.ldtk`, imported via `heygleeson/godot-ldtk-importer` | **Importer v2.0 installed + verified 2026-07-06** (M1.2/T-004): `assets/levels/test_room.ldtk` imports headlessly as `LDTKWorld > LDTKLevel > TileMapLayer` nodes with the Wall IntGrid readable per-cell. The LDtk desktop app itself is **not yet installed** (free - kayden install when map authoring starts); until then `.ldtk` files are bootstrap-generated JSON |
+| Art | Aseprite (primary, Lua/CLI-scriptable, **not yet installed** - purchase is Kayden's call), Pixelorama (fallback) | 1280x720 design-reference base, flexible HD/ultrawide scaling (see Design Decisions); **grid unit decided at M1.1 (2026-07-06): 16x16 art pixels rendered at 4x = the 64px runtime cell** (`RoomGrid.TILE`). First real art exists (`assets/art/tilesets/test_tiles.png`, `sprites/test_hero.png`), generated deterministically by `assets/art/_scripts/generate_test_tileset.gd` as a stopgap; the Aseprite exporter (`export_sheets.lua`/`.sh`) is ready and takes over the same output paths once Aseprite is installed |
 | Audio | Furnace Tracker -> `.ogg` -> `AudioStreamPlayer`/`AudioStreamPlayer2D` | No hardware-channel-emulation engine (dropped, not deferred) |
 | Testing | Headless Godot CLI checks (`--import`, `--quit-after`) | No GDScript test framework yet - see `RUNBOOK.md` |
 | Deployment/Export | Godot editor Export dialog: macOS, Windows, Android | Gameplan.md section 14 |
