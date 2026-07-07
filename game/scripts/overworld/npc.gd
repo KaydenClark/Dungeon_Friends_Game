@@ -6,12 +6,12 @@ extends Node2D
 
 var room: RoomGrid
 var cell := Vector2i.ZERO
-var lines := PackedStringArray()
+@export var lines := PackedStringArray()
 ## Placeholder body color until real sprites land (M1.1); the builder can
 ## override it to tell NPC roles apart (quest giver vs healer).
-var color := Color(0.93, 0.78, 0.25)
+@export var color := Color(0.93, 0.78, 0.25)
 ## When true, interacting fully restores the hero's HP before the dialogue.
-var heals := false
+@export var heals := false
 
 
 func _ready() -> void:

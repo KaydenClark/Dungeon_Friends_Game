@@ -13,9 +13,9 @@ signal pressed_changed(pressed: bool)
 
 var room: RoomGrid
 var cell := Vector2i.ZERO
-var id := ""
+@export var id := ""
 ## link id of the LockedDoor this plate drives (wired by PuzzleController).
-var target_id := ""
+@export var target_id := ""
 var pressed := false
 var _face: ColorRect
 

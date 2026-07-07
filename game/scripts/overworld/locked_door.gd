@@ -12,8 +12,11 @@ extends Node2D
 var room: RoomGrid
 var cell := Vector2i.ZERO
 ## LDtk link id so plates/controllers can target this door.
-var link_id := ""
-var required_key := "forest_key"
+@export var link_id := ""
+@export var required_key := "forest_key"
+## Optional replacement for the generic locked-door dialogue (doors opened by
+## room logic rather than keys set this so the hint isn't misleading).
+var locked_lines := PackedStringArray()
 ## When true the door belongs to a plate, not a key.
 var plate_driven := false
 ## Permanently opened (key doors only).
@@ -59,12 +62,14 @@ func interact() -> void:
 			"There must be a trigger for it nearby...",
 		])
 		return
-	if SceneManager.inventory.has(required_key):
+	if required_key != "" and SceneManager.inventory.has(required_key):
 		open_permanently()
 		SceneManager.show_dialogue([
-			"You use the %s." % required_key.capitalize().replace("_", " "),
+			"You use the %s." % required_key.capitalize(),
 			"The old door creaks open!",
 		])
+	elif not locked_lines.is_empty():
+		SceneManager.show_dialogue(locked_lines)
 	else:
 		SceneManager.show_dialogue([
 			"It's locked tight.",
@@ -73,12 +78,15 @@ func interact() -> void:
 
 
 ## Open for good: leave the grid entirely (key doors, and one-way doors
-## unlocked from their far side).
+## unlocked from their far side). Doors with a link_id record it in
+## SceneManager.flags so a rebuilt room keeps them open.
 func open_permanently() -> void:
 	if opened:
 		return
 	opened = true
 	held_open = false
+	if link_id != "":
+		SceneManager.flags["door_%s_opened" % link_id] = true
 	room.unregister(self)
 	room.set_blocked(cell, false)
 	visible = false

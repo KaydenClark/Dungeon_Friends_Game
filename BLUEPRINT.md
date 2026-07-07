@@ -135,16 +135,21 @@ above (no full dungeon, no boss, no save/load, no party-of-three depth
 required) - treat it as the walking skeleton the fuller Phase 6 slice builds
 on top of, not a replacement for it.
 
-**Status (2026-07-05, fourth session): the walking skeleton has grown into a
-~5-minute expanded playtest, playable from `main.tscn`** - still placeholder
-art, but now a 34x20 code-built forest (`game/scripts/dev/forest_slice.gd`)
-with tree clusters, seven roaming slimes (red triangles - enemies read as
-hostile at a glance), a quest NPC, a healer NPC (full HP restore), a leashed
-Boss Slime guarding the locked east door with the key, a small HP/XP/key HUD,
-and goal tiles behind the door. Verified by a 34/34-check headless smoke test
-(`game/scenes/dev/slice_smoke_test.tscn`). Real art (T-003) and LDtk
-authoring (T-004/T-011) replace the placeholders without changing the
-entity/RoomGrid logic.
+**Status (2026-07-06, Phase 2 build): the full Phase 2 tutorial dungeon is
+playable from `main.tscn`** - still placeholder art, but the whole loop now
+runs through the LDtk pipeline: the 34x20 forest is authored in
+`forest.ldtk` (T-011, same layout as the old code-built slice; entities as
+LDtk instances via the T-031 post-import hook), and behind the boss door sits
+the three-room tutorial dungeon from `tutorial_dungeon.ldtk` (T-027): hub
+with lock-behind entry, 3x3 block-onto-plate puzzle, visible locked chest and
+reset lever; 2-wide pit room solved by block-fill + the new jump button
+(T-025, Alt/C); fight room whose Dungeon Slime drops the chest key; a west
+loop-back shortcut; shield reward (D-001) that unbolts the entry. Party
+defeat restarts from the beginning (T-029/D-004). Debug builds carry an F1
+dev overlay (T-030: warps, puzzle reset, item grants, heal, skip-combat).
+Verified by a 94/94-check headless smoke test plus 17 unit suites including
+an exhaustive block-puzzle soft-lock solver. Kayden's windowed playthrough is
+the remaining Phase 2 gate; real art comes in the post-Phase-2 art pass.
 
 The most important quality bar is:
 
@@ -157,16 +162,17 @@ The most important quality bar is:
 
 Current phase:
 
-- **Completing Phase 1, planning Phase 2 (2026-07-06).** The Phase 1-2 walking
-  skeleton is built (see `TASKBOARD.md` T-016/T-018): grid movement,
-  interaction/dialogue, enemy contact, minimal d10 combat with transition,
-  key/door reward loop - all on placeholder art. Phase 1's remaining work is
-  the content pipeline (T-003 art, T-004 LDtk importer, T-011 real forest map,
-  T-020 real-art scaling check) plus two 2026-07-06 additions from Kayden:
-  movement feel polish (T-021) and the boss-door room transition (T-022).
-  Phase 2 is now concretely specified as a 3-room tutorial dungeon - see
-  "Phase 2 Target: Tutorial Dungeon" below. Phase 0's M0.3 (export presets)
-  is deprioritized to the TASKBOARD Backlog.
+- **Phase 2 built, gated on Kayden's windowed playthrough (2026-07-06, second
+  half of the day).** Everything in "Phase 2 Target: Tutorial Dungeon" below
+  is implemented and headless-verified: the LDtk entity pipeline (T-031), the
+  LDtk-authored forest (T-011), the puzzle primitives (T-023 blocks, T-024
+  plates/controller/lever, T-025 jump+pits, T-026 chest), defeat-restart
+  (T-029), dev tools (T-030), and the 3-room tutorial dungeon integration
+  (T-027). Phase 1's only leftover is T-020's windowed 3-resolution check
+  (gated on Kayden), and Phase 0's M0.3 (export presets) stays in the
+  TASKBOARD Backlog. Once Kayden's windowed pass confirms the dungeon,
+  Phase 3 (Data Model & Save/Load) is next - it also inherits the richer
+  death/respawn rule (D-004) and the shield's real effect (D-001/S-001).
 
 Build order (phases per Gameplan.md section 15; each is a real milestone with
 a stated "done" condition there):
@@ -271,7 +277,7 @@ same primitives underneath.
 | UI | Godot `Control` nodes + `CanvasLayer` (HUD, dialogue, menus) | `game/scenes/ui/` |
 | Backend | None - fully local, no server, no accounts | |
 | Storage | `Resource` (`.tres`) files for game data; `SaveData` to `user://saves/` | `game/data/`, section 12 of Gameplan.md |
-| Levels | LDtk, single `world.ldtk`, imported via `heygleeson/godot-ldtk-importer` | **Importer v2.0 installed + verified 2026-07-06** (M1.2/T-004): `assets/levels/test_room.ldtk` imports headlessly as `LDTKWorld > LDTKLevel > TileMapLayer` nodes with the Wall IntGrid readable per-cell. The LDtk desktop app itself is **not yet installed** (free - kayden install when map authoring starts); until then `.ldtk` files are bootstrap-generated JSON |
+| Levels | LDtk, imported via `heygleeson/godot-ldtk-importer`, entities all-in per D-002 | **Importer v2.0 + entity post-import pipeline live 2026-07-06** (T-004/T-031): each `.ldtk` sets `entities_post_import` to `scripts/ldtk/entities_post_import.gd`, which instantiates the matching game object per entity (conventions documented in that script); `LdtkRoom` adopts them into the runtime grid. Current worlds: `forest.ldtk` (T-011), `tutorial_dungeon.ldtk` (3 levels, T-027), `entity_test_room.ldtk` (pipeline test fixture), `test_room.ldtk` (T-004 fixture) - consolidation into one `world.ldtk` can wait for real LDtk-app authoring. The LDtk desktop app is installed (Gatekeeper cleared); the `.ldtk` files are still bootstrap-generated JSON (`assets/levels/_scripts/generate_levels.py`) until Kayden starts hand-authoring |
 | Art | Aseprite (primary, Lua/CLI-scriptable, **not yet installed** - purchase is Kayden's call), Pixelorama (fallback) | 1280x720 design-reference base, flexible HD/ultrawide scaling (see Design Decisions); **grid unit decided at M1.1 (2026-07-06): 16x16 art pixels rendered at 4x = the 64px runtime cell** (`RoomGrid.TILE`). First real art exists (`assets/art/tilesets/test_tiles.png`, `sprites/test_hero.png`), generated deterministically by `assets/art/_scripts/generate_test_tileset.gd` as a stopgap; the Aseprite exporter (`export_sheets.lua`/`.sh`) is ready and takes over the same output paths once Aseprite is installed |
 | Audio | Furnace Tracker -> `.ogg` -> `AudioStreamPlayer`/`AudioStreamPlayer2D` | No hardware-channel-emulation engine (dropped, not deferred) |
 | Testing | Headless Godot CLI checks (`--import`, `--quit-after`) | No GDScript test framework yet - see `RUNBOOK.md` |
@@ -317,11 +323,11 @@ Dungeon_Friends_Game/
 | Scene | Purpose | Status | Source |
 |---|---|---|---|
 | `game/scenes/main.tscn` | Root: `SceneManager` wiring, `WorldContainer`/`CombatContainer`/`UILayer`/`TransitionLayer` | working - `scripts/main.gd` registers the containers with `SceneManager` and boots the forest slice into `WorldContainer` | `game/scenes/main.tscn`, `game/scripts/main.gd` |
-| Overworld / Dungeon (LDtk-instanced) | Grid movement, puzzles, visible enemies | walking skeleton: `RoomGrid` runtime grid model + code-built placeholder room (`ForestSlice`); LDtk authoring still missing (T-004/T-011) | `game/scripts/overworld/`, `game/scripts/dev/forest_slice.gd` |
+| Overworld / Dungeon (LDtk-instanced) | Grid movement, puzzles, visible enemies | working through the LDtk pipeline: `RoomGrid` runtime grid model + `LdtkRoom` base (imports the level, feeds Wall/Pit IntGrids into the grid, adopts post-import-spawned entities) + `ForestRoom` (`forest.ldtk`) | `game/scripts/overworld/`, `game/scripts/ldtk/entities_post_import.gd`, `game/assets/levels/` |
 | Combat | Turn-based party-vs-enemy encounter | MVP walking skeleton (2026-07-05): per-unit initiative, AStarGrid2D arena movement, melee-adjacent d10 attacks, Pokemon-style two-tier command menu (Fight/Defend -> move list) with step-in/swing/step-back per turn, fade transition; built in code (`CombatScene`), no .tscn yet; formulas are placeholders pending Phase 3/4 | `game/scripts/combat/combat.gd` |
 | UI (HUD, dialogue, pause, party menu) | Player-facing menus and status | dialogue box exists (`DialogueBox`, code-built); HUD/pause/party menus missing | `game/scripts/ui/dialogue_box.gd` |
 | `game/scenes/dev/display_scaling_spike.tscn` | Throwaway diagnostic - proves the new flexible HD/ultrawide stretch settings render an undistorted tile grid at 1280x720/1920x1080/3440x1440 | working (placeholder ColorRect tiles, no real art yet) | `game/scenes/dev/display_scaling_spike.tscn`, `game/scripts/dev/display_scaling_spike.gd` |
-| Dungeon stub room (behind the boss door) | T-022 room transition target: first LDtk-pipeline-driven room in the live game (`cave_room.ldtk` -> `TileMapLayer` at 4x, Wall IntGrid -> `RoomGrid` blocking); stepping into the forest doorway enters it via `SceneManager.enter_room` (suspend-not-free, like combat), stepping back out restores the forest exactly. Placeholder until T-027 builds the real tutorial hub room | working (2026-07-06) | `game/scripts/dev/dungeon_stub_room.gd`, `game/assets/levels/cave_room.ldtk`, `SceneManager.boot_room/enter_room/exit_room` |
+| Tutorial dungeon (behind the boss door) | The Phase 2 deliverable (T-027): three LDtk-authored rooms (`tutorial_dungeon.ldtk` levels HubRoom/PitRoom/FightRoom, scripts `tutorial_*_room.gd`) navigated via `SceneManager.boot_room/enter_room/exit_room(s)` (suspend-not-free downward, freed-and-rebuilt on the way back up - the rebuild is the puzzle escape valve; persistent facts like opened chests/doors and slain unique enemies live in `SceneManager.flags`). Supersedes the T-022 cave stub room, whose wiring it inherits | working (2026-07-06), Kayden's windowed check pending | `game/scripts/overworld/tutorial_hub_room.gd` / `tutorial_pit_room.gd` / `tutorial_fight_room.gd`, `game/assets/levels/tutorial_dungeon.ldtk` |
 
 ### Commands
 
@@ -532,7 +538,7 @@ Rules:
 | Aseprite CLI/Lua automation has a learning curve before it pays off | Low | Start with simple batch-export scripts in M1.1; Pixelorama remains a no-cost manual fallback |
 | **No narrative/story/world-lore design exists yet** - the Gameplan is systems-and-architecture-first, but "go through a story" is part of the founding vision | Medium | Needs deliberate attention before Phase 6 (First Playable Slice) means anything narratively - a vertical slice needs at least one real story beat, not just working systems. Not yet scheduled; flagged here rather than invented unprompted |
 | Grid-based combat with per-unit movement/range is more implementation work than flat menu-only JRPG battles (positioning, move-range calc, attack-range validation, arena layout) | Medium | Reuse the overworld's existing `AStarGrid2D`/grid-movement patterns for combat positioning instead of inventing a parallel system; keep Phase 4 MVP range rules simple (e.g. melee = adjacent tile, ranged = fixed tile distance) and defer tactics depth (flanking, terrain bonuses) to Stretch Goals |
-| **Block-puzzle soft-locks** (added 2026-07-06): pushable blocks + doors that lock behind the player can create unsolvable states - a block shoved into a corner/off the path, leaving the player trapped in a locked room (and Phase 2 death just restarts the game, so a soft-lock is a hard restart). This is *the* classic block-puzzle bug, ongoing across every puzzle room, not just the tutorial | Medium | Prevent by construction: design rooms so no push leads to a dead state (geometry like the 3x3-with-margin), and/or add a cheap escape valve (re-enter-room resets the puzzle, or a "reset puzzle" affordance). Every puzzle room's proof must include a soft-lock check (can the player wedge it?), not just a can-it-be-solved check |
+| **Block-puzzle soft-locks** (added 2026-07-06): pushable blocks + doors that lock behind the player can create unsolvable states - a block shoved into a corner/off the path, leaving the player trapped in a locked room (and Phase 2 death just restarts the game, so a soft-lock is a hard restart). This is *the* classic block-puzzle bug, ongoing across every puzzle room, not just the tutorial | Medium | Mitigations built at T-024/T-027 (keep applying them to every future puzzle room): (1) blocks can never be pushed onto a doorway cell **or its approach cells** (`RoomGrid.no_block_cells`; the approach-cell rule was found by the solver - a block parked on the exit's only approach was just as fatal as one on the exit); (2) the hub's reset **Lever** returns blocks to their start cells; (3) leaving and re-entering a dungeon room rebuilds it fresh; (4) `tests/test_tutorial_softlock.gd` runs an exhaustive BFS over every reachable block/player state of the real shipped rooms and fails if any state can neither solve nor recover. Every new puzzle room must be added to that suite |
 
 ## Design Decisions
 
@@ -573,6 +579,7 @@ Rules:
 | Overworld is a **single party avatar** (no snake-follow); the party's characters appear only in **Fire-Emblem-Sacred-Stones-style tactical combat** (select a character, WASD picks its destination cell, mini action menu below) | Kayden: "I kinda imagined one character in this overworld being your party... These are party encounters, not character encounters"; concentrates positioning depth in the tactical battles and keeps the overworld simple - **supersedes the snake-follow-formation decision** (Gameplan §10/§15 M5.1) | 2026-07-06 round 3 / this session |
 | Puzzle geometry primitive: plate at the center of a 3x3 pushing space, block in a corner, 2-cell walking margin around it (the margin enables the around-the-block L-shaped push, since pushing needs the opposite side and there are no diagonals) | Kayden's sketch-in-words for Room 1; exact cells/push-count finalized at build against his drawing | 2026-07-06 round 3 / this session |
 | Placeholder art through Phase 2, one art pass afterward; invest in dev tools (room warp, puzzle reset, grant item, skip combat) as early as possible instead | Kayden: "Lets do art at the end, but build out some dev tools like your suggesting as soon as we can" - Phase 2 validates mechanics, and puzzle iteration is playtest-heavy, so tooling pays back faster than art now | 2026-07-06 round 3 / this session |
+| Tutorial-dungeon build interpretations (T-027, **agent interpretation - confirm in windowed play**): (a) the hub gets a reset **Lever** as the soft-lock escape valve; (b) blocks can never be pushed onto doorway cells or their approach cells; (c) opening the chest is the dungeon's completion beat - it unbolts the locked entry door; (d) the hub's west door is one-way (opens permanently when the player loops back through it from Room 3); (e) the Room 3 key-carrier is a new `dungeon_slime.tres` (10 HP / atk 3, `unique_id key_guardian` so it stays dead); (f) hub -> pit -> fight rooms suspend on the way in and are freed/rebuilt when backed out of, with chest/door/unique-enemy state persisted in `SceneManager.flags` | Fills the gaps Kayden's room spec left open, biased toward classic-Zelda readings and the Known Risks soft-lock mitigation; none of it touches a locked decision. Flag anything that plays wrong and it can be re-cut cheaply - rooms are LDtk data + thin room scripts | 2026-07-06 / this session (Phase 2 build) |
 
 ## Health Criteria
 

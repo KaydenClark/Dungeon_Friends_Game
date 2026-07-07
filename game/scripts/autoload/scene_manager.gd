@@ -106,18 +106,31 @@ func enter_room(new_room: Node2D) -> void:
 ## Leave the current room and restore the one beneath it on the stack. The
 ## restored room's player resumes at the exact cell they left from.
 func exit_room() -> void:
+	await exit_rooms(1)
+
+
+## Pop `count` rooms in one transition (the tutorial dungeon's Room 3 -> hub
+## loop skips back past Room 2). Freed rooms rebuild fresh on re-entry - that
+## re-entry reset is the puzzle escape valve. The restored room gets an
+## on_room_restored() callback to reposition the player / react to flags.
+func exit_rooms(count: int) -> void:
 	if transitioning or in_encounter or room_stack.is_empty():
 		return
 	transitioning = true
 	await _fade_to(1.0)
-	if current_room:
-		current_room.queue_free()
-	current_room = room_stack.pop_back()
+	for i in count:
+		if room_stack.is_empty():
+			break
+		if current_room:
+			current_room.queue_free()
+		current_room = room_stack.pop_back()
 	current_room.visible = true
 	current_room.process_mode = Node.PROCESS_MODE_INHERIT
 	var prev_player: Variant = current_room.get("player")
 	if prev_player is Player and prev_player.camera:
 		prev_player.camera.make_current()
+	if current_room.has_method("on_room_restored"):
+		current_room.on_room_restored()
 	await _fade_to(0.0)
 	transitioning = false
 

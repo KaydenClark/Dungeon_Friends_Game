@@ -61,14 +61,26 @@ Expected result: a 1280x720 window opens (flexible HD/ultrawide `canvas_items`/
 showing the first-playable forest slice (placeholder ColorRect art). No
 console errors.
 
-Playing the slice (2026-07-05 second session; controls are the T-009 input
-map):
+Playing the slice (updated 2026-07-06, Phase 2; controls are the T-009 input
+map plus the T-025 jump):
 
 - WASD / arrow keys: grid-snapped movement. E / Space: talk & interact;
-  Enter / Space advances dialogue.
-- Loop: talk to the yellow NPC -> walk into the purple slime -> turn-based
-  battle (Up/Down selects Attack/Defend, Enter confirms) -> win the Forest
-  Key -> open the brown door on the east side -> step onto the gold tiles.
+  Enter / Space advances dialogue. Alt (or C): jump one cell over a pit.
+- Loop: talk to the quest NPC -> fight slimes (bump to battle; Up/Down +
+  Enter drives the two-tier menu) -> beat the leashed Boss Slime by the east
+  door for the Forest Key -> open the door and step through into the
+  three-room tutorial dungeon: the entry locks behind you; push the block
+  onto the center pressure plate (L-shaped push) to hold the east door open;
+  in the pit room, push the block into the 2-wide pit and jump the remaining
+  gap; beat the Dungeon Slime for the chest key; loop back through the west
+  shortcut; open the chest for the shield - the entry unbolts and you walk
+  back out to the forest. Party defeat restarts from the beginning of the
+  game (T-029).
+- Dev tools (T-030, debug builds only - running from the editor or CLI
+  counts; excluded from release exports): press F1 for the overlay, then
+  1-4 warp (Forest / Hub / Pit / Fight rooms), 5 reset the room puzzle,
+  6-8 grant forest_key / chest_key / shield, 9 heal, 0 toggle skip-combat
+  (touch an enemy = instant win). Off by default every session.
 
 ## Test And Build
 
@@ -98,23 +110,26 @@ autoload initialized.
 ### First-playable slice smoke test (T-016)
 
 End-to-end scripted run of the whole slice (input map, movement/collision,
-NPC dialogue, enemy encounter, seeded d10 combat, key/door, then the T-022
-round trip: through the doorway into the LDtk-built dungeon stub room and
-back out with forest state preserved):
+NPC dialogue, enemy encounters, seeded d10 combat, key/door, then the full
+Phase 2 tutorial dungeon: hub lock-in, block-onto-plate puzzle, 2-wide pit
+crossing via block-fill + jump, key-guardian fight, west loop back, chest ->
+shield -> entry unbolts, return to the preserved forest, and a forced-defeat
+restart-from-the-beginning pass):
 
 ```bash
 cd game
 /Applications/Godot.app/Contents/MacOS/Godot --headless --path . scenes/dev/slice_smoke_test.tscn
 ```
 
-Expected result: exit `0` and a final `SLICE SMOKE TEST: PASS (47/47 checks)`
-line (~20-40s; the expanded forest walk and multiple fights take longer than
-the original 26-check slice). A benign `ObjectDB instances leaked` warning at
-exit is known noise from quitting mid-coroutines; any `CHECK FAILED:` line or
-exit `1` is a real failure. Because roaming enemies move on real-time timers,
-run it a few times in a row when touching enemy AI or movement (`for i in 1 2
-3 4 5; do ...; done`). Run this after any change to movement, interaction,
-combat, room transitions, or SceneManager.
+Expected result: exit `0` and a final `SLICE SMOKE TEST: PASS (94/94 checks)`
+line (~40-80s; the dungeon route roughly doubles the old 47-check run; the
+watchdog fails the run at 180s). A benign `ObjectDB instances leaked` warning
+at exit is known noise from quitting mid-coroutines; any `CHECK FAILED:` line
+or exit `1` is a real failure. Because roaming enemies move on real-time
+timers, run it a few times in a row when touching enemy AI or movement (`for
+i in 1 2 3 4 5; do ...; done`). Run this after any change to movement,
+interaction, combat, room transitions, puzzles, the LDtk pipeline, or
+SceneManager.
 
 Gotcha: `--path .` must point at `game/` (hence the `cd game`). Pointed at the
 repo root by mistake, Godot finds no `project.godot` and can hang around
@@ -156,12 +171,14 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
-per-suite tally (e.g. `UNIT TESTS: 10 suites, 65 tests, 176 checks, 0 failed`).
-Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in ~1-2s (pure
-logic and controlled clocks, no real-time waits, unlike the slice smoke test).
-Run this after any change to combat math, the grid/pathfinding model,
-`GridActor` movement, the player input/feel state machine, the enemy AI, the
-`.tres` data, `DialogueBox`, or the SceneManager reward/heal rules.
+per-suite tally (e.g. `UNIT TESTS: 17 suites, 102 tests, 330 checks, 0
+failed`). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a
+few seconds (pure logic and controlled clocks, no real-time waits, unlike the
+slice smoke test; the tutorial soft-lock solver adds a second or two). Run
+this after any change to combat math, the grid/pathfinding model, `GridActor`
+movement, the player input/feel state machine, the enemy AI, the `.tres`
+data, `DialogueBox`, the puzzle primitives, the LDtk entity pipeline, or the
+SceneManager reward/heal/restart rules.
 
 Coverage lives in `game/tests/`, one suite per area:
 `test_combat_math` (the d10 `hit_threshold`/`needed_roll`/`attack_damage` rules
@@ -171,14 +188,28 @@ Manhattan pathfinding, avoid-occupants routing), `test_grid_actor`
 hero/slime/boss `.tres` values + the boss-key/locked-door invariant),
 `test_dialogue_box` (line advancement + `finished`), `test_overworld_enemy`
 (`_manhattan` + `defeated()` cleanup), `test_scene_manager` (victory XP/loot
-dedup + heal-to-full, the real `apply_victory_rewards`/`heal_hero_to_full`
-methods), `test_enemy_ai` (the deterministic `_act`/`_step_toward`/`_step_home`/
+dedup + heal-to-full + the T-029 session reset, the real
+`apply_victory_rewards`/`heal_hero_to_full`/`reset_session_state` methods),
+`test_enemy_ai` (the deterministic `_act`/`_step_toward`/`_step_home`/
 `_wander` decision branches), `test_dialogue_cooldown` (the real
-`_unhandled_input` debounce, driven with a controlled input clock), and
+`_unhandled_input` debounce, driven with a controlled input clock),
 `test_player_movement` (the T-021 feel state machine - the real
 `Player._movement_intent` tap/turn/hold/walk decisions driven with hand-fed
-deltas, plus `_read_dir` last-pressed-wins rollover via `Input.action_press`).
-Add a suite path to the `SUITES` list in `run_tests.gd` to register new tests.
+deltas, plus `_read_dir` last-pressed-wins rollover via `Input.action_press`),
+`test_pushable_block` (T-023 push/refusal/sink-into-pit/reset),
+`test_pressure_plate` (T-024 momentary press/release, plate-door open/re-lock,
+deferred re-lock while the doorway is occupied, PuzzleController wiring),
+`test_jump` (T-025: 1-cell gap jumpable, 2-cell never, filled pit walkable and
+jumpable-from, refusals), `test_chest` (T-026 key gate, one-time reward, flag
+persistence), `test_ldtk_pipeline` (T-031: the committed entity_test_room
+fixture imports and adopts one of every entity type with fields carried),
+`test_tutorial_softlock` (exhaustive BFS over every reachable block/player
+state of the REAL shipped hub and pit rooms: solvable from the start, and
+every wedged state can still reach the reset lever / the exit - the
+can-the-player-wedge-it proof the Known Risks row demands), and
+`test_debug_overlay` (T-030 hooks: hidden by default, grant dedup, reset
+delegation). Add a suite path to the `SUITES` list in `run_tests.gd` to
+register new tests.
 
 The runner `await`s each test, so a suite method may be a coroutine when a test
 genuinely needs to yield; most tests read state synchronously right after the

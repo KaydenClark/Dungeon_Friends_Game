@@ -17,8 +17,12 @@ func wire() -> void:
 			continue
 		var door := _door_with_link(plate.target_id)
 		if door == null:
-			push_warning("PuzzleController: plate '%s' targets unknown door '%s'"
-					% [plate.id, plate.target_id])
+			# A door opened permanently in a previous visit isn't rebuilt -
+			# the plate legitimately has nothing left to drive. Anything else
+			# is a level-authoring mistake worth flagging.
+			if not SceneManager.flags.get("door_%s_opened" % plate.target_id, false):
+				push_warning("PuzzleController: plate '%s' targets unknown door '%s'"
+						% [plate.id, plate.target_id])
 			continue
 		door.plate_driven = true
 		door.refresh_look()

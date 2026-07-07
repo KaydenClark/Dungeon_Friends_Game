@@ -12,11 +12,13 @@ A solo, AI-assisted Godot 4.6 project: grid-based overworld and dungeon
 exploration (Zelda-style block/switch/key puzzles), Baldur's-Gate/Fire-Emblem-
 inspired turn-based party combat, and recruitable "Dungeon Friends" party
 members. The world starts in a fantasy forest and later expands into a castle
-city, mountains, and rivers. Current state: a first-playable walking
-skeleton exists on placeholder art - walk a forest test room, talk to an
-NPC, bump a visible enemy into a turn-based d10 battle, win a key, and open
-a locked path. Real art, LDtk-authored maps, and the full combat system are
-next.
+city, mountains, and rivers. Current state: a playable slice on placeholder
+art - walk an LDtk-authored forest, talk to NPCs, bump a visible enemy into a
+turn-based d10 battle, win the boss's key, and enter the Phase 2 three-room
+tutorial dungeon: push a block onto a pressure plate, fill a pit and jump the
+gap (Alt/C), beat the key guardian, loop back, and claim the shield from the
+locked chest. Party defeat restarts from the beginning. Real art and the full
+combat system are next.
 
 ## How This Project Is Run
 

@@ -13,6 +13,10 @@ var height := 0
 var blocked := {}    # Vector2i -> true (static geometry: walls, closed doors)
 var pits := {}       # Vector2i -> true (block walking, jumpable, fillable - T-025)
 var occupants := {}  # Vector2i -> Node2D (player, enemies, NPCs, doors, blocks)
+## Cells a PushableBlock may never be pushed onto (doorway gaps - a block
+## plugging the room's exit would be an unrecoverable soft-lock; blocks stay
+## in their room, classic Zelda).
+var no_block_cells := {}
 var enemies: Array = []
 var astar := AStarGrid2D.new()
 
@@ -117,6 +121,18 @@ func move_occupant(node: Node2D, from: Vector2i, to: Vector2i) -> void:
 
 func cell_to_pos(c: Vector2i) -> Vector2:
 	return Vector2(c) * TILE + Vector2(TILE, TILE) * 0.5
+
+
+## Instantly relocate a registered occupant (room-restore repositioning and
+## dev-tools warps - normal movement always tweens instead).
+func teleport(node: Node2D, to: Vector2i) -> void:
+	vacate(node)
+	occupy(node, to)
+	if node is GridActor:
+		node.cell = to
+	elif "cell" in node:
+		node.cell = to
+	node.position = cell_to_pos(to)
 
 
 ## Reset the room's puzzle state (dev tools + the hub's reset lever): every

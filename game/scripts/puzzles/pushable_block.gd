@@ -10,7 +10,7 @@ extends GridActor
 ## that cell to walkable floor (T-025 / classic Zelda; locked decision).
 
 ## LDtk link id so plates/controllers can reference a specific block.
-var link_id := ""
+@export var link_id := ""
 ## Where the block started; the reset lever / dev tools send it back here.
 var start_cell := Vector2i.ZERO
 ## True once the block has filled a pit: it is floor now - no longer an
@@ -48,6 +48,8 @@ func try_push(dir: Vector2i) -> bool:
 	var target := cell + dir
 	if not room.in_bounds(target):
 		return false
+	if room.no_block_cells.has(target):
+		return false  # never plug a doorway (soft-lock by construction)
 	if room.get_occupant(target) != null:
 		return false
 	if room.is_pit(target):

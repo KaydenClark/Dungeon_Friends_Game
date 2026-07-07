@@ -9,10 +9,10 @@ extends Node2D
 
 var room: RoomGrid
 var cell := Vector2i.ZERO
-var id := "chest"
+@export var id := "chest"
 ## Empty string = unlocked chest.
-var required_key := ""
-var reward_item := ""
+@export var required_key := ""
+@export var reward_item := ""
 var opened := false
 var _lid: ColorRect
 
