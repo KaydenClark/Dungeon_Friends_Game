@@ -157,12 +157,16 @@ The most important quality bar is:
 
 Current phase:
 
-- Phase 1-2 walking skeleton built (2026-07-05 second session, see
-  `TASKBOARD.md` T-016): grid movement, interaction/dialogue, enemy contact,
-  minimal d10 combat with transition, key/door reward loop - all on
-  placeholder art. Phase 0's M0.3 (export presets) is still open, as are the
-  content-pipeline tasks (T-003 Aseprite art, T-004 LDtk importer, T-011 real
-  forest map) that turn the skeleton into the real Phase 1.
+- **Completing Phase 1, planning Phase 2 (2026-07-06).** The Phase 1-2 walking
+  skeleton is built (see `TASKBOARD.md` T-016/T-018): grid movement,
+  interaction/dialogue, enemy contact, minimal d10 combat with transition,
+  key/door reward loop - all on placeholder art. Phase 1's remaining work is
+  the content pipeline (T-003 art, T-004 LDtk importer, T-011 real forest map,
+  T-020 real-art scaling check) plus two 2026-07-06 additions from Kayden:
+  movement feel polish (T-021) and the boss-door room transition (T-022).
+  Phase 2 is now concretely specified as a 3-room tutorial dungeon - see
+  "Phase 2 Target: Tutorial Dungeon" below. Phase 0's M0.3 (export presets)
+  is deprioritized to the TASKBOARD Backlog.
 
 Build order (phases per Gameplan.md section 15; each is a real milestone with
 a stated "done" condition there):
@@ -193,6 +197,63 @@ a stated "done" condition there):
    project's founding vision, followed by telegraphed combat UI, traversal
    abilities, resource-gauge mechanics, more dungeons/full overworld map,
    cosmetic shader, roguelike postgame.
+
+### Movement-State Roadmap (2026-07-06, Kayden)
+
+Kayden's priority ordering for movement/traversal capability. Rows 1-3 are
+MVP work (Phases 1-2); rows 4-5 are Deferred (`TASKBOARD.md` S-009/S-010) -
+do not build them early.
+
+| Priority | Movement type | Why | Where it lands |
+|---:|---|---|---|
+| 1 | Walk, face, act lock-in | Core feel | Phase 1 - T-021 (walk exists; feel polish + turn-in-place is the open work) |
+| 2 | Door transitions, ledges, stairs | Room/world structure | T-022 (door transition, Phase 1) + T-025 (ledges/pits + jump, Phase 2) |
+| 3 | Push/pull objects | Zelda puzzle baseline | Phase 2 - T-023 (PushableBlock) |
+| 4 | Dash/roll | Makes overworld feel better | Deferred S-009 |
+| 5 | Swim (or similar) | First major traversal upgrade | Deferred S-010 - pairs naturally with the post-MVP rivers region |
+
+### Phase 2 Target: Tutorial Dungeon (2026-07-06, Kayden)
+
+Phase 2's puzzle primitives are built *in service of* a concrete 3-room
+tutorial dungeon behind the Boss Slime's locked east door (the door the
+current slice already unlocks). Each room teaches one mechanic; the whole
+thing is the Phase 2 "done" condition. The Phase 6 forest dungeon then builds
+on these same primitives.
+
+Layout (revised 2026-07-06 round 2, Kayden): Room 1 is a **hub** connected to
+two other rooms - Zelda-style, so the reward loop reads spatially instead of
+via a surprise trigger.
+
+- **Room 1 - hub: block + plate + the locked chest.** The door locks behind
+  the player on entry. A **locked treasure chest is visible from the start**
+  (no ceiling-drop trigger - "if you're confused the players will be too");
+  it holds the shield and can't be opened until the chest key comes back
+  from Room 3. A `PushableBlock` sits 3 pushes from a `PressurePlate`
+  (2 pushes forward, then 1 to the right). The plate opens the next door
+  while pressed and re-locks it when released - the player standing on it
+  demonstrates the mechanic; the block parked on it is the real solution.
+- **Room 2 - pit room.** A **2-cell-wide** pit spans the full room width -
+  deliberately beyond the 1-cell jump limit, so jumping alone can't cross
+  it. The intended solution: push the room's block into the pit (fills one
+  cell), then **jump the remaining 1-cell gap from the filled cell** -
+  teaching block-fills-pit, the jump, and the jump's limit in one move.
+- **Room 3 - fight + loop back.** An enemy that drops the **chest key** on
+  defeat. The player loops back to the Room 1 hub, opens the chest, and gets
+  the **shield** - a plain inventory item for now (decision D-001 resolved
+  2026-07-06: skeleton first; its real effect is a question for
+  Phase 3/S-001, asked when we get there).
+
+**Death & respawn (added 2026-07-06 round 2, Kayden):** if the party is
+defeated *before* reaching the dungeon, respawn at the old man (the healer
+NPC). If defeated *inside* the dungeon, respawn in Room 1 with the dungeon's
+puzzle state fully reset - "you have to redo it all". (Whether the chest key
+survives a death is TBD at T-029 implementation - classic Zelda keeps keys;
+"redo it all" may mean losing it. Flag at build time.)
+
+Design intent: "That is a lot, but that should be a good tutorial, and a good
+place to call Phase 2" - this supersedes the generic M2.1-M2.4 test-room
+framing in Gameplan.md §15 as the concrete deliverable, while keeping the
+same primitives underneath.
 
 ## Architecture
 
@@ -303,6 +364,19 @@ Rules:
 - **Grid movement**: compute the target cell, raycast/tile-check it, then
   `Tween`-interpolate over ~0.12-0.2s. Entities always rest exactly on grid.
   Never velocity-based `CharacterBody2D` free movement.
+  - **Feel bar (added 2026-07-06, Kayden):** grid-locked but never
+    *feels* locked - the Zelda/Pokemon standard where the player is on a grid
+    but never reads as "clicking into place". Held movement chains steps with
+    no inter-step hitch; a tap turns the player to face first, then a
+    continued press steps (turn-in-place); facing locks during
+    interactions. This is a feel requirement on top of the invariant, not a
+    change to it (T-021).
+- **Jump (added 2026-07-06, Kayden)**: a contextual, grid-snapped hop -
+  available at ledge/pit edges (not a free jump button everywhere), implemented
+  as a `Tween` arc between grid cells like any other step. **Max jump distance
+  is exactly 1 cell** - a 1-cell-wide pit is the definitional jumpable gap;
+  2+ cells is never jumpable. Party followers (Phase 5) jump with the player.
+  Never a physics/velocity jump.
 - **Pathfinding**: `AStarGrid2D`, `diagonal_mode = DIAGONAL_MODE_NEVER`,
   Manhattan heuristic.
 - **Combat**: grid-based, turn-based, resolved with a **d10 percentage
@@ -347,7 +421,27 @@ Rules:
 - **Puzzle primitives**: `PushableBlock`, `PressurePlate`, `Switch`/`Lever`,
   `LockedDoor` - LDtk entity custom fields carry linking IDs; a per-room
   `PuzzleController` wires signals at `_ready()` (MVP choice - simpler to
-  debug than fully-automatic wiring).
+  debug than fully-automatic wiring). Semantics confirmed 2026-07-06 (Kayden):
+  - **PressurePlate is momentary**: pressed while any grid occupant (player
+    *or* block) stands on it, released the moment the cell is vacated. Doors
+    driven by a plate open while pressed and re-lock on release - a block
+    pushed onto the plate is the persistent solution; the player standing on
+    it is the temporary one.
+  - **Pits**: pit tiles block walking (treated like walls for pathing) but a
+    1-cell-wide pit can be jumped (see Jump above). A `PushableBlock` pushed
+    into a pit **fills it**, permanently converting that cell to walkable
+    floor (classic Zelda). No fall-in/respawn mechanic at MVP - pits are
+    impassable, not lethal.
+  - **Chests**: a `Chest` interactable holds a reward and may be locked
+    (opens only with its matching key item), reusing the `LockedDoor`
+    key-check pattern. Chests are placed visibly in the room from the start -
+    no surprise reveal triggers ("if you're confused the players will be
+    too", 2026-07-06).
+- **Death & respawn (added 2026-07-06, Kayden)**: party defeat is never a
+  game-over screen dead end. Outside the dungeon: respawn at the old man
+  (healer NPC). Inside the dungeon: respawn in the dungeon's first room with
+  its puzzle state fully reset. Pits themselves stay non-lethal/impassable -
+  death comes from combat.
 - **Save**: save points are physical map objects; `SaveData` serializes to
   `user://saves/slot_N`; never saved mid-combat; 3 slots supported from the
   start.
@@ -408,6 +502,16 @@ Rules:
 | General moment-to-moment loop confirmed as explore -> interact with an object/NPC/enemy -> take an action -> see the consequence -> continue exploring | Kayden's explicit framing for what "first playable" should feel like at every scale; confirms rather than changes the existing concrete first-playable scenario (row above) | 2026-07-05 / this session |
 | Combat is grid-based (units occupy cells, check move/attack range, can move each turn); turn order is strict per-character initiative (speed), never a whole-team phase | Kayden's explicit combat-loop framing: check ranges -> move -> attack phase -> results, repeated per unit in initiative order, not team-by-team; the `TurnManager` design already sorted all combatants together by speed - only the Battle FSM's stale `PlayerPhase`/`EnemyPhase` state names implied team-phasing, and those are retired | 2026-07-05 / this session |
 | Combat resolution uses a d10 percentage system (roll 1-10 against a stat-derived success threshold) instead of flat deterministic damage-only math | Kayden's explicit request for a system where success chances read as clean percentages; exact threshold/damage formula is a Phase 3/4 combat-math implementation decision (red/green/refactor per `AGENTS.md`), not decided here | 2026-07-05 / this session |
+| Movement-state roadmap locked: (1) walk/face/act lock-in, (2) door transitions/ledges/stairs, (3) push/pull, (4) dash/roll, (5) swim - rows 1-3 MVP, rows 4-5 Deferred (S-009/S-010) | Kayden's explicit priority table; sequences movement investment by feel-impact and keeps dash/swim from being built early | 2026-07-06 / this session, see Movement-State Roadmap |
+| Grid movement must *feel* continuous (Zelda/Pokemon bar): held steps chain with no hitch, tap turns-in-place before stepping, no "clicking into place" read - the grid-snap invariant itself is unchanged | Kayden: "In zelda and pokemon games I am locked into a grid but it never feels like I am clicking into place" - a feel requirement layered on the locked invariant, not a relitigation of it | 2026-07-06 / this session (T-021) |
+| Jump added to MVP: contextual grid-snapped hop at ledge/pit edges, max exactly 1 cell, Tween-arc implementation (never physics) | Kayden: "not whenever but like when there are ledges and pits I want to be able to jump over them with my party"; the 1-cell limit is load-bearing for Room 2 of the tutorial dungeon (the pit is exactly at the jump limit) | 2026-07-06 / this session |
+| PressurePlate is momentary (pressed by player *or* block, releases on vacate; plate-driven doors re-lock on release); a block pushed into a pit fills it permanently; pits block walking but aren't lethal at MVP | Kayden's explicit plate spec ("unlocks the doors, but locks again if we step off"); block-fills-pit and non-lethal pits are the smallest classic-Zelda reading of his Room 2 spec - flag if fall-in damage is ever wanted | 2026-07-06 / this session |
+| Phase 2's deliverable is the 3-room tutorial dungeon behind the boss door (hub room with block+plate puzzle and a visible locked chest -> 2-wide-pit room -> key-drop fight room -> loop back, open chest, shield reward) | Kayden's room-by-room spec; gives Phase 2's puzzle primitives a concrete, testable integration target instead of abstract test rooms - "a good tutorial, and a good place to call phase 2" | 2026-07-06 / this session, see Phase 2 Target: Tutorial Dungeon; layout revised same day (round 2 rows below) |
+| Tutorial chest is visible in the hub room from the start, not ceiling-dropped on puzzle solve; Room 1 is a hub connected to two other rooms so the reward loop reads spatially | Kayden: "I think if you're confused the players will be too. Zelda fixes this by adding another room" - replaces the surprise-trigger chest with legible dungeon structure | 2026-07-06 round 2 / this session |
+| Tutorial pit widened to 2 cells: jump alone can't cross it; intended solve is block-into-pit (fills 1 cell) then jump the remaining 1-cell gap from the filled cell | Kayden: with block-fills-pit in play, "we need to make the pit 2 wide so they can't jump across it and have to push the block into it"; the block-then-jump crossing is the smallest mechanical reading that still teaches the jump - **flagged as agent interpretation, confirm in windowed play** (alternatives: two blocks, or a walk-across bridge reading) | 2026-07-06 round 2 / this session |
+| Death/respawn: party defeat outside the dungeon respawns at the old man (healer NPC); defeat inside respawns in Room 1 with dungeon puzzle state fully reset ("you have to redo it all"). Pits stay non-lethal/impassable | Kayden's explicit respawn spec - death is a setback, not a game-over dead end; chest-key retention across death is TBD at T-029 | 2026-07-06 round 2 / this session |
+| Enemy aggro telegraph (oozes get visibly angry + faster when they spot you, replacing ambiguous wander-to-chase) is a real task, deferred until sprites exist | Kayden's clarification of "attack lock-in" from the movement table - it's an *enemy* feel feature, not player movement; parked as T-028 until T-003 art gives it something to show | 2026-07-06 round 2 / this session |
+| Shield is a plain inventory item at Phase 2 (D-001 resolved) | Kayden: "We are building the skeleton so we can just continue to ask the questions like 'Well, what does the shield do'" - effect decided at Phase 3/S-001 | 2026-07-06 round 2 / this session |
 
 ## Health Criteria
 

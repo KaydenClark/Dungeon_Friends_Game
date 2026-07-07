@@ -463,12 +463,31 @@ Each milestone is sized for a single AI-assisted working session. Milestones are
 - **M0.3**: Set up export presets for macOS, Windows, Android (debug). Produce one trivial build per platform to confirm the pipeline works end-to-end. Test on real Android device if available.
 
 ### Phase 1 — Movement & World Skeleton
+
+> **Revision note (2026-07-06):** M1.3 landed early via the walking skeleton
+> (TASKBOARD T-010). Kayden added two Phase 1 requirements: movement *feel*
+> polish to the Zelda/Pokemon grid-but-seamless bar (T-021), and a room
+> transition through the boss-unlocked door (T-022, pulling M2.3's mechanism
+> forward). See `BLUEPRINT.md` → Movement-State Roadmap and the 2026-07-06
+> Design Decisions rows.
+
 - **M1.1**: Draw a tiny test tileset (floor, wall, 1 character) in Aseprite against the flexible HD/ultrawide design reference, grid unit decided at this milestone (per revised §3.2 settings). Set up the Aseprite batch-export script (`game/assets/art/_scripts/`).
 - **M1.2**: Build a minimal LDtk project (one small room) with a Wall IntGrid layer; install `heygleeson/godot-ldtk-importer`; import into Godot, confirm `TileMapLayer` + collision generate correctly.
 - **M1.3**: Implement grid-snapped player movement (Tween-based, raycast-checked) per §3.3. Player can walk around the test room and collide with walls.
 - **M1.4**: Confirm the flexible HD/ultrawide `canvas_items`/`expand` stretch settings look correct with the real M1.1 test tileset at 1280x720, 1920x1080, and 3440x1440 (the T-007 spike already validated this with placeholder tiles — this milestone re-validates with real art). No palette shader work needed here — that's been removed from MVP (§3.2).
 
 ### Phase 2 — Puzzle Primitives & Room Transitions
+
+> **Revision note (2026-07-06):** Phase 2's deliverable is now a concrete
+> 3-room **tutorial dungeon** behind the boss door (hub room: block+plate
+> puzzle + a visible locked chest → 2-wide-pit room crossed by
+> block-into-pit + a grid-snapped **jump** of the remaining cell → key-drop
+> fight room, loop back, open chest, shield reward), replacing the abstract
+> test rooms below as the integration target — the M2.x primitives underneath
+> are unchanged, plus jump/pits and a death/respawn system (new to MVP).
+> Full spec: `BLUEPRINT.md` → Phase 2 Target: Tutorial Dungeon; tasks:
+> TASKBOARD T-023..T-027 + T-029.
+
 - **M2.1**: Implement `PushableBlock` + `PressurePlate` + simple `PuzzleController` wiring (§9). Build one test puzzle room.
 - **M2.2**: Implement `LockedDoor` + key-item check against `SaveData.inventory`.
 - **M2.3**: Implement room-transition system (`Area2D` boundaries + `CameraRig` Tween pan, §8). Build a 2-3 room connected test area.
