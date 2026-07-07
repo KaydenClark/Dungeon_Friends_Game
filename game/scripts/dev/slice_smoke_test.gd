@@ -2,8 +2,10 @@ extends Node
 ## Headless end-to-end smoke test of the expanded playable slice. Drives the
 ## real game (main.tscn) through the whole loop with a seeded RNG:
 ## input map -> wall collision -> NPC dialogue -> regular slime fight (no key)
-## -> healer restore -> boss slime fight (key drop) -> unlock door -> goal.
-## The forest now has several autonomous enemies, so navigation is tolerant:
+## -> healer restore -> boss slime fight (key drop) -> unlock door -> walk
+## through the doorway into the LDtk-built dungeon stub room (T-022) -> walk
+## back out -> forest restored exactly (position, defeated boss, open door).
+## The forest has several autonomous enemies, so navigation is tolerant:
 ## any unplanned encounter is fought to completion and the walk resumes.
 ## Run: Godot --headless --path . scenes/dev/slice_smoke_test.tscn
 ## Exits 0 and prints "SLICE SMOKE TEST: PASS" on success, exits 1 on failure.
@@ -114,7 +116,7 @@ func _run() -> void:
 	check(not is_instance_valid(room.boss) or room.boss.is_queued_for_deletion(),
 			"defeated boss removed from the map")
 
-	# 8. Locked door + key (reward flow): unlock, walk through, reach goal.
+	# 8. Locked door + key (reward flow): unlock, then walk into the doorway.
 	var door: LockedDoor = room.door
 	check(await _go(player, door.cell + Vector2i.DOWN), "reached the locked door")
 	player.set_facing(Vector2i.UP)
@@ -123,10 +125,37 @@ func _run() -> void:
 	await _pump_dialogue()
 	check(door.opened, "door opened with the forest key")
 	check(room.is_walkable(door.cell), "door cell is walkable after opening")
+
+	# 9. Room transition (T-022): stepping into the doorway enters the
+	# LDtk-built dungeon stub; the forest is suspended, not freed.
 	await _step(player, Vector2i.UP)
-	await _step(player, Vector2i.UP)
-	await _pump_dialogue()
-	check(SceneManager.flags.get("slice_complete", false), "slice completion flag set")
+	check(await _until(func() -> bool: return SceneManager.current_room is DungeonStubRoom),
+			"doorway transitioned into the dungeon stub room")
+	check(SceneManager.flags.get("entered_dungeon", false), "entered_dungeon flag set")
+	var cave: DungeonStubRoom = SceneManager.current_room
+	await _pump_dialogue()   # cave welcome lines
+	var cave_player: Player = cave.player
+	check(cave_player != null and cave_player.cell == DungeonStubRoom.ENTRY,
+			"player spawned at the cave entry cell")
+	check(cave_player.camera.is_current(), "camera switched to the cave player")
+	check(not room.visible, "forest room hidden while in the cave")
+	check(is_instance_valid(room) and room.get_parent() != null,
+			"forest room preserved in the tree, not freed")
+	check(cave.blocked.size() == 59,
+			"cave walls block 59 cells from the LDtk Wall IntGrid (doorway open)")
+	not_walkable(cave, Vector2i(0, 0), "cave corner wall is not walkable")
+
+	# 10. Walk back out: stepping onto the doorway gap returns to the forest
+	# with its state fully intact.
+	await _step(cave_player, Vector2i.DOWN)
+	check(await _until(func() -> bool: return SceneManager.current_room == room),
+			"stepping out of the cave returned to the forest")
+	check(room.visible, "forest visible again after returning")
+	check(room.player.cell == door.cell, "player back at the exact doorway cell")
+	check(room.player.camera.is_current(), "camera restored to the forest player")
+	check(not is_instance_valid(room.boss) or room.boss.is_queued_for_deletion(),
+			"forest state preserved across the trip (boss still defeated)")
+	check(door.opened, "door still open after the round trip")
 
 	done = true
 	var total := passes + fails.size()
@@ -138,6 +167,20 @@ func _run() -> void:
 		for f in fails:
 			print("  failed: ", f)
 		get_tree().quit(1)
+
+
+## Wait until `pred` returns true (room transitions run over a few fade
+## frames). Returns whether it became true within the frame budget.
+func _until(pred: Callable, max_frames := 300) -> bool:
+	for i in max_frames:
+		if pred.call():
+			return true
+		await get_tree().process_frame
+	return pred.call()
+
+
+func not_walkable(grid: RoomGrid, c: Vector2i, msg: String) -> void:
+	check(not grid.is_walkable(c), msg)
 
 
 func _step(player: Player, dir: Vector2i) -> bool:

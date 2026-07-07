@@ -11,8 +11,7 @@ var hud: Label
 func _ready() -> void:
 	SceneManager.register_main(
 		$WorldContainer, $CombatContainer, $UILayer, $TransitionLayer)
-	var room := ForestSlice.new()
-	$WorldContainer.add_child(room)
+	SceneManager.boot_room(ForestSlice.new())
 	var hint := Label.new()
 	hint.text = "WASD / Arrows: move    E or Space: talk & interact"
 	hint.position = Vector2(16, 8)

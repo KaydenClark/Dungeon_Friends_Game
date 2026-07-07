@@ -37,6 +37,15 @@ var last_ui_close_ms := 0
 var in_encounter := false
 var current_dialogue: DialogueBox
 
+## Room transitions (T-022). The active room plus a stack of suspended ones:
+## entering a sub-room (the dungeon behind the boss door) hides and disables
+## the current room rather than freeing it - the same context-preservation
+## pattern combat uses - so exiting restores it exactly (defeated enemies,
+## opened doors, player position all intact).
+var current_room: Node2D
+var room_stack: Array[Node2D] = []
+var transitioning := false
+
 
 func _ready() -> void:
 	rng.randomize()
@@ -61,6 +70,49 @@ func register_main(world: Node2D, combat: Node2D, ui: CanvasLayer,
 	fade_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	fade_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
 	transition_layer.add_child(fade_rect)
+
+
+## Place the game's starting room. Called by the booting scene (main.gd or a
+## test) after register_main, so room transitions know what "current" is.
+func boot_room(room: Node2D) -> void:
+	current_room = room
+	world_container.add_child(room)
+
+
+## Suspend the current room and enter a new one (e.g. forest -> dungeon).
+func enter_room(new_room: Node2D) -> void:
+	if transitioning or in_encounter or world_container == null:
+		new_room.free()
+		return
+	transitioning = true
+	await _fade_to(1.0)
+	if current_room:
+		current_room.visible = false
+		current_room.process_mode = Node.PROCESS_MODE_DISABLED
+		room_stack.append(current_room)
+	current_room = new_room
+	world_container.add_child(new_room)
+	await _fade_to(0.0)
+	transitioning = false
+
+
+## Leave the current room and restore the one beneath it on the stack. The
+## restored room's player resumes at the exact cell they left from.
+func exit_room() -> void:
+	if transitioning or in_encounter or room_stack.is_empty():
+		return
+	transitioning = true
+	await _fade_to(1.0)
+	if current_room:
+		current_room.queue_free()
+	current_room = room_stack.pop_back()
+	current_room.visible = true
+	current_room.process_mode = Node.PROCESS_MODE_INHERIT
+	var prev_player: Variant = current_room.get("player")
+	if prev_player is Player and prev_player.camera:
+		prev_player.camera.make_current()
+	await _fade_to(0.0)
+	transitioning = false
 
 
 func show_dialogue(lines: PackedStringArray) -> void:

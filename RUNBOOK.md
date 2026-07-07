@@ -98,21 +98,28 @@ autoload initialized.
 ### First-playable slice smoke test (T-016)
 
 End-to-end scripted run of the whole slice (input map, movement/collision,
-NPC dialogue, enemy encounter, seeded d10 combat, key/door/goal):
+NPC dialogue, enemy encounter, seeded d10 combat, key/door, then the T-022
+round trip: through the doorway into the LDtk-built dungeon stub room and
+back out with forest state preserved):
 
 ```bash
 cd game
 /Applications/Godot.app/Contents/MacOS/Godot --headless --path . scenes/dev/slice_smoke_test.tscn
 ```
 
-Expected result: exit `0` and a final `SLICE SMOKE TEST: PASS (34/34 checks)`
+Expected result: exit `0` and a final `SLICE SMOKE TEST: PASS (47/47 checks)`
 line (~20-40s; the expanded forest walk and multiple fights take longer than
 the original 26-check slice). A benign `ObjectDB instances leaked` warning at
 exit is known noise from quitting mid-coroutines; any `CHECK FAILED:` line or
 exit `1` is a real failure. Because roaming enemies move on real-time timers,
 run it a few times in a row when touching enemy AI or movement (`for i in 1 2
 3 4 5; do ...; done`). Run this after any change to movement, interaction,
-combat, or SceneManager.
+combat, room transitions, or SceneManager.
+
+Gotcha: `--path .` must point at `game/` (hence the `cd game`). Pointed at the
+repo root by mistake, Godot finds no `project.godot` and can hang around
+rather than exiting - if a headless run seems stuck forever, check the cwd
+before debugging the game.
 
 ### Display-scaling spike (T-007)
 

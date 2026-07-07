@@ -56,7 +56,7 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	if SceneManager.ui_busy or SceneManager.in_encounter:
+	if SceneManager.ui_busy or SceneManager.in_encounter or SceneManager.transitioning:
 		_reset_hold()
 		return
 	var dir := _read_dir()

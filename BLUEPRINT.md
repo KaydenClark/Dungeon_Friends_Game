@@ -313,6 +313,7 @@ Dungeon_Friends_Game/
 | Combat | Turn-based party-vs-enemy encounter | MVP walking skeleton (2026-07-05): per-unit initiative, AStarGrid2D arena movement, melee-adjacent d10 attacks, Pokemon-style two-tier command menu (Fight/Defend -> move list) with step-in/swing/step-back per turn, fade transition; built in code (`CombatScene`), no .tscn yet; formulas are placeholders pending Phase 3/4 | `game/scripts/combat/combat.gd` |
 | UI (HUD, dialogue, pause, party menu) | Player-facing menus and status | dialogue box exists (`DialogueBox`, code-built); HUD/pause/party menus missing | `game/scripts/ui/dialogue_box.gd` |
 | `game/scenes/dev/display_scaling_spike.tscn` | Throwaway diagnostic - proves the new flexible HD/ultrawide stretch settings render an undistorted tile grid at 1280x720/1920x1080/3440x1440 | working (placeholder ColorRect tiles, no real art yet) | `game/scenes/dev/display_scaling_spike.tscn`, `game/scripts/dev/display_scaling_spike.gd` |
+| Dungeon stub room (behind the boss door) | T-022 room transition target: first LDtk-pipeline-driven room in the live game (`cave_room.ldtk` -> `TileMapLayer` at 4x, Wall IntGrid -> `RoomGrid` blocking); stepping into the forest doorway enters it via `SceneManager.enter_room` (suspend-not-free, like combat), stepping back out restores the forest exactly. Placeholder until T-027 builds the real tutorial hub room | working (2026-07-06) | `game/scripts/dev/dungeon_stub_room.gd`, `game/assets/levels/cave_room.ldtk`, `SceneManager.boot_room/enter_room/exit_room` |
 
 ### Commands
 
