@@ -23,6 +23,10 @@ var rng := RandomNumberGenerator.new()
 ## When true (used by the headless smoke test), combat auto-plays with tiny
 ## waits and menu selection is skipped.
 var auto_combat := false
+## Dev-tools hook (T-030): when true, touching an enemy skips the battle
+## entirely and resolves as an instant victory. Never on in a real build -
+## only the debug overlay flips it.
+var skip_combat := false
 
 var hero_stats: CharacterStats
 var hero_hp := 0
@@ -45,6 +49,9 @@ var current_dialogue: DialogueBox
 var current_room: Node2D
 var room_stack: Array[Node2D] = []
 var transitioning := false
+## How the booting scene rebuilds the game's starting room - set by main.gd,
+## used by restart_game() (T-029: party defeat restarts from the beginning).
+var boot_factory := Callable()
 
 
 func _ready() -> void:
@@ -137,6 +144,13 @@ func show_dialogue(lines: PackedStringArray) -> void:
 func start_encounter(enemy: OverworldEnemy) -> void:
 	if in_encounter or world_container == null:
 		return
+	if skip_combat:
+		# Dev-tools shortcut (T-030): instant victory, no combat scene.
+		var skip_msg := apply_victory_rewards(enemy.stats)
+		enemy.defeated()
+		encounter_finished.emit(true)
+		await show_dialogue(["(Dev: combat skipped.)", skip_msg])
+		return
 	in_encounter = true
 	await _fade_to(1.0)
 	world_container.visible = false
@@ -160,13 +174,9 @@ func start_encounter(enemy: OverworldEnemy) -> void:
 		encounter_finished.emit(true)
 		await show_dialogue([msg])
 	else:
-		heal_hero_to_full()
 		in_encounter = false
 		encounter_finished.emit(false)
-		await show_dialogue([
-			"You were defeated...",
-			"You wake up back in the forest, restored.",
-		])
+		await handle_defeat()
 
 
 ## Grant XP and loot for a defeated enemy and return the victory banner text.
@@ -190,6 +200,41 @@ func apply_victory_rewards(enemy_stats: EnemyStats) -> String:
 func heal_hero_to_full() -> void:
 	if hero_stats:
 		hero_hp = hero_stats.max_hp
+
+
+## Party defeat (T-029, locked decision D-004): restart from the beginning of
+## the game - the simplest possible rule, no state snapshotting. The richer
+## respawn (healer NPC outside, dungeon room 1 with puzzle reset inside) is
+## deferred to Phase 3, where it rides on save/load serialization.
+func handle_defeat() -> void:
+	await show_dialogue([
+		"You were defeated...",
+		"Everything fades to black.",
+		"...and the adventure begins anew.",
+	])
+	restart_game()
+
+
+## Wipe the session and boot a fresh starting room via boot_factory.
+func restart_game() -> void:
+	reset_session_state()
+	for r in room_stack:
+		r.queue_free()
+	room_stack.clear()
+	if current_room:
+		current_room.queue_free()
+		current_room = null
+	if boot_factory.is_valid() and world_container:
+		boot_room(boot_factory.call())
+
+
+## The pure state-reset half of a restart (unit-tested on its own): XP,
+## inventory, flags, and HP all return to a fresh game's values.
+func reset_session_state() -> void:
+	inventory = PackedStringArray()
+	total_xp = 0
+	flags = {}
+	heal_hero_to_full()
 
 
 func _fade_to(alpha: float) -> void:
