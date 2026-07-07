@@ -2,16 +2,44 @@ class_name Player
 extends GridActor
 ## Player-controlled grid actor with camera follow. Input comes exclusively
 ## from the Input Map actions (see /BLUEPRINT.md -> Commands).
+##
+## Feel model (T-021, 2026-07-06 - see /BLUEPRINT.md -> Core Logic, feel bar):
+## grid-locked but never *feels* locked, the Zelda/Pokemon standard.
+## - Tap toward a new direction: turn in place (face it, no step).
+## - Hold past TURN_DELAY: take the first step, then walk continuously.
+## - Tap in the faced direction: exactly one step (B-04 stays fixed).
+## - Hold in the faced direction: one step, a short beat, then continuous.
+## - While walking, direction changes are seamless (no turn pause, no gap).
+## - Last-pressed direction wins (pressing right while holding up goes right),
+##   and releasing it falls back to whatever is still held.
+## The step decision lives in _movement_intent(), a pure function of
+## (direction, delta) plus actor state, so the unit suite drives the real path.
 
-## Delayed-auto-shift: after the first step, a held direction must be held this
-## much longer (on top of the move tween) before it starts repeating. Keeps a
-## tap to exactly one cell while still allowing hold-to-walk.
+## Total hold time (from press, *including* the move tween) before auto-walk
+## engages. Anything shorter reads as a tap = exactly one step. The move tween
+## is 0.12s, so the visible stationary beat after a held first step is
+## MOVE_REPEAT_DELAY - 0.12 = ~0.08s - the deliberate tap/hold discriminator.
 const MOVE_REPEAT_DELAY := 0.2
+## Facing a new direction pauses this long before the first step (turn-in-
+## place). Consumed concurrently with the hold, so a turn that becomes a walk
+## has no extra stationary beat after its first step.
+const TURN_DELAY := 0.1
+
+const DIR_ACTIONS := {
+	"move_up": Vector2i.UP,
+	"move_down": Vector2i.DOWN,
+	"move_left": Vector2i.LEFT,
+	"move_right": Vector2i.RIGHT,
+}
 
 var camera: Camera2D
 var _hold_dir := Vector2i.ZERO
 var _hold_time := 0.0
 var _repeating := false
+var _turn_pause := 0.0
+var _buffered_step := false
+## Held directions in press order; the most recent press is authoritative.
+var _pressed_stack: Array[Vector2i] = []
 
 
 func _ready() -> void:
@@ -40,41 +68,85 @@ func _process(delta: float) -> void:
 				and Time.get_ticks_msec() - SceneManager.last_ui_close_ms >= 250:
 			interact()
 		return
-	if moving:
-		return
+	if _movement_intent(dir, delta):
+		try_step(dir)
+
+
+## The whole tap/turn/hold/walk state machine, kept free of Input and tween
+## calls so tests can drive it deterministically. Returns true when a step
+## should be attempted this frame; mutates hold state (and facing, for
+## turn-in-place) as a side effect.
+func _movement_intent(dir: Vector2i, delta: float) -> bool:
+	if dir == Vector2i.ZERO:
+		_reset_hold()
+		return false
 	if dir != _hold_dir:
-		# Fresh press (or a direction change): always exactly one step.
+		# Fresh press or direction change.
 		_hold_dir = dir
 		_hold_time = 0.0
-		_repeating = false
-		try_step(dir)
-	elif _repeating:
-		# Auto-repeat engaged: step at the move-tween cadence.
-		try_step(dir)
-	else:
-		# Same direction still held but not yet repeating: wait out the delay.
-		_hold_time += delta
-		if _hold_time >= MOVE_REPEAT_DELAY:
-			_repeating = true
-			try_step(dir)
+		_buffered_step = false
+		if _repeating:
+			# Already auto-walking: change direction seamlessly - no turn
+			# pause, no repeat re-arm, next step fires as soon as we can move.
+			_hold_time = MOVE_REPEAT_DELAY
+			_turn_pause = 0.0
+			return not moving
+		if dir != facing:
+			# Turn in place: face the new direction now; the first step only
+			# happens if the press outlives TURN_DELAY.
+			set_facing(dir)
+			_turn_pause = TURN_DELAY
+			return false
+		_turn_pause = 0.0
+		if moving:
+			# Fresh press in the faced direction while a step is finishing:
+			# buffer it so the step lands the moment the tween ends.
+			_buffered_step = true
+			return false
+		return true
+	# Direction unchanged: the hold matures even while the move tween runs, so
+	# hold-to-walk has no stationary re-arm gap between steps.
+	_hold_time += delta
+	if moving:
+		return false
+	if _turn_pause > 0.0:
+		_turn_pause -= delta
+		if _turn_pause > 0.0:
+			return false
+		return true
+	if _buffered_step:
+		_buffered_step = false
+		return true
+	if _repeating:
+		return true
+	if _hold_time >= MOVE_REPEAT_DELAY:
+		_repeating = true
+		return true
+	return false
 
 
+## Last-pressed-wins direction read. Newly held actions append to the stack;
+## released ones drop out, so rolling from one key to another (or releasing
+## back to an earlier held key) always moves the way the hands expect.
 func _read_dir() -> Vector2i:
-	if Input.is_action_pressed("move_up"):
-		return Vector2i.UP
-	if Input.is_action_pressed("move_down"):
-		return Vector2i.DOWN
-	if Input.is_action_pressed("move_left"):
-		return Vector2i.LEFT
-	if Input.is_action_pressed("move_right"):
-		return Vector2i.RIGHT
-	return Vector2i.ZERO
+	for action: String in DIR_ACTIONS:
+		var dir: Vector2i = DIR_ACTIONS[action]
+		if Input.is_action_pressed(action):
+			if not _pressed_stack.has(dir):
+				_pressed_stack.append(dir)
+		else:
+			_pressed_stack.erase(dir)
+	if _pressed_stack.is_empty():
+		return Vector2i.ZERO
+	return _pressed_stack.back()
 
 
 func _reset_hold() -> void:
 	_hold_dir = Vector2i.ZERO
 	_hold_time = 0.0
 	_repeating = false
+	_turn_pause = 0.0
+	_buffered_step = false
 
 
 func interact() -> void:

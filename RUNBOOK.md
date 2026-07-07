@@ -149,12 +149,12 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
-per-suite tally (e.g. `UNIT TESTS: 9 suites, 54 tests, 149 checks, 0 failed`).
+per-suite tally (e.g. `UNIT TESTS: 10 suites, 65 tests, 176 checks, 0 failed`).
 Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in ~1-2s (pure
 logic and controlled clocks, no real-time waits, unlike the slice smoke test).
 Run this after any change to combat math, the grid/pathfinding model,
-`GridActor` movement, the enemy AI, the `.tres` data, `DialogueBox`, or the
-SceneManager reward/heal rules.
+`GridActor` movement, the player input/feel state machine, the enemy AI, the
+`.tres` data, `DialogueBox`, or the SceneManager reward/heal rules.
 
 Coverage lives in `game/tests/`, one suite per area:
 `test_combat_math` (the d10 `hit_threshold`/`needed_roll`/`attack_damage` rules
@@ -166,9 +166,12 @@ hero/slime/boss `.tres` values + the boss-key/locked-door invariant),
 (`_manhattan` + `defeated()` cleanup), `test_scene_manager` (victory XP/loot
 dedup + heal-to-full, the real `apply_victory_rewards`/`heal_hero_to_full`
 methods), `test_enemy_ai` (the deterministic `_act`/`_step_toward`/`_step_home`/
-`_wander` decision branches), and `test_dialogue_cooldown` (the real
-`_unhandled_input` debounce, driven with a controlled input clock). Add a suite
-path to the `SUITES` list in `run_tests.gd` to register new tests.
+`_wander` decision branches), `test_dialogue_cooldown` (the real
+`_unhandled_input` debounce, driven with a controlled input clock), and
+`test_player_movement` (the T-021 feel state machine - the real
+`Player._movement_intent` tap/turn/hold/walk decisions driven with hand-fed
+deltas, plus `_read_dir` last-pressed-wins rollover via `Input.action_press`).
+Add a suite path to the `SUITES` list in `run_tests.gd` to register new tests.
 
 The runner `await`s each test, so a suite method may be a coroutine when a test
 genuinely needs to yield; most tests read state synchronously right after the
