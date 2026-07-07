@@ -184,7 +184,10 @@ a stated "done" condition there):
 5. **Phase 4 - Combat MVP** - the turn-based Baldur's Gate/Fire-Emblem-inspired
    core loop: `TurnManager`, two-layer FSM, Attack/Ability/Item/Defend.
 6. **Phase 5 - Party System & Progression** - recruitment, XP/leveling,
-   multi-character active party with snake-follow formation.
+   party management menu. **The overworld avatar stays a single character**
+   (revised 2026-07-06 - see Party And Combat Model below); the party's
+   multiple characters appear only inside tactical combat, not as overworld
+   followers.
 7. **Phase 6 - First Playable Slice** - one full forest dungeon (3-5 rooms,
    puzzles, encounters, boss) proving the whole loop end to end. This is the
    MVP finish line (Gameplan.md section 16).
@@ -228,10 +231,14 @@ via a surprise trigger.
   the player on entry. A **locked treasure chest is visible from the start**
   (no ceiling-drop trigger - "if you're confused the players will be too");
   it holds the shield and can't be opened until the chest key comes back
-  from Room 3. A `PushableBlock` sits 3 pushes from a `PressurePlate`
-  (2 pushes forward, then 1 to the right). The plate opens the next door
-  while pressed and re-locks it when released - the player standing on it
-  demonstrates the mechanic; the block parked on it is the real solution.
+  from Room 3. A **3x3 pushing space** sits in the room with the
+  `PressurePlate` at its **center** and a `PushableBlock` in a **corner** of
+  that 3x3, plus a 2-cell walking margin around it (see the plate-geometry
+  note in Core Logic): the player circles the block via the margin and pushes
+  it - an L-shaped, non-diagonal path - onto the center plate. The plate opens
+  the next door while pressed and re-locks it when released - the player
+  standing on it demonstrates the mechanic; the block parked on it is the real
+  solution.
 - **Room 2 - pit room.** A **2-cell-wide** pit spans the full room width -
   deliberately beyond the 1-cell jump limit, so jumping alone can't cross
   it. The intended solution: push the room's block into the pit (fills one
@@ -243,12 +250,12 @@ via a surprise trigger.
   2026-07-06: skeleton first; its real effect is a question for
   Phase 3/S-001, asked when we get there).
 
-**Death & respawn (added 2026-07-06 round 2, Kayden):** if the party is
-defeated *before* reaching the dungeon, respawn at the old man (the healer
-NPC). If defeated *inside* the dungeon, respawn in Room 1 with the dungeon's
-puzzle state fully reset - "you have to redo it all". (Whether the chest key
-survives a death is TBD at T-029 implementation - classic Zelda keeps keys;
-"redo it all" may mean losing it. Flag at build time.)
+**Death & respawn (revised 2026-07-06 round 3, Kayden):** for Phase 2, party
+defeat simply **restarts from the beginning of the game** - no mid-dungeon
+respawn, no puzzle-state snapshot. The richer respawn (old man when defeated
+outside, Room 1 with puzzle reset when inside) is **deferred to Phase 3**,
+where it rides on the save/load serialization it actually needs. See the
+Death & respawn rule in Core Logic.
 
 Design intent: "That is a lot, but that should be a good tutorial, and a good
 place to call Phase 2" - this supersedes the generic M2.1-M2.4 test-room
@@ -327,6 +334,7 @@ keyboard, controller, and mobile touch - see Gameplan.md section 11):
 | `interact` / `confirm` | Interact with objects/NPCs; confirm menu selection | yes |
 | `cancel` / `back` | Cancel or back out of a menu | yes |
 | `menu` | Open pause/party menu | yes |
+| `jump` | Hop one cell over a pit/ledge in the facing direction (Phase 2) - bound to Alt primary, C fallback (2026-07-06) | yes (from Phase 2) |
 
 ### Data Model
 
@@ -353,11 +361,37 @@ instances `game/data/characters/hero.tres` and
 a `PackedStringArray` of item ids for now - it becomes richer when `ItemData`
 lands.
 
+## Party And Combat Model
+
+Clarified 2026-07-06 (Kayden) - this shapes the overworld, combat, and Phase 5,
+and **supersedes the old "snake-follow formation" party idea** (Gameplan.md
+§10/§15 M5.1, kept for history but not built):
+
+- **The overworld avatar is a single character** representing the whole party.
+  No snake-follow train of `PartyFollower` bodies. Movement, pushing, jumping,
+  and puzzles are all single-actor in the overworld - the systems Phase 2
+  builds don't need to anticipate follower actors.
+- **The party's individual characters exist only inside combat.** Touching a
+  visible overworld enemy is a **party encounter**, not a single-character
+  one: it zooms into a **more detailed tactical mini-map** and the game goes
+  turn-based, in the mold of **Fire Emblem: The Sacred Stones**. Control on
+  that map: WASD no longer free-walks the avatar - instead you **select a
+  character** (the mini action menu sits below), then use **WASD to choose the
+  destination cell** for that character's move, within its move range. Each
+  encounter can field multiple party characters against multiple enemies on
+  the grid.
+- This keeps the overworld simple and readable while concentrating the
+  positioning depth where Kayden wants it - in the tactical battles - and is
+  consistent with the already-locked grid-based, per-unit-initiative, d10
+  combat below (it names the *control scheme and framing*, not new combat
+  math).
+
 ## Core Logic And Invariants
 
 The combat/movement/data rules below are locked technical decisions (resolved
 2026-06-11 per the research audit; the Combat rule below was extended
-2026-07-05 with grid/range/d10 specifics directly from Kayden) - do not
+2026-07-05 with grid/range/d10 specifics directly from Kayden, and 2026-07-06
+with the single-avatar/Fire-Emblem tactical-control framing above) - do not
 relitigate without flagging to Kayden first; see `AGENTS.md` -> When To Ask,
 Proceed, Or Stop.
 
@@ -373,12 +407,17 @@ Rules:
     continued press steps (turn-in-place); facing locks during
     interactions. This is a feel requirement on top of the invariant, not a
     change to it (T-021).
-- **Jump (added 2026-07-06, Kayden)**: a contextual, grid-snapped hop -
-  available at ledge/pit edges (not a free jump button everywhere), implemented
-  as a `Tween` arc between grid cells like any other step. **Max jump distance
-  is exactly 1 cell** - a 1-cell-wide pit is the definitional jumpable gap;
-  2+ cells is never jumpable. Party followers (Phase 5) jump with the player.
-  Never a physics/velocity jump.
+- **Jump (added 2026-07-06, revised same day - Kayden)**: a **player-pressed
+  button** (`jump` input action, bound to Alt primary / C fallback - see
+  Commands), not automatic - Kayden: "I don't want to trust that my character
+  will jump the right way." Pressing jump hops one cell in the facing
+  direction as a `Tween` arc (like any other step, never physics). **Max jump
+  distance is exactly 1 cell** - a 1-cell gap is the definitional jumpable
+  gap; 2+ cells is never jumpable. The jump only *succeeds* over a
+  jumpable gap/ledge (a jump into a wall or across too-wide a pit just plays
+  a small in-place hop or is refused); it is not a free traversal everywhere.
+  Single overworld avatar (see Party model below), so no follower-jump to
+  coordinate.
 - **Pathfinding**: `AStarGrid2D`, `diagonal_mode = DIAGONAL_MODE_NEVER`,
   Manhattan heuristic.
 - **Combat**: grid-based, turn-based, resolved with a **d10 percentage
@@ -429,6 +468,14 @@ Rules:
     driven by a plate open while pressed and re-lock on release - a block
     pushed onto the plate is the persistent solution; the player standing on
     it is the temporary one.
+  - **Tutorial puzzle geometry (2026-07-06, Kayden)**: the plate sits at the
+    **center of a 3x3 "pushing space"**, the block starts in a **corner** of
+    that 3x3, and there is a **2-cell walking margin** around the whole
+    pushing space. Because pushing requires standing on the opposite side of
+    the block (and there are no diagonals), the margin is what lets the player
+    circle around to push the block along two axes into the center - an
+    L-shaped push, not a straight line. Exact cell coordinates + push count
+    are finalized at build time against Kayden's sketch (T-024/T-027).
   - **Pits**: pit tiles block walking (treated like walls for pathing) but a
     1-cell-wide pit can be jumped (see Jump above). A `PushableBlock` pushed
     into a pit **fills it**, permanently converting that cell to walkable
@@ -439,11 +486,16 @@ Rules:
     key-check pattern. Chests are placed visibly in the room from the start -
     no surprise reveal triggers ("if you're confused the players will be
     too", 2026-07-06).
-- **Death & respawn (added 2026-07-06, Kayden)**: party defeat is never a
-  game-over screen dead end. Outside the dungeon: respawn at the old man
-  (healer NPC). Inside the dungeon: respawn in the dungeon's first room with
-  its puzzle state fully reset. Pits themselves stay non-lethal/impassable -
-  death comes from combat.
+- **Death & respawn (added 2026-07-06, revised same day - Kayden)**: party
+  defeat is never a game-over screen dead end. **Phase 2 (now): restart from
+  the beginning of the game** - the simplest possible rule, no state
+  snapshotting. **Phase 3 (deferred): the richer respawn** - respawn at the
+  old man (healer NPC) when defeated outside a dungeon, or in the dungeon's
+  first room with puzzle state reset when inside - lands with save/load,
+  because "reset the dungeon's puzzle state" is the same room-state
+  serialization `SaveData` needs (Kayden: "I agree this is starting to be
+  phase 3"). Pits themselves stay non-lethal/impassable - death comes from
+  combat.
 - **Save**: save points are physical map objects; `SaveData` serializes to
   `user://saves/slot_N`; never saved mid-combat; 3 slots supported from the
   start.
@@ -480,6 +532,7 @@ Rules:
 | Aseprite CLI/Lua automation has a learning curve before it pays off | Low | Start with simple batch-export scripts in M1.1; Pixelorama remains a no-cost manual fallback |
 | **No narrative/story/world-lore design exists yet** - the Gameplan is systems-and-architecture-first, but "go through a story" is part of the founding vision | Medium | Needs deliberate attention before Phase 6 (First Playable Slice) means anything narratively - a vertical slice needs at least one real story beat, not just working systems. Not yet scheduled; flagged here rather than invented unprompted |
 | Grid-based combat with per-unit movement/range is more implementation work than flat menu-only JRPG battles (positioning, move-range calc, attack-range validation, arena layout) | Medium | Reuse the overworld's existing `AStarGrid2D`/grid-movement patterns for combat positioning instead of inventing a parallel system; keep Phase 4 MVP range rules simple (e.g. melee = adjacent tile, ranged = fixed tile distance) and defer tactics depth (flanking, terrain bonuses) to Stretch Goals |
+| **Block-puzzle soft-locks** (added 2026-07-06): pushable blocks + doors that lock behind the player can create unsolvable states - a block shoved into a corner/off the path, leaving the player trapped in a locked room (and Phase 2 death just restarts the game, so a soft-lock is a hard restart). This is *the* classic block-puzzle bug, ongoing across every puzzle room, not just the tutorial | Medium | Prevent by construction: design rooms so no push leads to a dead state (geometry like the 3x3-with-margin), and/or add a cheap escape valve (re-enter-room resets the puzzle, or a "reset puzzle" affordance). Every puzzle room's proof must include a soft-lock check (can the player wedge it?), not just a can-it-be-solved check |
 
 ## Design Decisions
 
@@ -514,6 +567,12 @@ Rules:
 | Death/respawn: party defeat outside the dungeon respawns at the old man (healer NPC); defeat inside respawns in Room 1 with dungeon puzzle state fully reset ("you have to redo it all"). Pits stay non-lethal/impassable | Kayden's explicit respawn spec - death is a setback, not a game-over dead end; chest-key retention across death is TBD at T-029 | 2026-07-06 round 2 / this session |
 | Enemy aggro telegraph (oozes get visibly angry + faster when they spot you, replacing ambiguous wander-to-chase) is a real task, deferred until sprites exist | Kayden's clarification of "attack lock-in" from the movement table - it's an *enemy* feel feature, not player movement; parked as T-028 until T-003 art gives it something to show | 2026-07-06 round 2 / this session |
 | Shield is a plain inventory item at Phase 2 (D-001 resolved) | Kayden: "We are building the skeleton so we can just continue to ask the questions like 'Well, what does the shield do'" - effect decided at Phase 3/S-001 | 2026-07-06 round 2 / this session |
+| Levels authored **all-in as LDtk entities** (not a code/LDtk hybrid): blocks, plates, doors, chests, NPCs, enemies placed as LDtk entity instances with custom fields (link IDs, key names), instantiated by a post-import hook | Kayden picked all-in but conditioned it on documentation; confirmed the importer's entity path is the well-documented one - `post-import/entity-template.gd` + a complete `entity-spawn-lights.gd` example (match `entity.identifier`, read `entity.fields`, instantiate a scene, `update_instance_reference`) + `docs/classes.md` for `LDTKEntity` | 2026-07-06 round 3 / this session |
+| Jump is a **player-pressed button** (Alt primary, C fallback), not automatic/contextual | Kayden: "I don't want to trust that my character will jump the right way"; adds a `jump` input action (the map's first addition beyond the original 8). Note: Alt is an OS modifier on macOS - C is the safety binding if Alt reads poorly | 2026-07-06 round 3 / this session, supersedes the round-2 "contextual hop" wording |
+| Phase 2 death = restart from the beginning of the game; the richer old-man/room-reset respawn moves to Phase 3 | Kayden: "I agree this is starting to be phase 3" - the dungeon-puzzle-state reset a mid-dungeon respawn needs is the same serialization `SaveData` provides, so it belongs with save/load, not Phase 2 | 2026-07-06 round 3 / this session, supersedes the round-2 respawn row |
+| Overworld is a **single party avatar** (no snake-follow); the party's characters appear only in **Fire-Emblem-Sacred-Stones-style tactical combat** (select a character, WASD picks its destination cell, mini action menu below) | Kayden: "I kinda imagined one character in this overworld being your party... These are party encounters, not character encounters"; concentrates positioning depth in the tactical battles and keeps the overworld simple - **supersedes the snake-follow-formation decision** (Gameplan §10/§15 M5.1) | 2026-07-06 round 3 / this session |
+| Puzzle geometry primitive: plate at the center of a 3x3 pushing space, block in a corner, 2-cell walking margin around it (the margin enables the around-the-block L-shaped push, since pushing needs the opposite side and there are no diagonals) | Kayden's sketch-in-words for Room 1; exact cells/push-count finalized at build against his drawing | 2026-07-06 round 3 / this session |
+| Placeholder art through Phase 2, one art pass afterward; invest in dev tools (room warp, puzzle reset, grant item, skip combat) as early as possible instead | Kayden: "Lets do art at the end, but build out some dev tools like your suggesting as soon as we can" - Phase 2 validates mechanics, and puzzle iteration is playtest-heavy, so tooling pays back faster than art now | 2026-07-06 round 3 / this session |
 
 ## Health Criteria
 

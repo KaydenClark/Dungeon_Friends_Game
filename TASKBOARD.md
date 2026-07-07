@@ -3,33 +3,27 @@
 > Generated from LLM Workbench v2.1. See `RUNBOOK.md` -> Upgrading The
 > Harness.
 
-**Current focus:** **Phase 1 endgame - open as [PR #5](https://github.com/KaydenClark/Dungeon_Friends_Game/pull/5)
-into `integration`** (pushed 2026-07-06, awaiting Kayden's review+merge; brings
-the T-019 test layer along too). Done this session (2026-07-06, all on
-`feature/movement-feel`): T-021 movement feel (Kayden: "night and day"), T-003
-real 16x16 test art + grid-unit decision (16px @ 4x = 64px cells), T-004 LDtk
-importer installed + verified, T-022 boss-door transition into the first
-LDtk-built room (cave stub) with full state-preserving round trip - smoke
-test now 47/47. **Phase 1 remaining:** T-011 (author the forest itself via
-LDtk, reusing T-022's proven wiring), T-020 (Kayden's windowed 3-resolution
-check - spike already shows real art), T-008 (folder hygiene). Tool notes:
-Aseprite (paid) and the LDtk desktop app (free) are both not installed -
-`.ldtk`/art are script-generated stopgaps until Kayden installs them. Phase 0
-is done except M0.3 export presets (T-002, Backlog per Kayden). **Phase 2 is
-concretely planned (2026-07-06, Kayden's spec):** a 3-room tutorial dungeon behind the
-boss door - a hub room (block+plate puzzle, visible locked chest), a
-2-wide-pit room (block-into-pit + jump the remaining cell - new MVP jump
-mechanic), and a key-drop fight room, looping back to open the chest for the
-**shield** (a plain inventory item for now - D-001 resolved). Death now
-respawns (old man outside the dungeon; Room 1 + full puzzle reset inside -
-T-029). Primitives land as T-023 (PushableBlock), T-024 (PressurePlate),
-T-025 (jump + pits), T-026 (chest/key flow), T-029 (respawn), integrated by
-T-027. Full spec: `BLUEPRINT.md` -> Phase 2 Target: Tutorial Dungeon.
-Dash/roll and swim are Deferred (S-009/S-010); enemy aggro telegraph is
-Backlog (T-028) until sprites exist. **Building has started: T-021 (movement
-feel) is in progress.**
+**Current focus:** **Phase 1 sprint merged ([PR #5](https://github.com/KaydenClark/Dungeon_Friends_Game/pull/5)
+-> `integration`); Phase 2 fully specced and ready to build.** Landed on
+integration: T-021 movement feel (Kayden: "night and day"), T-003 real 16x16
+art + grid unit (16px @ 4x = 64px), T-004 LDtk importer, T-022 boss-door
+transition into the first LDtk-built room (smoke test 47/47), T-019 test
+layer. **Tools now installed for real:** Aseprite (verified end-to-end) and
+LDtk desktop app (Gatekeeper cleared) - the script-generated stopgaps can give
+way to real authoring. **Phase 1 remaining:** T-011 (rebuild the forest as an
+LDtk project - tiles + entities) and T-020 (Kayden's windowed 3-resolution
+check). Phase 0's M0.3 export presets stays Backlog (T-002).
+**Phase 2 decisions all locked (2026-07-06 round 3, D-002..D-005 - see Pending
+Decisions + `BLUEPRINT.md`):** all-in on LDtk entities; jump is a **button**
+(Alt/C); overworld is a **single avatar** with multi-character control only in
+**Fire-Emblem-Sacred-Stones tactical combat** (supersedes snake-follow); death
+= restart from game start (richer respawn -> Phase 3). **Next build order:**
+T-030 dev tools (Kayden wants early) -> T-031 LDtk entity pipeline (foundational)
+-> T-011 forest -> Phase 2 primitives T-023/T-024/T-025/T-026/T-029 ->
+integrated by T-027 (the 3-room tutorial = Phase 2 "done"). Dash/roll + swim
+Deferred (S-009/S-010); aggro telegraph Backlog (T-028).
 **Owner:** Kayden
-**Last updated:** 2026-07-06 (round 2 - building started)
+**Last updated:** 2026-07-06 (round 3 - Phase 2 decisions locked, PR #5 merged)
 
 This is the live work queue and proof ledger. Agents use it to decide what to
 work on next. Keep strategy and long-term direction in `BLUEPRINT.md`; keep
@@ -85,12 +79,17 @@ commands and verification procedures in `RUNBOOK.md`.
 
 The architecture/toolchain decisions were resolved in the original research
 audit (2026-06-11); the 2026-07-05/06 creative-direction additions were folded
-directly into `BLUEPRINT.md` - see Design Decisions there. One small decision
-is open from the Phase 2 tutorial-dungeon spec:
+directly into `BLUEPRINT.md` - see Design Decisions there. **All Phase 2 open
+decisions are now resolved (2026-07-06 round 3)** and folded into `BLUEPRINT.md`
+(Design Decisions + Party And Combat Model + Core Logic):
 
-| ID | Decision | Options | Recommendation | Cost / impact | Owner | Status |
-|---|---|---|---|---|---|---|
-| D-001 | What does the tutorial **shield** actually do when the chest opens? | (a) Trophy/inventory item at Phase 2, real stats when Phase 3 `ItemData` + S-001 equipment land; (b) minimal hardcoded +defense now | (a) - keeps the "no balance numbers in scene scripts" invariant and doesn't pull the S-001 equipment stretch goal forward | Low - purely affects T-026/T-027 scope; the chest/key flow is identical either way | Kayden | **resolved 2026-07-06: (a)** - "Right now the shield is just an inventory item. It will be a thing we use later" |
+| ID | Decision | Resolution | Owner |
+|---|---|---|---|
+| D-001 | What does the tutorial **shield** do? | (a) plain inventory item at Phase 2; real effect a Phase 3/S-001 question | Kayden |
+| D-002 | LDtk entities all-in vs. code/LDtk hybrid? | **All-in on LDtk entities** - confirmed the importer's post-import entity path is the well-documented one (template + working example + class docs). Foundational task T-031 | Kayden |
+| D-003 | Jump automatic or a button? | **Button** - `jump` action, Alt primary / C fallback (T-025 adds it) | Kayden |
+| D-004 | Phase 2 death handling? | **Restart from the beginning of the game**; richer respawn deferred to Phase 3 (rescopes T-029) | Kayden |
+| D-005 | Overworld party representation? | **Single avatar**; multi-character control only in Fire-Emblem-Sacred-Stones-style tactical combat. Supersedes snake-follow (Phase 5 revision) | Kayden |
 
 ## How To Use This Board
 
@@ -131,14 +130,16 @@ M0.3 export presets (T-002) is a Phase-0 leftover intentionally in Backlog.
 
 | ID | Priority | Task | Source / why now | Touches | Proof required | Docs impact | Owner | Status | Last update |
 |---|---:|---|---|---|---|---|---|---|---|
-| T-011 | 4 | Forest map: build the first test room/map using the LDtk pipeline (replaces the code-built placeholder room in `game/scripts/dev/forest_slice.gd` - keep the entities/RoomGrid logic, swap the layout authoring) | Gameplan.md §15 Phase 1; depends on T-004 (LDtk importer) | `game/assets/levels/forest_test.ldtk` + imported `TileMapLayer` | Headless import succeeds; player (T-010) can walk the room and collide with walls | `TASKBOARD.md` proof row | agent | ready | 2026-07-06 |
+| T-030 | 2 | **Dev tools** (Kayden wants these early): a debug overlay/menu, toggleable, for fast iteration - room warp (forest <-> dungeon rooms), reset the current puzzle, grant an item/key, heal to full, and skip/auto-win combat. Guard behind a debug flag so it never ships in a real build. Reuses the existing `SceneManager.auto_combat` hook | Kayden 2026-07-06: "build out some dev tools like your suggesting as soon as we can"; puzzle iteration (T-023..T-027) is playtest-heavy and this pays back immediately | `game/scripts/dev/` debug overlay, small `SceneManager` hooks | Overlay toggles in a windowed run; each action works (warp/reset/grant/heal/skip); off by default | `RUNBOOK.md` dev-tools note; `TASKBOARD.md` proof row | agent | ready | 2026-07-06 |
+| T-031 | 3 | **LDtk entity post-import pipeline** (D-002, foundational for T-011 + all Phase 2 rooms): a `post_import` hook (importer's `post-import/entity-template.gd` pattern) that reads each `LDTKEntity` (`identifier`, `fields`, `position`) and instantiates the matching game object (Player spawn, NPC, OverworldEnemy, LockedDoor, PushableBlock, PressurePlate, Chest), wiring link IDs from `entity.fields`. Establishes the LDtk entity-layer conventions (identifiers + custom fields) the levels use | Kayden 2026-07-06 (D-002) all-in on LDtk entities; confirmed well-documented (importer template + `entity-spawn-lights.gd` example + `docs/classes.md`) | `game/assets/levels/`, a post-import `.gd`, entity glue in `RoomGrid`/spawners | Headless import of a room with 1+ of each entity type spawns the right nodes at the right cells; smoke-test extension | `BLUEPRINT.md` Levels row / Core Logic puzzle-primitive note; `TASKBOARD.md` proof row | agent | ready | 2026-07-06 |
+| T-011 | 4 | Forest map: rebuild the forest through the LDtk pipeline - tiles as TileMapLayers (per T-022's proven wiring) and **entities via T-031** (NPCs, enemies, boss, door as LDtk entity instances), replacing the code-built `forest_slice.gd` layout while keeping the RoomGrid logic | Gameplan.md §15 Phase 1; depends on T-004 (done) + T-031 (entity pipeline) | `game/assets/levels/forest.ldtk` + post-import | Headless import succeeds; the slice smoke test passes against the LDtk-authored forest (walk, collide, fight, key, door, cave round trip) | `TASKBOARD.md` proof row | agent | ready | 2026-07-06 |
 | T-020 | 5 | **M1.4**: re-validate the `canvas_items`/`expand` HD/ultrawide stretch settings with the **real** M1.1 tileset at 1280x720, 1920x1080, and 3440x1440. *Prep done 2026-07-06: the spike scene now draws the real 16x16 tiles at 4x (all 5 tiles + hero on screen, ColorRect fallback removed from the happy path); headless run confirms `real_art=true`.* **Remaining: Kayden's windowed run at the 3 resolutions** - confirm the grid reads undistorted and 21:9 shows an acceptable amount of world | Gameplan.md §15 Phase 1 (M1.4); T-003 done | `game/scripts/dev/display_scaling_spike.gd` (done), windowed judgment (Kayden) | Windowed run at all 3 resolutions shows an undistorted grid; if `expand` reads poorly at 21:9, note the `keep`+letterbox fallback | `RUNBOOK.md` display-spike expectation; `BLUEPRINT.md` ultrawide-risk row if fallback chosen | Kayden (windowed) | **gated** - code ready, windowed check pending | 2026-07-06 |
 | T-023 | 8 | **Phase 2 - M2.1a**: `PushableBlock` entity - grid-snapped push (player walks into it while pressing toward it; block tweens one cell if the destination is free), blocked by walls/entities/other blocks, occupies its cell for pathing. Push-only at MVP (pull is not in Kayden's spec) | Kayden 2026-07-06: "I really want pushable blocks... my favorite tool for puzzles"; movement roadmap row 3 | `game/scripts/puzzles/pushable_block.gd`, overworld interaction | Unit tests: push into free cell moves block, push into wall/occupied cell doesn't, player never overlaps block; smoke-test extension | `TASKBOARD.md` proof row | agent | ready | 2026-07-06 |
-| T-024 | 9 | **Phase 2 - M2.1b**: `PressurePlate` + per-room `PuzzleController` wiring (`BLUEPRINT.md` semantics, 2026-07-06): plate pressed while any occupant (player or block) is on its cell, released on vacate; plate-driven doors open while pressed, re-lock on release; controller wires plate->door signals at `_ready()` | Kayden 2026-07-06 plate spec; depends on T-023 (block is one of the two pressers) | `game/scripts/puzzles/pressure_plate.gd`, `game/scripts/puzzles/puzzle_controller.gd`, door script | Unit tests: press/release transitions for player and block, door re-locks on step-off; smoke-test extension | `TASKBOARD.md` proof row | agent | ready | 2026-07-06 |
-| T-025 | 10 | **Phase 2**: jump + pits/ledges - pit tile type (blocks walking, not lethal); contextual grid-snapped jump at pit/ledge edges (Tween arc, **max exactly 1 cell** - the locked limit); `PushableBlock` pushed into a pit fills it into walkable floor permanently. The tutorial's pit is **2 cells wide** (round 2): unjumpable as-is, crossed by filling one cell with the block then jumping the remaining 1-cell gap from the filled cell | Kayden 2026-07-06: jump over ledges/pits; movement roadmap row 2; round 2: pit widened so the block push is mandatory; depends on T-023 for block-fills-pit | `game/scripts/overworld/player.gd`/`grid_actor.gd`, `room_grid.gd` (pit cells), `pushable_block.gd` | Unit tests: 1-cell pit jumpable, 2-cell not, filled pit walkable + jumpable-from, unfilled pit blocks pathing; windowed feel-check of the jump arc | `TASKBOARD.md` proof row; `BLUEPRINT.md` already carries the jump invariant | agent | ready | 2026-07-06 |
+| T-024 | 9 | **Phase 2 - M2.1b**: `PressurePlate` + per-room `PuzzleController` wiring (`BLUEPRINT.md` semantics): plate pressed while any occupant (player or block) is on its cell, released on vacate; plate-driven doors open while pressed, re-lock on release; controller wires plate->door signals at `_ready()`. **Geometry: plate at the center of a 3x3 pushing space, block starts in a corner, 2-cell walking margin** (the margin enables the L-shaped around-the-block push) - finalize exact cells against Kayden's sketch | Kayden 2026-07-06 plate + geometry spec; depends on T-023 (block is one of the two pressers) | `game/scripts/puzzles/pressure_plate.gd`, `game/scripts/puzzles/puzzle_controller.gd`, door script | Unit tests: press/release transitions for player and block, door re-locks on step-off; smoke-test solves the 3x3 push; **soft-lock check: block can't be pushed into an unsolvable spot** | `TASKBOARD.md` proof row | agent | ready | 2026-07-06 |
+| T-025 | 10 | **Phase 2**: jump + pits/ledges - **add a `jump` input action (Alt primary, C fallback)** to `project.godot`; pit tile type (blocks walking, not lethal); pressing `jump` hops one cell in the facing direction over a jumpable gap (Tween arc, **max exactly 1 cell**; into a wall / too-wide pit = small in-place hop or refused); `PushableBlock` pushed into a pit fills it into walkable floor permanently. The tutorial's pit is **2 cells wide**: unjumpable as-is, crossed by filling one cell with the block then jumping the remaining 1-cell gap from the filled cell | Kayden 2026-07-06 (D-003): jump is a **button**, not automatic; movement roadmap row 2; depends on T-023 for block-fills-pit | `game/project.godot` (input), `game/scripts/overworld/player.gd`/`grid_actor.gd`, `room_grid.gd` (pit cells), `pushable_block.gd` | Unit tests: 1-cell gap jumpable, 2-cell not, filled pit walkable + jumpable-from, unfilled pit blocks pathing, jump-into-wall refused; windowed feel-check of the button + arc | `TASKBOARD.md` proof row; `BLUEPRINT.md` Commands table + jump rule already updated | agent | ready | 2026-07-06 |
 | T-026 | 11 | **Phase 2**: `Chest` interactable + chest-key flow - locked chest (opens only with its matching key item, reusing the locked-door key-check pattern), **visible in the room from the start** (no reveal trigger - round 2), enemy loot can carry the chest key, opening grants the shield as a plain inventory item (D-001 resolved) | Kayden 2026-07-06 tutorial spec (Rooms 1+3); round 2 dropped the ceiling-drop reveal | `game/scripts/puzzles/` or `overworld/` chest script, loot flow in `scene_manager.gd` | Unit tests: locked chest refuses without key, opens with key, reward granted once; smoke-test extension | `TASKBOARD.md` proof row | agent | ready | 2026-07-06 |
-| T-029 | 12 | **Phase 2**: death/respawn system - party defeat outside the dungeon respawns at the old man (healer NPC); defeat inside the dungeon respawns in Room 1 with the dungeon's puzzle state fully reset ("you have to redo it all"). Replaces whatever combat-defeat dead-end exists today. **TBD at build time (flag to Kayden): does the chest key survive an in-dungeon death?** (classic Zelda keeps keys; a literal "redo it all" loses it) | Kayden 2026-07-06 round 2 respawn spec; needed before T-027 makes the dungeon survivable | `game/scripts/autoload/scene_manager.gd`, combat defeat path, dungeon room state | Unit tests: defeat-outside respawns at healer with state intact; defeat-inside respawns in Room 1 with puzzles reset; smoke-test extension covering a deliberate loss | `TASKBOARD.md` proof row; `BLUEPRINT.md` already carries the respawn rule | agent | ready | 2026-07-06 |
-| T-027 | 13 | **Phase 2 integration**: build the 3-room tutorial dungeon per `BLUEPRINT.md` -> Phase 2 Target (Room 1 **hub**: lock-behind + block 2-forward-1-right onto plate + visible locked chest, connected to the two other rooms; Room 2: full-width **2-wide** pit, block-then-jump crossing; Room 3: enemy drops chest key; loop back -> open chest -> shield). Author rooms via the LDtk pipeline if T-011 has landed, code-built otherwise. **This is Phase 2's "done" condition** | Kayden 2026-07-06: "a good tutorial, and a good place to call phase 2"; depends on T-022..T-026 + T-029 | `game/assets/levels/` or `game/scripts/dev/`, room scenes, smoke test | End-to-end smoke test through all 3 rooms (solve plate puzzle, fill pit + jump, kill key enemy, loop back, open chest, shield granted; plus a death-and-respawn pass) and Kayden's windowed playthrough | `TASKBOARD.md` proof row + demo artifact; `BLUEPRINT.md` Current Product Shape status | agent | ready | 2026-07-06 |
+| T-029 | 12 | **Phase 2**: on party defeat, **restart from the beginning of the game** (reset session state + reload the forest at the start position). Simplest possible - no room-state snapshot. Replaces the current in-place "you wake up restored" combat-defeat behavior | Kayden 2026-07-06 round 3 (D-004): "if I die I get to restart from the beginning of the game"; the richer old-man/room-reset respawn is deferred to **Phase 3** (rides on save/load), tracked when Phase 3 is planned | `game/scripts/autoload/scene_manager.gd`, combat defeat path, `main.gd`/`boot_room` | Unit test: a forced defeat resets XP/inventory/flags/HP and re-boots the forest at spawn; smoke-test defeat path | `TASKBOARD.md` proof row; `BLUEPRINT.md` respawn rule updated | agent | ready | 2026-07-06 |
+| T-027 | 13 | **Phase 2 integration**: build the 3-room tutorial dungeon per `BLUEPRINT.md` -> Phase 2 Target (Room 1 **hub**: lock-behind + 3x3-plate-center push puzzle + visible locked chest, connected to the two other rooms; Room 2: full-width **2-wide** pit, block-then-jump crossing; Room 3: enemy drops chest key; loop back -> open chest -> shield). Author rooms **as LDtk entities via the T-031 post-import pipeline** (D-002). **This is Phase 2's "done" condition** | Kayden 2026-07-06: "a good tutorial, and a good place to call phase 2"; depends on T-022..T-026 + T-029 + T-031 | `game/assets/levels/` (LDtk), room post-import, smoke test | End-to-end smoke test through all 3 rooms (solve plate puzzle, fill pit + jump, kill key enemy, loop back, open chest, shield granted; plus a defeat->restart pass) and Kayden's windowed playthrough | `TASKBOARD.md` proof row + demo artifact; `BLUEPRINT.md` Current Product Shape status | agent | ready | 2026-07-06 |
 
 ## Backlog
 
