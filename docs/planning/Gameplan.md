@@ -372,6 +372,14 @@ Built entirely from a small set of reusable, LDtk-driven primitives (per audit's
 
 ## 10. Party/Team System Architecture
 
+> **Revision note (2026-07-06):** the **overworld is a single party avatar** —
+> the "snake formation" of `OverworldActor` followers described below is
+> **superseded and will not be built**. The party's multiple characters appear
+> only inside **Fire-Emblem-Sacred-Stones-style tactical combat** (select a
+> character, WASD picks its destination cell). Roster/recruitment/reserve model
+> below is unchanged. See `BLUEPRINT.md` → Party And Combat Model and the
+> 2026-07-06 Design Decisions row.
+
 - `SaveData.party_roster` is an ordered array of character IDs (max active party size — recommend **3** for MVP, a common small-party-JRPG size that keeps combat UI simple).
 - A separate **reserve roster** (recruited but not active) is just "any character ID not in `party_roster`" — no separate data structure needed.
 - **Recruitment**: an NPC/event in the overworld adds a character ID to the reserve roster (and `SaveData.flags`) when triggered. No combat/recruitment minigame at MVP — recruitment is a dialogue/cutscene event.
@@ -505,7 +513,7 @@ Each milestone is sized for a single AI-assisted working session. Milestones are
 - **M4.4**: Implement `SceneManager` context-passing transition (§3.1/§7): touching a visible overworld enemy pauses the overworld, instances Combat with the right party/enemy data, and on victory/defeat returns cleanly to the exact overworld position.
 
 ### Phase 5 — Party System & Progression
-- **M5.1**: Implement multi-character party (3 active), snake-following `PartyFollower` actors in the overworld.
+- **M5.1**: ~~snake-following `PartyFollower` actors in the overworld~~ — **superseded 2026-07-06: overworld stays a single avatar** (see §10 revision note). M5.1 is instead the party-management menu (swap which characters are active); multi-character positioning lives in tactical combat (§7), not the overworld.
 - **M5.2**: Add 1 ability per character (`AbilityCommand`), MP cost, and a simple AI behavior (`RANDOM_WALK` first, then `BIASED_TRACKING` via `AStarGrid2D`).
 - **M5.3**: Implement XP/leveling: combat victory grants XP, level-up increases stats per a simple curve, persisted in `SaveData`.
 - **M5.4**: Implement one recruitment event: an NPC/scene that adds a new character to the reserve roster + a basic party-management menu to swap active members.
