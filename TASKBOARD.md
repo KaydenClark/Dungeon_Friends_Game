@@ -5,7 +5,9 @@
 
 **Current focus:** **Phase 2 built end to end - gated on Kayden's windowed
 playthrough.** The whole Phase 2 sprint landed on branch
-`feature/phase2-tutorial-dungeon` (PR into `integration` pending): T-031 LDtk
+`feature/phase2-tutorial-dungeon`, open as
+[PR #6](https://github.com/KaydenClark/Dungeon_Friends_Game/pull/6) into
+`integration`: T-031 LDtk
 entity pipeline (post-import hook + `LdtkRoom` adoption), T-011 LDtk-authored
 forest (same 34x20 layout, entities as LDtk instances), T-023 PushableBlock,
 T-024 PressurePlate + PuzzleController + reset Lever, T-025 jump button
