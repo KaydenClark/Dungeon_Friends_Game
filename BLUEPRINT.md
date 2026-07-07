@@ -291,7 +291,8 @@ Dungeon_Friends_Game/
 │   ├── data/                        <- .tres Resource instances (characters/, enemies/, items/, abilities/, encounters/)
 │   ├── scenes/                      <- .tscn files (overworld/, dungeons/, combat/, entities/, ui/, dev/ for throwaway spikes)
 │   ├── scripts/                     <- .gd files (autoload/, data/, combat/, overworld/, puzzles/, save/, dev/ for throwaway spikes)
-│   └── shaders/
+│   ├── shaders/
+│   └── tests/                       <- first-party headless unit suites + runner (see RUNBOOK.md -> Unit tests)
 ├── docs/
 │   ├── planning/Gameplan.md        <- full architecture/design rationale
 │   ├── research/audited_research.md <- toolchain research audit
