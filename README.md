@@ -14,11 +14,11 @@ inspired turn-based party combat, and recruitable "Dungeon Friends" party
 members. The world starts in a fantasy forest and later expands into a castle
 city, mountains, and rivers. Current state: a playable slice on placeholder
 art - walk an LDtk-authored forest, talk to NPCs, bump a visible enemy into a
-turn-based d10 battle, win the boss's key, and enter the Phase 2 three-room
-tutorial dungeon: push a block onto a pressure plate, fill a pit and jump the
-gap (Alt/C), beat the key guardian, loop back, and claim the shield from the
-locked chest. Party defeat restarts from the beginning. Real art and the full
-combat system are next.
+turn-based d10 battle, win the boss's key, and enter the Phase 2 four-room
+tutorial dungeon: find the one loose brick in the wall, jump the ledges and
+fill the chasm with a block (Alt/C jumps), beat the key guardian, loop back,
+and unlock the side room holding the shield chest. Party defeat restarts from
+the beginning. Real art and the full combat system are next.
 
 ## How This Project Is Run
 

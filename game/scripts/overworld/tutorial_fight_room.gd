@@ -1,10 +1,12 @@
 class_name TutorialFightRoom
 extends LdtkRoom
-## Tutorial dungeon Room 3 - the fight room (T-027). A lone Dungeon Slime
-## (unique_id key_guardian) carries the chest key; beating it opens the loop
-## back: the west door leads straight to the hub, popping the suspended rooms
-## between (SceneManager.exit_rooms), where the hub repositions the player at
-## its west door and opens it permanently.
+## Tutorial dungeon Room 4 - the fight room (T-027). A lone Dungeon Slime
+## (unique_id key_guardian) carries the dungeon_key that opens the hub's
+## north door to the chest room (Kayden 2026-07-07: door locked, not the
+## chest). Beating it opens the loop back: the west door leads straight to
+## the hub, popping the suspended rooms between (SceneManager.exit_rooms),
+## where the hub repositions the player at its west door and opens it
+## permanently.
 ##
 ## Doorway targets: pit_room_return (south, back the way you came),
 ## hub_loop (west, the shortcut home).

@@ -61,25 +61,28 @@ Expected result: a 1280x720 window opens (flexible HD/ultrawide `canvas_items`/
 showing the first-playable forest slice (placeholder ColorRect art). No
 console errors.
 
-Playing the slice (updated 2026-07-06, Phase 2; controls are the T-009 input
-map plus the T-025 jump):
+Playing the slice (updated 2026-07-07, Phase 2 rework; controls are the
+T-009 input map plus the T-025 jump):
 
 - WASD / arrow keys: grid-snapped movement. E / Space: talk & interact;
   Enter / Space advances dialogue. Alt (or C): jump one cell over a pit.
 - Loop: talk to the quest NPC -> fight slimes (bump to battle; Up/Down +
   Enter drives the two-tier menu) -> beat the leashed Boss Slime by the east
   door for the Forest Key -> open the door and step through into the
-  three-room tutorial dungeon: the entry locks behind you; push the block
-  onto the center pressure plate (L-shaped push) to hold the east door open;
-  in the pit room, push the block into the 2-wide pit and jump the remaining
-  gap; beat the Dungeon Slime for the chest key; loop back through the west
-  shortcut; open the chest for the shield - the entry unbolts and you walk
-  back out to the forest. Party defeat restarts from the beginning of the
-  game (T-029).
+  four-room tutorial dungeon: the entry locks behind you; a wall of 13
+  bricks spans the hub and exactly one pushes free (walk into bricks to
+  test them; the lever resets the loose brick); through the east gap, jump
+  the pit room's two 1-wide ledges, then push the block into the 2-wide
+  chasm and jump the remaining gap; beat the Dungeon Slime for the Dungeon
+  Key; loop back through the west shortcut; unlock the hub's north door and
+  open the side room's chest for the shield - the entry unbolts and you
+  walk back out to the forest. Party defeat restarts from the beginning of
+  the game (T-029). The pressure plate is on hold (B-06) - no shipped room
+  uses one.
 - Dev tools (T-030, debug builds only - running from the editor or CLI
   counts; excluded from release exports): press F1 for the overlay, then
   1-4 warp (Forest / Hub / Pit / Fight rooms), 5 reset the room puzzle,
-  6-8 grant forest_key / chest_key / shield, 9 heal, 0 toggle skip-combat
+  6-8 grant forest_key / dungeon_key / shield, 9 heal, 0 toggle skip-combat
   (touch an enemy = instant win). Off by default every session.
 
 ## Test And Build
@@ -111,19 +114,20 @@ autoload initialized.
 
 End-to-end scripted run of the whole slice (input map, movement/collision,
 NPC dialogue, enemy encounters, seeded d10 combat, key/door, then the full
-Phase 2 tutorial dungeon: hub lock-in, block-onto-plate puzzle, 2-wide pit
-crossing via block-fill + jump, key-guardian fight, west loop back, chest ->
-shield -> entry unbolts, return to the preserved forest, and a forced-defeat
-restart-from-the-beginning pass):
+Phase 2 tutorial dungeon in its 2026-07-07 layout: hub lock-in, the
+13-brick wall's one loose brick (fixed bricks refuse the push), the north
+door locked without its key, two 1-wide ledge jumps, 2-wide chasm crossing
+via block-fill + jump, key-guardian fight -> dungeon_key, west loop back,
+north door unlock, chest room -> shield -> entry unbolts, return to the
+preserved forest, and a forced-defeat restart-from-the-beginning pass):
 
 ```bash
 cd game
 /Applications/Godot.app/Contents/MacOS/Godot --headless --path . scenes/dev/slice_smoke_test.tscn
 ```
 
-Expected result: exit `0` and a final `SLICE SMOKE TEST: PASS (94/94 checks)`
-line (~40-80s; the dungeon route roughly doubles the old 47-check run; the
-watchdog fails the run at 180s). A benign `ObjectDB instances leaked` warning
+Expected result: exit `0` and a final `SLICE SMOKE TEST: PASS (109/109
+checks)` line (~40-80s; the watchdog fails the run at 180s). A benign `ObjectDB instances leaked` warning
 at exit is known noise from quitting mid-coroutines; any `CHECK FAILED:` line
 or exit `1` is a real failure. Because roaming enemies move on real-time
 timers, run it a few times in a row when touching enemy AI or movement (`for
@@ -135,6 +139,22 @@ Gotcha: `--path .` must point at `game/` (hence the `cd game`). Pointed at the
 repo root by mistake, Godot finds no `project.godot` and can hang around
 rather than exiting - if a headless run seems stuck forever, check the cwd
 before debugging the game.
+
+### Screenshot tour (demo artifacts)
+
+Boots each room in a real windowed run and saves one PNG per room
+(`forest/hub/pit/fight/chest.png`) - the quick per-room demo artifact for
+proof rows. Needs a display: under `--headless` the dummy renderer produces
+black images, so run it windowed (a window flashes up for a few seconds).
+
+```bash
+cd game
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/screenshot_tour.tscn -- --out=/tmp/dungeon_shots
+```
+
+Expected result: exit `0`, five `wrote .../<room>.png` lines and a final
+`SCREENSHOT TOUR: done`. Omitting `--out=` writes into the project's
+`user://screenshots` directory.
 
 ### Display-scaling spike (T-007)
 
@@ -171,7 +191,7 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
-per-suite tally (e.g. `UNIT TESTS: 17 suites, 102 tests, 330 checks, 0
+per-suite tally (e.g. `UNIT TESTS: 17 suites, 103 tests, 351 checks, 0
 failed`). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a
 few seconds (pure logic and controlled clocks, no real-time waits, unlike the
 slice smoke test; the tutorial soft-lock solver adds a second or two). Run

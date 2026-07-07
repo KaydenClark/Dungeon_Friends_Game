@@ -47,6 +47,19 @@ func test_push_into_occupant_is_refused() -> void:
 	g.queue_free()
 
 
+func test_fixed_brick_refuses_every_push() -> void:
+	# movable=false (the hub's Oracle-style wall, 2026-07-07): identical
+	# look, occupies its cell, but never budges in any direction.
+	var g := _make_grid()
+	var b := _block(g, Vector2i(2, 2))
+	b.movable = false
+	for d in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+		not_ok(b.try_push(d), "fixed brick refuses push %s" % str(d))
+	eq(b.cell, Vector2i(2, 2), "fixed brick never moves")
+	eq(g.get_occupant(Vector2i(2, 2)), b, "fixed brick still occupies its cell")
+	g.queue_free()
+
+
 func test_push_off_grid_is_refused() -> void:
 	var g := _make_grid()
 	var b := _block(g, Vector2i(0, 2))

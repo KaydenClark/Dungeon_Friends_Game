@@ -3,12 +3,13 @@ extends Node
 ## (main.tscn) through the whole loop with a seeded RNG:
 ## input map -> wall collision -> NPC dialogue -> regular slime fight (no key)
 ## -> healer restore -> boss slime fight (key drop) -> unlock door -> the
-## Phase 2 tutorial dungeon (T-027): hub (door locks behind, push the block
-## onto the plate, plate-door opens) -> pit room (2-wide pit unjumpable,
-## block fills one cell, jump the rest) -> fight room (key guardian drops the
-## chest key) -> west loop back to the hub -> open the chest (shield) ->
-## entry door unbolts -> back to the forest with state intact -> forced
-## defeat restarts from the beginning of the game (T-029).
+## Phase 2 tutorial dungeon (T-027, 2026-07-07 rework): hub (door locks
+## behind, 13-brick wall where only one brick budges) -> pit room (two 1-wide
+## ledges jumped, 2-wide chasm unjumpable, block fills one cell) -> fight
+## room (key guardian drops the dungeon key) -> west loop back to the hub ->
+## dungeon key opens the north door -> chest room (shield) -> entry door
+## unbolts -> back to the forest with state intact -> forced defeat restarts
+## from the beginning of the game (T-029).
 ## The forest has several autonomous enemies, so navigation is tolerant:
 ## any unplanned encounter is fought to completion and the walk resumes.
 ## Run: Godot --headless --path . scenes/dev/slice_smoke_test.tscn
@@ -151,55 +152,86 @@ func _run() -> void:
 	check(entry_door != null and not entry_door.opened,
 			"entry door locked behind the player")
 
-	# 10. Hub puzzle (T-023/T-024): L-shaped push onto the center plate opens
-	# the plate-driven east door; stepping off would re-lock it, the parked
-	# block holds it open.
-	var block: PushableBlock = hub.blocks[0]
-	var plate: PressurePlate = hub.plates[0]
-	var east_door := _hub_door(hub, "room2_door")
-	check(block.cell == Vector2i(4, 4), "block starts in the 3x3 corner")
-	check(not east_door.held_open, "east door starts locked")
-	check(await _go_grid(hub, hub_player, Vector2i(3, 4)), "walked behind the block")
-	hub_player.set_facing(Vector2i.RIGHT)
-	await _push(hub_player, block, Vector2i.RIGHT)
-	check(block.cell == Vector2i(5, 4), "block pushed right into the 3x3 middle column")
-	check(await _go_grid(hub, hub_player, Vector2i(5, 3)), "circled above the block")
-	await _push(hub_player, block, Vector2i.DOWN)
-	check(block.cell == Vector2i(5, 5), "L-shaped push landed the block on the plate")
-	check(plate.pressed, "plate pressed by the parked block")
-	check(east_door.held_open, "plate-driven door held open")
-	check(hub.is_walkable(east_door.cell), "east doorway walkable while held")
+	# 10. Hub brick wall (2026-07-07 rework): 13 identical bricks, only one
+	# budges; fixed bricks refuse the push. The north chest-room door stays
+	# locked without its key. No pressure plate anywhere (on hold).
+	check(hub.blocks.size() == 13, "hub wall has its 13 bricks")
+	check(hub.plates.size() == 0, "no pressure plate in the hub (on hold)")
+	check(hub.chests.size() == 0, "no chest in the hub (moved to the side room)")
+	var brick: PushableBlock = null
+	var fixed: PushableBlock = null
+	var movable_count := 0
+	for b: PushableBlock in hub.blocks:
+		if b.movable:
+			movable_count += 1
+			brick = b
+		elif fixed == null:
+			fixed = b
+	check(movable_count == 1, "exactly one brick is movable")
+	check(brick != null and brick.cell == Vector2i(6, 8),
+			"the loose brick sits in the wall at (6,8)")
+	var fixed_cell: Vector2i = fixed.cell
+	check(await _go_grid(hub, hub_player, fixed_cell + Vector2i.DOWN),
+			"stood under a fixed brick")
+	await _push(hub_player, fixed, Vector2i.UP)
+	check(fixed.cell == fixed_cell, "fixed brick refuses the push")
+	check(await _go_grid(hub, hub_player, Vector2i(6, 9)), "stood under the loose brick")
+	await _push(hub_player, brick, Vector2i.UP)
+	check(brick.cell == Vector2i(6, 7), "loose brick pushed out of the wall")
+	await _step(hub_player, Vector2i.UP)   # into the gap
+	await _push(hub_player, brick, Vector2i.UP)
+	check(brick.cell == Vector2i(6, 6) and hub_player.cell == Vector2i(6, 8),
+			"brick pushed clear, player standing in the wall gap")
+	var chest_door := _hub_door(hub, "chest_door")
+	check(chest_door != null and not chest_door.opened,
+			"north chest-room door present and locked")
+	check(await _go_grid(hub, hub_player, Vector2i(7, 1)), "reached the north door")
+	hub_player.set_facing(Vector2i.UP)
+	hub_player.interact()
+	await get_tree().process_frame
+	await _pump_dialogue()
+	check(not chest_door.opened, "north door stays locked without the dungeon key")
 
-	# 11. Pit room (T-025): the 2-wide pit can't be jumped; sink the block,
-	# then jump the remaining 1-cell gap from the filled cell.
-	check(await _go_grid(hub, hub_player, Vector2i(13, 6)), "reached the east door")
+	# 11. Pit room (T-025 rework): two 1-wide ledges teach the jump, the
+	# 2-wide chasm refuses it; sink the block, cross on the filled cell.
+	check(await _go_grid(hub, hub_player, Vector2i(13, 6)), "reached the east gap")
 	await _step(hub_player, Vector2i.RIGHT)
 	check(await _until(func() -> bool: return SceneManager.current_room is TutorialPitRoom),
-			"east doorway entered the pit room")
+			"east gap entered the pit room")
 	var pit: TutorialPitRoom = SceneManager.current_room
 	await _pump_dialogue()
 	var pit_player: Player = pit.player
 	var pit_block: PushableBlock = pit.blocks[0]
 	check(pit_player.cell == Vector2i(5, 11), "player at the pit-room entry")
-	check(await _go_grid(pit, pit_player, Vector2i(5, 8)), "walked to the pit edge")
+	check(pit_block.movable and pit_block.cell == Vector2i(3, 5),
+			"block waits on the chasm's near bank")
+	check(await _go_grid(pit, pit_player, Vector2i(5, 10)), "walked to the first ledge")
 	pit_player.set_facing(Vector2i.UP)
-	check(not pit_player.try_jump(), "the 2-wide pit is not jumpable (T-025 limit)")
+	check(pit_player.try_jump(), "jumped the first 1-wide ledge")
 	await _until(func() -> bool: return not pit_player.moving)
-	check(await _go_grid(pit, pit_player, Vector2i(5, 10)), "walked behind the block")
-	await _push(pit_player, pit_block, Vector2i.UP)
-	check(pit_block.cell == Vector2i(5, 8), "block pushed to the pit edge")
-	check(await _go_grid(pit, pit_player, Vector2i(5, 9)), "followed the block")
+	check(pit_player.cell == Vector2i(5, 8), "landed between the ledges")
+	pit_player.set_facing(Vector2i.UP)
+	check(pit_player.try_jump(), "jumped the second ledge")
+	await _until(func() -> bool: return not pit_player.moving)
+	check(pit_player.cell == Vector2i(5, 6), "landed on the chasm's near bank")
+	await _pump_dialogue()   # chasm hint
+	check(await _go_grid(pit, pit_player, Vector2i(5, 5)), "walked to the chasm edge")
+	await _pump_dialogue()
+	pit_player.set_facing(Vector2i.UP)
+	check(not pit_player.try_jump(), "the 2-wide chasm is not jumpable (T-025 limit)")
+	await _until(func() -> bool: return not pit_player.moving)
+	check(await _go_grid(pit, pit_player, Vector2i(3, 6)), "stood behind the block")
 	await _push(pit_player, pit_block, Vector2i.UP)
 	await _until(func() -> bool: return pit_block.sunk)
-	check(pit_block.sunk, "block sank into the pit")
-	check(pit.is_walkable(Vector2i(5, 7)), "filled pit cell is walkable floor")
-	check(await _go_grid(pit, pit_player, Vector2i(5, 7)), "stood on the filled cell")
+	check(pit_block.sunk, "block sank into the chasm")
+	check(pit.is_walkable(Vector2i(3, 4)), "filled chasm cell is walkable floor")
+	check(await _go_grid(pit, pit_player, Vector2i(3, 4)), "stood on the filled cell")
 	pit_player.set_facing(Vector2i.UP)
 	check(pit_player.try_jump(), "jumped the remaining 1-cell gap")
 	await _until(func() -> bool: return not pit_player.moving)
-	check(pit_player.cell == Vector2i(5, 5), "landed on the far side of the pit")
+	check(pit_player.cell == Vector2i(3, 2), "landed on the far side of the chasm")
 
-	# 12. Fight room: the key guardian drops the chest key; the west door
+	# 12. Fight room: the key guardian drops the dungeon key; the west door
 	# loops straight back to the hub.
 	check(await _go_grid(pit, pit_player, Vector2i(5, 1)), "crossed to the north door")
 	await _step(pit_player, Vector2i.UP)
@@ -211,7 +243,7 @@ func _run() -> void:
 	check(fight.enemies.size() == 1, "the key guardian awaits")
 	var guardian_ok := await _hunt_all(fight, fight_player)
 	check(guardian_ok, "key guardian defeated")
-	check(SceneManager.inventory.has("chest_key"), "guardian dropped the chest key")
+	check(SceneManager.inventory.has("dungeon_key"), "guardian dropped the dungeon key")
 	check(SceneManager.flags.get("defeated_key_guardian", false),
 			"guardian defeat recorded (won't respawn)")
 	check(await _go_grid(fight, fight_player, Vector2i(1, 4)), "reached the west door")
@@ -223,18 +255,36 @@ func _run() -> void:
 			"loop-back placed the player at the hub's west door")
 	var west_door := _hub_door(hub, "hub_west")
 	check(west_door == null or west_door.opened, "west shortcut door opened for good")
-	check(block.cell == Vector2i(5, 5) and plate.pressed,
-			"hub puzzle state preserved across the loop (block still on plate)")
+	check(brick.cell == Vector2i(6, 6), "hub brick-wall state preserved across the loop")
 
-	# 13. Chest -> shield -> the entry door unbolts (dungeon complete).
-	check(await _go_grid(hub, hub_player, Vector2i(10, 4)), "reached the chest")
+	# 13. The dungeon key opens the north door; the side room's chest gives
+	# the shield; the entry door unbolts (dungeon complete).
+	check(await _go_grid(hub, hub_player, Vector2i(7, 1)), "back at the north door")
 	hub_player.set_facing(Vector2i.UP)
 	hub_player.interact()
+	await get_tree().process_frame
+	await _pump_dialogue()
+	check(chest_door.opened, "north door opened with the dungeon key")
+	await _step(hub_player, Vector2i.UP)
+	check(await _until(func() -> bool: return SceneManager.current_room is TutorialChestRoom),
+			"north doorway entered the chest room")
+	var vault: TutorialChestRoom = SceneManager.current_room
+	await _pump_dialogue()
+	var vault_player: Player = vault.player
+	check(vault_player.cell == Vector2i(3, 5), "player at the chest-room entry")
+	check(vault.chests.size() == 1, "the shield chest is in the side room")
+	check(await _go_grid(vault, vault_player, Vector2i(3, 3)), "reached the chest")
+	vault_player.set_facing(Vector2i.UP)
+	vault_player.interact()
 	await get_tree().process_frame
 	await _pump_dialogue()
 	check(SceneManager.inventory.has("shield"), "chest opened: shield acquired (D-001)")
 	check(SceneManager.flags.get("chest_tutorial_chest_opened", false),
 			"chest opened state persisted in flags")
+	check(await _go_grid(vault, vault_player, Vector2i(3, 5)), "back at the vault exit")
+	await _step(vault_player, Vector2i.DOWN)
+	check(await _until(func() -> bool: return SceneManager.current_room == hub),
+			"vault exit returned to the SAME hub instance")
 	await _step(hub_player, Vector2i.DOWN)   # any step triggers the completion check
 	await _pump_dialogue()
 	check(entry_door.opened, "entry door unbolted once the dungeon is complete")

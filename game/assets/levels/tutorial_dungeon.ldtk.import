@@ -7,10 +7,10 @@ path="res://.godot/imported/tutorial_dungeon.ldtk-92e77f71879b72c588f436ce110419
 
 [deps]
 
-files=["res://assets/levels/tilesets/tileset_16px.res", "res://assets/levels/levels/HubRoom.scn", "res://assets/levels/levels/PitRoom.scn", "res://assets/levels/levels/FightRoom.scn", "res://.godot/imported/tutorial_dungeon.ldtk-92e77f71879b72c588f436ce11041924.scn"]
+files=["res://assets/levels/tilesets/tileset_16px.res", "res://assets/levels/levels/HubRoom.scn", "res://assets/levels/levels/PitRoom.scn", "res://assets/levels/levels/FightRoom.scn", "res://assets/levels/levels/ChestRoom.scn", "res://.godot/imported/tutorial_dungeon.ldtk-92e77f71879b72c588f436ce11041924.scn"]
 
 source_file="res://assets/levels/tutorial_dungeon.ldtk"
-dest_files=["res://.godot/imported/tutorial_dungeon.ldtk-92e77f71879b72c588f436ce11041924.scn", "res://assets/levels/tilesets/tileset_16px.res", "res://assets/levels/levels/HubRoom.scn", "res://assets/levels/levels/PitRoom.scn", "res://assets/levels/levels/FightRoom.scn", "res://.godot/imported/tutorial_dungeon.ldtk-92e77f71879b72c588f436ce11041924.scn"]
+dest_files=["res://.godot/imported/tutorial_dungeon.ldtk-92e77f71879b72c588f436ce11041924.scn", "res://assets/levels/tilesets/tileset_16px.res", "res://assets/levels/levels/HubRoom.scn", "res://assets/levels/levels/PitRoom.scn", "res://assets/levels/levels/FightRoom.scn", "res://assets/levels/levels/ChestRoom.scn", "res://.godot/imported/tutorial_dungeon.ldtk-92e77f71879b72c588f436ce11041924.scn"]
 
 [params]
 

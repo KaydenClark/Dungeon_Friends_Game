@@ -3,26 +3,27 @@
 > Generated from LLM Workbench v2.1. See `RUNBOOK.md` -> Upgrading The
 > Harness.
 
-**Current focus:** **Phase 2 built end to end - gated on Kayden's windowed
-playthrough.** The whole Phase 2 sprint landed on branch
-`feature/phase2-tutorial-dungeon`, open as
-[PR #6](https://github.com/KaydenClark/Dungeon_Friends_Game/pull/6) into
-`integration`: T-031 LDtk
-entity pipeline (post-import hook + `LdtkRoom` adoption), T-011 LDtk-authored
-forest (same 34x20 layout, entities as LDtk instances), T-023 PushableBlock,
-T-024 PressurePlate + PuzzleController + reset Lever, T-025 jump button
-(Alt/C) + pits + block-fills-pit, T-026 Chest + chest-key flow, T-029
-defeat-restarts-from-the-beginning, T-030 F1 dev overlay (warp/reset/grant/
-heal/skip-combat), and T-027's 3-room tutorial dungeon - **Phase 2's "done"
-condition**. Proof: 17 unit suites (102 tests) incl. an exhaustive
-block-puzzle soft-lock solver over the real shipped rooms (it caught and
-killed one real wedge), and the slice smoke test extended 47 -> 94 checks
-covering the full dungeon loop + defeat restart. **Kayden's gates:** windowed
-tutorial-dungeon playthrough (T-027) and the T-020 3-resolution check. After
-that: Phase 3 (Data Model & Save/Load), which inherits the richer respawn
-(D-004) and the shield's effect (D-001/S-001).
+**Current focus:** **Phase 2 reworked from Kayden's first windowed playthrough
+(T-032 round 1, 2026-07-07) - gated on his re-check.** The rework (T-033)
+landed on the same branch `feature/phase2-tutorial-dungeon` /
+[PR #6](https://github.com/KaydenClark/Dungeon_Friends_Game/pull/6):
+the forest's invisible tree colliders now draw tree tiles (B-05) plus new
+open-field clusters; the **pressure plate is ON HOLD** (B-06 - its momentary
+re-lock read as broken in play) and out of the dungeon; the tutorial dungeon
+is now **four rooms**: hub with an Oracle-style 13-brick wall where exactly
+one brick pushes free (`PushableBlock.Movable=false` fixed bricks - wedge-proof
+by construction), a new chest room behind a north **locked door**
+(`dungeon_key`, dropped by the fight-room guardian; chest itself unlocked -
+Kayden's call), and the pit room reworked to two 1-wide jumpable ledges +
+the 2-wide block-fill chasm. Proof: 17 unit suites (103 tests / 351 checks,
+solver now jump- and fixed-brick-aware), smoke test 109/109 on 5/5 runs,
+plus a new `screenshot_tour.tscn` dev scene producing per-room PNGs.
+**Kayden's gates:** windowed re-check of the reworked dungeon + forest
+(T-032 round 2) and the T-020 3-resolution check. After that: Phase 3
+(Data Model & Save/Load), which inherits the richer respawn (D-004) and the
+shield's effect (D-001/S-001).
 **Owner:** Kayden
-**Last updated:** 2026-07-06 (Phase 2 build sprint)
+**Last updated:** 2026-07-07 (playtest-feedback rework)
 
 This is the live work queue and proof ledger. Agents use it to decide what to
 work on next. Keep strategy and long-term direction in `BLUEPRINT.md`; keep
@@ -30,33 +31,35 @@ commands and verification procedures in `RUNBOOK.md`.
 
 ## Executive Brief
 
-- **Shipping now:** The Phase 2 slice, playable from `main.tscn` on
-  placeholder art: the LDtk-authored forest (walk, NPCs, roaming slimes,
-  boss + key + locked door), and behind the door the 3-room tutorial
-  dungeon - entry locks behind you, push the block onto the center plate to
-  hold the east door open, fill the 2-wide pit with the block and jump
-  (Alt/C) the remaining gap, beat the Dungeon Slime for the chest key, loop
-  back through the west shortcut, open the chest for the shield, and the
-  entry unbolts. Party defeat restarts from the beginning (D-004). Debug
-  builds add an F1 dev overlay (warps, puzzle reset, grants, heal,
-  skip-combat).
+- **Shipping now:** The Phase 2 slice in its 2026-07-07 reworked layout,
+  playable from `main.tscn` on placeholder art: the LDtk-authored forest
+  (trees now actually visible where they block - B-05 - plus new open-field
+  clusters), and behind the boss door the **4-room** tutorial dungeon -
+  entry locks behind you, find the one brick in the 13-brick wall that
+  pushes free, jump the pit room's two 1-wide ledges (Alt/C), fill the
+  2-wide chasm with the block and jump the last gap, beat the Dungeon Slime
+  for the **dungeon_key**, loop back through the west shortcut, unlock the
+  north door, open the side room's chest for the shield, and the entry
+  unbolts. No pressure plate anywhere (B-06 - on hold). Party defeat
+  restarts from the beginning (D-004). Debug builds add an F1 dev overlay.
 - **Health:** green (headless) - on `feature/phase2-tutorial-dungeon`
   (Godot 4.6.3): `--import` clean, `main.tscn` boots clean, unit tests PASS
-  (17 suites / 102 tests / 322 checks incl. the soft-lock solver), slice
-  smoke test PASS 94/94 (multi-run battery; see Proof Log). **Kayden's
-  windowed playthrough is the Phase 2 gate.**
-- **Decision needed:** none blocking. The T-027 build filled several spec
-  gaps with flagged agent interpretations (reset lever, doorway no-block
-  rule, chest-opens-entry completion beat, one-way west door, dungeon_slime
-  stats) - confirm or re-cut during the windowed pass; see `BLUEPRINT.md`
-  Design Decisions (Phase 2 build row).
+  (17 suites / 103 tests / 351 checks incl. the jump- and fixed-brick-aware
+  soft-lock solver), slice smoke test PASS 109/109 on 5/5 consecutive runs.
+  **Kayden's windowed re-check is the Phase 2 gate.**
+- **Decision needed:** none blocking. The pressure plate is shelved, not
+  deleted - decide later whether it returns with a latching variant or a
+  visible cause-effect cue (see `BLUEPRINT.md` Core Logic). The remaining
+  T-027 agent interpretations (reset lever, doorway no-block rule,
+  chest-opens-entry completion beat, one-way west door) still want judging
+  in the re-check.
 - **Blocked on:** nothing for agents. T-020 (windowed 3-resolution check) and
-  the T-027 playthrough are Kayden-side gates.
-- **Phase status (2026-07-06):** Phase 0 done except M0.3 (T-002, Backlog).
-  Phase 1 done except T-020's windowed judgment. **Phase 2 code-complete**
-  (T-031/T-011/T-023/T-024/T-025/T-026/T-029/T-030/T-027 all built and
-  headless-verified).
-- **Next milestone:** Kayden's windowed pass, then Phase 3 - Data Model &
+  the T-032 round-2 re-check are Kayden-side gates.
+- **Phase status (2026-07-07):** Phase 0 done except M0.3 (T-002, Backlog).
+  Phase 1 done except T-020's windowed judgment. **Phase 2 code-complete in
+  the reworked layout** (T-031/T-011/T-023/T-025/T-026/T-029/T-030/T-027 +
+  T-033; T-024 plates built but on hold).
+- **Next milestone:** Kayden's windowed re-check, then Phase 3 - Data Model &
   Save/Load (`ItemData`/`AbilityData`/`MapMeta`/`EncounterData`/`SaveData`
   Resources, save points, the richer D-004 respawn, D-001 shield effect).
 - **Design update (2026-07-06):** Kayden locked in the movement-state roadmap
@@ -129,7 +132,7 @@ M0.3 export presets (T-002) is a Phase-0 leftover intentionally in Backlog.
 | ID | Priority | Task | Source / why now | Touches | Proof required | Docs impact | Owner | Status | Last update |
 |---|---:|---|---|---|---|---|---|---|---|
 | T-020 | 1 | **M1.4**: re-validate the `canvas_items`/`expand` HD/ultrawide stretch settings with the **real** M1.1 tileset at 1280x720, 1920x1080, and 3440x1440. *Prep done 2026-07-06: the spike scene now draws the real 16x16 tiles at 4x (all 5 tiles + hero on screen, ColorRect fallback removed from the happy path); headless run confirms `real_art=true`.* **Remaining: Kayden's windowed run at the 3 resolutions** - confirm the grid reads undistorted and 21:9 shows an acceptable amount of world | Gameplan.md §15 Phase 1 (M1.4); T-003 done | `game/scripts/dev/display_scaling_spike.gd` (done), windowed judgment (Kayden) | Windowed run at all 3 resolutions shows an undistorted grid; if `expand` reads poorly at 21:9, note the `keep`+letterbox fallback | `RUNBOOK.md` display-spike expectation; `BLUEPRINT.md` ultrawide-risk row if fallback chosen | Kayden (windowed) | **gated** - code ready, windowed check pending | 2026-07-06 |
-| T-032 | 2 | **Phase 2 windowed acceptance (Kayden)**: play the tutorial dungeon start to finish in a window - boss door -> hub lock-in -> plate puzzle -> pit crossing -> key fight -> loop back -> chest/shield -> exit; try to wedge the blocks (lever + re-entry should always recover); try a defeat (restart from the beginning); try the F1 dev overlay. Judge the flagged agent interpretations (`BLUEPRINT.md` Design Decisions, Phase 2 build row) and the jump binding (does Alt read OK on macOS, or should C lead?) | The Phase 2 "done" condition is Kayden's playthrough, not just the 94/94 smoke run | none (play + feedback) | Kayden's verdict recorded in a proof row; any re-cuts become new tasks | `TASKBOARD.md` proof row; `BLUEPRINT.md` if an interpretation is overturned | Kayden (windowed) | **gated** - build complete, awaiting playthrough | 2026-07-06 |
+| T-032 | 2 | **Phase 2 windowed acceptance (Kayden), round 2**: round 1 (2026-07-07) produced the B-05/B-06 findings and the 4-room rescope, all built as T-033. Now re-play the reworked loop: forest (trees visible? enough obstacles in the open stretch?) -> boss door -> hub lock-in -> find the loose brick in the wall -> ledge jumps -> chasm block-fill -> key fight -> west loop back -> north locked door -> chest/shield -> exit; try to wedge the brick (lever + fixed bricks should make it impossible); try a defeat; try the F1 dev overlay. Judge the remaining flagged interpretations and the jump binding (does Alt read OK on macOS, or should C lead?) | The Phase 2 "done" condition is Kayden's playthrough, not just the 109/109 smoke run | none (play + feedback) | Kayden's verdict recorded in a proof row; any re-cuts become new tasks | `TASKBOARD.md` proof row; `BLUEPRINT.md` if an interpretation is overturned | Kayden (windowed) | **gated** - rework complete, awaiting re-check | 2026-07-07 |
 
 ## Backlog
 
@@ -157,6 +160,8 @@ enough" and left `needs-review` for a later feel-tuning pass.
 | B-02 | 2 | Slime "moved opposite of me" and engaged too soon; and (2nd report) it only moves when the player moves - freezes when you stand still | (1) Pure random-walker (the "opposite" was coincidence). (2) It stepped only on `player_moved` (the synchronized-turn model), so it froze whenever the player did | (1)+(2) Autonomous timer-driven movement (`STEP_INTERVAL` 0.35s): wander until player within `TRACK_RADIUS` (4 tiles), then A*-chase continuously; spawn moved (9,4)->(14,4). **Retires the documented synchronized-turn invariant** (BLUEPRINT updated) | `game/scripts/overworld/overworld_enemy.gd`, `game/scripts/dev/forest_slice.gd` | gated |
 | B-04 | 1 | Walking sometimes moved two cells from a single tap | Player read movement with `is_action_pressed` (held) and re-stepped the instant the 0.15s move tween finished, so any tap held longer than ~0.15s produced a second step | Delayed-auto-shift: a fresh press is always exactly one step; continuous walking only engages after the direction is held past `MOVE_REPEAT_DELAY` (0.2s), then repeats at move cadence. Kayden: "good enough" - **left flagged for a later feel-review pass** (repeat delay/cadence may want tuning). *2026-07-06: that feel pass happened - T-021 reworked the input layer (hold matures through the tween, turn-in-place, last-pressed-wins) with the tap=one-step contract now unit-tested; Kayden's windowed check passed ("night and day")* | `game/scripts/overworld/player.gd` | **closed** (via T-021, 2026-07-06) |
 | B-03 | 3 | Combat felt "auto" / hard to track | Only input was a tiny bottom-left Attack/Defend toggle; everything else auto-ran on fixed timers, so it read as a cutscene | Pokemon-style two-tier menu ("What will Hero do?" -> Fight/Defend; Fight -> Swing Sword / Back) with a panel + prompt; hero now steps in, swings, and returns to their side each turn | `game/scripts/combat/combat.gd` | gated |
+| B-05 | 1 | (T-032 round 1, 2026-07-07) "Random places all over the map I run into and I don't know why... I don't see anything but grass" | `forest.ldtk`'s Ground layer drew the grass tile on all 241 Wall cells - every tree collider was invisible (the tileset's tree tile was never referenced) | Level patch: every Wall cell now draws the tree tile (tree sits on a grass base so edges tile clean); also removed a stray Pit cell sitting under the player spawn | `game/assets/levels/forest.ldtk` | **fixed** (via T-033) - windowed confirm in T-032 round 2 |
+| B-06 | 2 | (T-032 round 1, 2026-07-07) "The pressure plate never worked in the game" - blocked Kayden from reaching the pit room | Most likely the plate's locked momentary semantics: stepping on it opens the far east door, stepping off re-locks it before you can get there; without a visible cause-effect cue it reads as broken. (Headless tests exercise the block-parked path, which works - the human path is the broken-feeling one) | **Pressure plate put ON HOLD** (Kayden's call): primitive + unit suite stay, no shipped room uses one; the hub was redesigned around the brick wall instead. Revisit with a latching variant or an in-view door/cue | `game/assets/levels/tutorial_dungeon.ldtk`, `game/scripts/overworld/tutorial_hub_room.gd` | **on hold** (rescoped via T-033) |
 
 ## In Progress
 
@@ -226,6 +231,7 @@ MVP given this project's emphasis on weapon variety and magic (see
 | T-031 | LDtk entity post-import pipeline (D-002): `scripts/ldtk/entities_post_import.gd` instantiates the matching game object per entity (conventions in-script), `entities_post_import` wired in each .ldtk's import params, `LdtkRoom` base adopts spawned nodes into the runtime grid (IntGrid Wall/Pit -> blocking/pits, refs, PuzzleController, doorway markers + no-block cells, flag-based persistence) | 2026-07-06 | pass (headless) - unit suite `test_ldtk_pipeline` against the committed `entity_test_room.ldtk` fixture (one of every entity type adopted at the right cells with fields carried) | See Proof Log row 2026-07-06 (T-031/T-011) |
 | T-011 | Forest rebuilt through the LDtk pipeline: `forest.ldtk` (same 34x20 layout; tiles + Wall IntGrid + all entities as LDtk instances), `ForestRoom extends LdtkRoom` replaces the code-built `forest_slice.gd` (deleted, with the T-022 `dungeon_stub_room.gd`/`cave_room.ldtk` the tutorial supersedes) | 2026-07-06 | pass (headless) - full smoke test runs against the LDtk forest (walk/collide/NPC/fights/key/door checks unchanged in spirit, now 94/94 overall) | See Proof Log row 2026-07-06 (T-031/T-011) |
 | T-030 | Dev tools: `DebugOverlay` (debug builds only via `OS.is_debug_build()`, hidden until F1) - warps (Forest/Hub/Pit/Fight), reset room puzzle, grant forest_key/chest_key/shield, heal, skip-combat toggle (`SceneManager.skip_combat` -> instant victory) | 2026-07-06 | pass (headless) - unit suite `test_debug_overlay` (hidden by default, grant dedup, reset delegation); windowed F1 pass is Kayden's (T-032) | See Proof Log row 2026-07-06 (T-030) |
+| T-033 | Playtest-feedback rework (T-032 round 1, Kayden 2026-07-07): forest tree tiles on every Wall cell (B-05) + spawn-pit removal + open-field tree clusters; pressure plate ON HOLD (B-06); dungeon rescoped to 4 rooms - hub 13-brick wall with one movable brick (`PushableBlock.Movable` field, new fixed-brick primitive), new ChestRoom behind a north dungeon_key door, pit room reworked to 2 jumpable ledges + 2-wide chasm, guardian drops dungeon_key; solver made jump- and fixed-brick-aware; new `screenshot_tour.tscn` dev scene for per-room PNG demo artifacts | 2026-07-07 | pass (headless + screenshot review); Kayden's windowed re-check pending (T-032 round 2) | See Proof Log row 2026-07-07 (T-033) |
 | T-027 | **Phase 2 "done" condition**: the 3-room tutorial dungeon (`tutorial_dungeon.ldtk` + `tutorial_hub_room.gd`/`tutorial_pit_room.gd`/`tutorial_fight_room.gd`) - hub lock-in + 3x3 plate puzzle + visible locked chest + reset lever; 2-wide pit room (block-fill + jump); key-guardian fight room; west loop-back; chest -> shield -> entry unbolts; forest state preserved on return | 2026-07-06 | pass (headless) - smoke 94/94 through the whole loop incl. defeat restart; soft-lock solver proves both puzzle rooms wedge-safe (it caught one real wedge - see Proof Log); **Kayden's windowed playthrough pending (T-032)** | See Proof Log row 2026-07-06 (T-027) |
 
 ## Documentation Check
@@ -282,4 +288,6 @@ dated heading.
 | 2026-07-06 | T-023/T-024/T-025/T-026/T-029 (Phase 2 primitives) | Claude | Puzzle primitives + defeat restart on `feature/phase2-tutorial-dungeon` (branched off `integration`, includes the round-3 decision docs). `RoomGrid` gained pits (block walking/pathing, fillable), an occupancy-change signal (plates listen), occupy/vacate, no-block cells, teleport, and reset_puzzle. New: `PushableBlock` (bump-push one cell; sinks into pits and fills them permanently), `PressurePlate` (momentary; pressed by player *or* block), `PuzzleController` (plate->door wiring; adopts pre-pressed plates), `Lever` (reset escape valve), `Chest` (key-gated, one-time reward, flag persistence); `LockedDoor` reworked (per-door key, link ids, plate-driven held-open with deferred re-lock so a door never closes onto an occupant, custom locked lines, open-state persistence); `Player` gained the `jump` button (Alt/C - D-003; exactly 1 cell, Tween arc, in-place hop on refusal) and push-on-bump; `SceneManager` gained `handle_defeat`/`restart_game`/`reset_session_state` (D-004: defeat = restart from the beginning via main.gd's boot_factory) and the `skip_combat` dev hook. Verified (Godot 4.6.3): 4 new unit suites (`test_pushable_block`, `test_pressure_plate`, `test_jump`, `test_chest`) + `test_scene_manager` reset test - all PASS; negative control (corrupted push expectation) -> `UNIT TESTS: FAIL` then restored | `cd game && Godot --headless --path . tests/run_tests.tscn` | pass (headless); windowed jump/push feel is Kayden's (T-032) | `BLUEPRINT.md` Known Risks soft-lock row (mitigations built); `RUNBOOK.md` unit-test list; `TASKBOARD.md` this row + Done lane | Exact d10 combat formula still Phase 3/4; pull (vs push) deliberately out of scope |
 | 2026-07-06 | T-031/T-011 | Claude | LDtk entity pipeline + LDtk forest. `scripts/ldtk/entities_post_import.gd` (importer's entity-template pattern, set as `entities_post_import` in each .ldtk's import params) instantiates the matching game object per LDtk entity and stamps cell/fields metadata; entity-layer conventions documented in-script (PlayerSpawn/Npc/Enemy/LockedDoor/PushableBlock/PressurePlate/Chest/Lever/Doorway + fields). Runtime `LdtkRoom extends RoomGrid` instantiates the imported world at 4x, feeds Wall/Pit IntGrids into the grid, adopts spawned entities (reparent + register + wire refs/PuzzleController), marks doorway cells + approach cells block-free, spawns the player, and restores persisted state (opened doors/chests, slain unique enemies) from `SceneManager.flags`. Game fields made `@export` so import-time values survive scene packing. `forest.ldtk` (bootstrap JSON via committed `assets/levels/_scripts/generate_levels.py` - exact old 34x20 layout, 13 entities) + `ForestRoom` replace `forest_slice.gd`; T-022's `dungeon_stub_room.gd`/`cave_room.ldtk` retired (superseded by T-027's real rooms, same wiring). Verified: `--import` clean with `Entity Post-Import` running on all 5 entity layers; unit suite `test_ldtk_pipeline` (37 checks) proves the committed `entity_test_room.ldtk` fixture adopts one of every entity type at the right cells with fields carried; full smoke passes against the LDtk forest | Unit run + smoke battery (see T-027 row) | pass | `BLUEPRINT.md` Levels/scene-contract rows; `TASKBOARD.md` this row + Done lane | .ldtk files remain generator-authored until Kayden hand-authors in the LDtk app; multi-file worlds consolidate into `world.ldtk` at that point |
 | 2026-07-06 | T-030 | Claude | Dev overlay `scripts/dev/debug_overlay.gd`: instantiated by main.gd only when `OS.is_debug_build()` (never in release exports), hidden until F1. Actions: 1-4 warp (fresh Forest / Hub / Pit / Fight - tears down the room graph and boots the target; dungeon exits no-op on the empty stack, documented dev-only), 5 reset room puzzle, 6-8 grant forest_key/chest_key/shield (deduplicated), 9 heal, 0 skip-combat toggle (`SceneManager.skip_combat` -> instant victory + loot, no combat scene). HUD now lists the full inventory. Verified: unit suite `test_debug_overlay` (hidden by default, grant dedup, reset delegates to the real reset_puzzle); skip_combat default-off pinned in `test_scene_manager` | Windowed: run `main.tscn`, press F1 | pass (headless); windowed key-pass is Kayden's (T-032) | `RUNBOOK.md` dev-tools note; `TASKBOARD.md` this row + Done lane | Warp list is hardcoded to the 4 current rooms - extend as rooms are added |
+| 2026-07-07 | T-032 (round 1) | Kayden | First windowed playthrough of the Phase 2 build. Findings: (1) **B-05** - invisible collisions "all over the map... I don't see anything but grass" (root cause: forest Wall cells all drew the grass tile, zero tree tiles in the level); (2) wants more visible obstacles in the open stretch between spawn and the dungeon entry - "maybe not a maze, but at least trees or something"; (3) **B-06** - "the pressure plate never worked in the game," so he never reached the pit room; plate put ON HOLD by his call; (4) rescope to 4 rooms: hub brick wall (Oracle reference screenshot) where only some bricks push, chest moved to a side room behind a **locked door** ("I like having the door locked instead" of the chest), pit room = block pushing + ledge jumps, fight room's enemy drops the door key | Kayden's own play session + reference screenshot | round 1 verdict: rework required (built as T-033); forest look otherwise approved ("That looks good btw") | `TASKBOARD.md` this row + Bugs lane B-05/B-06 + T-032 re-scoped to round 2; `BLUEPRINT.md` Phase 2 Target revision block | Round 2 re-check after the T-033 rework |
+| 2026-07-07 | T-033 | Claude | Playtest-feedback rework on `feature/phase2-tutorial-dungeon` (PR #6). Levels rebuilt by scratchpad patch script: `forest.ldtk` (tree tile on all 249 Wall cells incl. 8 new cluster trees; stray spawn-cell Pit removed), `tutorial_dungeon.ldtk` (hub: 13-brick wall y=8 with only (6,8) movable, no plate/chest, north dungeon_key door at (7,0), east gap doorway; new ChestRoom 7x7 level, unlocked shield chest; pit room: 1-wide ledges y=9/y=7 + 2-wide chasm y=3..4, block on the near bank at (3,5) - wedge-proof: no push can reach the ledges, every reachable sink is a solution). Code: `PushableBlock.movable` + post-import `Movable` field; `TutorialChestRoom`; hub/pit/fight room scripts + dialogue reworked; `dungeon_slime.tres` drops dungeon_key; dev overlay grants dungeon_key. Tests: solver rewritten (fixed bricks as obstacles, 1-cell jumps in reachability, hub goal = east+north+entry all reachable or lever, pit goal = every sink is in the chasm + exit always reachable); smoke test rewritten for the new flow incl. fixed-brick refusal, locked-door-without-key beat, and the chest-room leg. Verified (Godot 4.6.3): `--import` exit 0; unit tests PASS (17 suites / 103 tests / 351 checks); `main.tscn --quit-after 1` clean; smoke **PASS 109/109 on 5/5 consecutive runs**; windowed `screenshot_tour.tscn` run produced per-room PNGs, visually reviewed (trees where colliders are; brick wall, ledges+chasm, vault render correctly) | `cd game && Godot --headless --path . scenes/dev/slice_smoke_test.tscn` -> 109/109 (~60s); or `Godot --path . scenes/dev/screenshot_tour.tscn -- --out=/tmp/shots` for 5 PNGs | pass (headless + screenshot review); **Kayden's windowed re-check is T-032 round 2** | `BLUEPRINT.md` (status para, Phase 2 Target 2026-07-07 revision, Core Logic plate-hold + movable note, arch rows, Known Risks, 2 Design Decisions rows); `TASKBOARD.md` (focus, brief, T-032, B-05/B-06, T-033, this row); `RUNBOOK.md` (smoke/unit expectations, screenshot tour) | Plate mechanic parked - future latching/cue variant is an open design question; forest cluster density is a first pass, tune in round 2; screenshot tour needs a display (black under --headless) |
 | 2026-07-06 | T-027 | Claude | **Phase 2 integration - the 3-room tutorial dungeon.** `tutorial_dungeon.ldtk` (3 levels) + thin room scripts: HubRoom 15x13 (entry door locks behind at the south doorway; plate at (5,5) = center of the 3x3 with the block at corner (4,4) and a 2-cell margin - the L-shaped push; visible locked chest; reset lever; plate-driven east door -> PitRoom; one-way west door), PitRoom 11x13 (2-wide pit spans the full width; block-fill + 1-cell jump crossing), FightRoom 11x9 (`dungeon_slime` key guardian, `unique_id` so it stays dead; west doorway loops to the hub via `SceneManager.exit_rooms(n)`, which repositions the player at the hub's west door and opens it for good). Chest -> shield (D-001) -> hub entry unbolts -> exit to the preserved forest. Rooms suspend going in, are freed/rebuilt backing out (escape valve); durable facts persist in flags. **Soft-lock proof:** `test_tutorial_softlock` BFS over every reachable (block, player-region) state of both real rooms - it caught a real wedge (block parked on the pit-room exit's only approach cell = trapped) which drove the doorway-approach no-block rule; both rooms now verify wedge-safe. Verified (Godot 4.6.3): `--import` exit 0; unit tests PASS (17 suites, 102 tests, 322 checks); `main.tscn --quit-after 3` boots clean; smoke test rewritten 47 -> **94 checks** covering the full dungeon loop + forced-defeat restart - **PASS 94/94 on 5/5 consecutive runs** (one earlier mid-battery timeout was a stale script-class cache from editing between runs, resolved by `--import`; not reproducible after) | `cd game && Godot --headless --path . scenes/dev/slice_smoke_test.tscn` -> 94/94 (~60s); windowed: beat the boss, enter the door, play the dungeon | pass (headless); **Kayden's windowed playthrough is the Phase 2 gate (T-032)** | `BLUEPRINT.md` Current Product Shape + scene contracts + Design Decisions (flagged interpretations) + Known Risks; `RUNBOOK.md` smoke expectation 94/94 + play loop + dev tools; `README.md` status para; `TASKBOARD.md` this row + lanes | Camera-zoom combat transition polish still deferred (Phase 4 framing); east-door/south-entry spatial mismatch between hub and pit room is door-to-door Zelda convention - flag if it reads wrong in play |

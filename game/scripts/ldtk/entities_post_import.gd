@@ -13,7 +13,7 @@
 ##   Npc        {Lines: Array<String>, Heals: Bool, ColorHex: String}
 ##   Enemy      {StatsId: String, IsBoss: Bool, LeashRadius: Int, UniqueId: String}
 ##   LockedDoor {KeyId: String, LinkId: String}
-##   PushableBlock {LinkId: String}
+##   PushableBlock {LinkId: String, Movable: Bool (default true; false = fixed brick)}
 ##   PressurePlate {Id: String, TargetId: String}
 ##   Chest      {Id: String, KeyId: String, RewardId: String}
 ##   Lever      (cell only)
@@ -78,6 +78,7 @@ func _spawn(entity: Dictionary) -> Node2D:
 		"PushableBlock":
 			var block: Node2D = BlockScript.new()
 			block.link_id = str(fields.get("LinkId", ""))
+			block.movable = bool(fields.get("Movable", true))
 			return block
 		"PressurePlate":
 			var plate: Node2D = PlateScript.new()

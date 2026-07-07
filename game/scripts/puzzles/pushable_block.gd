@@ -11,6 +11,10 @@ extends GridActor
 
 ## LDtk link id so plates/controllers can reference a specific block.
 @export var link_id := ""
+## False = a fixed brick: looks identical to a pushable block but never
+## moves (the Oracle-style "find the brick that budges" wall - Kayden
+## 2026-07-07). Fixed bricks still occupy and block their cell.
+@export var movable := true
 ## Where the block started; the reset lever / dev tools send it back here.
 var start_cell := Vector2i.ZERO
 ## True once the block has filled a pit: it is floor now - no longer an
@@ -43,7 +47,7 @@ func attach(p_room: RoomGrid, p_cell: Vector2i) -> void:
 ## tweening, after sinking, into walls/pits-behind-occupants/other occupants,
 ## or out of bounds.
 func try_push(dir: Vector2i) -> bool:
-	if moving or sunk or room == null or dir == Vector2i.ZERO:
+	if not movable or moving or sunk or room == null or dir == Vector2i.ZERO:
 		return false
 	var target := cell + dir
 	if not room.in_bounds(target):

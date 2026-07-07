@@ -8,7 +8,7 @@ extends CanvasLayer
 ## F1 toggles the panel. While it is open:
 ##   1-4  warp: fresh Forest / Tutorial Hub / Pit Room / Fight Room
 ##   5    reset the current room's puzzle (blocks back to start)
-##   6-8  grant forest_key / chest_key / shield
+##   6-8  grant forest_key / dungeon_key / shield
 ##   9    heal to full
 ##   0    toggle skip-combat (touch an enemy = instant victory)
 ##
@@ -57,7 +57,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_4: _warp(func() -> Node2D: return TutorialFightRoom.new())
 		KEY_5: reset_puzzle()
 		KEY_6: grant_item("forest_key")
-		KEY_7: grant_item("chest_key")
+		KEY_7: grant_item("dungeon_key")
 		KEY_8: grant_item("shield")
 		KEY_9: SceneManager.heal_hero_to_full()
 		KEY_0: SceneManager.skip_combat = not SceneManager.skip_combat
@@ -97,7 +97,7 @@ func _refresh() -> void:
 4  Warp: Fight Room
 5  Reset room puzzle
 6  Grant forest_key
-7  Grant chest_key
+7  Grant dungeon_key
 8  Grant shield
 9  Heal to full
 0  Skip combat: %s
