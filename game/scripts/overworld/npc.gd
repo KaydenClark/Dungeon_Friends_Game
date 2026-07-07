@@ -28,6 +28,6 @@ func _ready() -> void:
 
 
 func interact() -> void:
-	if heals and SceneManager.hero_stats:
-		SceneManager.hero_hp = SceneManager.hero_stats.max_hp
+	if heals:
+		SceneManager.heal_hero_to_full()
 	SceneManager.show_dialogue(lines)
