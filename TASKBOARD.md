@@ -3,7 +3,9 @@
 > Generated from LLM Workbench v2.1. See `RUNBOOK.md` -> Upgrading The
 > Harness.
 
-**Current focus:** **Phase 1 endgame.** Done this session (2026-07-06, all on
+**Current focus:** **Phase 1 endgame - open as [PR #5](https://github.com/KaydenClark/Dungeon_Friends_Game/pull/5)
+into `integration`** (pushed 2026-07-06, awaiting Kayden's review+merge; brings
+the T-019 test layer along too). Done this session (2026-07-06, all on
 `feature/movement-feel`): T-021 movement feel (Kayden: "night and day"), T-003
 real 16x16 test art + grid-unit decision (16px @ 4x = 64px cells), T-004 LDtk
 importer installed + verified, T-022 boss-door transition into the first
