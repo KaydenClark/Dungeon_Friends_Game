@@ -23,7 +23,7 @@ func test_two_states_never_share_containers() -> void:
 	var b := GameState.new()
 	a.party_xp["hero"] = 99
 	a.flags["door_x_opened"] = true
-	a.inventory.append("shield")
+	a.inventory["shield"] = 1
 	eq(b.party_xp.get("hero"), 0, "xp dictionaries are per-instance")
 	not_ok(b.flags.has("door_x_opened"), "flags dictionaries are per-instance")
 	eq(b.inventory.size(), 0, "inventories are per-instance")
@@ -47,7 +47,8 @@ func test_add_item_is_the_deduped_write_path() -> void:
 	SceneManager.state = GameState.new()
 	SceneManager.add_item("dungeon_key")
 	SceneManager.add_item("dungeon_key")
-	eq(SceneManager.state.inventory.size(), 1, "add_item de-duplicates")
+	eq(SceneManager.state.inventory.get("dungeon_key", 0), 1,
+			"add_item de-duplicates (qty stays 1)")
 	ok(SceneManager.inventory.has("dungeon_key"),
 			"the inventory property sees the item")
 	SceneManager.reset_session_state()
