@@ -8,8 +8,10 @@ extends Node
 ## camera-zoom-into-the-encounter treatment (see BLUEPRINT.md Design
 ## Decisions) - same context-passing pattern, different animation.
 ##
-## Full GameState/SaveData Resources arrive in Phase 3; until then the small
-## amount of session state below lives directly on this node.
+## Session state lives on a single GameState Resource (T-036); the
+## hero_hp/total_xp/inventory/flags properties below forward to it so call
+## sites read naturally while `state` stays the one serializable truth
+## (T-037's SaveData wraps it).
 
 signal encounter_finished(victory: bool)
 
@@ -29,10 +31,24 @@ var auto_combat := false
 var skip_combat := false
 
 var hero_stats: CharacterStats
-var hero_hp := 0
-var inventory := PackedStringArray()
-var total_xp := 0
-var flags := {}
+## The one mutable-session Resource (T-036). Swapped wholesale on reset/load.
+var state := GameState.new()
+
+var hero_hp: int:
+	get: return state.party_hp.get("hero", 0)
+	set(v): state.party_hp["hero"] = v
+var total_xp: int:
+	get: return state.party_xp.get("hero", 0)
+	set(v): state.party_xp["hero"] = v
+## NOTE: reads return a copy-on-write PackedStringArray - never call
+## .append() on it from outside; use add_item() (the write would land on the
+## copy and vanish). Assignment and .has() are safe.
+var inventory: PackedStringArray:
+	get: return state.inventory
+	set(v): state.inventory = v
+var flags: Dictionary:
+	get: return state.flags
+	set(v): state.flags = v
 
 var ui_busy := false
 ## Set when a dialogue closes. The player polls interact each frame, so without
@@ -200,12 +216,19 @@ func apply_victory_rewards(enemy_stats: EnemyStats) -> String:
 	total_xp += enemy_stats.xp_reward
 	var drops: PackedStringArray = enemy_stats.loot_table
 	for item in drops:
-		if not inventory.has(item):
-			inventory.append(item)
+		add_item(item)
 	var msg := "Victory! Gained %d XP." % enemy_stats.xp_reward
 	if drops.size() > 0:
 		msg += " The %s dropped: %s!" % [enemy_stats.display_name, ", ".join(drops)]
 	return msg
+
+
+## Add an item id to the inventory once - every current item is a unique
+## key or gear piece (stacking arrives with ItemData at T-034). The single
+## write path for inventory from outside this autoload.
+func add_item(item: String) -> void:
+	if not state.inventory.has(item):
+		state.inventory.append(item)
 
 
 ## Restore the hero to full HP. Shared by the healer NPC and the post-defeat
@@ -241,12 +264,11 @@ func restart_game() -> void:
 		boot_room(boot_factory.call())
 
 
-## The pure state-reset half of a restart (unit-tested on its own): XP,
-## inventory, flags, and HP all return to a fresh game's values.
+## The pure state-reset half of a restart (unit-tested on its own): swap in
+## a fresh GameState, then restore HP - XP, inventory, flags, and HP all
+## return to a fresh game's values in one move.
 func reset_session_state() -> void:
-	inventory = PackedStringArray()
-	total_xp = 0
-	flags = {}
+	state = GameState.new()
 	heal_hero_to_full()
 
 

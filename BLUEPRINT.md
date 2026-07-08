@@ -326,7 +326,12 @@ but at least trees or something" (added as scattered clusters).
 Architecture constraints:
 
 - Single Autoload: `SceneManager`. No other autoloads - additional global
-  state goes on `SceneManager`'s `GameState`/`SaveData` resource.
+  state goes on `SceneManager`'s `GameState`/`SaveData` resource. **Built
+  2026-07-07 (T-036):** `SceneManager.state: GameState` holds the mutable
+  session (party roster/levels/xp/hp, inventory, flags); `hero_hp`,
+  `total_xp`, `inventory`, `flags` are forwarding properties over it and
+  `add_item()` is the one deduped inventory write path. Reset/load swap the
+  whole `GameState` in one move - the shape `SaveData` (T-037) serializes.
 - Grid-snapped movement only, via `Tween`; never raw `velocity`-based free
   movement.
 - All stats/items/abilities/encounters are `Resource` subclasses defined in
