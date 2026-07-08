@@ -15,7 +15,7 @@ func _ready() -> void:
 	SceneManager.boot_factory = func() -> Node2D: return ForestRoom.new()
 	SceneManager.boot_room(SceneManager.boot_factory.call())
 	var hint := Label.new()
-	hint.text = "WASD / Arrows: move    E or Space: talk & interact"
+	hint.text = "WASD / Arrows: move    E: talk & interact    Space: jump"
 	hint.position = Vector2(16, 8)
 	hint.add_theme_font_size_override("font_size", 16)
 	hint.modulate = Color(1, 1, 1, 0.75)

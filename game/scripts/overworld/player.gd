@@ -62,8 +62,9 @@ func _process(delta: float) -> void:
 	if SceneManager.ui_busy or SceneManager.in_encounter or SceneManager.transitioning:
 		_reset_hold()
 		return
-	# Jump is a deliberate button press (D-003: Alt primary, C fallback), never
-	# automatic - it beats movement this frame so a hop is never eaten by a step.
+	# Jump is a deliberate button press (D-003; Space since Kayden's 2026-07-07
+	# input-scheme revision), never automatic - it beats movement this frame so
+	# a hop is never eaten by a step.
 	if not moving and Input.is_action_just_pressed("jump"):
 		try_jump()
 		return

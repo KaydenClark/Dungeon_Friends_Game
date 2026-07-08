@@ -381,11 +381,19 @@ keyboard, controller, and mobile touch - see Gameplan.md section 11):
 
 | Command | Purpose | Required for done? |
 |---|---|---|
-| `move_up` / `move_down` / `move_left` / `move_right` | Grid movement | yes |
-| `interact` / `confirm` | Interact with objects/NPCs; confirm menu selection | yes |
-| `cancel` / `back` | Cancel or back out of a menu | yes |
-| `menu` | Open pause/party menu | yes |
-| `jump` | Hop one cell over a pit/ledge in the facing direction (Phase 2) - bound to Alt primary, C fallback (2026-07-06) | yes (from Phase 2) |
+| `move_up` / `move_down` / `move_left` / `move_right` | Grid movement (WASD + arrows) | yes |
+| `interact` / `confirm` | Interact with objects/NPCs (E); confirm menu selection (Enter; E also confirms via `interact`) | yes |
+| `cancel` / `back` | Cancel or back out of a menu (Esc) | yes |
+| `menu` | Open pause/party menu (Tab - becomes the inventory/party screen per Kayden's 2026-07-07 scheme) | yes |
+| `jump` | Hop one cell over a pit/ledge in the facing direction (Phase 2) - **Space** (2026-07-07 revision, supersedes Alt/C) | yes (from Phase 2) |
+
+*Keyboard scheme (locked by Kayden 2026-07-07):* E talk/interact, Space jump,
+Tab inventory/party menu, **reserved for future actions:** `1`-`4` (switch
+which party member leads / is viewed), `M` (map), then `Q`, `F`, `C`, `V`,
+`Z`, `X` as the free pool, in that order of preference. The reserved keys are
+documented here, not bound - actions are created when their feature lands.
+Design intent: few quick-action presses; Q/E/F/1-4/Space is the whole
+everyday hand position.
 
 ### Data Model
 
@@ -477,9 +485,9 @@ Rules:
     interactions. This is a feel requirement on top of the invariant, not a
     change to it (T-021).
 - **Jump (added 2026-07-06, revised same day - Kayden)**: a **player-pressed
-  button** (`jump` input action, bound to Alt primary / C fallback - see
-  Commands), not automatic - Kayden: "I don't want to trust that my character
-  will jump the right way." Pressing jump hops one cell in the facing
+  button** (`jump` input action, bound to **Space** since the 2026-07-07
+  keyboard-scheme revision - see Commands), not automatic - Kayden: "I don't
+  want to trust that my character will jump the right way." Pressing jump hops one cell in the facing
   direction as a `Tween` arc (like any other step, never physics). **Max jump
   distance is exactly 1 cell** - a 1-cell gap is the definitional jumpable
   gap; 2+ cells is never jumpable. The jump only *succeeds* over a
@@ -651,6 +659,7 @@ Rules:
 | Shield is a plain inventory item at Phase 2 (D-001 resolved) | Kayden: "We are building the skeleton so we can just continue to ask the questions like 'Well, what does the shield do'" - effect decided at Phase 3/S-001. **Answered 2026-07-07 (D-007): the shield unlocks the Defend command** - see the Phase 3 rows below | 2026-07-06 round 2 / this session |
 | Levels authored **all-in as LDtk entities** (not a code/LDtk hybrid): blocks, plates, doors, chests, NPCs, enemies placed as LDtk entity instances with custom fields (link IDs, key names), instantiated by a post-import hook | Kayden picked all-in but conditioned it on documentation; confirmed the importer's entity path is the well-documented one - `post-import/entity-template.gd` + a complete `entity-spawn-lights.gd` example (match `entity.identifier`, read `entity.fields`, instantiate a scene, `update_instance_reference`) + `docs/classes.md` for `LDTKEntity` | 2026-07-06 round 3 / this session |
 | Jump is a **player-pressed button** (Alt primary, C fallback), not automatic/contextual | Kayden: "I don't want to trust that my character will jump the right way"; adds a `jump` input action (the map's first addition beyond the original 8). Note: Alt is an OS modifier on macOS - C is the safety binding if Alt reads poorly | 2026-07-06 round 3 / this session, supersedes the round-2 "contextual hop" wording |
+| **Keyboard scheme locked (revises the jump binding above)**: E talk/interact, **Space jump** (replaces Alt/C; Space removed from interact/confirm so a dialogue-closing press can never trigger a hop), Enter confirm, Esc cancel (X unbound - returned to the free pool), Tab = the future inventory/party screen (existing `menu` action), reserved: 1-4 party lead/view, M map, free pool Q/F/C/V/Z/X in that order | Kayden 2026-07-07 round 2: "is it too late to change it to spacebar? ... E to talk, spacebar to jump. maybe Tab to enter the inventory and 1 2 3 4 to switch which party member is leading"; few quick-action presses expected, so the everyday hand position is Q/E/F/1-4/Space | 2026-07-07 playtest round 2 |
 | Phase 2 death = restart from the beginning of the game; the richer old-man/room-reset respawn moves to Phase 3 | Kayden: "I agree this is starting to be phase 3" - the dungeon-puzzle-state reset a mid-dungeon respawn needs is the same serialization `SaveData` provides, so it belongs with save/load, not Phase 2 | 2026-07-06 round 3 / this session, supersedes the round-2 respawn row |
 | Overworld is a **single party avatar** (no snake-follow); the party's characters appear only in **Fire-Emblem-Sacred-Stones-style tactical combat** (select a character, WASD picks its destination cell, mini action menu below) | Kayden: "I kinda imagined one character in this overworld being your party... These are party encounters, not character encounters"; concentrates positioning depth in the tactical battles and keeps the overworld simple - **supersedes the snake-follow-formation decision** (Gameplan §10/§15 M5.1) | 2026-07-06 round 3 / this session |
 | Puzzle geometry primitive: plate at the center of a 3x3 pushing space, block in a corner, 2-cell walking margin around it (the margin enables the around-the-block L-shaped push, since pushing needs the opposite side and there are no diagonals) | Kayden's sketch-in-words for Room 1; exact cells/push-count finalized at build against his drawing | 2026-07-06 round 3 / this session |
