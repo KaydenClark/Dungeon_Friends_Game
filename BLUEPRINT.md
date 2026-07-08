@@ -392,7 +392,7 @@ keyboard, controller, and mobile touch - see Gameplan.md section 11):
 | `AbilityData` | `id, display_name, mp_cost, target_type, element, power, overworld_use` | `game/data/abilities/*.tres` | `element`/equipment-adjacent fields exist for Stretch Goals 1-2, unused at MVP |
 | `MapMeta` | `ldtk_level_id, display_name, music_track, encounter_table` | one companion `.tres` per level | LDtk is the source of truth for layout; this covers non-visual metadata |
 | `EncounterData` | `id, enemy_group, background_id` | `game/data/encounters/*.tres` | Referenced directly by overworld enemy instances - no random rolls |
-| `SaveData` | `current_map, player_position, party_roster, party_levels/xp/hp/mp, inventory, flags, defeated_enemy_ids` | `user://saves/slot_N` (`.tres` or `.json`) | Never saved mid-combat; 3 slots from the start |
+| `SaveData` | `schema_version, current_map, player_position, party_roster, party_levels/xp/hp/mp, inventory, flags` | `user://saves/slot_N.json` (JSON - D-006, 2026-07-07) | Never saved mid-combat; 3 slots from the start; no `defeated_enemy_ids` - enemies always respawn (D-009) |
 
 *Note (2026-07-05):* grid-based combat means `CharacterStats`/`EnemyStats`/
 `AbilityData` will need move-range and attack-range fields once Phase 4
@@ -522,29 +522,42 @@ Rules:
     refuses every push. This is the hub brick-wall primitive ("wall where
     you can only push some bricks, so we don't soft lock ourselves"); the
     2026-07-06 3x3-plate geometry note is retired with the plate hold.
-  - **Pits**: pit tiles block walking (treated like walls for pathing) but a
-    1-cell-wide pit can be jumped (see Jump above). A `PushableBlock` pushed
-    into a pit **fills it**, permanently converting that cell to walkable
-    floor (classic Zelda). No fall-in/respawn mechanic at MVP - pits are
-    impassable, not lethal.
+  - **Pits (revised 2026-07-07, D-008 - supersedes "impassable, not
+    lethal")**: a 1-cell-wide pit can be jumped (see Jump above); a
+    `PushableBlock` pushed into a pit **fills it**, permanently converting
+    that cell to walkable floor (classic Zelda). **Walking into a pit is a
+    Zelda-style fall** (T-047): small damage (tunable, first cut 1 HP) and
+    respawn at the last entrance the player came through into that room; a
+    fall that reaches 0 HP triggers the defeat flow. Enemies and pathfinding
+    still treat pits as blocked.
   - **Chests**: a `Chest` interactable holds a reward and may be locked
     (opens only with its matching key item), reusing the `LockedDoor`
     key-check pattern. Chests are placed visibly in the room from the start -
     no surprise reveal triggers ("if you're confused the players will be
     too", 2026-07-06).
-- **Death & respawn (added 2026-07-06, revised same day - Kayden)**: party
-  defeat is never a game-over screen dead end. **Phase 2 (now): restart from
-  the beginning of the game** - the simplest possible rule, no state
-  snapshotting. **Phase 3 (deferred): the richer respawn** - respawn at the
-  old man (healer NPC) when defeated outside a dungeon, or in the dungeon's
-  first room with puzzle state reset when inside - lands with save/load,
-  because "reset the dungeon's puzzle state" is the same room-state
-  serialization `SaveData` needs (Kayden: "I agree this is starting to be
-  phase 3"). Pits themselves stay non-lethal/impassable - death comes from
-  combat.
-- **Save**: save points are physical map objects; `SaveData` serializes to
-  `user://saves/slot_N`; never saved mid-combat; 3 slots supported from the
-  start.
+- **Death & respawn (revised 2026-07-07, D-008 - the Phase 3 rule)**: party
+  defeat is never a game-over dead end, and **redoing content is never the
+  punishment - losing XP is** (money may join/replace it once currency
+  exists). On defeat: **keep inventory; lose XP but never below the current
+  level's floor** (T-045 curve; exact penalty tunable); respawn at the
+  **dungeon entrance** when defeated inside a dungeon (rooms between reset -
+  puzzles and enemies alike), or at the healer's campfire outside. Defeat
+  never touches save files. Full HP on respawn (agent interpretation, flag
+  if wrong). The Phase 2 restart-from-the-beginning rule is retired once
+  T-041 lands; `restart_game()` remains a dev tool.
+- **Enemy respawns (added 2026-07-07, D-009)**: **enemies respawn every time
+  a room is left and rebuilt** - the same reset that un-wedges puzzles
+  applies to enemies, uniques and bosses included (duplicate key drops are
+  prevented by loot dedup; opened doors/chests stay open via flags).
+  Suspended-and-restored rooms (mid-trip) keep their in-visit state.
+  Deliberate deviation from Gameplan §12's defeated-enemies-stay-dead
+  (Lufia II) pattern; `SaveData` carries no `defeated_enemy_ids`.
+- **Save (revised 2026-07-07, D-006/D-011)**: save points are physical map
+  objects (SaveCrystal); `SaveData` serializes to **JSON** at
+  `user://saves/slot_N.json` (authored data stays `.tres` under `res://`);
+  never saved mid-combat; defeat/checkpoints never write saves; 3 slots in
+  the format, slot 1 via the crystal at MVP; a minimal Continue/New Game
+  prompt when a save exists at boot.
 
 Do not duplicate this logic in:
 
@@ -612,7 +625,7 @@ Rules:
 | Tutorial pit widened to 2 cells: jump alone can't cross it; intended solve is block-into-pit (fills 1 cell) then jump the remaining 1-cell gap from the filled cell | Kayden: with block-fills-pit in play, "we need to make the pit 2 wide so they can't jump across it and have to push the block into it"; the block-then-jump crossing is the smallest mechanical reading that still teaches the jump - **flagged as agent interpretation, confirm in windowed play** (alternatives: two blocks, or a walk-across bridge reading) | 2026-07-06 round 2 / this session |
 | Death/respawn: party defeat outside the dungeon respawns at the old man (healer NPC); defeat inside respawns in Room 1 with dungeon puzzle state fully reset ("you have to redo it all"). Pits stay non-lethal/impassable | Kayden's explicit respawn spec - death is a setback, not a game-over dead end; chest-key retention across death is TBD at T-029 | 2026-07-06 round 2 / this session |
 | Enemy aggro telegraph (oozes get visibly angry + faster when they spot you, replacing ambiguous wander-to-chase) is a real task, deferred until sprites exist | Kayden's clarification of "attack lock-in" from the movement table - it's an *enemy* feel feature, not player movement; parked as T-028 until T-003 art gives it something to show | 2026-07-06 round 2 / this session |
-| Shield is a plain inventory item at Phase 2 (D-001 resolved) | Kayden: "We are building the skeleton so we can just continue to ask the questions like 'Well, what does the shield do'" - effect decided at Phase 3/S-001 | 2026-07-06 round 2 / this session |
+| Shield is a plain inventory item at Phase 2 (D-001 resolved) | Kayden: "We are building the skeleton so we can just continue to ask the questions like 'Well, what does the shield do'" - effect decided at Phase 3/S-001. **Answered 2026-07-07 (D-007): the shield unlocks the Defend command** - see the Phase 3 rows below | 2026-07-06 round 2 / this session |
 | Levels authored **all-in as LDtk entities** (not a code/LDtk hybrid): blocks, plates, doors, chests, NPCs, enemies placed as LDtk entity instances with custom fields (link IDs, key names), instantiated by a post-import hook | Kayden picked all-in but conditioned it on documentation; confirmed the importer's entity path is the well-documented one - `post-import/entity-template.gd` + a complete `entity-spawn-lights.gd` example (match `entity.identifier`, read `entity.fields`, instantiate a scene, `update_instance_reference`) + `docs/classes.md` for `LDTKEntity` | 2026-07-06 round 3 / this session |
 | Jump is a **player-pressed button** (Alt primary, C fallback), not automatic/contextual | Kayden: "I don't want to trust that my character will jump the right way"; adds a `jump` input action (the map's first addition beyond the original 8). Note: Alt is an OS modifier on macOS - C is the safety binding if Alt reads poorly | 2026-07-06 round 3 / this session, supersedes the round-2 "contextual hop" wording |
 | Phase 2 death = restart from the beginning of the game; the richer old-man/room-reset respawn moves to Phase 3 | Kayden: "I agree this is starting to be phase 3" - the dungeon-puzzle-state reset a mid-dungeon respawn needs is the same serialization `SaveData` provides, so it belongs with save/load, not Phase 2 | 2026-07-06 round 3 / this session, supersedes the round-2 respawn row |
@@ -622,6 +635,7 @@ Rules:
 | Tutorial-dungeon build interpretations (T-027, **agent interpretation - confirm in windowed play**): (a) the hub gets a reset **Lever** as the soft-lock escape valve; (b) blocks can never be pushed onto doorway cells or their approach cells; (c) opening the chest is the dungeon's completion beat - it unbolts the locked entry door; (d) the hub's west door is one-way (opens permanently when the player loops back through it from Room 3); (e) the Room 3 key-carrier is a new `dungeon_slime.tres` (10 HP / atk 3, `unique_id key_guardian` so it stays dead); (f) hub -> pit -> fight rooms suspend on the way in and are freed/rebuilt when backed out of, with chest/door/unique-enemy state persisted in `SceneManager.flags` | Fills the gaps Kayden's room spec left open, biased toward classic-Zelda readings and the Known Risks soft-lock mitigation; none of it touches a locked decision. Flag anything that plays wrong and it can be re-cut cheaply - rooms are LDtk data + thin room scripts | 2026-07-06 / this session (Phase 2 build) |
 | **PressurePlate ON HOLD**; dungeon rescoped to four rooms: hub brick wall (13 bricks, one movable - Oracle-style, per Kayden's reference screenshot), new chest room behind a north **locked door** (`dungeon_key`; "I like having the door locked instead" of the chest), pit room gains two 1-wide jumpable ledges before the 2-wide chasm, fight room's guardian drops `dungeon_key` | Kayden's first windowed playthrough (T-032): the plate's momentary re-lock read as broken, so it's shelved rather than debugged mid-tutorial; the brick wall is wedge-proof by construction and keeps Room 1 focused on pushing | 2026-07-07 / playtest-feedback rework |
 | Forest fixes from the same playthrough: every Wall cell now draws its tree tile (colliders were rendering as plain grass - the "random places I run into" bug), stray pit under the spawn cell removed, extra tree clusters added in the open stretch between spawn and the dungeon entry | Kayden: "I would like for there to be more things out in the open between me and the entry like there was. Maybe not a maze, but at least trees or something" | 2026-07-07 / playtest-feedback rework |
+| **Phase 3 round (D-006..D-011, all resolved)**: (a) saves are **JSON** at `user://saves/slot_N.json` - Kayden delegated the pick; agent chose JSON per Gameplan §12's own MVP recommendation plus the `.tres`-from-`user://` script-execution risk; (b) **the shield unlocks Defend** - the command is absent from the combat menu until the shield is in inventory (D-001's answer); (c) **checkpoint respawns + XP-as-punishment** - keep inventory, lose XP never-below-level, dungeon-entrance/healer respawn, and walking into pits = Zelda fall back to the room's last-used entrance (supersedes pits-impassable); (d) **enemies respawn every time a room is left-and-rebuilt**, uniques included - the puzzle escape valve applies to enemies too (supersedes Gameplan §12's stay-dead pattern; `defeated_enemy_ids` dropped from SaveData); (e) EncounterData/MapMeta built now as stubs, wired Phase 4; (f) minimal Continue/New Game boot prompt; dev warps expand to every built room via the map registry | Kayden's 2026-07-07 planning answers, verbatim rationale on the TASKBOARD Pending Decisions table; agent interpretations flagged there (full-HP respawn, suspended-room semantics, fall damage + XP penalty amounts as tunables) | 2026-07-07 / Phase 3 planning round |
 
 ## Health Criteria
 
