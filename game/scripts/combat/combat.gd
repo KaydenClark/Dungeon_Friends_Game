@@ -195,7 +195,7 @@ func _build_view() -> void:
 	continue_label.position = Vector2(432, 466)
 	continue_label.add_theme_font_size_override("font_size", 22)
 	continue_label.modulate = Color(0.75, 1.0, 0.75)
-	continue_label.text = "▶  Press E / Space to continue"
+	continue_label.text = "▶  Press E to continue"
 	continue_label.visible = false
 	layer.add_child(continue_label)
 

@@ -24,7 +24,7 @@ func _room_ready() -> void:
 		SceneManager.show_dialogue([
 			"Narrow ledges split the floor ahead -",
 			"a single square wide. A running leap might do it.",
-			"(Alt or C jumps the gap you're facing.)",
+			"(Space jumps the gap you're facing.)",
 		])
 	player.move_finished.connect(_chasm_hint)
 
