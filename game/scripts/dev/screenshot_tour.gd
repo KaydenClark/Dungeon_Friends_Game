@@ -29,22 +29,11 @@ func _run() -> void:
 	await _shot("forest")
 	for room in [["hub", TutorialHubRoom], ["pit", TutorialPitRoom],
 			["fight", TutorialFightRoom], ["chest", TutorialChestRoom]]:
-		_warp(room[1].new())
+		SceneManager.warp_to(room[1].new())
 		await _frames(20)
 		await _shot(room[0])
 	print("SCREENSHOT TOUR: done -> ", out_dir)
 	get_tree().quit(0)
-
-
-## Same teardown the DebugOverlay warps use: boot the room with no stack.
-func _warp(room: Node2D) -> void:
-	for r in SceneManager.room_stack:
-		r.queue_free()
-	SceneManager.room_stack.clear()
-	if SceneManager.current_room:
-		SceneManager.current_room.queue_free()
-		SceneManager.current_room = null
-	SceneManager.boot_room(room)
 
 
 func _frames(n: int) -> void:

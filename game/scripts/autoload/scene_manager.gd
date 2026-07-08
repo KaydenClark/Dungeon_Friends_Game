@@ -283,17 +283,24 @@ func handle_defeat() -> void:
 	restart_game()
 
 
-## Wipe the session and boot a fresh starting room via boot_factory.
-func restart_game() -> void:
-	reset_session_state()
+## Free every suspended + current room and boot `room` fresh. Shared by
+## restart_game() and the dev tools' warps (DebugOverlay, screenshot_tour) so
+## there's one "start clean" path instead of three copies of the same teardown.
+func warp_to(room: Node2D) -> void:
 	for r in room_stack:
 		r.queue_free()
 	room_stack.clear()
 	if current_room:
 		current_room.queue_free()
 		current_room = null
+	boot_room(room)
+
+
+## Wipe the session and boot a fresh starting room via boot_factory.
+func restart_game() -> void:
+	reset_session_state()
 	if boot_factory.is_valid() and world_container:
-		boot_room(boot_factory.call())
+		warp_to(boot_factory.call())
 
 
 ## The pure state-reset half of a restart (unit-tested on its own): swap in

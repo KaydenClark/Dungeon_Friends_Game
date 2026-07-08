@@ -88,7 +88,7 @@ func _run() -> void:
 	check(not regulars_carry_key, "no regular slime carries the key")
 
 	# 4. NPC dialogue (T-012): stand under the quest NPC, face up, interact.
-	check(await _go(player, room.npc.cell + Vector2i.DOWN), "reached the NPC")
+	check(await _go_grid(room, player, room.npc.cell + Vector2i.DOWN), "reached the NPC")
 	player.set_facing(Vector2i.UP)
 	player.interact()
 	await get_tree().process_frame
@@ -107,7 +107,7 @@ func _run() -> void:
 	check(SceneManager.world_container.visible, "overworld restored after combat")
 
 	# 6. Healer NPC: interact fully restores HP.
-	check(await _go(player, room.healer.cell + Vector2i.LEFT), "reached the healer")
+	check(await _go_grid(room, player, room.healer.cell + Vector2i.LEFT), "reached the healer")
 	player.set_facing(Vector2i.RIGHT)
 	player.interact()
 	await get_tree().process_frame
@@ -124,7 +124,7 @@ func _run() -> void:
 
 	# 8. Locked door + key (reward flow): unlock, then walk into the doorway.
 	var door: LockedDoor = room.door
-	check(await _go(player, door.cell + Vector2i.DOWN), "reached the locked door")
+	check(await _go_grid(room, player, door.cell + Vector2i.DOWN), "reached the locked door")
 	player.set_facing(Vector2i.UP)
 	player.interact()
 	await get_tree().process_frame
@@ -317,11 +317,16 @@ func _run() -> void:
 	check(door.opened, "door still open after the round trip")
 
 	# 14. Party defeat (T-029, D-004): restart from the beginning of the game.
-	var old_room: Node2D = SceneManager.current_room
+	# Capture the instance id, not the node itself - restart_game() frees this
+	# room, and comparing a lambda-captured reference against a freed object
+	# throws (Godot's freed-object guard silently nulls it, but still logs an
+	# ERROR every run).
+	var old_room_id := SceneManager.current_room.get_instance_id()
 	SceneManager.handle_defeat()
 	await _pump_dialogue()
 	check(await _until(func() -> bool:
-			return SceneManager.current_room != old_room \
+			return SceneManager.current_room != null \
+			and SceneManager.current_room.get_instance_id() != old_room_id \
 			and SceneManager.current_room is ForestRoom),
 			"defeat rebooted a fresh forest")
 	check(SceneManager.total_xp == 0, "XP reset to zero")
@@ -397,18 +402,7 @@ func _navigate(grid: RoomGrid, player: Player, target: Vector2i, max_steps := 16
 	return player.cell == target
 
 
-## Encounter-tolerant navigation on the forest grid.
-func _go(player: Player, target: Vector2i, max_rounds := 8) -> bool:
-	for i in max_rounds:
-		if await _navigate(room, player, target):
-			return true
-		if SceneManager.in_encounter:
-			await SceneManager.encounter_finished
-			await _pump_dialogue()
-	return player.cell == target
-
-
-## Encounter-tolerant navigation on an arbitrary grid (dungeon rooms).
+## Encounter-tolerant navigation on any grid (the forest or a dungeon room).
 func _go_grid(grid: RoomGrid, player: Player, target: Vector2i, max_rounds := 8) -> bool:
 	for i in max_rounds:
 		if await _navigate(grid, player, target):

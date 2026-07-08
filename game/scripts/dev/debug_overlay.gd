@@ -51,10 +51,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if SceneManager.in_encounter or SceneManager.transitioning:
 		return
 	match key:
-		KEY_1: _warp(func() -> Node2D: return ForestRoom.new())
-		KEY_2: _warp(func() -> Node2D: return TutorialHubRoom.new())
-		KEY_3: _warp(func() -> Node2D: return TutorialPitRoom.new())
-		KEY_4: _warp(func() -> Node2D: return TutorialFightRoom.new())
+		KEY_1: SceneManager.warp_to(ForestRoom.new())
+		KEY_2: SceneManager.warp_to(TutorialHubRoom.new())
+		KEY_3: SceneManager.warp_to(TutorialPitRoom.new())
+		KEY_4: SceneManager.warp_to(TutorialFightRoom.new())
 		KEY_5: reset_puzzle()
 		KEY_6: grant_item("forest_key")
 		KEY_7: grant_item("dungeon_key")
@@ -65,16 +65,6 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 	get_viewport().set_input_as_handled()
 	_refresh()
-
-
-func _warp(factory: Callable) -> void:
-	for r in SceneManager.room_stack:
-		r.queue_free()
-	SceneManager.room_stack.clear()
-	if SceneManager.current_room:
-		SceneManager.current_room.queue_free()
-		SceneManager.current_room = null
-	SceneManager.boot_room(factory.call())
 
 
 func reset_puzzle() -> void:

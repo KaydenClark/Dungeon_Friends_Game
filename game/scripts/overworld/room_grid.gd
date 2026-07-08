@@ -20,7 +20,6 @@ var no_block_cells := {}
 var enemies: Array = []
 var astar := AStarGrid2D.new()
 
-signal player_moved
 ## Emitted whenever a cell gains or loses an occupant (register, unregister,
 ## or a move touching that cell). Pressure plates listen to this (T-024).
 signal cell_occupancy_changed(cell: Vector2i)

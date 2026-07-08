@@ -219,4 +219,3 @@ func _on_player_moved() -> void:
 		return
 	if doorways.has(player.cell):
 		_on_doorway(doorways[player.cell])
-	player_moved.emit()

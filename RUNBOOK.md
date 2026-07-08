@@ -65,8 +65,8 @@ console errors.
 Playing the slice (updated 2026-07-07, Phase 2 rework; controls are the
 T-009 input map plus the T-025 jump):
 
-- WASD / arrow keys: grid-snapped movement. E / Space: talk & interact;
-  Enter / Space advances dialogue. Alt (or C): jump one cell over a pit.
+- WASD / arrow keys: grid-snapped movement. E: talk & interact; E / Enter
+  advances dialogue. Space: jump one cell over a pit.
 - Loop: talk to the quest NPC -> fight slimes (bump to battle; Up/Down +
   Enter drives the two-tier menu) -> beat the leashed Boss Slime by the east
   door for the Forest Key -> open the door and step through into the
