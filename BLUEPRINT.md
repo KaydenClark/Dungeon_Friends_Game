@@ -399,8 +399,9 @@ everyday hand position.
 
 | Entity | Key fields | Stored where | Notes |
 |---|---|---|---|
-| `CharacterStats` | `id, display_name, max_hp, max_mp, attack, defense, speed, sprite_frames, starting_abilities` | `game/data/characters/*.tres` | Party member stat block |
-| `EnemyStats` | `id, display_name, max_hp, attack, defense, speed, abilities, ai_behavior, xp_reward, loot_table` | `game/data/enemies/*.tres` | `ai_behavior`: `RANDOM_WALK` / `BIASED_TRACKING` / `PATTERN` |
+| `CombatStats` | `max_hp, max_mp, might, guard, skill, speed, focus, move_range` | sub-resource inside character/enemy .tres | **The one shared combat stat block (T-052, 2026-07-07)** - both sides of a fight use the same stats so abilities can target either. Scale: 0 unusable, 1-2 weak, 3-4 average, 5-6 strong, 7-8 exceptional, 9-10 boss; level-1 units sit in 2-6 |
+| `CharacterStats` | `id, display_name, role, stats (CombatStats), starting_level, starting_ability_ids, starting_equipment_ids, exploration_tags, description, portrait, battle_sprite` | `game/data/characters/*.tres` | Party member TEMPLATE (definitions only - live HP/XP/level/recruitment are GameState/SaveData). Ability/equipment refs are id strings resolved through libraries |
+| `EnemyStats` | `id, display_name, family, role, rank, stats (CombatStats), ability_ids, ai_behavior, damage_resistances, status_immunities, xp_reward, loot_table, battle_sprite` | `game/data/enemies/*.tres` | Enemy TEMPLATE. `ai_behavior`: `RANDOM_WALK` / `BIASED_TRACKING` / `PATTERN` (kept over the adopted spec's `ai_profile_id`). Resistances/immunities are schema-only until Phase 4 |
 | `ItemData` | `id, display_name, description, item_type, stat_modifiers, on_use_ability` | `game/data/items/*.tres` | **Built (T-034, 2026-07-07).** `item_type`: `KEY_ITEM` / `CONSUMABLE` / `EQUIPMENT`; ids resolve through the static `ItemLibrary` (`game/scripts/data/item_library.gd`); `stat_modifiers`/`on_use_ability` are authored-but-unconsumed stretch fields until Phases 4/5 |
 | `AbilityData` | `id, display_name, mp_cost, target_type, element, power, overworld_use` | `game/data/abilities/*.tres` | `element`/equipment-adjacent fields exist for Stretch Goals 1-2, unused at MVP |
 | `MapMeta` | `ldtk_level_id, display_name, music_track, encounter_table` | one companion `.tres` per level | LDtk is the source of truth for layout; this covers non-visual metadata |
@@ -428,6 +429,24 @@ stack, and `SceneManager.add_item`/`remove_item` are the write paths. UI
 `ItemLibrary`; unknown ids fall back to `id.capitalize()` so dev/test items
 never crash a dialogue. `EnemyStats.loot_table` stays a `PackedStringArray`
 of item ids resolved through the library (the T-043 deviation).
+
+*Status (2026-07-07, T-052 - the stat-block adoption):* Kayden brought in an
+external (GPT-pro) data-model proposal and it was adopted **selectively**:
+the shared `CombatStats` block, the might/guard/skill/speed/focus stat
+spread and its 0-10 scale, the template-vs-runtime split, id-based
+ability/equipment references, the d10 formulas above, and the hero + 3
+slime records rebalanced to the new scale (hero 20hp/4/4/4/4/3, forest
+slime 8hp minion, boss slime 16hp boss, dungeon slime 10hp elite). Our
+additions/deviations: `max_mp` lives on `CombatStats` (the proposal left
+the ability-resource pool undecided; T-035's AbilityData has `mp_cost`),
+`ai_behavior` stays our consumed enum, `loot_table` stays string ids
+(T-043). **Not adopted:** the proposal's save shape records
+per-encounter `defeated` flags and persistent enemy HP - that directly
+contradicts Kayden's same-day D-009 ("enemies respawn every time you leave
+the room"), so D-009 stands; and its 4-character starting party + 6-enemy
+roster is deliberately deferred content - the schema is ready for them, but
+recruitment is Phase 5 and new enemy kinds arrive with Phase 4 encounters
+(building them now violates the build-order discipline).
 
 *Progression note (2026-07-07, T-045):* `Progression.xp_to_next(level)`
 (`game/scripts/data/progression.gd`) is the pure XP-curve function - a
@@ -500,9 +519,16 @@ Rules:
 - **Combat**: grid-based, turn-based, resolved with a **d10 percentage
   system** - roll 1-10 against a stat-derived success threshold, so success
   chances map directly to clean percentages (e.g. a threshold of 7 reads as a
-  70% chance). Exact threshold/damage formula is TBD at the Phase 3/4
-  combat-math implementation (red/green/refactor per `AGENTS.md` ->
-  Verification And Proof), not decided here. Two-layer FSM - Battle FSM
+  70% chance). **Formulas decided 2026-07-07 (T-052, Kayden's adopted
+  direction), implemented red/green over the shared `CombatStats` block:**
+  hit tier = `clamp(7 + attacker.skill - defender.speed, 2, 9)` (-2 while
+  the defender braces), presented roll-HIGH-good (need `11 - tier` or more,
+  the 2026-07-05 playtest flip); physical damage =
+  `max(1, ability_power + might - guard)` (halved, min 1, while bracing;
+  the basic swing uses a placeholder power of 2 until AbilityData);
+  focus damage = `max(1, power + focus - focus)` and status tier =
+  `clamp(6 + focus - focus, 2, 9)` are pinned by tests but unconsumed until
+  Phase 4 abilities. Two-layer FSM - Battle FSM
   (`Initialize -> CalculateInitiative -> UnitTurn (loop) -> EncounterEnd`) and
   per-Entity FSM (`AwaitingTurn -> CheckRange (move + attack range) -> Moving
   -> SelectingAction -> ExecutingCommand -> TakingDamage/Healing -> back or
@@ -647,6 +673,7 @@ Rules:
 | General moment-to-moment loop confirmed as explore -> interact with an object/NPC/enemy -> take an action -> see the consequence -> continue exploring | Kayden's explicit framing for what "first playable" should feel like at every scale; confirms rather than changes the existing concrete first-playable scenario (row above) | 2026-07-05 / this session |
 | Combat is grid-based (units occupy cells, check move/attack range, can move each turn); turn order is strict per-character initiative (speed), never a whole-team phase | Kayden's explicit combat-loop framing: check ranges -> move -> attack phase -> results, repeated per unit in initiative order, not team-by-team; the `TurnManager` design already sorted all combatants together by speed - only the Battle FSM's stale `PlayerPhase`/`EnemyPhase` state names implied team-phasing, and those are retired | 2026-07-05 / this session |
 | Combat resolution uses a d10 percentage system (roll 1-10 against a stat-derived success threshold) instead of flat deterministic damage-only math | Kayden's explicit request for a system where success chances read as clean percentages; exact threshold/damage formula is a Phase 3/4 combat-math implementation decision (red/green/refactor per `AGENTS.md`), not decided here | 2026-07-05 / this session |
+| **Shared `CombatStats` block + concrete d10 formulas (T-052)**: one stat system (might/guard/skill/speed/focus + move_range, 0-10 scale) for characters AND enemies; hit = skill vs speed, physical = power+might-guard, focus mirrors for magic/status; templates never hold runtime state. Adopted from the GPT-pro proposal Kayden brought in, selectively - its per-encounter defeated-flag save shape was REJECTED (contradicts D-009), its 4-character/6-enemy roster deferred to Phases 4/5 (schema ready, content not built early), `max_mp` added to the block, `ai_behavior` enum kept | Kayden 2026-07-07: "Here is a response from GPT pro about the resources and what we should do"; the shared block means abilities can target either side without parallel systems - resolves the formula TBD in the row above | 2026-07-07 playtest round 2 |
 | Movement-state roadmap locked: (1) walk/face/act lock-in, (2) door transitions/ledges/stairs, (3) push/pull, (4) dash/roll, (5) swim - rows 1-3 MVP, rows 4-5 Deferred (S-009/S-010) | Kayden's explicit priority table; sequences movement investment by feel-impact and keeps dash/swim from being built early | 2026-07-06 / this session, see Movement-State Roadmap |
 | Grid movement must *feel* continuous (Zelda/Pokemon bar): held steps chain with no hitch, tap turns-in-place before stepping, no "clicking into place" read - the grid-snap invariant itself is unchanged | Kayden: "In zelda and pokemon games I am locked into a grid but it never feels like I am clicking into place" - a feel requirement layered on the locked invariant, not a relitigation of it | 2026-07-06 / this session (T-021) |
 | Jump added to MVP: contextual grid-snapped hop at ledge/pit edges, max exactly 1 cell, Tween-arc implementation (never physics) | Kayden: "not whenever but like when there are ledges and pits I want to be able to jump over them with my party"; the 1-cell limit is load-bearing for Room 2 of the tutorial dungeon (the pit is exactly at the jump limit) | 2026-07-06 / this session |

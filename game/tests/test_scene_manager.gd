@@ -69,7 +69,7 @@ func test_heal_restores_to_full() -> void:
 	var saved := SceneManager.hero_hp
 	SceneManager.hero_hp = 1
 	SceneManager.heal_hero_to_full()
-	eq(SceneManager.hero_hp, SceneManager.hero_stats.max_hp, "heal tops HP to max")
+	eq(SceneManager.hero_hp, SceneManager.hero_stats.stats.max_hp, "heal tops HP to max")
 	SceneManager.hero_hp = saved
 
 
@@ -86,7 +86,7 @@ func test_defeat_reset_wipes_session_state() -> void:
 	eq(SceneManager.total_xp, 0, "XP resets to zero")
 	eq(SceneManager.inventory.size(), 0, "inventory wiped")
 	eq(SceneManager.flags.size(), 0, "flags wiped")
-	eq(SceneManager.hero_hp, SceneManager.hero_stats.max_hp,
+	eq(SceneManager.hero_hp, SceneManager.hero_stats.stats.max_hp,
 			"hero restored to full for the fresh start")
 	SceneManager.hero_hp = saved_hp
 

@@ -1,13 +1,25 @@
-[gd_resource type="Resource" script_class="CharacterStats" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="CharacterStats" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/data/character_stats.gd" id="1_hero"]
+[ext_resource type="Script" path="res://scripts/data/combat_stats.gd" id="2_stats"]
+
+[sub_resource type="Resource" id="CombatStats_hero"]
+script = ExtResource("2_stats")
+max_hp = 20
+max_mp = 5
+might = 4
+guard = 4
+skill = 4
+speed = 4
+focus = 3
+move_range = 4
 
 [resource]
 script = ExtResource("1_hero")
 id = "hero"
 display_name = "Hero"
-max_hp = 20
-max_mp = 5
-attack = 4
-defense = 2
-speed = 5
+role = &"balanced"
+stats = SubResource("CombatStats_hero")
+starting_level = 1
+exploration_tags = Array[StringName]([&"cut_vines"])
+description = "The balanced founding party member - decent at everything, master of nothing."

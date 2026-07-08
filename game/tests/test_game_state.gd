@@ -63,5 +63,5 @@ func test_reset_swaps_in_a_fresh_state() -> void:
 	ok(SceneManager.state != old, "reset replaces the GameState instance")
 	eq(SceneManager.total_xp, 0, "XP back to zero")
 	eq(SceneManager.inventory.size(), 0, "inventory back to empty")
-	eq(SceneManager.hero_hp, SceneManager.hero_stats.max_hp,
+	eq(SceneManager.hero_hp, SceneManager.hero_stats.stats.max_hp,
 			"hero healed to full on reset")

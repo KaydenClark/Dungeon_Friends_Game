@@ -1,15 +1,26 @@
-[gd_resource type="Resource" script_class="EnemyStats" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="EnemyStats" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/data/enemy_stats.gd" id="1_dungeon"]
+[ext_resource type="Script" path="res://scripts/data/combat_stats.gd" id="2_stats"]
+
+[sub_resource type="Resource" id="CombatStats_guardian"]
+script = ExtResource("2_stats")
+max_hp = 10
+might = 3
+guard = 2
+skill = 3
+speed = 2
+focus = 0
+move_range = 3
 
 [resource]
 script = ExtResource("1_dungeon")
 id = "dungeon_slime"
 display_name = "Dungeon Slime"
-max_hp = 10
-attack = 3
-defense = 1
-speed = 2
+family = &"slime"
+role = &"striker"
+rank = &"elite"
+stats = SubResource("CombatStats_guardian")
 ai_behavior = 1
 xp_reward = 12
 loot_table = PackedStringArray("dungeon_key")

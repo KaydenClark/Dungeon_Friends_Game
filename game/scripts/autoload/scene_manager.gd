@@ -75,7 +75,7 @@ func _ready() -> void:
 	rng.randomize()
 	hero_stats = load("res://data/characters/hero.tres")
 	if hero_stats:
-		hero_hp = hero_stats.max_hp
+		hero_hp = hero_stats.stats.max_hp
 	print("SceneManager ready.")
 
 
@@ -267,7 +267,7 @@ func inventory_text() -> String:
 ## recovery so both apply the exact same rule.
 func heal_hero_to_full() -> void:
 	if hero_stats:
-		hero_hp = hero_stats.max_hp
+		hero_hp = hero_stats.stats.max_hp
 
 
 ## Party defeat (T-029, locked decision D-004): restart from the beginning of

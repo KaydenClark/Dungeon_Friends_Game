@@ -112,7 +112,7 @@ func _run() -> void:
 	player.interact()
 	await get_tree().process_frame
 	await _pump_dialogue()
-	check(SceneManager.hero_hp == SceneManager.hero_stats.max_hp,
+	check(SceneManager.hero_hp == SceneManager.hero_stats.stats.max_hp,
 			"healer restored HP to max (%d)" % SceneManager.hero_hp)
 
 	# 7. Boss fight: hunt the boss until it falls; it drops the key.
@@ -327,7 +327,7 @@ func _run() -> void:
 	check(SceneManager.total_xp == 0, "XP reset to zero")
 	check(SceneManager.inventory.size() == 0, "inventory wiped")
 	check(SceneManager.flags.size() == 0, "flags wiped (dungeon fully resets)")
-	check(SceneManager.hero_hp == SceneManager.hero_stats.max_hp,
+	check(SceneManager.hero_hp == SceneManager.hero_stats.stats.max_hp,
 			"hero restored to full for the fresh start")
 	var fresh: ForestRoom = SceneManager.current_room
 	check(await _until(func() -> bool: return fresh.player != null), "fresh player spawned")
