@@ -127,8 +127,11 @@ cd game
 /Applications/Godot.app/Contents/MacOS/Godot --headless --path . scenes/dev/slice_smoke_test.tscn
 ```
 
-Expected result: exit `0` and a final `SLICE SMOKE TEST: PASS (109/109
-checks)` line (~40-80s; the watchdog fails the run at 180s). A benign `ObjectDB instances leaked` warning
+Expected result: exit `0` and a final `SLICE SMOKE TEST: PASS (113/113
+checks)` line (~40-80s; the watchdog fails the run at 180s). The count grew
+109 -> 113 on 2026-07-07 when the B-08 dungeon re-entry leg was added
+(exit restores the player on the forest side of the doorway, then walks
+back in and out once more). A benign `ObjectDB instances leaked` warning
 at exit is known noise from quitting mid-coroutines; any `CHECK FAILED:` line
 or exit `1` is a real failure. Because roaming enemies move on real-time
 timers, run it a few times in a row when touching enemy AI or movement (`for

@@ -293,7 +293,24 @@ func _run() -> void:
 	check(await _until(func() -> bool: return SceneManager.current_room == room),
 			"stepping out returned to the forest")
 	check(room.visible, "forest visible again after returning")
-	check(room.player.cell == door.cell, "player back at the exact doorway cell")
+	# B-08 (2026-07-07): the restore nudges the player OFF the doorway trigger
+	# to the forest side, facing the forest - standing on the trigger meant
+	# "walking back in" stepped past it into the decorative cave-mouth pocket.
+	check(room.player.cell == door.cell + Vector2i.DOWN,
+			"player restored on the forest side of the doorway (B-08)")
+	check(room.player.facing == Vector2i.DOWN, "player faces back into the forest")
+	# And the doorway must still re-fire: walk back in, then return once more.
+	await _step(room.player, Vector2i.UP)
+	check(await _until(func() -> bool:
+			return SceneManager.current_room is TutorialHubRoom),
+			"stepping onto the doorway again re-enters the dungeon (B-08)")
+	var hub2: TutorialHubRoom = SceneManager.current_room
+	await _pump_dialogue()
+	check(await _go_grid(hub2, hub2.player, Vector2i(7, 11)),
+			"walked back to the rebuilt hub's entry")
+	await _step(hub2.player, Vector2i.DOWN)
+	check(await _until(func() -> bool: return SceneManager.current_room == room),
+			"second exit returns to the forest again")
 	check(room.player.camera.is_current(), "camera restored to the forest player")
 	check(not is_instance_valid(room.boss) or room.boss.is_queued_for_deletion(),
 			"forest state preserved across the trip (boss still defeated)")
