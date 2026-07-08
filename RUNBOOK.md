@@ -14,9 +14,10 @@ It should be boring, exact, and executable.
 
 Required tools:
 
-- Godot 4.6.x - confirmed installed at `/Applications/Godot.app`
+- Godot 4.7.x - confirmed installed at `/Applications/Godot.app`
   (`/Applications/Godot.app/Contents/MacOS/Godot --version` ->
-  `4.6.3.stable.official`).
+  `4.7.stable.official`). Upgraded from 4.6.x on 2026-07-07 (Kayden's call);
+  `project.godot` declares `4.7` and the whole suite verifies clean on it.
 - Git.
 
 Required accounts/services:
@@ -61,14 +62,29 @@ Expected result: a 1280x720 window opens (flexible HD/ultrawide `canvas_items`/
 showing the first-playable forest slice (placeholder ColorRect art). No
 console errors.
 
-Playing the slice (2026-07-05 second session; controls are the T-009 input
-map):
+Playing the slice (updated 2026-07-07, Phase 2 rework; controls are the
+T-009 input map plus the T-025 jump):
 
 - WASD / arrow keys: grid-snapped movement. E / Space: talk & interact;
-  Enter / Space advances dialogue.
-- Loop: talk to the yellow NPC -> walk into the purple slime -> turn-based
-  battle (Up/Down selects Attack/Defend, Enter confirms) -> win the Forest
-  Key -> open the brown door on the east side -> step onto the gold tiles.
+  Enter / Space advances dialogue. Alt (or C): jump one cell over a pit.
+- Loop: talk to the quest NPC -> fight slimes (bump to battle; Up/Down +
+  Enter drives the two-tier menu) -> beat the leashed Boss Slime by the east
+  door for the Forest Key -> open the door and step through into the
+  four-room tutorial dungeon: the entry locks behind you; a wall of 13
+  bricks spans the hub and exactly one pushes free (walk into bricks to
+  test them; the lever resets the loose brick); through the east gap, jump
+  the pit room's two 1-wide ledges, then push the block into the 2-wide
+  chasm and jump the remaining gap; beat the Dungeon Slime for the Dungeon
+  Key; loop back through the west shortcut; unlock the hub's north door and
+  open the side room's chest for the shield - the entry unbolts and you
+  walk back out to the forest. Party defeat restarts from the beginning of
+  the game (T-029). The pressure plate is on hold (B-06) - no shipped room
+  uses one.
+- Dev tools (T-030, debug builds only - running from the editor or CLI
+  counts; excluded from release exports): press F1 for the overlay, then
+  1-4 warp (Forest / Hub / Pit / Fight rooms), 5 reset the room puzzle,
+  6-8 grant forest_key / dungeon_key / shield, 9 heal, 0 toggle skip-combat
+  (touch an enemy = instant win). Off by default every session.
 
 ## Test And Build
 
@@ -98,28 +114,48 @@ autoload initialized.
 ### First-playable slice smoke test (T-016)
 
 End-to-end scripted run of the whole slice (input map, movement/collision,
-NPC dialogue, enemy encounter, seeded d10 combat, key/door, then the T-022
-round trip: through the doorway into the LDtk-built dungeon stub room and
-back out with forest state preserved):
+NPC dialogue, enemy encounters, seeded d10 combat, key/door, then the full
+Phase 2 tutorial dungeon in its 2026-07-07 layout: hub lock-in, the
+13-brick wall's one loose brick (fixed bricks refuse the push), the north
+door locked without its key, two 1-wide ledge jumps, 2-wide chasm crossing
+via block-fill + jump, key-guardian fight -> dungeon_key, west loop back,
+north door unlock, chest room -> shield -> entry unbolts, return to the
+preserved forest, and a forced-defeat restart-from-the-beginning pass):
 
 ```bash
 cd game
 /Applications/Godot.app/Contents/MacOS/Godot --headless --path . scenes/dev/slice_smoke_test.tscn
 ```
 
-Expected result: exit `0` and a final `SLICE SMOKE TEST: PASS (47/47 checks)`
-line (~20-40s; the expanded forest walk and multiple fights take longer than
-the original 26-check slice). A benign `ObjectDB instances leaked` warning at
-exit is known noise from quitting mid-coroutines; any `CHECK FAILED:` line or
-exit `1` is a real failure. Because roaming enemies move on real-time timers,
-run it a few times in a row when touching enemy AI or movement (`for i in 1 2
-3 4 5; do ...; done`). Run this after any change to movement, interaction,
-combat, room transitions, or SceneManager.
+Expected result: exit `0` and a final `SLICE SMOKE TEST: PASS (109/109
+checks)` line (~40-80s; the watchdog fails the run at 180s). A benign `ObjectDB instances leaked` warning
+at exit is known noise from quitting mid-coroutines; any `CHECK FAILED:` line
+or exit `1` is a real failure. Because roaming enemies move on real-time
+timers, run it a few times in a row when touching enemy AI or movement (`for
+i in 1 2 3 4 5; do ...; done`). Run this after any change to movement,
+interaction, combat, room transitions, puzzles, the LDtk pipeline, or
+SceneManager.
 
 Gotcha: `--path .` must point at `game/` (hence the `cd game`). Pointed at the
 repo root by mistake, Godot finds no `project.godot` and can hang around
 rather than exiting - if a headless run seems stuck forever, check the cwd
 before debugging the game.
+
+### Screenshot tour (demo artifacts)
+
+Boots each room in a real windowed run and saves one PNG per room
+(`forest/hub/pit/fight/chest.png`) - the quick per-room demo artifact for
+proof rows. Needs a display: under `--headless` the dummy renderer produces
+black images, so run it windowed (a window flashes up for a few seconds).
+
+```bash
+cd game
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/screenshot_tour.tscn -- --out=/tmp/dungeon_shots
+```
+
+Expected result: exit `0`, five `wrote .../<room>.png` lines and a final
+`SCREENSHOT TOUR: done`. Omitting `--out=` writes into the project's
+`user://screenshots` directory.
 
 ### Display-scaling spike (T-007)
 
@@ -156,12 +192,14 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
-per-suite tally (e.g. `UNIT TESTS: 10 suites, 65 tests, 176 checks, 0 failed`).
-Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in ~1-2s (pure
-logic and controlled clocks, no real-time waits, unlike the slice smoke test).
-Run this after any change to combat math, the grid/pathfinding model,
-`GridActor` movement, the player input/feel state machine, the enemy AI, the
-`.tres` data, `DialogueBox`, or the SceneManager reward/heal rules.
+per-suite tally (e.g. `UNIT TESTS: 17 suites, 103 tests, 351 checks, 0
+failed`). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a
+few seconds (pure logic and controlled clocks, no real-time waits, unlike the
+slice smoke test; the tutorial soft-lock solver adds a second or two). Run
+this after any change to combat math, the grid/pathfinding model, `GridActor`
+movement, the player input/feel state machine, the enemy AI, the `.tres`
+data, `DialogueBox`, the puzzle primitives, the LDtk entity pipeline, or the
+SceneManager reward/heal/restart rules.
 
 Coverage lives in `game/tests/`, one suite per area:
 `test_combat_math` (the d10 `hit_threshold`/`needed_roll`/`attack_damage` rules
@@ -171,14 +209,28 @@ Manhattan pathfinding, avoid-occupants routing), `test_grid_actor`
 hero/slime/boss `.tres` values + the boss-key/locked-door invariant),
 `test_dialogue_box` (line advancement + `finished`), `test_overworld_enemy`
 (`_manhattan` + `defeated()` cleanup), `test_scene_manager` (victory XP/loot
-dedup + heal-to-full, the real `apply_victory_rewards`/`heal_hero_to_full`
-methods), `test_enemy_ai` (the deterministic `_act`/`_step_toward`/`_step_home`/
+dedup + heal-to-full + the T-029 session reset, the real
+`apply_victory_rewards`/`heal_hero_to_full`/`reset_session_state` methods),
+`test_enemy_ai` (the deterministic `_act`/`_step_toward`/`_step_home`/
 `_wander` decision branches), `test_dialogue_cooldown` (the real
-`_unhandled_input` debounce, driven with a controlled input clock), and
+`_unhandled_input` debounce, driven with a controlled input clock),
 `test_player_movement` (the T-021 feel state machine - the real
 `Player._movement_intent` tap/turn/hold/walk decisions driven with hand-fed
-deltas, plus `_read_dir` last-pressed-wins rollover via `Input.action_press`).
-Add a suite path to the `SUITES` list in `run_tests.gd` to register new tests.
+deltas, plus `_read_dir` last-pressed-wins rollover via `Input.action_press`),
+`test_pushable_block` (T-023 push/refusal/sink-into-pit/reset),
+`test_pressure_plate` (T-024 momentary press/release, plate-door open/re-lock,
+deferred re-lock while the doorway is occupied, PuzzleController wiring),
+`test_jump` (T-025: 1-cell gap jumpable, 2-cell never, filled pit walkable and
+jumpable-from, refusals), `test_chest` (T-026 key gate, one-time reward, flag
+persistence), `test_ldtk_pipeline` (T-031: the committed entity_test_room
+fixture imports and adopts one of every entity type with fields carried),
+`test_tutorial_softlock` (exhaustive BFS over every reachable block/player
+state of the REAL shipped hub and pit rooms: solvable from the start, and
+every wedged state can still reach the reset lever / the exit - the
+can-the-player-wedge-it proof the Known Risks row demands), and
+`test_debug_overlay` (T-030 hooks: hidden by default, grant dedup, reset
+delegation). Add a suite path to the `SUITES` list in `run_tests.gd` to
+register new tests.
 
 The runner `await`s each test, so a suite method may be a coroutine when a test
 genuinely needs to yield; most tests read state synchronously right after the
@@ -219,7 +271,7 @@ are set up in Milestone M0.3 (see `TASKBOARD.md`).
 
 ### Windows
 
-- Export `.exe` directly from macOS - Godot 4.6 cross-compiles natively.
+- Export `.exe` directly from macOS - Godot 4.7 cross-compiles natively.
 - Icon embedding works out of the box on Godot 4.5+; no Wine/rcedit steps
   needed.
 
@@ -290,7 +342,7 @@ If a downstream lesson should flow *back* to the harness, capture it in
 
 | Symptom | Likely cause | Check | Fix |
 |---|---|---|---|
-| Godot editor opens the project but behaves unexpectedly / editor UI looks wrong | Wrong Godot version installed (this project targets 4.6.x specifically) | `/Applications/Godot.app/Contents/MacOS/Godot --version` | Install/switch to Godot 4.6.x |
+| Godot editor opens the project but behaves unexpectedly / editor UI looks wrong | Wrong Godot version installed (this project targets 4.7.x as of 2026-07-07) | `/Applications/Godot.app/Contents/MacOS/Godot --version` | Install/switch to Godot 4.7.x |
 | Headless `--import` run is slow the first time | Expected - first import scans the filesystem and builds the global script class cache from scratch | Re-run the same command | Subsequent runs are faster; not a bug |
 | `--quit-after 1` output has no `SceneManager ready.` line | `SceneManager` autoload not registered, or `main.tscn` isn't the scene passed | Check `game/project.godot` -> `[autoload]` section and the command's scene path | Fix the autoload path or the invoked scene |
 

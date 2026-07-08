@@ -8,8 +8,10 @@ extends Node
 ## camera-zoom-into-the-encounter treatment (see BLUEPRINT.md Design
 ## Decisions) - same context-passing pattern, different animation.
 ##
-## Full GameState/SaveData Resources arrive in Phase 3; until then the small
-## amount of session state below lives directly on this node.
+## Session state lives on a single GameState Resource (T-036); the
+## hero_hp/total_xp/inventory/flags properties below forward to it so call
+## sites read naturally while `state` stays the one serializable truth
+## (T-037's SaveData wraps it).
 
 signal encounter_finished(victory: bool)
 
@@ -23,12 +25,30 @@ var rng := RandomNumberGenerator.new()
 ## When true (used by the headless smoke test), combat auto-plays with tiny
 ## waits and menu selection is skipped.
 var auto_combat := false
+## Dev-tools hook (T-030): when true, touching an enemy skips the battle
+## entirely and resolves as an instant victory. Never on in a real build -
+## only the debug overlay flips it.
+var skip_combat := false
 
 var hero_stats: CharacterStats
-var hero_hp := 0
-var inventory := PackedStringArray()
-var total_xp := 0
-var flags := {}
+## The one mutable-session Resource (T-036). Swapped wholesale on reset/load.
+var state := GameState.new()
+
+var hero_hp: int:
+	get: return state.party_hp.get("hero", 0)
+	set(v): state.party_hp["hero"] = v
+var total_xp: int:
+	get: return state.party_xp.get("hero", 0)
+	set(v): state.party_xp["hero"] = v
+## NOTE: reads return a copy-on-write PackedStringArray - never call
+## .append() on it from outside; use add_item() (the write would land on the
+## copy and vanish). Assignment and .has() are safe.
+var inventory: PackedStringArray:
+	get: return state.inventory
+	set(v): state.inventory = v
+var flags: Dictionary:
+	get: return state.flags
+	set(v): state.flags = v
 
 var ui_busy := false
 ## Set when a dialogue closes. The player polls interact each frame, so without
@@ -45,6 +65,9 @@ var current_dialogue: DialogueBox
 var current_room: Node2D
 var room_stack: Array[Node2D] = []
 var transitioning := false
+## How the booting scene rebuilds the game's starting room - set by main.gd,
+## used by restart_game() (T-029: party defeat restarts from the beginning).
+var boot_factory := Callable()
 
 
 func _ready() -> void:
@@ -99,18 +122,31 @@ func enter_room(new_room: Node2D) -> void:
 ## Leave the current room and restore the one beneath it on the stack. The
 ## restored room's player resumes at the exact cell they left from.
 func exit_room() -> void:
+	await exit_rooms(1)
+
+
+## Pop `count` rooms in one transition (the tutorial dungeon's Room 3 -> hub
+## loop skips back past Room 2). Freed rooms rebuild fresh on re-entry - that
+## re-entry reset is the puzzle escape valve. The restored room gets an
+## on_room_restored() callback to reposition the player / react to flags.
+func exit_rooms(count: int) -> void:
 	if transitioning or in_encounter or room_stack.is_empty():
 		return
 	transitioning = true
 	await _fade_to(1.0)
-	if current_room:
-		current_room.queue_free()
-	current_room = room_stack.pop_back()
+	for i in count:
+		if room_stack.is_empty():
+			break
+		if current_room:
+			current_room.queue_free()
+		current_room = room_stack.pop_back()
 	current_room.visible = true
 	current_room.process_mode = Node.PROCESS_MODE_INHERIT
 	var prev_player: Variant = current_room.get("player")
 	if prev_player is Player and prev_player.camera:
 		prev_player.camera.make_current()
+	if current_room.has_method("on_room_restored"):
+		current_room.on_room_restored()
 	await _fade_to(0.0)
 	transitioning = false
 
@@ -137,6 +173,13 @@ func show_dialogue(lines: PackedStringArray) -> void:
 func start_encounter(enemy: OverworldEnemy) -> void:
 	if in_encounter or world_container == null:
 		return
+	if skip_combat:
+		# Dev-tools shortcut (T-030): instant victory, no combat scene.
+		var skip_msg := apply_victory_rewards(enemy.stats)
+		enemy.defeated()
+		encounter_finished.emit(true)
+		await show_dialogue(["(Dev: combat skipped.)", skip_msg])
+		return
 	in_encounter = true
 	await _fade_to(1.0)
 	world_container.visible = false
@@ -160,13 +203,9 @@ func start_encounter(enemy: OverworldEnemy) -> void:
 		encounter_finished.emit(true)
 		await show_dialogue([msg])
 	else:
-		heal_hero_to_full()
 		in_encounter = false
 		encounter_finished.emit(false)
-		await show_dialogue([
-			"You were defeated...",
-			"You wake up back in the forest, restored.",
-		])
+		await handle_defeat()
 
 
 ## Grant XP and loot for a defeated enemy and return the victory banner text.
@@ -177,12 +216,19 @@ func apply_victory_rewards(enemy_stats: EnemyStats) -> String:
 	total_xp += enemy_stats.xp_reward
 	var drops: PackedStringArray = enemy_stats.loot_table
 	for item in drops:
-		if not inventory.has(item):
-			inventory.append(item)
+		add_item(item)
 	var msg := "Victory! Gained %d XP." % enemy_stats.xp_reward
 	if drops.size() > 0:
 		msg += " The %s dropped: %s!" % [enemy_stats.display_name, ", ".join(drops)]
 	return msg
+
+
+## Add an item id to the inventory once - every current item is a unique
+## key or gear piece (stacking arrives with ItemData at T-034). The single
+## write path for inventory from outside this autoload.
+func add_item(item: String) -> void:
+	if not state.inventory.has(item):
+		state.inventory.append(item)
 
 
 ## Restore the hero to full HP. Shared by the healer NPC and the post-defeat
@@ -190,6 +236,40 @@ func apply_victory_rewards(enemy_stats: EnemyStats) -> String:
 func heal_hero_to_full() -> void:
 	if hero_stats:
 		hero_hp = hero_stats.max_hp
+
+
+## Party defeat (T-029, locked decision D-004): restart from the beginning of
+## the game - the simplest possible rule, no state snapshotting. The richer
+## respawn (healer NPC outside, dungeon room 1 with puzzle reset inside) is
+## deferred to Phase 3, where it rides on save/load serialization.
+func handle_defeat() -> void:
+	await show_dialogue([
+		"You were defeated...",
+		"Everything fades to black.",
+		"...and the adventure begins anew.",
+	])
+	restart_game()
+
+
+## Wipe the session and boot a fresh starting room via boot_factory.
+func restart_game() -> void:
+	reset_session_state()
+	for r in room_stack:
+		r.queue_free()
+	room_stack.clear()
+	if current_room:
+		current_room.queue_free()
+		current_room = null
+	if boot_factory.is_valid() and world_container:
+		boot_room(boot_factory.call())
+
+
+## The pure state-reset half of a restart (unit-tested on its own): swap in
+## a fresh GameState, then restore HP - XP, inventory, flags, and HP all
+## return to a fresh game's values in one move.
+func reset_session_state() -> void:
+	state = GameState.new()
+	heal_hero_to_full()
 
 
 func _fade_to(alpha: float) -> void:

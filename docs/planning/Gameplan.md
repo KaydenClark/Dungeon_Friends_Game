@@ -3,8 +3,9 @@
 Status: Draft v2, 2026-06-11 — all 5 open decisions from the audit resolved (see audit §8)
 **Revision, 2026-07-05:** §3.2's fixed 240x160 base resolution has been superseded — see §3.2 and BLUEPRINT.md → Design Decisions. The rest of this document (loop, architecture, data model, combat, milestones) is unaffected; only the rendering/resolution decision changed.
 **Revision, 2026-07-05 (2):** Combat is now confirmed grid-based with per-unit movement/range, strict per-character initiative order (§7's `TurnManager` already sorted all combatants by speed — only this document's §7 `PlayerPhase → EnemyPhase` Battle-FSM state names implied team-phasing, and that reading is retired), and a d10 percentage resolution system in place of flat deterministic damage math. Visual language is narrowed to a GBA-fantasy-adventure look built from 8x8/16x16 tile units. See BLUEPRINT.md → Visual Language, → Current Product Shape, and → Core Logic And Invariants for the current detail — this document's §2/§7 prose itself is not yet rewritten to match.
+**Revision, 2026-07-07:** Engine target upgraded from Godot 4.6.x to **4.7.x** (Kayden's explicit decision; the local toolchain moved to `4.7.stable` and the project was re-verified clean on it). No other §3.2 change; BLUEPRINT.md → Architecture/Design Decisions hold the current detail.
 Companion document: `docs/research/audited_research.md` (read that first — this plan builds on its conclusions)
-Engine target: Godot 4.6.x (GDScript), Mobile renderer
+Engine target: Godot 4.7.x (GDScript), Mobile renderer
 Platforms: macOS, Windows, Android (desktop-first development)
 Base resolution: flexible HD/ultrawide (1280x720 design reference, scaling cleanly to 1920x1080 and 3440x1440), nearest-neighbor filtering, unrestricted palette — see §3.2
 
@@ -372,6 +373,14 @@ Built entirely from a small set of reusable, LDtk-driven primitives (per audit's
 
 ## 10. Party/Team System Architecture
 
+> **Revision note (2026-07-06):** the **overworld is a single party avatar** —
+> the "snake formation" of `OverworldActor` followers described below is
+> **superseded and will not be built**. The party's multiple characters appear
+> only inside **Fire-Emblem-Sacred-Stones-style tactical combat** (select a
+> character, WASD picks its destination cell). Roster/recruitment/reserve model
+> below is unchanged. See `BLUEPRINT.md` → Party And Combat Model and the
+> 2026-07-06 Design Decisions row.
+
 - `SaveData.party_roster` is an ordered array of character IDs (max active party size — recommend **3** for MVP, a common small-party-JRPG size that keeps combat UI simple).
 - A separate **reserve roster** (recruited but not active) is just "any character ID not in `party_roster`" — no separate data structure needed.
 - **Recruitment**: an NPC/event in the overworld adds a character ID to the reserve roster (and `SaveData.flags`) when triggered. No combat/recruitment minigame at MVP — recruitment is a dialogue/cutscene event.
@@ -505,7 +514,7 @@ Each milestone is sized for a single AI-assisted working session. Milestones are
 - **M4.4**: Implement `SceneManager` context-passing transition (§3.1/§7): touching a visible overworld enemy pauses the overworld, instances Combat with the right party/enemy data, and on victory/defeat returns cleanly to the exact overworld position.
 
 ### Phase 5 — Party System & Progression
-- **M5.1**: Implement multi-character party (3 active), snake-following `PartyFollower` actors in the overworld.
+- **M5.1**: ~~snake-following `PartyFollower` actors in the overworld~~ — **superseded 2026-07-06: overworld stays a single avatar** (see §10 revision note). M5.1 is instead the party-management menu (swap which characters are active); multi-character positioning lives in tactical combat (§7), not the overworld.
 - **M5.2**: Add 1 ability per character (`AbilityCommand`), MP cost, and a simple AI behavior (`RANDOM_WALK` first, then `BIASED_TRACKING` via `AStarGrid2D`).
 - **M5.3**: Implement XP/leveling: combat victory grants XP, level-up increases stats per a simple curve, persisted in `SaveData`.
 - **M5.4**: Implement one recruitment event: an NPC/scene that adds a new character to the reserve roster + a basic party-management menu to swap active members.

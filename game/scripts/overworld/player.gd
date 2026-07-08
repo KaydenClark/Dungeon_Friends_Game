@@ -24,6 +24,9 @@ const MOVE_REPEAT_DELAY := 0.2
 ## place). Consumed concurrently with the hold, so a turn that becomes a walk
 ## has no extra stationary beat after its first step.
 const TURN_DELAY := 0.1
+## Airtime for a real jump across a gap, and for the refused in-place hop.
+const JUMP_TIME := 0.22
+const HOP_TIME := 0.14
 
 const DIR_ACTIONS := {
 	"move_up": Vector2i.UP,
@@ -58,6 +61,11 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if SceneManager.ui_busy or SceneManager.in_encounter or SceneManager.transitioning:
 		_reset_hold()
+		return
+	# Jump is a deliberate button press (D-003: Alt primary, C fallback), never
+	# automatic - it beats movement this frame so a hop is never eaten by a step.
+	if not moving and Input.is_action_just_pressed("jump"):
+		try_jump()
 		return
 	var dir := _read_dir()
 	if dir == Vector2i.ZERO:
@@ -149,6 +157,58 @@ func _reset_hold() -> void:
 	_buffered_step = false
 
 
+## Jump exactly one cell over a jumpable gap in the facing direction (T-025,
+## locked rule: max jump distance is exactly 1 cell - a 1-cell pit is the
+## definitional jumpable gap; 2+ cells is never jumpable). A jump into a wall,
+## an occupant, or across a too-wide pit plays a small in-place hop instead.
+## Tween arc, never physics. Returns true when the jump actually crossed.
+func try_jump() -> bool:
+	if moving or room == null:
+		return false
+	var gap := cell + facing
+	var land := cell + facing * 2
+	if room.is_pit(gap) and room.is_walkable(land):
+		_start_jump(land)
+		return true
+	_hop_in_place()
+	return false
+
+
+## Arc to the landing cell: occupancy and cell update at takeoff (same
+## reservation rule as _start_move), the body bobs up and back down while the
+## root tweens across, so the hop reads as an arc without any physics.
+func _start_jump(land: Vector2i) -> void:
+	moving = true
+	room.move_occupant(self, cell, land)
+	cell = land
+	var tw := create_tween()
+	tw.tween_property(self, "position", room.cell_to_pos(land), JUMP_TIME)
+	_bob_body(JUMP_TIME)
+	await tw.finished
+	moving = false
+	move_finished.emit()
+
+
+## Refused jump: a quick vertical bob in place, so the button always answers.
+func _hop_in_place() -> void:
+	if moving:
+		return
+	moving = true
+	_bob_body(HOP_TIME)
+	await get_tree().create_timer(HOP_TIME).timeout
+	moving = false
+	move_finished.emit()
+
+
+func _bob_body(duration: float) -> void:
+	if body == null:
+		return
+	var rest := body.position
+	var tw := create_tween()
+	tw.tween_property(body, "position:y", rest.y - 20.0, duration * 0.5)
+	tw.tween_property(body, "position:y", rest.y, duration * 0.5)
+
+
 func interact() -> void:
 	if room == null:
 		return
@@ -160,3 +220,7 @@ func interact() -> void:
 func _on_bump(occ: Node2D) -> void:
 	if occ is OverworldEnemy:
 		SceneManager.start_encounter(occ)
+	elif occ is PushableBlock:
+		# Walking into the block while pressing toward it pushes it one cell
+		# (T-023). The player stays put; walking follows on the next step.
+		occ.try_push(occ.cell - cell)

@@ -1,20 +1,29 @@
 class_name RoomGrid
 extends Node2D
-## Base class for a grid-logic room: walkability, occupancy, and AStarGrid2D
-## pathfinding (no diagonals, Manhattan heuristic - locked decision, see
-## /BLUEPRINT.md -> Core Logic And Invariants). Level *layout* authoring moves
-## to LDtk once T-004/T-011 land; this class stays as the runtime grid model.
+## Base class for a grid-logic room: walkability, occupancy, pits, and
+## AStarGrid2D pathfinding (no diagonals, Manhattan heuristic - locked
+## decision, see /BLUEPRINT.md -> Core Logic And Invariants). Level *layout*
+## authoring lives in LDtk (see LdtkRoom); this class stays as the runtime
+## grid model.
 
 const TILE := 64
 
 var width := 0
 var height := 0
 var blocked := {}    # Vector2i -> true (static geometry: walls, closed doors)
-var occupants := {}  # Vector2i -> Node2D (player, enemies, NPCs, doors)
+var pits := {}       # Vector2i -> true (block walking, jumpable, fillable - T-025)
+var occupants := {}  # Vector2i -> Node2D (player, enemies, NPCs, doors, blocks)
+## Cells a PushableBlock may never be pushed onto (doorway gaps - a block
+## plugging the room's exit would be an unrecoverable soft-lock; blocks stay
+## in their room, classic Zelda).
+var no_block_cells := {}
 var enemies: Array = []
 var astar := AStarGrid2D.new()
 
 signal player_moved
+## Emitted whenever a cell gains or loses an occupant (register, unregister,
+## or a move touching that cell). Pressure plates listen to this (T-024).
+signal cell_occupancy_changed(cell: Vector2i)
 
 
 func setup_grid(w: int, h: int) -> void:
@@ -41,8 +50,31 @@ func set_blocked(c: Vector2i, v: bool) -> void:
 		astar.set_point_solid(c, v)
 
 
+## Pit cells block walking and pathing (like walls) but are distinct: a
+## 1-cell pit can be jumped over, and a PushableBlock shoved in fills it
+## (see fill_pit). Pits are impassable, not lethal (locked decision).
+func set_pit(c: Vector2i, v: bool) -> void:
+	if v:
+		pits[c] = true
+	else:
+		pits.erase(c)
+	if in_bounds(c):
+		astar.set_point_solid(c, v)
+
+
+func is_pit(c: Vector2i) -> bool:
+	return pits.has(c)
+
+
+## A block pushed into a pit permanently converts it to walkable floor
+## (classic Zelda; locked decision - see BLUEPRINT.md puzzle primitives).
+func fill_pit(c: Vector2i) -> void:
+	set_pit(c, false)
+
+
 func is_walkable(c: Vector2i) -> bool:
-	return in_bounds(c) and not blocked.has(c) and not occupants.has(c)
+	return in_bounds(c) and not blocked.has(c) and not pits.has(c) \
+			and not occupants.has(c)
 
 
 func get_occupant(c: Vector2i) -> Node2D:
@@ -53,7 +85,7 @@ func get_occupant(c: Vector2i) -> Node2D:
 ## room/cell wired via attach(); static occupants (NPC, door) must have their
 ## `room`/`cell` fields set by the builder before registering.
 func register(node: Node2D, c: Vector2i) -> void:
-	occupants[c] = node
+	occupy(node, c)
 	if node is GridActor:
 		node.attach(self, c)
 	else:
@@ -62,19 +94,54 @@ func register(node: Node2D, c: Vector2i) -> void:
 
 
 func unregister(node: Node2D) -> void:
+	vacate(node)
+
+
+## Occupancy-map-only claim (no reparenting/positioning) - used by doors that
+## re-lock while already in the tree (T-024) and by register() above.
+func occupy(node: Node2D, c: Vector2i) -> void:
+	occupants[c] = node
+	cell_occupancy_changed.emit(c)
+
+
+func vacate(node: Node2D) -> void:
 	for k in occupants.keys():
 		if occupants[k] == node:
 			occupants.erase(k)
+			cell_occupancy_changed.emit(k)
 
 
 func move_occupant(node: Node2D, from: Vector2i, to: Vector2i) -> void:
 	if occupants.get(from) == node:
 		occupants.erase(from)
+		cell_occupancy_changed.emit(from)
 	occupants[to] = node
+	cell_occupancy_changed.emit(to)
 
 
 func cell_to_pos(c: Vector2i) -> Vector2:
 	return Vector2(c) * TILE + Vector2(TILE, TILE) * 0.5
+
+
+## Instantly relocate a registered occupant (room-restore repositioning and
+## dev-tools warps - normal movement always tweens instead).
+func teleport(node: Node2D, to: Vector2i) -> void:
+	vacate(node)
+	occupy(node, to)
+	if node is GridActor:
+		node.cell = to
+	elif "cell" in node:
+		node.cell = to
+	node.position = cell_to_pos(to)
+
+
+## Reset the room's puzzle state (dev tools + the hub's reset lever): every
+## un-sunk PushableBlock returns to its starting cell. Filled pits stay
+## filled (permanent by design); rooms with richer reset needs override.
+func reset_puzzle() -> void:
+	for child in get_children():
+		if child is PushableBlock and not child.sunk:
+			child.reset_to_start()
 
 
 ## Path over static geometry; with avoid_occupants, other occupants' cells

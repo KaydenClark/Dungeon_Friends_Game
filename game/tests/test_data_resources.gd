@@ -62,7 +62,10 @@ func test_hero_outclasses_slime() -> void:
 
 func test_boss_key_matches_locked_door() -> void:
 	# Cross-system invariant: the key the boss drops must be the exact key the
-	# forest door asks for, or the reward loop dead-ends.
+	# forest door asks for, or the reward loop dead-ends. required_key became a
+	# per-door variable in T-024; the forest door uses the default.
 	var boss: EnemyStats = load("res://data/enemies/boss_slime.tres")
-	ok(boss.loot_table.has(LockedDoor.REQUIRED_KEY),
-			"boss drop matches LockedDoor.REQUIRED_KEY (%s)" % LockedDoor.REQUIRED_KEY)
+	var door := LockedDoor.new()
+	ok(boss.loot_table.has(door.required_key),
+			"boss drop matches the default door key (%s)" % door.required_key)
+	door.free()

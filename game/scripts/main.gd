@@ -11,7 +11,9 @@ var hud: Label
 func _ready() -> void:
 	SceneManager.register_main(
 		$WorldContainer, $CombatContainer, $UILayer, $TransitionLayer)
-	SceneManager.boot_room(ForestSlice.new())
+	# The factory lets a party defeat rebuild the game from the start (T-029).
+	SceneManager.boot_factory = func() -> Node2D: return ForestRoom.new()
+	SceneManager.boot_room(SceneManager.boot_factory.call())
 	var hint := Label.new()
 	hint.text = "WASD / Arrows: move    E or Space: talk & interact"
 	hint.position = Vector2(16, 8)
@@ -23,6 +25,10 @@ func _ready() -> void:
 	hud.add_theme_font_size_override("font_size", 18)
 	hud.modulate = Color(1, 0.95, 0.75)
 	$UILayer.add_child(hud)
+	# Dev tools (T-030): debug builds only, hidden until F1 - never in a
+	# release export.
+	if OS.is_debug_build():
+		add_child(DebugOverlay.new())
 
 
 func _process(_delta: float) -> void:
@@ -30,7 +36,7 @@ func _process(_delta: float) -> void:
 	# status, so playtesters can see combat and loot actually change state.
 	if SceneManager.hero_stats == null:
 		return
-	var key_text := "Forest Key" if SceneManager.inventory.has("forest_key") else "-"
-	hud.text = "HP %d/%d    XP %d    Key: %s" % [
+	var items := ", ".join(SceneManager.inventory) if SceneManager.inventory.size() > 0 else "-"
+	hud.text = "HP %d/%d    XP %d    Items: %s" % [
 		SceneManager.hero_hp, SceneManager.hero_stats.max_hp,
-		SceneManager.total_xp, key_text]
+		SceneManager.total_xp, items]

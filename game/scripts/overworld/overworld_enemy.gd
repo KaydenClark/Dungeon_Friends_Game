@@ -16,14 +16,18 @@ const TRACK_RADIUS := 4
 ## Seconds between steps (the tween itself takes `move_time` on top of this).
 const STEP_INTERVAL := 0.35
 
-var stats: EnemyStats
+@export var stats: EnemyStats
 var target_player: Player
-var is_boss := false
+@export var is_boss := false
+## Non-empty for one-off enemies (boss, key guardians): defeat is recorded in
+## SceneManager.flags so a rebuilt room doesn't respawn them (rooms are freed
+## and rebuilt on re-entry - see LdtkRoom).
+@export var unique_id := ""
 ## Spawn cell; with a leash set, the enemy drifts back here when it strays.
 var home_cell := Vector2i.ZERO
 ## Max Manhattan distance from home_cell while wandering (< 0 = roam freely).
 ## Chasing the player may exceed the leash; the enemy walks home afterwards.
-var leash_radius := -1
+@export var leash_radius := -1
 var _step_accum := 0.0
 
 
@@ -107,6 +111,8 @@ func _manhattan(a: Vector2i, b: Vector2i) -> int:
 
 
 func defeated() -> void:
+	if unique_id != "":
+		SceneManager.flags["defeated_%s" % unique_id] = true
 	if room:
 		room.unregister(self)
 		room.enemies.erase(self)

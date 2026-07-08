@@ -73,3 +73,26 @@ func test_heal_restores_to_full() -> void:
 	SceneManager.heal_hero_to_full()
 	eq(SceneManager.hero_hp, SceneManager.hero_stats.max_hp, "heal tops HP to max")
 	SceneManager.hero_hp = saved
+
+
+func test_defeat_reset_wipes_session_state() -> void:
+	# T-029 (D-004): party defeat restarts from the beginning of the game.
+	# This pins the state-wipe half; the room reboot is covered end-to-end by
+	# the slice smoke test's forced-defeat pass.
+	var saved_hp := SceneManager.hero_hp
+	SceneManager.total_xp = 120
+	SceneManager.inventory = PackedStringArray(["forest_key", "shield"])
+	SceneManager.flags = {"entered_dungeon": true, "chest_hub_opened": true}
+	SceneManager.hero_hp = 3
+	SceneManager.reset_session_state()
+	eq(SceneManager.total_xp, 0, "XP resets to zero")
+	eq(SceneManager.inventory.size(), 0, "inventory wiped")
+	eq(SceneManager.flags.size(), 0, "flags wiped")
+	eq(SceneManager.hero_hp, SceneManager.hero_stats.max_hp,
+			"hero restored to full for the fresh start")
+	SceneManager.hero_hp = saved_hp
+
+
+func test_skip_combat_flag_defaults_off() -> void:
+	# The T-030 dev hook must never leak into a real session by default.
+	not_ok(SceneManager.skip_combat, "skip_combat is off unless dev tools enable it")
