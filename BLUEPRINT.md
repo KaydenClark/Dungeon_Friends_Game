@@ -393,7 +393,7 @@ keyboard, controller, and mobile touch - see Gameplan.md section 11):
 |---|---|---|---|
 | `CharacterStats` | `id, display_name, max_hp, max_mp, attack, defense, speed, sprite_frames, starting_abilities` | `game/data/characters/*.tres` | Party member stat block |
 | `EnemyStats` | `id, display_name, max_hp, attack, defense, speed, abilities, ai_behavior, xp_reward, loot_table` | `game/data/enemies/*.tres` | `ai_behavior`: `RANDOM_WALK` / `BIASED_TRACKING` / `PATTERN` |
-| `ItemData` | `id, display_name, item_type, stat_modifiers, on_use_ability` | `game/data/items/*.tres` | `item_type`: `KEY_ITEM` / `CONSUMABLE` / `EQUIPMENT` |
+| `ItemData` | `id, display_name, description, item_type, stat_modifiers, on_use_ability` | `game/data/items/*.tres` | **Built (T-034, 2026-07-07).** `item_type`: `KEY_ITEM` / `CONSUMABLE` / `EQUIPMENT`; ids resolve through the static `ItemLibrary` (`game/scripts/data/item_library.gd`); `stat_modifiers`/`on_use_ability` are authored-but-unconsumed stretch fields until Phases 4/5 |
 | `AbilityData` | `id, display_name, mp_cost, target_type, element, power, overworld_use` | `game/data/abilities/*.tres` | `element`/equipment-adjacent fields exist for Stretch Goals 1-2, unused at MVP |
 | `MapMeta` | `ldtk_level_id, display_name, music_track, encounter_table` | one companion `.tres` per level | LDtk is the source of truth for layout; this covers non-visual metadata |
 | `EncounterData` | `id, enemy_group, background_id` | `game/data/encounters/*.tres` | Referenced directly by overworld enemy instances - no random rolls |
@@ -407,10 +407,19 @@ a Phase 3/4 implementation decision, not decided here.
 *Status (2026-07-05, second session):* `CharacterStats` and `EnemyStats` now
 exist (`game/scripts/data/`) with the fields listed above, plus first
 instances `game/data/characters/hero.tres` and
-`game/data/enemies/forest_slime.tres`. `ItemData`/`AbilityData`/`MapMeta`/
-`EncounterData`/`SaveData` are still Phase 3 work. `EnemyStats.loot_table` is
-a `PackedStringArray` of item ids for now - it becomes richer when `ItemData`
-lands.
+`game/data/enemies/forest_slime.tres`. `AbilityData`/`MapMeta`/
+`EncounterData`/`SaveData` are still Phase 3 work.
+
+*Status (2026-07-07, T-034):* `ItemData` is built with four authored records
+(`forest_key`, `dungeon_key`, `shield` per the task, plus `tonic` - the first
+CONSUMABLE, added so the stacking rules are actually exercisable; nothing
+drops or uses it until Phase 4). `GameState.inventory` is now `{item_id: qty}`
+- keys/equipment are unique at qty 1 (the old loot-dedup rule), consumables
+stack, and `SceneManager.add_item`/`remove_item` are the write paths. UI
+(HUD, victory banner, chest/door dialogue) reads `display_name` via
+`ItemLibrary`; unknown ids fall back to `id.capitalize()` so dev/test items
+never crash a dialogue. `EnemyStats.loot_table` stays a `PackedStringArray`
+of item ids resolved through the library (the T-043 deviation).
 
 ## Party And Combat Model
 

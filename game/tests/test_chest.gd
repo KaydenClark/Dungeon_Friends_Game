@@ -9,7 +9,7 @@ extends "res://tests/gd_test.gd"
 
 
 func _reset() -> void:
-	SceneManager.inventory = PackedStringArray()
+	SceneManager.inventory = {}
 	SceneManager.flags = {}
 
 
@@ -51,11 +51,8 @@ func test_reward_granted_only_once() -> void:
 	var c := _chest()
 	c.interact()
 	c.interact()   # already opened: "the chest is empty"
-	var shields := 0
-	for item in SceneManager.inventory:
-		if item == "shield":
-			shields += 1
-	eq(shields, 1, "shield appears exactly once after repeat interactions")
+	eq(SceneManager.inventory.get("shield", 0), 1,
+			"shield appears exactly once after repeat interactions")
 	c.queue_free()
 	_reset()
 
@@ -82,10 +79,7 @@ func test_opened_state_persists_across_rebuild() -> void:
 	rebuilt.restore_state()
 	ok(rebuilt.opened, "rebuilt chest remembers it was opened")
 	rebuilt.interact()
-	var shields := 0
-	for item in SceneManager.inventory:
-		if item == "shield":
-			shields += 1
-	eq(shields, 1, "no second reward from the rebuilt chest")
+	eq(SceneManager.inventory.get("shield", 0), 1,
+			"no second reward from the rebuilt chest")
 	rebuilt.queue_free()
 	_reset()

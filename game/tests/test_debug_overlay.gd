@@ -18,16 +18,15 @@ func test_panel_hidden_by_default() -> void:
 
 
 func test_grant_item_deduplicates() -> void:
-	var saved := SceneManager.inventory
-	SceneManager.inventory = PackedStringArray()
+	# Dictionaries are by reference - duplicate() so the restore below isn't
+	# aliasing the same container we're about to clear.
+	var saved: Dictionary = SceneManager.inventory.duplicate()
+	SceneManager.inventory = {}
 	var o := _overlay()
 	o.grant_item("chest_key")
 	o.grant_item("chest_key")
-	var count := 0
-	for item in SceneManager.inventory:
-		if item == "chest_key":
-			count += 1
-	eq(count, 1, "granting twice keeps a single copy")
+	eq(SceneManager.inventory.get("chest_key", 0), 1,
+			"granting twice keeps a single copy")
 	SceneManager.inventory = saved
 	o.queue_free()
 

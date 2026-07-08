@@ -58,10 +58,10 @@ func interact() -> void:
 	var lines := PackedStringArray()
 	if required_key != "":
 		lines.append("You unlock the chest with the %s."
-				% required_key.capitalize())
+				% ItemLibrary.display_name(required_key))
 	if reward_item != "" and not SceneManager.inventory.has(reward_item):
 		SceneManager.add_item(reward_item)
-		lines.append("You got the %s!" % reward_item.capitalize())
+		lines.append("You got the %s!" % ItemLibrary.display_name(reward_item))
 	else:
 		lines.append("It's empty...")
 	_refresh_look()
