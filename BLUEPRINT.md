@@ -421,6 +421,15 @@ stack, and `SceneManager.add_item`/`remove_item` are the write paths. UI
 never crash a dialogue. `EnemyStats.loot_table` stays a `PackedStringArray`
 of item ids resolved through the library (the T-043 deviation).
 
+*Progression note (2026-07-07, T-045):* `Progression.xp_to_next(level)`
+(`game/scripts/data/progression.gd`) is the pure XP-curve function - a
+quadratic **placeholder** (10 * level^2) whose tests pin only the contract
+(level-1 base of 10, strictly rising cost and per-level deltas, out-of-range
+clamp), not the tuning. `party_levels`/`party_xp` already live on `GameState`
+(T-036) so SaveData carries progression from day one. Level-up *mechanics*
+(stat growth, combat integration) are deliberately absent until Phase 5
+(M5.3).
+
 ## Party And Combat Model
 
 Clarified 2026-07-06 (Kayden) - this shapes the overworld, combat, and Phase 5,
