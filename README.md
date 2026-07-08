@@ -18,6 +18,19 @@ NPC, bump a visible enemy into a turn-based d10 battle, win a key, and open
 a locked path. Real art, LDtk-authored maps, and the full combat system are
 next.
 
+## Screenshots
+
+Placeholder-art tour of the current playable slice (captured with
+`scenes/dev/screenshot_tour.tscn` - see `RUNBOOK.md` -> Screenshot tour):
+
+| Forest (overworld) | Dungeon hub |
+|---|---|
+| ![Forest overworld](docs/screenshots/forest.png) | ![Dungeon hub room](docs/screenshots/hub.png) |
+
+| Pit room (jump/block puzzle) | Fight room (guardian) | Chest room |
+|---|---|---|
+| ![Pit room](docs/screenshots/pit.png) | ![Fight room](docs/screenshots/fight.png) | ![Chest room](docs/screenshots/chest.png) |
+
 ## How This Project Is Run
 
 This repository is governed by a small set of control documents. Read them
