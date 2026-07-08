@@ -34,7 +34,7 @@ func test_locked_chest_refuses_without_key() -> void:
 
 func test_locked_chest_opens_with_key() -> void:
 	_reset()
-	SceneManager.inventory.append("chest_key")
+	SceneManager.add_item("chest_key")
 	var c := _chest()
 	c.interact()
 	ok(c.opened, "chest opens once the key is held")
@@ -47,7 +47,7 @@ func test_locked_chest_opens_with_key() -> void:
 
 func test_reward_granted_only_once() -> void:
 	_reset()
-	SceneManager.inventory.append("chest_key")
+	SceneManager.add_item("chest_key")
 	var c := _chest()
 	c.interact()
 	c.interact()   # already opened: "the chest is empty"
@@ -72,7 +72,7 @@ func test_unlocked_chest_opens_freely() -> void:
 
 func test_opened_state_persists_across_rebuild() -> void:
 	_reset()
-	SceneManager.inventory.append("chest_key")
+	SceneManager.add_item("chest_key")
 	var first := _chest()
 	first.interact()
 	first.queue_free()

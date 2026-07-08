@@ -14,9 +14,10 @@ It should be boring, exact, and executable.
 
 Required tools:
 
-- Godot 4.6.x - confirmed installed at `/Applications/Godot.app`
+- Godot 4.7.x - confirmed installed at `/Applications/Godot.app`
   (`/Applications/Godot.app/Contents/MacOS/Godot --version` ->
-  `4.6.3.stable.official`).
+  `4.7.stable.official`). Upgraded from 4.6.x on 2026-07-07 (Kayden's call);
+  `project.godot` declares `4.7` and the whole suite verifies clean on it.
 - Git.
 
 Required accounts/services:
@@ -270,7 +271,7 @@ are set up in Milestone M0.3 (see `TASKBOARD.md`).
 
 ### Windows
 
-- Export `.exe` directly from macOS - Godot 4.6 cross-compiles natively.
+- Export `.exe` directly from macOS - Godot 4.7 cross-compiles natively.
 - Icon embedding works out of the box on Godot 4.5+; no Wine/rcedit steps
   needed.
 
@@ -341,7 +342,7 @@ If a downstream lesson should flow *back* to the harness, capture it in
 
 | Symptom | Likely cause | Check | Fix |
 |---|---|---|---|
-| Godot editor opens the project but behaves unexpectedly / editor UI looks wrong | Wrong Godot version installed (this project targets 4.6.x specifically) | `/Applications/Godot.app/Contents/MacOS/Godot --version` | Install/switch to Godot 4.6.x |
+| Godot editor opens the project but behaves unexpectedly / editor UI looks wrong | Wrong Godot version installed (this project targets 4.7.x as of 2026-07-07) | `/Applications/Godot.app/Contents/MacOS/Godot --version` | Install/switch to Godot 4.7.x |
 | Headless `--import` run is slow the first time | Expected - first import scans the filesystem and builds the global script class cache from scratch | Re-run the same command | Subsequent runs are faster; not a bug |
 | `--quit-after 1` output has no `SceneManager ready.` line | `SceneManager` autoload not registered, or `main.tscn` isn't the scene passed | Check `game/project.godot` -> `[autoload]` section and the command's scene path | Fix the autoload path or the invoked scene |
 

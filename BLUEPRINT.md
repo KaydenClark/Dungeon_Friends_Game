@@ -312,7 +312,7 @@ but at least trees or something" (added as scattered clusters).
 
 | Layer | Choice | Source / Notes |
 |---|---|---|
-| Engine/Runtime | Godot 4.6.x, GDScript | Installed and confirmed: `4.6.3.stable.official` |
+| Engine/Runtime | Godot 4.7.x, GDScript | Upgraded from 4.6.x on 2026-07-07 (Kayden's call); installed and verified: `4.7.stable.official.5b4e0cb0f` (full clean reimport + unit/smoke suites all green on 4.7) |
 | Renderer | Mobile | Locked, Gameplan.md section 3.2 |
 | UI | Godot `Control` nodes + `CanvasLayer` (HUD, dialogue, menus) | `game/scenes/ui/` |
 | Backend | None - fully local, no server, no accounts | |
@@ -326,7 +326,12 @@ but at least trees or something" (added as scattered clusters).
 Architecture constraints:
 
 - Single Autoload: `SceneManager`. No other autoloads - additional global
-  state goes on `SceneManager`'s `GameState`/`SaveData` resource.
+  state goes on `SceneManager`'s `GameState`/`SaveData` resource. **Built
+  2026-07-07 (T-036):** `SceneManager.state: GameState` holds the mutable
+  session (party roster/levels/xp/hp, inventory, flags); `hero_hp`,
+  `total_xp`, `inventory`, `flags` are forwarding properties over it and
+  `add_item()` is the one deduped inventory write path. Reset/load swap the
+  whole `GameState` in one move - the shape `SaveData` (T-037) serializes.
 - Grid-snapped movement only, via `Tween`; never raw `velocity`-based free
   movement.
 - All stats/items/abilities/encounters are `Resource` subclasses defined in
@@ -585,7 +590,7 @@ Rules:
 | Scope creep from an oversized feature wishlist | High | The MVP/Stretch split (Non-Goals above, Gameplan.md section 16/17) is the guardrail - revisit it before adding any new system mid-phase |
 | Solo + AI-assisted dev underestimates UI work (menus, inventory, party management) | Medium | UI-heavy phases (4, 5) get dedicated milestones rather than being bundled into "just add combat" |
 | Android export friction (SDK/JDK setup, device-specific quirks) | Medium | Addressed in Phase 0 (M0.3), not deferred to the end |
-| `heygleeson/godot-ldtk-importer` is a community plugin - could break on Godot updates | Low-Medium | Pin Godot to 4.6.x and the importer version; check its GitHub issues before any engine upgrade |
+| `heygleeson/godot-ldtk-importer` is a community plugin - could break on Godot updates | Low-Medium | Pin Godot to the current 4.7.x and the importer version (2.0); check its GitHub issues before any engine upgrade. **2026-07-07: the 4.6->4.7 upgrade re-verified clean** - importer 2.0 reimported all four `.ldtk` worlds with no errors/deprecations |
 | Ultrawide (21:9) aspect ratios could show too much/too little world at the screen edges under `expand` | Low-Medium | Validated by the T-007 display-scaling spike at 1280x720/1920x1080/3440x1440 before producing more art; revisit `keep`+letterbox if `expand` reads poorly once real level art exists |
 | "Authentic hardware constraint" scope creep (chasing GB/GBA-accuracy that doesn't serve gameplay) | Low | Any remaining hardware-accuracy ideas (e.g. a CRT shader) stay optional, cosmetic Stretch Goals, never load-bearing |
 | Aseprite CLI/Lua automation has a learning curve before it pays off | Low | Start with simple batch-export scripts in M1.1; Pixelorama remains a no-cost manual fallback |
@@ -597,7 +602,7 @@ Rules:
 
 | Decision | Rationale | Date / Source |
 |---|---|---|
-| Godot 4.6.x, GDScript, Mobile renderer | Confirmed installed and matches the audited toolchain recommendation | 2026-06-11 / Gameplan.md section 3.2 |
+| ~~Godot 4.6.x~~ -> **Godot 4.7.x**, GDScript, Mobile renderer | Original 4.6.x matched the audited toolchain recommendation; **upgraded to 4.7.x on 2026-07-07 (Kayden's explicit decision)** after the local toolchain moved to `4.7.stable` - project verified clean on 4.7 (reimport + unit 18 suites/369 checks + smoke 109/109). Mobile renderer + GDScript unchanged | 2026-06-11, rev. 2026-07-07 / Gameplan.md section 3.2 |
 ~~240x160 base resolution (GBA-like, 3:2), nearest filter, integer scaling, `keep` aspect, unrestricted palette~~ - **superseded 2026-07-05, see the flexible HD/ultrawide row below** | GBA-*inspired* not GBC-accurate; more screen real estate than 160x144 while staying grid-friendly (240 = 15x16px, 160 = 10x16px) | 2026-06-11 / Gameplan.md section 3.2 |
 | Flexible HD/ultrawide base resolution (1280x720 design reference), nearest filter, `canvas_items` stretch mode, `expand` aspect, `fractional` scale mode, unrestricted palette | Kayden decided to drop the fixed low-res GBA-locked canvas in favor of native HD/ultrawide rendering while keeping the retro sprite-art look (nearest-neighbor filtering, chunky pixel silhouettes); `canvas_items`+`expand` shows more world on wider displays (e.g. 3440x1440) instead of pillarboxing, validated by the T-007 display-scaling spike at 1280x720/1920x1080/3440x1440 | 2026-07-05 / this session, supersedes the 2026-06-11 row above |
 | No global palette-swap shader / `SCREEN_TEXTURE` post-process in MVP | Was the source of a Compatibility-renderer bug risk; no longer needed once the palette isn't artificially constrained | 2026-06-11 / audited_research.md section 4.1, section 8 decision #2 |

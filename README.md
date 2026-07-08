@@ -8,7 +8,7 @@ recruit a team and fight through turn-based combat across dungeons and the
 overworld, rendered natively at flexible HD/ultrawide resolutions rather than
 a locked handheld-style canvas.
 
-A solo, AI-assisted Godot 4.6 project: grid-based overworld and dungeon
+A solo, AI-assisted Godot 4.7 project: grid-based overworld and dungeon
 exploration (Zelda-style block/switch/key puzzles), Baldur's-Gate/Fire-Emblem-
 inspired turn-based party combat, and recruitable "Dungeon Friends" party
 members. The world starts in a fantasy forest and later expands into a castle

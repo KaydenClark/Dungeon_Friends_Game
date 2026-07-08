@@ -84,8 +84,7 @@ func reset_puzzle() -> void:
 
 
 func grant_item(item: String) -> void:
-	if not SceneManager.inventory.has(item):
-		SceneManager.inventory.append(item)
+	SceneManager.add_item(item)  # dedup lives in the one write path (T-036)
 
 
 func _refresh() -> void:
