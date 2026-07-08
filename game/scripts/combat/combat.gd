@@ -28,16 +28,24 @@ const ROOT_OPTIONS := ["Fight", "Defend"]
 const MOVE_OPTIONS := ["Swing Sword", "Back"]
 
 
-## Pure d10 combat math (Phase 3/4 red-green target - see RUNBOOK -> Test
-## Coverage Policy). Extracted as static functions so the hit/damage rules can
-## be unit tested without standing up the whole combat scene. _attack() below
-## is the only caller; keep the two in sync.
+## Pure d10 combat math over the shared CombatStats block (T-052, Kayden's
+## 2026-07-07 direction; red/green per RUNBOOK -> Test Coverage Policy).
+## Stats work in 10% chunks: hit is skill vs speed, physical damage is
+## power + might vs guard, focus mirrors it for magic/status. Extracted as
+## static functions so the rules are unit-testable without standing up the
+## whole combat scene. _attack() below is the physical caller; the focus/
+## status functions wait on Phase 4's AbilityData wiring.
 
-## Percent-to-hit tier (also the tens digit shown to the player): 5 + attack
-## - defense, minus 2 when the defender is bracing, clamped to a 10%..90% band
-## so nothing is ever a guaranteed hit or a certain miss.
-static func hit_threshold(attack: int, defense: int, defending: bool) -> int:
-	return clampi(5 + attack - defense - (2 if defending else 0), 1, 9)
+## Placeholder power of the basic "Swing Sword" until abilities carry their
+## own power values (T-035/Phase 4).
+const SWING_POWER := 2
+
+## Percent-to-hit tier (also the tens digit shown to the player):
+## 7 + attacker skill - defender speed, minus 2 when the defender is
+## bracing, clamped to a 20%..90% band so nothing is ever a guaranteed hit
+## or a certain miss.
+static func hit_threshold(skill: int, spd: int, defending: bool) -> int:
+	return clampi(7 + skill - spd - (2 if defending else 0), 2, 9)
 
 
 ## The d10 value the attacker must meet or beat (roll-high-good): a 70% tier
@@ -46,21 +54,31 @@ static func needed_roll(threshold: int) -> int:
 	return 11 - threshold
 
 
-## Damage on a hit: attack minus half the defender's defense (min 1), then
-## halved again (min 1) when the defender is bracing.
-static func attack_damage(attack: int, defense: int, defending: bool) -> int:
-	var dmg := maxi(1, attack - int(defense / 2.0))
+## Physical damage on a hit: ability power + might - guard (min 1), halved
+## again (min 1) when the defender is bracing.
+static func attack_damage(power: int, might: int, guard: int, defending: bool) -> int:
+	var dmg := maxi(1, power + might - guard)
 	if defending:
 		dmg = maxi(1, int(dmg / 2.0))
 	return dmg
 
 
+## Magic damage: ability power + attacker focus - defender focus (min 1).
+## Unconsumed until Phase 4 abilities; tested now so the rule is pinned.
+static func focus_damage(power: int, atk_focus: int, def_focus: int) -> int:
+	return maxi(1, power + atk_focus - def_focus)
+
+
+## Status-effect tier: 6 + attacker focus - defender focus, same 20%..90%
+## band and roll-high resolution as hits. Unconsumed until Phase 4.
+static func status_threshold(atk_focus: int, def_focus: int) -> int:
+	return clampi(6 + atk_focus - def_focus, 2, 9)
+
+
 class CombatUnit:
 	var display_name := ""
-	var attack := 0
-	var defense := 0
-	var speed := 0
-	var max_hp := 0
+	## Shared template stat block (never mutated - runtime state stays here).
+	var stats: CombatStats
 	var hp := 0
 	var cell := Vector2i.ZERO
 	var is_player := false
@@ -94,21 +112,15 @@ func setup(hero: CharacterStats, hero_hp: int, enemy: EnemyStats,
 	auto_play = p_auto
 	var h := CombatUnit.new()
 	h.display_name = hero.display_name
-	h.attack = hero.attack
-	h.defense = hero.defense
-	h.speed = hero.speed
-	h.max_hp = hero.max_hp
+	h.stats = hero.stats
 	h.hp = hero_hp
 	h.cell = Vector2i(2, 2)
 	h.is_player = true
 	units.append(h)
 	var e := CombatUnit.new()
 	e.display_name = enemy.display_name
-	e.attack = enemy.attack
-	e.defense = enemy.defense
-	e.speed = enemy.speed
-	e.max_hp = enemy.max_hp
-	e.hp = enemy.max_hp
+	e.stats = enemy.stats
+	e.hp = enemy.stats.max_hp
 	e.cell = Vector2i(6, 2)
 	e.is_boss = enemy.id == "boss_slime"
 	units.append(e)
@@ -207,7 +219,8 @@ func _run_battle() -> void:
 	# CalculateInitiative: every combatant sorted together by speed - strict
 	# per-unit order, never a whole-team phase (locked decision).
 	var order := units.duplicate()
-	order.sort_custom(func(a: CombatUnit, b: CombatUnit) -> bool: return a.speed > b.speed)
+	order.sort_custom(func(a: CombatUnit, b: CombatUnit) -> bool:
+		return a.stats.speed > b.stats.speed)
 	while not battle_over:
 		for u in order:
 			if battle_over:
@@ -375,14 +388,12 @@ func _return_to(u: CombatUnit, home: Vector2i) -> void:
 
 
 func _attack(atk: CombatUnit, def: CombatUnit) -> void:
-	# PLACEHOLDER d10 formula (Phase 3/4 decides the real one, red/green):
-	# threshold = 5 + attack - defense (-2 if defending), clamped 1..9; it is
-	# the percent chance to hit (7 -> 70%). You roll a d10 and HIT ON A HIGH
-	# ROLL - you need to roll `needed` (= 11 - threshold) or higher. So a 70%
-	# chance means "roll a 4 or higher". (Revised 2026-07-05: this used to be a
-	# roll-UNDER check, which read as backwards - low rolls hitting - during
-	# playtest; flipped to roll-high-good, same odds.)
-	var threshold := hit_threshold(atk.attack, def.defense, def.defending)
+	# T-052 d10 formula: threshold = 7 + skill - speed (-2 if defending),
+	# clamped 2..9; it is the percent chance to hit (7 -> 70%). You roll a
+	# d10 and HIT ON A HIGH ROLL - you need `needed` (= 11 - threshold) or
+	# higher, so 70% means "roll a 4 or higher". (The roll-high presentation
+	# is the 2026-07-05 playtest flip; the stats are the shared block.)
+	var threshold := hit_threshold(atk.stats.skill, def.stats.speed, def.defending)
 	var needed := needed_roll(threshold)
 	var roll := rng.randi_range(1, 10)
 	var hit := roll >= needed
@@ -395,11 +406,12 @@ func _attack(atk: CombatUnit, def: CombatUnit) -> void:
 	await _wait(0.6)
 	var result := ""
 	if hit:
-		var dmg := attack_damage(atk.attack, def.defense, def.defending)
+		var dmg := attack_damage(SWING_POWER, atk.stats.might, def.stats.guard,
+				def.defending)
 		def.hp = maxi(0, def.hp - dmg)
 		_update_info(def)
 		result = "Rolled %d — HIT!  %d damage.  %s: %d/%d HP." % [
-			roll, dmg, def.display_name, def.hp, def.max_hp]
+			roll, dmg, def.display_name, def.hp, def.stats.max_hp]
 		if def.hp <= 0:
 			def.node.visible = false
 			battle_over = true
@@ -435,7 +447,7 @@ func _cell_pos(c: Vector2i) -> Vector2:
 
 
 func _update_info(u: CombatUnit) -> void:
-	u.info.text = "%s %d/%d" % [u.display_name, u.hp, u.max_hp]
+	u.info.text = "%s %d/%d" % [u.display_name, u.hp, u.stats.max_hp]
 
 
 func _log(msg: String) -> void:

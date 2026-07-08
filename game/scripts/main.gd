@@ -37,5 +37,5 @@ func _process(_delta: float) -> void:
 	if SceneManager.hero_stats == null:
 		return
 	hud.text = "HP %d/%d    XP %d    Items: %s" % [
-		SceneManager.hero_hp, SceneManager.hero_stats.max_hp,
+		SceneManager.hero_hp, SceneManager.hero_stats.stats.max_hp,
 		SceneManager.total_xp, SceneManager.inventory_text()]

@@ -1,15 +1,26 @@
-[gd_resource type="Resource" script_class="EnemyStats" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="EnemyStats" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/data/enemy_stats.gd" id="1_boss"]
+[ext_resource type="Script" path="res://scripts/data/combat_stats.gd" id="2_stats"]
+
+[sub_resource type="Resource" id="CombatStats_boss"]
+script = ExtResource("2_stats")
+max_hp = 16
+might = 3
+guard = 2
+skill = 3
+speed = 2
+focus = 1
+move_range = 3
 
 [resource]
 script = ExtResource("1_boss")
 id = "boss_slime"
 display_name = "Boss Slime"
-max_hp = 16
-attack = 3
-defense = 2
-speed = 3
+family = &"slime"
+role = &"tank"
+rank = &"boss"
+stats = SubResource("CombatStats_boss")
 ai_behavior = 1
 xp_reward = 25
 loot_table = PackedStringArray("forest_key")

@@ -35,7 +35,7 @@ func test_heal_hook_uses_real_rule() -> void:
 	var saved := SceneManager.hero_hp
 	SceneManager.hero_hp = 2
 	SceneManager.heal_hero_to_full()
-	eq(SceneManager.hero_hp, SceneManager.hero_stats.max_hp,
+	eq(SceneManager.hero_hp, SceneManager.hero_stats.stats.max_hp,
 			"dev heal is the same heal_hero_to_full the healer uses")
 	SceneManager.hero_hp = saved
 
