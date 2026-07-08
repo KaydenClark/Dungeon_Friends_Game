@@ -18,6 +18,7 @@ const SUITES := [
 	"res://tests/test_scene_manager.gd",
 	"res://tests/test_game_state.gd",
 	"res://tests/test_item_data.gd",
+	"res://tests/test_progression.gd",
 	"res://tests/test_enemy_ai.gd",
 	"res://tests/test_dialogue_cooldown.gd",
 	"res://tests/test_player_movement.gd",
@@ -40,7 +41,10 @@ func _ready() -> void:
 	print("UNIT TESTS: begin")
 	for path in SUITES:
 		var script: GDScript = load(path)
-		if script == null:
+		# A parse-broken suite loads as a non-null GDScript that can't
+		# instantiate; calling new() on it aborts _ready before quit() runs
+		# and the process hangs forever - so a red run must be caught here.
+		if script == null or not script.can_instantiate():
 			total_failures.append("%s: suite failed to load" % path)
 			print("  SUITE LOAD FAILED: ", path)
 			continue
