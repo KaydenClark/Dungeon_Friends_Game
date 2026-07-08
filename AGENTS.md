@@ -75,7 +75,10 @@ ripple effects across the data model, scene structure, and milestones. Full
 list and rationale: `BLUEPRINT.md` -> Core Logic And Invariants and Design
 Decisions.
 
-Quick reference: Godot 4.6.x / GDScript / Mobile renderer; flexible HD/
+Quick reference: Godot 4.7.x / GDScript / Mobile renderer (revised 2026-07-07,
+Kayden's explicit upgrade from the original 4.6.x - the local toolchain moved
+to 4.7.stable and the project was verified clean on it; supersedes the 4.6.x
+lock); flexible HD/
 ultrawide base resolution (1280x720 design reference, `canvas_items`/`expand`
 scaling - revised 2026-07-05, supersedes the old 240x160-locked decision),
 nearest filter, unrestricted palette; `TileMapLayer`

@@ -3,8 +3,9 @@
 Status: Draft v2, 2026-06-11 — all 5 open decisions from the audit resolved (see audit §8)
 **Revision, 2026-07-05:** §3.2's fixed 240x160 base resolution has been superseded — see §3.2 and BLUEPRINT.md → Design Decisions. The rest of this document (loop, architecture, data model, combat, milestones) is unaffected; only the rendering/resolution decision changed.
 **Revision, 2026-07-05 (2):** Combat is now confirmed grid-based with per-unit movement/range, strict per-character initiative order (§7's `TurnManager` already sorted all combatants by speed — only this document's §7 `PlayerPhase → EnemyPhase` Battle-FSM state names implied team-phasing, and that reading is retired), and a d10 percentage resolution system in place of flat deterministic damage math. Visual language is narrowed to a GBA-fantasy-adventure look built from 8x8/16x16 tile units. See BLUEPRINT.md → Visual Language, → Current Product Shape, and → Core Logic And Invariants for the current detail — this document's §2/§7 prose itself is not yet rewritten to match.
+**Revision, 2026-07-07:** Engine target upgraded from Godot 4.6.x to **4.7.x** (Kayden's explicit decision; the local toolchain moved to `4.7.stable` and the project was re-verified clean on it). No other §3.2 change; BLUEPRINT.md → Architecture/Design Decisions hold the current detail.
 Companion document: `docs/research/audited_research.md` (read that first — this plan builds on its conclusions)
-Engine target: Godot 4.6.x (GDScript), Mobile renderer
+Engine target: Godot 4.7.x (GDScript), Mobile renderer
 Platforms: macOS, Windows, Android (desktop-first development)
 Base resolution: flexible HD/ultrawide (1280x720 design reference, scaling cleanly to 1920x1080 and 3440x1440), nearest-neighbor filtering, unrestricted palette — see §3.2
 
