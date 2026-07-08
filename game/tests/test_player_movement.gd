@@ -13,6 +13,7 @@ const FRAME := 1.0 / 60.0
 
 func _bare_player() -> Player:
 	var p: Player = Player.new()
+	p.move_time = p.WALK_MOVE_TIME
 	# Never added to the tree: _process/_ready stay quiet; facing defaults DOWN.
 	return p
 
@@ -78,15 +79,31 @@ func test_tap_is_exactly_one_step() -> void:
 
 func test_hold_in_faced_direction_walks_continuously() -> void:
 	var p := _bare_player()
-	# 1 second of holding: first step at t=0, repeat engages at 0.2s, then one
-	# step per move_time (0.15 default here since _ready never ran).
+	# 1 second of holding: first step at t=0, then repeat movement at roughly
+	# one step per move_time.
 	var steps := _run_hold(p, Vector2i.DOWN, 1.0)
 	ok(steps >= 5, "a 1s hold walks continuously (got %d steps)" % steps)
 	ok(p._repeating, "auto-walk state is engaged")
 	p.free()
 
 
-func test_no_stationary_gap_between_repeat_steps() -> void:
+func test_first_held_step_chains_after_at_most_two_frames() -> void:
+	var p := _bare_player()
+	ok(p._movement_intent(Vector2i.DOWN, FRAME), "first faced-direction step starts immediately")
+	p.moving = true
+	var tween := 0.0
+	while tween < p.move_time:
+		p._movement_intent(Vector2i.DOWN, FRAME)
+		tween += FRAME
+	p.moving = false
+	var wait_frames := 0
+	while wait_frames < 4 and not p._movement_intent(Vector2i.DOWN, FRAME):
+		wait_frames += 1
+	ok(wait_frames <= 2, "first held repeat has no visible hitch (waited %d frames)" % wait_frames)
+	p.free()
+
+
+func test_no_stationary_gap_between_established_repeat_steps() -> void:
 	var p := _bare_player()
 	_run_hold(p, Vector2i.DOWN, 0.5)   # get into repeat mode
 	ok(p._repeating, "precondition: repeating")
@@ -107,7 +124,7 @@ func test_turn_then_walk_has_no_second_pause() -> void:
 	# Simulate the first step's tween maturing the hold.
 	p.moving = true
 	var tween := 0.0
-	while tween < 0.12:
+	while tween < p.move_time:
 		p._movement_intent(Vector2i.LEFT, FRAME)
 		tween += FRAME
 	p.moving = false
