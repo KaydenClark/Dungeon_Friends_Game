@@ -17,6 +17,10 @@ const TRACK_RADIUS := 4
 const STEP_INTERVAL := 0.35
 
 @export var stats: EnemyStats
+## Optional enemy-party record (T-044/T-062): when set, touching this enemy
+## fights the whole enemy_group instead of just `stats`. The LDtk entity
+## field wiring lands at T-066; until then only tests/dev set it.
+@export var encounter: EncounterData
 var target_player: Player
 @export var is_boss := false
 ## Non-empty for one-off enemies (boss, key guardians): defeat is recorded in

@@ -62,6 +62,9 @@ func interact() -> void:
 	if reward_item != "" and not SceneManager.inventory.has(reward_item):
 		SceneManager.add_item(reward_item)
 		lines.append("You got the %s!" % ItemLibrary.display_name(reward_item))
+		if reward_item == "shield":
+			# D-007: the shield unlocks the Defend command (T-046).
+			lines.append("You can now Defend in combat!")
 	else:
 		lines.append("It's empty...")
 	_refresh_look()

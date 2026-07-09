@@ -185,12 +185,18 @@ func start_encounter(enemy: OverworldEnemy) -> void:
 	world_container.visible = false
 	world_container.process_mode = Node.PROCESS_MODE_DISABLED
 	var combat := CombatScene.new()
-	combat.setup(hero_stats, hero_hp, enemy.stats, rng, auto_combat)
+	combat.setup(_build_party_units(), _build_enemy_units(enemy),
+			_arena_from_room(enemy.cell), rng, auto_combat,
+			inventory.has("shield"))
 	combat_container.add_child(combat)
 	await _fade_to(0.0)
 	var result: Array = await combat.finished
 	var victory: bool = result[0]
-	hero_hp = result[1]
+	var payload: Dictionary = result[1]
+	for id in payload.get("party_hp", {}):
+		state.party_hp[id] = payload["party_hp"][id]
+	for id in payload.get("party_mp", {}):
+		state.party_mp[id] = payload["party_mp"][id]
 	await _fade_to(1.0)
 	combat.queue_free()
 	world_container.visible = true
@@ -265,11 +271,99 @@ func inventory_summary() -> String:
 	return ", ".join(parts)
 
 
-## Restore the hero to full HP. Shared by the healer NPC and the post-defeat
-## recovery so both apply the exact same rule.
+## Cached CharacterStats lookup for every roster member (the hero keeps its
+## dedicated hero_stats var for legacy call sites; this is the general path).
+var _character_stats_cache: Dictionary = {}
+func character_stats_for(id: String) -> CharacterStats:
+	if not _character_stats_cache.has(id):
+		_character_stats_cache[id] = load("res://data/characters/%s.tres" % id)
+	return _character_stats_cache[id]
+
+
+## The player's side of a battle (T-062): one CombatUnit per roster member,
+## with current HP/MP carried in (defaults: full).
+func _build_party_units() -> Array[CombatUnit]:
+	var out: Array[CombatUnit] = []
+	for id in state.party_roster:
+		var stats := character_stats_for(id)
+		if stats == null:
+			push_warning("No CharacterStats for roster id %s" % id)
+			continue
+		var hp: int = state.party_hp.get(id, stats.max_hp)
+		var mp: int = state.party_mp.get(id, stats.max_mp)
+		out.append(CombatUnit.from_character(id, stats, hp, mp))
+	return out
+
+
+## The enemy side (T-062): the touched enemy's EncounterData party when it
+## carries one (T-066 wires the LDtk field), else the single enemy itself.
+func _build_enemy_units(enemy: OverworldEnemy) -> Array[CombatUnit]:
+	var out: Array[CombatUnit] = []
+	if enemy.encounter != null and not enemy.encounter.enemy_group.is_empty():
+		for i in enemy.encounter.enemy_group.size():
+			out.append(CombatUnit.from_enemy(enemy.encounter.enemy_group[i], i))
+	else:
+		out.append(CombatUnit.from_enemy(enemy.stats, 0))
+	return out
+
+
+## D-012 (Kayden: "use the local terrain where you were touched"): seed the
+## combat grid from the current room's cells in a window around the contact
+## point. Blocked terrain and pits both read as obstacles. Falls back to an
+## open field when the local area can't fit both parties.
+const ARENA_W := 9
+const ARENA_H := 5
+func _arena_from_room(contact: Vector2i) -> Dictionary:
+	var open_field := {"w": ARENA_W, "h": ARENA_H, "blocked": []}
+	var room := current_room as RoomGrid
+	if room == null or room.width <= 0:
+		return open_field
+	var w: int = mini(ARENA_W, room.width)
+	var h: int = mini(ARENA_H, room.height)
+	var origin := contact - Vector2i(w / 2, h / 2)
+	origin.x = clampi(origin.x, 0, room.width - w)
+	origin.y = clampi(origin.y, 0, room.height - h)
+	var walkable: Dictionary = {}
+	for y in h:
+		for x in w:
+			var world_cell := origin + Vector2i(x, y)
+			if not (room.blocked.has(world_cell) or room.pits.has(world_cell)):
+				walkable[Vector2i(x, y)] = true
+	# Keep only the connected region around the contact point, so the two
+	# parties can always reach each other (a wall pocket would otherwise
+	# stalemate the battle). Everything else reads as an obstacle.
+	var start := contact - origin
+	if not walkable.has(start):
+		return open_field
+	var component: Dictionary = {start: true}
+	var frontier: Array[Vector2i] = [start]
+	while not frontier.is_empty():
+		var c: Vector2i = frontier.pop_front()
+		for d in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+			var n: Vector2i = c + d
+			if walkable.has(n) and not component.has(n):
+				component[n] = true
+				frontier.append(n)
+	# Both parties (up to 4 + 4) plus room to maneuver, or fight in a field.
+	if component.size() < 12:
+		return open_field
+	var blocked: Array[Vector2i] = []
+	for y in h:
+		for x in w:
+			var c := Vector2i(x, y)
+			if not component.has(c):
+				blocked.append(c)
+	return {"w": w, "h": h, "blocked": blocked}
+
+
+## Restore the whole party to full HP/MP. Shared by the healer NPC and the
+## post-defeat recovery so both apply the exact same rule.
 func heal_hero_to_full() -> void:
-	if hero_stats:
-		hero_hp = hero_stats.max_hp
+	for id in state.party_roster:
+		var stats := character_stats_for(id)
+		if stats:
+			state.party_hp[id] = stats.max_hp
+			state.party_mp[id] = stats.max_mp
 
 
 ## Party defeat (T-029, locked decision D-004): restart from the beginning of
