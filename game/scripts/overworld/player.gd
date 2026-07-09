@@ -15,11 +15,14 @@ extends GridActor
 ## The step decision lives in _movement_intent(), a pure function of
 ## (direction, delta) plus actor state, so the unit suite drives the real path.
 
+## Visible time for one grid step. Long enough to read as motion instead of a
+## cell pop, short enough that the grid still feels crisp.
+const WALK_MOVE_TIME := 0.16
 ## Total hold time (from press, *including* the move tween) before auto-walk
-## engages. Anything shorter reads as a tap = exactly one step. The move tween
-## is 0.12s, so the visible stationary beat after a held first step is
-## MOVE_REPEAT_DELAY - 0.12 = ~0.08s - the deliberate tap/hold discriminator.
-const MOVE_REPEAT_DELAY := 0.2
+## engages. Anything shorter reads as a tap = exactly one step. This sits just
+## above WALK_MOVE_TIME, so held walking chains after about one frame instead
+## of the old ~0.08s beat.
+const MOVE_REPEAT_DELAY := 0.17
 ## Facing a new direction pauses this long before the first step (turn-in-
 ## place). Consumed concurrently with the hold, so a turn that becomes a walk
 ## has no extra stationary beat after its first step.
@@ -49,7 +52,7 @@ func _ready() -> void:
 	_make_body(Color(0.25, 0.5, 0.95))
 	# Snappier per-step tween than the default so grid movement reads as crisp
 	# steps rather than a laggy glide (playtest feedback 2026-07-05).
-	move_time = 0.12
+	move_time = WALK_MOVE_TIME
 	camera = Camera2D.new()
 	camera.position_smoothing_enabled = true
 	# Tighter follow (was 8.0) so the camera doesn't visibly trail the player.
