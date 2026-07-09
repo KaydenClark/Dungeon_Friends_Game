@@ -11,7 +11,7 @@ extends "res://tests/gd_test.gd"
 
 func _reset() -> void:
 	SceneManager.total_xp = 0
-	SceneManager.inventory = PackedStringArray()
+	SceneManager.inventory = {}
 
 
 func test_victory_grants_xp() -> void:
@@ -62,7 +62,8 @@ func test_victory_banner_text() -> void:
 	_reset()
 	var boss: EnemyStats = load("res://data/enemies/boss_slime.tres")
 	var with_loot := SceneManager.apply_victory_rewards(boss)
-	ok(with_loot.contains("dropped: forest_key"), "loot banner names the drop")
+	ok(with_loot.contains("dropped: Forest Key"),
+			"loot banner uses the ItemData display name (T-034)")
 	ok(with_loot.contains("25 XP"), "loot banner shows boss XP")
 	_reset()
 
@@ -81,7 +82,7 @@ func test_defeat_reset_wipes_session_state() -> void:
 	# the slice smoke test's forced-defeat pass.
 	var saved_hp := SceneManager.hero_hp
 	SceneManager.total_xp = 120
-	SceneManager.inventory = PackedStringArray(["forest_key", "shield"])
+	SceneManager.inventory = {"forest_key": 1, "shield": 1}
 	SceneManager.flags = {"entered_dungeon": true, "chest_hub_opened": true}
 	SceneManager.hero_hp = 3
 	SceneManager.reset_session_state()

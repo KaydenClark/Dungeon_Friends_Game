@@ -471,13 +471,19 @@ attack-range fields (they drive the highlighted movement/attack ranges in
 battle) - not yet added to the table above; exact field names/shape are a
 Phase 3/4 implementation decision, not decided here.
 
-*Status (2026-07-05, second session):* `CharacterStats` and `EnemyStats` now
-exist (`game/scripts/data/`) with the fields listed above, plus first
-instances `game/data/characters/hero.tres` and
-`game/data/enemies/forest_slime.tres`. `ItemData`/`AbilityData`/`MapMeta`/
-`EncounterData`/`SaveData` are still Phase 3 work. `EnemyStats.loot_table` is
-a `PackedStringArray` of item ids for now - it becomes richer when `ItemData`
-lands.
+*Status (2026-07-05, second session; ItemData row updated 2026-07-08):*
+`CharacterStats` and `EnemyStats` exist (`game/scripts/data/`) with the
+fields listed above, plus first instances `game/data/characters/hero.tres`
+and `game/data/enemies/forest_slime.tres`. **`ItemData` is built (T-034,
+2026-07-08)**: `item_data.gd` + `item_library.gd` (id -> ItemData lookup
+over `game/data/items/`, where forest_key/dungeon_key/shield now live as
+`.tres`), and the session inventory is a `{item_id: qty}` Dictionary on
+`GameState` - key items/equipment never stack, consumables do, and
+`SceneManager.add_item()/remove_item()` are the only write paths.
+`AbilityData`/`MapMeta`/`EncounterData`/`SaveData` are still open (T-035/
+T-044/T-037). `EnemyStats.loot_table` deliberately stays a
+`PackedStringArray` of item ids resolved through the library - the T-043
+deviation.
 
 ## Party And Combat Model
 

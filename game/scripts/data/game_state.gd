@@ -14,7 +14,8 @@ extends Resource
 @export var party_levels: Dictionary = {"hero": 1}
 @export var party_xp: Dictionary = {"hero": 0}
 @export var party_hp: Dictionary = {}
-## Item ids (PackedStringArray until T-034 upgrades to {id: qty} + ItemData).
-@export var inventory := PackedStringArray()
+## {item_id: qty} (T-034). Key items and equipment never stack (qty stays 1);
+## consumables increment. Write through SceneManager.add_item()/remove_item().
+@export var inventory: Dictionary = {}
 ## Durable world facts: doors opened, chests looted, dialogue beats seen.
 @export var flags: Dictionary = {}

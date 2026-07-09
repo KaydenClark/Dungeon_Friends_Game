@@ -40,10 +40,10 @@ var hero_hp: int:
 var total_xp: int:
 	get: return state.party_xp.get("hero", 0)
 	set(v): state.party_xp["hero"] = v
-## NOTE: reads return a copy-on-write PackedStringArray - never call
-## .append() on it from outside; use add_item() (the write would land on the
-## copy and vanish). Assignment and .has() are safe.
-var inventory: PackedStringArray:
+## {item_id: qty} (T-034). Write through add_item()/remove_item(), never
+## directly - they own the stack-vs-dedup rules. Reads (.has(), .size(),
+## iteration over ids) are safe.
+var inventory: Dictionary:
 	get: return state.inventory
 	set(v): state.inventory = v
 var flags: Dictionary:
@@ -219,16 +219,50 @@ func apply_victory_rewards(enemy_stats: EnemyStats) -> String:
 		add_item(item)
 	var msg := "Victory! Gained %d XP." % enemy_stats.xp_reward
 	if drops.size() > 0:
-		msg += " The %s dropped: %s!" % [enemy_stats.display_name, ", ".join(drops)]
+		var names := PackedStringArray()
+		for item in drops:
+			names.append(ItemLibrary.display_name(item))
+		msg += " The %s dropped: %s!" % [enemy_stats.display_name, ", ".join(names)]
 	return msg
 
 
-## Add an item id to the inventory once - every current item is a unique
-## key or gear piece (stacking arrives with ItemData at T-034). The single
-## write path for inventory from outside this autoload.
-func add_item(item: String) -> void:
-	if not state.inventory.has(item):
-		state.inventory.append(item)
+## Add an item to the {id: qty} inventory (T-034). Key items and equipment
+## never stack - a second copy is ignored (the loot-dedup rule); consumables
+## increment by qty. The single write path for inventory from outside this
+## autoload.
+func add_item(item: String, qty: int = 1) -> void:
+	var data := ItemLibrary.get_item(item)
+	if data != null and data.stacks():
+		state.inventory[item] = int(state.inventory.get(item, 0)) + qty
+	elif not state.inventory.has(item):
+		state.inventory[item] = 1
+
+
+## Remove qty of an item (consumable use, T-064). Refuses - and changes
+## nothing - if fewer than qty are held; erases the entry at zero so
+## has()/size() keep their old meanings.
+func remove_item(item: String, qty: int = 1) -> bool:
+	var have := int(state.inventory.get(item, 0))
+	if have < qty:
+		return false
+	if have == qty:
+		state.inventory.erase(item)
+	else:
+		state.inventory[item] = have - qty
+	return true
+
+
+## One-line inventory readout for the HUD and dev overlay: display names
+## from ItemData, "x qty" suffix only when stacked, "-" when empty.
+func inventory_summary() -> String:
+	if state.inventory.is_empty():
+		return "-"
+	var parts := PackedStringArray()
+	for item in state.inventory:
+		var qty := int(state.inventory[item])
+		var display := ItemLibrary.display_name(item)
+		parts.append(display if qty <= 1 else "%s x%d" % [display, qty])
+	return ", ".join(parts)
 
 
 ## Restore the hero to full HP. Shared by the healer NPC and the post-defeat

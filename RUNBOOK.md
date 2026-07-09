@@ -192,7 +192,7 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
-per-suite tally (e.g. `UNIT TESTS: 17 suites, 103 tests, 351 checks, 0
+per-suite tally (e.g. `UNIT TESTS: 19 suites, 115 tests, 391 checks, 0
 failed`). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a
 few seconds (pure logic and controlled clocks, no real-time waits, unlike the
 slice smoke test; the tutorial soft-lock solver adds a second or two). Run
@@ -207,10 +207,15 @@ the live `_attack` path calls), `test_room_grid` (bounds, blocking, occupancy,
 Manhattan pathfinding, avoid-occupants routing), `test_grid_actor`
 (`try_step` reservation/bump/refusal), `test_data_resources` (the shipped
 hero/slime/boss `.tres` values + the boss-key/locked-door invariant),
-`test_dialogue_box` (line advancement + `finished`), `test_overworld_enemy`
+`test_item_data` (T-034: ItemLibrary id->ItemData lookup + display-name
+fallback, key-items-never-stack vs consumables-stack, `remove_item`
+decrement/erase/refusal, `inventory_summary`), `test_dialogue_box` (line
+advancement + `finished`), `test_overworld_enemy`
 (`_manhattan` + `defeated()` cleanup), `test_scene_manager` (victory XP/loot
 dedup + heal-to-full + the T-029 session reset, the real
 `apply_victory_rewards`/`heal_hero_to_full`/`reset_session_state` methods),
+`test_game_state` (T-036: per-instance container isolation, SceneManager
+property forwarding, reset swap),
 `test_enemy_ai` (the deterministic `_act`/`_step_toward`/`_step_home`/
 `_wander` decision branches), `test_dialogue_cooldown` (the real
 `_unhandled_input` debounce, driven with a controlled input clock),

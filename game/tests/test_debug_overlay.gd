@@ -19,7 +19,7 @@ func test_panel_hidden_by_default() -> void:
 
 func test_grant_item_deduplicates() -> void:
 	var saved := SceneManager.inventory
-	SceneManager.inventory = PackedStringArray()
+	SceneManager.inventory = {}
 	var o := _overlay()
 	o.grant_item("chest_key")
 	o.grant_item("chest_key")

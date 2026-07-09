@@ -103,5 +103,5 @@ func _refresh() -> void:
 
 Items: %s""" % [
 		"ON" if SceneManager.skip_combat else "off",
-		", ".join(SceneManager.inventory) if SceneManager.inventory.size() > 0 else "-",
+		SceneManager.inventory_summary(),
 	]

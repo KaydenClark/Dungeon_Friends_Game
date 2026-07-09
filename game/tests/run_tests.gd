@@ -13,6 +13,7 @@ const SUITES := [
 	"res://tests/test_room_grid.gd",
 	"res://tests/test_grid_actor.gd",
 	"res://tests/test_data_resources.gd",
+	"res://tests/test_item_data.gd",
 	"res://tests/test_dialogue_box.gd",
 	"res://tests/test_overworld_enemy.gd",
 	"res://tests/test_scene_manager.gd",
@@ -39,8 +40,11 @@ func _ready() -> void:
 	print("UNIT TESTS: begin")
 	for path in SUITES:
 		var script: GDScript = load(path)
-		if script == null:
-			total_failures.append("%s: suite failed to load" % path)
+		if script == null or not script.can_instantiate():
+			# can_instantiate() also catches "loaded but failed to compile" -
+			# without it, script.new() returns null and the crash below would
+			# abort _ready() before quit(), hanging the process forever.
+			total_failures.append("%s: suite failed to load/compile" % path)
 			print("  SUITE LOAD FAILED: ", path)
 			continue
 		var suite: Node = script.new()
