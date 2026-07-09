@@ -7,21 +7,29 @@
 **Status:** partial
 **Source root:** `/Users/kayden/GPT_OS/Projects/Dungeon_Friends_Game`
 
-This is the stable reference for what the project is. Full architecture and
-milestone-level rationale lives in [`docs/planning/Gameplan.md`](docs/planning/Gameplan.md)
-(545 lines - read it for the "why" behind anything below); the toolchain
-research behind that plan is in [`docs/research/audited_research.md`](docs/research/audited_research.md).
-This file is the dense summary a future agent should read first.
+This is the stable reference for what the project is. This file is the
+canonical design doc and the summary a future agent should read first; the
+toolchain research behind its decisions is in [`docs/research/audited_research.md`](docs/research/audited_research.md).
+(The former `docs/planning/Gameplan.md` was retired 2026-07-08 - its content is
+absorbed here, in `RUNBOOK.md`, and in `TASKBOARD.md`.)
 
 ## What This Project Is
 
-A 2D top-down adventure RPG in the structural tradition of classic Zelda games
-(grid-based overworld and dungeons, block-pushing puzzles, switches, locked
-doors, key items that unlock new areas) layered with turn-based party combat
-inspired by Baldur's Gate and Fire Emblem. The player explores a hand-authored
-world - beginning in a fantasy forest with a Kokiri-Forest-from-Ocarina-of-Time
-mood, later opening into a castle city, mountains, and rivers - while
-recruiting party members ("Dungeon Friends") who fight alongside them.
+A 2D top-down adventure RPG: **Zelda meets BG3**. Exploration is in the
+structural tradition of classic Zelda games (grid-based overworld and dungeons,
+block-pushing puzzles, switches, locked doors, key items that unlock new areas).
+Combat is **tactics-RPG**: touching a visible enemy drops the game into a
+dedicated turn-based battle mode (BG3's turn-based mode is the direct model) -
+you command a party of up to four "Dungeon Friends" on a zoomed-in tactical
+grid, selecting a unit, seeing its movement and attack range highlighted (Fire
+Emblem is the *visual* reference for that presentation, not a separate combat
+model), and spending ability-driven turns in strict initiative order. This is
+**not a JRPG**: positioning, range, and ability choice carry real weight; the
+party is not a menu-driven line-up. The player explores a hand-authored world -
+beginning in a fantasy forest with a Kokiri-Forest-from-Ocarina-of-Time mood,
+later opening into a castle city, mountains, rivers, and surrounding wilderness -
+while recruiting the party members who fight alongside them.
+
 Visually it's retro-pixel-art *inspired*, not any specific handheld-accurate:
 a flexible HD/ultrawide base resolution (1280x720 design reference, scaling
 cleanly up through 1920x1080 and 3440x1440), nearest-neighbor filtering,
@@ -29,25 +37,59 @@ unrestricted palette - retro sprite silhouette (chunky pixel art, grid
 movement, tile-based dungeons), not a hardware recreation and not locked to
 any one fixed low-res canvas. See Visual Language below for the specific
 GBA-fantasy-adventure look (bright/readable, toy-like overworlds, chunky
-silhouettes, 8x8/16x16 tile logic) this project targets. The combat/ability
-system borrows the shape of Dungeons & Dragons (classes, abilities, a small
-stat block) without being a literal D&D implementation - adapt what serves a
-small, well-balanced turn-based system, skip the rest. Combat resolution uses
-a d10 percentage system (see Core Logic And Invariants), not literal D&D dice.
+silhouettes, 8x8/16x16 tile logic) this project targets.
+
+On the D&D question: BG3 is itself a D&D-shaped RPG, and that *shape* (classes,
+roles, abilities, a small stat block, party builds) is the target. What this
+project is **not** is a literal D&D implementation - no pulling 5e
+rules-as-written or SRD/OGL content into the game. A D&D-shaped RPG that isn't
+Wizards-of-the-Coast's ruleset. Combat resolution uses a d10 percentage system
+(see Core Logic And Invariants), not literal D&D dice.
 
 Core promise:
 
-> Walk a hand-built overworld, get pulled into a readable turn-based fight
-> without a jarring scene change (the camera zooms into where you were
+> Walk a hand-built overworld, get pulled into a readable turn-based tactical
+> battle without a jarring scene change (the camera zooms into where you were
 > standing, early-Final-Fantasy style, so the world reads as bigger than its
-> actual grid), solve a block/switch/key puzzle, and grow a small recruited
-> party across a forest, a castle city, and a mountain/river region.
+> actual grid), command your party of Dungeon Friends on the zoomed-in grid,
+> solve a block/switch/key puzzle, and grow that party across a forest, a
+> castle city, and a mountain/river region.
 
 Primary users:
 
 - Kayden - solo player and primary tester.
 - Friends/family Kayden shares built exports with (macOS/Windows/Android).
 - A future AI agent (Claude, Codex, or other) picking this repo up cold.
+
+## Design Pillars
+
+The five product pillars, in priority order (confirmed 2026-07-08, Kayden -
+these replace the four dev-discipline pillars from the retired Gameplan
+(movement precision, combat-simple-to-build, party-collection, scope-discipline);
+pillar 1 survives as the quality-bar note below):
+
+1. **Adventure First.** The player should always feel like they are on a clear
+   fantasy adventure: walk the overworld, find secrets, enter dungeons, solve
+   puzzles, earn key items, open new paths.
+2. **Party-Based Progression.** Companions are not just story flavor. Each
+   Dungeon Friend should change how the player fights, explores, or solves
+   problems.
+3. **Readable, Tactical Combat.** BG3-style turn-based tactics on a zoomed-in
+   grid: positioning, range, and ability choice carry real weight, and depth is
+   the point (the earlier "quick decisions over tactical depth" framing is
+   retired - see Design Decisions, 2026-07-08). "Readable" is the constraint,
+   not a cap on depth: small parties, clear stats, distinct abilities, visible
+   outcomes, and a legible board keep the tactics from becoming bloated.
+4. **Compact Open World.** The world should feel open and interconnected but
+   not endless. Regions are dense, authored, and full of meaningful gates,
+   shortcuts, secrets, and dungeon entrances - hand-built, never procedurally
+   generated.
+5. **Retro Feel, Modern Flexibility.** The game looks and feels like a chunky
+   pixel-art adventure RPG, but it is not a strict hardware recreation. Use
+   retro visual logic where it helps readability, not where it limits the game.
+
+The most important quality bar underneath these: movement and puzzle feel
+(precise, grid-snapped, no floaty physics) over feature breadth.
 
 ## Visual Language
 
@@ -102,19 +144,20 @@ continue exploring. Everything below is this same loop playing out at a
 different scale - a single NPC conversation, a single puzzle switch, or a full
 combat encounter.
 
-Target shape once Phase 0-6 (the Gameplan's MVP, see Gameplan.md section 16)
-is complete - **not yet built**; see `TASKBOARD.md` for what actually exists
-today. When the project is working, a user can:
+Target shape once Phase 0-6 (the MVP) is complete - **not yet built**; see
+`TASKBOARD.md` for what actually exists today. When the project is working, a
+user can:
 
 - Walk a grid-based overworld and dungeon with precise, snapped movement.
 - Solve pushable-block / pressure-plate / locked-door puzzles gated by key
   items.
-- See enemies on the map, touch one, and enter a grid-based turn-based fight:
-  each combatant checks its move/attack range, moves, then acts on its own
-  turn in strict initiative (speed) order - never a whole-team phase -
-  resolved with a d10 percentage roll (3-character active party,
-  Attack/Ability/Item/Defend), with a camera-zoom transition into the
-  encounter and back.
+- See enemies on the map, touch one, and enter a dedicated turn-based tactical
+  battle (BG3 turn-based mode is the model): select a party unit, see its
+  movement and attack range highlighted (Fire Emblem-style presentation), move
+  it within range, and act. Each combatant takes its own turn in strict
+  initiative (speed) order - never a whole-team phase - resolved with a d10
+  percentage roll (party of up to four, Attack/Ability/Item/Defend), with a
+  camera-zoom transition into the encounter and back.
 - Recruit at least one additional party member and swap the active three.
 - Save at physical save points (3 slots) and reload with puzzle/enemy state
   intact.
@@ -131,7 +174,7 @@ toward, and a good smoke test once combat exists:
 > forest position, gets a key/reward, and opens a blocked path.
 
 This is a smaller, more testable slice than the full Phase 6 finish line
-above (no full dungeon, no boss, no save/load, no party-of-three depth
+above (no full dungeon, no boss, no save/load, no full party depth
 required) - treat it as the walking skeleton the fuller Phase 6 slice builds
 on top of, not a replacement for it.
 
@@ -160,9 +203,8 @@ comes in the post-Phase-2 art pass.
 The most important quality bar is:
 
 - Movement and puzzle feel (precise, grid-snapped, no floaty physics) over
-  feature breadth - see Gameplan.md section 1 Design Pillars, which this
-  Blueprint treats as still authoritative and unchanged by the direction
-  notes below.
+  feature breadth - see Design Pillars above (the canonical five, 2026-07-08),
+  which replace the retired Gameplan's four dev-discipline pillars.
 
 ## Direction And Build Order
 
@@ -181,8 +223,8 @@ Current phase:
   Phase 3 (Data Model & Save/Load) is next - it also inherits the richer
   death/respawn rule (D-004) and the shield's real effect (D-001/S-001).
 
-Build order (phases per Gameplan.md section 15; each is a real milestone with
-a stated "done" condition there):
+Build order (each phase is a real milestone with a stated "done" condition;
+live milestone tracking is in `TASKBOARD.md`):
 
 1. **Phase 0 - Foundation** - harness + a scaffold that actually runs. Nothing
    else can start on a trustworthy base without this.
@@ -194,8 +236,10 @@ a stated "done" condition there):
    every dungeon after this depends on.
 4. **Phase 3 - Data Model & Save/Load** - the Resource-based data pipeline
    (`CharacterStats`, `EnemyStats`, etc.) combat and party both build on.
-5. **Phase 4 - Combat MVP** - the turn-based Baldur's Gate/Fire-Emblem-inspired
-   core loop: `TurnManager`, two-layer FSM, Attack/Ability/Item/Defend.
+5. **Phase 4 - Combat MVP** - the turn-based tactical combat core (BG3
+   turn-based mode as the model, Fire Emblem-style range highlighting):
+   `TurnManager`, two-layer FSM, unit selection + highlighted move/attack range,
+   Attack/Ability/Item/Defend.
 6. **Phase 5 - Party System & Progression** - recruitment, XP/leveling,
    party management menu. **The overworld avatar stays a single character**
    (revised 2026-07-06 - see Party And Combat Model below); the party's
@@ -203,10 +247,11 @@ a stated "done" condition there):
    followers.
 7. **Phase 6 - First Playable Slice** - one full forest dungeon (3-5 rooms,
    puzzles, encounters, boss) proving the whole loop end to end. This is the
-   MVP finish line (Gameplan.md section 16).
+   MVP finish line.
 8. **World expansion (post-MVP, content work, no new architecture)** - castle
-   city, then mountains, then rivers, each authored as new `world.ldtk`
-   regions using the systems already built for the forest.
+   city, then mountains, then rivers, and the surrounding wilderness, each
+   authored as new `world.ldtk` regions using the systems already built for the
+   forest.
 9. **Stretch goals (sequenced)** - see `TASKBOARD.md` Deferred lane: equipment/
    weapon variety and elemental/magic system are the two highest-priority
    stretch items given the emphasis on magic and weapon variety in this
@@ -272,7 +317,7 @@ Death & respawn rule in Core Logic.
 
 Design intent: "That is a lot, but that should be a good tutorial, and a good
 place to call Phase 2" - this supersedes the generic M2.1-M2.4 test-room
-framing in Gameplan.md §15 as the concrete deliverable, while keeping the
+framing as the concrete deliverable, while keeping the
 same primitives underneath.
 
 #### 2026-07-07 revision (Kayden's first windowed playthrough)
@@ -313,15 +358,15 @@ but at least trees or something" (added as scattered clusters).
 | Layer | Choice | Source / Notes |
 |---|---|---|
 | Engine/Runtime | Godot 4.7.x, GDScript | Upgraded from 4.6.x on 2026-07-07 (Kayden's call); installed and verified: `4.7.stable.official.5b4e0cb0f` (full clean reimport + unit/smoke suites all green on 4.7) |
-| Renderer | Mobile | Locked, Gameplan.md section 3.2 |
+| Renderer | Mobile | Locked (audit §4.1) |
 | UI | Godot `Control` nodes + `CanvasLayer` (HUD, dialogue, menus) | `game/scenes/ui/` |
 | Backend | None - fully local, no server, no accounts | |
-| Storage | `Resource` (`.tres`) files for game data; `SaveData` to `user://saves/` | `game/data/`, section 12 of Gameplan.md |
+| Storage | `Resource` (`.tres`) files for game data; `SaveData` (JSON) to `user://saves/` | `game/data/`; save format per D-006 (see Core Logic) |
 | Levels | LDtk, imported via `heygleeson/godot-ldtk-importer`, entities all-in per D-002 | **Importer v2.0 + entity post-import pipeline live 2026-07-06** (T-004/T-031): each `.ldtk` sets `entities_post_import` to `scripts/ldtk/entities_post_import.gd`, which instantiates the matching game object per entity (conventions documented in that script); `LdtkRoom` adopts them into the runtime grid. Current worlds: `forest.ldtk` (T-011), `tutorial_dungeon.ldtk` (4 levels, T-027 + 2026-07-07 rework), `entity_test_room.ldtk` (pipeline test fixture), `test_room.ldtk` (T-004 fixture) - consolidation into one `world.ldtk` can wait for real LDtk-app authoring. The LDtk desktop app is installed (Gatekeeper cleared); the `.ldtk` files are still bootstrap-generated JSON (`assets/levels/_scripts/generate_levels.py`) until Kayden starts hand-authoring |
 | Art | Aseprite (primary, Lua/CLI-scriptable, **not yet installed** - purchase is Kayden's call), Pixelorama (fallback) | 1280x720 design-reference base, flexible HD/ultrawide scaling (see Design Decisions); **grid unit decided at M1.1 (2026-07-06): 16x16 art pixels rendered at 4x = the 64px runtime cell** (`RoomGrid.TILE`). First real art exists (`assets/art/tilesets/test_tiles.png`, `sprites/test_hero.png`), generated deterministically by `assets/art/_scripts/generate_test_tileset.gd` as a stopgap; the Aseprite exporter (`export_sheets.lua`/`.sh`) is ready and takes over the same output paths once Aseprite is installed |
 | Audio | Furnace Tracker -> `.ogg` -> `AudioStreamPlayer`/`AudioStreamPlayer2D` | No hardware-channel-emulation engine (dropped, not deferred) |
 | Testing | Headless Godot CLI checks (`--import`, `--quit-after`) | No GDScript test framework yet - see `RUNBOOK.md` |
-| Deployment/Export | Godot editor Export dialog: macOS, Windows, Android | Gameplan.md section 14 |
+| Deployment/Export | Godot editor Export dialog: macOS, Windows, Android | `RUNBOOK.md` -> Test And Build |
 
 Architecture constraints:
 
@@ -352,7 +397,6 @@ Dungeon_Friends_Game/
 │   ├── shaders/
 │   └── tests/                       <- first-party headless unit suites + runner (see RUNBOOK.md -> Unit tests)
 ├── docs/
-│   ├── planning/Gameplan.md        <- full architecture/design rationale
 │   ├── research/audited_research.md <- toolchain research audit
 │   └── LEGACY_HARNESS.md            <- archived pre-v2 AGENTS.md/CLAUDE.md
 ├── AGENTS.md                        <- agent behavior and read/edit scope
@@ -377,7 +421,7 @@ Dungeon_Friends_Game/
 ### Commands
 
 Godot Input Map actions (single source of truth for all gameplay input across
-keyboard, controller, and mobile touch - see Gameplan.md section 11):
+keyboard, controller, and mobile touch - per-device bindings below):
 
 | Command | Purpose | Required for done? |
 |---|---|---|
@@ -386,6 +430,21 @@ keyboard, controller, and mobile touch - see Gameplan.md section 11):
 | `cancel` / `back` | Cancel or back out of a menu | yes |
 | `menu` | Open pause/party menu | yes |
 | `jump` | Hop one cell over a pit/ledge in the facing direction (Phase 2) - bound to Alt primary, C fallback (2026-07-06) | yes (from Phase 2) |
+
+Per-device bindings (Godot Input Map is the single binding source; migrated
+from the retired Gameplan §11):
+
+| Action | Keyboard | Controller | Touch (mobile) |
+|---|---|---|---|
+| `move_*` | Arrow keys / WASD | D-pad / left stick | On-screen virtual D-pad |
+| `interact` / `confirm` | Z / Enter | A (Xbox) / Cross (PS) | On-screen "A" |
+| `cancel` / `back` | X / Escape | B / Circle | On-screen "B" |
+| `menu` | Enter / Tab | Start / Options | On-screen menu icon |
+| `jump` | Alt (primary) / C (fallback) | (TBD) | On-screen button |
+
+`TouchScreenButton` nodes map directly to Input Map actions, so gameplay code
+reads `Input.is_action_pressed(...)` regardless of source; the touch UI is only
+shown on mobile exports; Godot 4 auto-detects most standard gamepads.
 
 ### Data Model
 
@@ -399,10 +458,11 @@ keyboard, controller, and mobile touch - see Gameplan.md section 11):
 | `EncounterData` | `id, enemy_group, background_id` | `game/data/encounters/*.tres` | Referenced directly by overworld enemy instances - no random rolls |
 | `SaveData` | `schema_version, current_map, player_position, party_roster, party_levels/xp/hp/mp, inventory, flags` | `user://saves/slot_N.json` (JSON - D-006, 2026-07-07) | Never saved mid-combat; 3 slots from the start; no `defeated_enemy_ids` - enemies always respawn (D-009) |
 
-*Note (2026-07-05):* grid-based combat means `CharacterStats`/`EnemyStats`/
-`AbilityData` will need move-range and attack-range fields once Phase 4
-implements it - not yet added to the table above; exact field names/shape are
-a Phase 3/4 implementation decision, not decided here.
+*Note (2026-07-05, reaffirmed 2026-07-08):* the tactics-RPG combat model means
+`CharacterStats`/`EnemyStats`/`AbilityData` **will need** move-range and
+attack-range fields (they drive the highlighted movement/attack ranges in
+battle) - not yet added to the table above; exact field names/shape are a
+Phase 3/4 implementation decision, not decided here.
 
 *Status (2026-07-05, second session):* `CharacterStats` and `EnemyStats` now
 exist (`game/scripts/data/`) with the fields listed above, plus first
@@ -414,35 +474,42 @@ lands.
 
 ## Party And Combat Model
 
-Clarified 2026-07-06 (Kayden) - this shapes the overworld, combat, and Phase 5,
-and **supersedes the old "snake-follow formation" party idea** (Gameplan.md
-§10/§15 M5.1, kept for history but not built):
+Clarified 2026-07-06, combat model sharpened 2026-07-08 (Kayden) - this shapes
+the overworld, combat, and Phase 5, and **supersedes the old "snake-follow
+formation" party idea** (from the retired Gameplan §10, never built):
 
 - **The overworld avatar is a single character** representing the whole party.
   No snake-follow train of `PartyFollower` bodies. Movement, pushing, jumping,
   and puzzles are all single-actor in the overworld - the systems Phase 2
   builds don't need to anticipate follower actors.
 - **The party's individual characters exist only inside combat.** Touching a
-  visible overworld enemy is a **party encounter**, not a single-character
-  one: it zooms into a **more detailed tactical mini-map** and the game goes
-  turn-based, in the mold of **Fire Emblem: The Sacred Stones**. Control on
-  that map: WASD no longer free-walks the avatar - instead you **select a
-  character** (the mini action menu sits below), then use **WASD to choose the
-  destination cell** for that character's move, within its move range. Each
-  encounter can field multiple party characters against multiple enemies on
-  the grid.
+  visible overworld enemy is a **party encounter**, not a single-character one
+  (the slime you bumped represents an enemy party; your avatar represents
+  yours). The game zooms **way in** on the contact point - far enough that the
+  enemy is no longer on top of you, reading as "they entered the same zone and
+  spotted you" - and switches into a dedicated **turn-based tactical battle
+  mode**. **The model is BG3's turn-based mode**: top-down tactical control of a
+  **party of up to four** against the enemy party on a local mini-map.
+- **Control in battle mode:** you **select a unit**; its **movement range and
+  attack range light up on the grid** (this is the Fire Emblem *visual*
+  affordance Kayden wants - range highlighting and a distinct combat mode - not
+  a second combat model). You then move that unit anywhere inside its range and
+  spend its turn on an ability-driven action. Units act one at a time in strict
+  initiative order; when the enemy party is defeated the battle ends and play
+  returns to exploration at the contact point.
 - This keeps the overworld simple and readable while concentrating the
-  positioning depth where Kayden wants it - in the tactical battles - and is
-  consistent with the already-locked grid-based, per-unit-initiative, d10
-  combat below (it names the *control scheme and framing*, not new combat
+  positioning depth in the tactical battles, and is consistent with the
+  already-locked grid-based, per-unit-initiative, d10 combat below (it names the
+  *control scheme, framing, and genre* - tactics-RPG, not JRPG - not new combat
   math).
 
 ## Core Logic And Invariants
 
 The combat/movement/data rules below are locked technical decisions (resolved
 2026-06-11 per the research audit; the Combat rule below was extended
-2026-07-05 with grid/range/d10 specifics directly from Kayden, and 2026-07-06
-with the single-avatar/Fire-Emblem tactical-control framing above) - do not
+2026-07-05 with grid/range/d10 specifics directly from Kayden, 2026-07-06 with
+the single-avatar tactical-control framing above, and 2026-07-08 with the
+tactics-RPG / BG3-turn-based-mode identity and party-of-four size) - do not
 relitigate without flagging to Kayden first; see `AGENTS.md` -> When To Ask,
 Proceed, Or Stop.
 
@@ -471,10 +538,12 @@ Rules:
   coordinate.
 - **Pathfinding**: `AStarGrid2D`, `diagonal_mode = DIAGONAL_MODE_NEVER`,
   Manhattan heuristic.
-- **Combat**: grid-based, turn-based, resolved with a **d10 percentage
-  system** - roll 1-10 against a stat-derived success threshold, so success
-  chances map directly to clean percentages (e.g. a threshold of 7 reads as a
-  70% chance). Exact threshold/damage formula is TBD at the Phase 3/4
+- **Combat**: a **tactics-RPG battle** (BG3 turn-based mode as the model, Fire
+  Emblem-style range highlighting as presentation - **not a JRPG**), grid-based
+  and turn-based, with a party of up to four units the player selects and moves
+  within a highlighted move range. Resolved with a **d10 percentage system** -
+  roll 1-10 against a stat-derived success threshold, so success chances map
+  directly to clean percentages (e.g. a threshold of 7 reads as a 70% chance). Exact threshold/damage formula is TBD at the Phase 3/4
   combat-math implementation (red/green/refactor per `AGENTS.md` ->
   Verification And Proof), not decided here. Two-layer FSM - Battle FSM
   (`Initialize -> CalculateInitiative -> UnitTurn (loop) -> EncounterEnd`) and
@@ -555,8 +624,8 @@ Rules:
   applies to enemies, uniques and bosses included (duplicate key drops are
   prevented by loot dedup; opened doors/chests stay open via flags).
   Suspended-and-restored rooms (mid-trip) keep their in-visit state.
-  Deliberate deviation from Gameplan §12's defeated-enemies-stay-dead
-  (Lufia II) pattern; `SaveData` carries no `defeated_enemy_ids`.
+  Deliberate deviation from the original Lufia-II defeated-enemies-stay-dead
+  pattern (retired Gameplan §12); `SaveData` carries no `defeated_enemy_ids`.
 - **Save (revised 2026-07-07, D-006/D-011)**: save points are physical map
   objects (SaveCrystal); `SaveData` serializes to **JSON** at
   `user://saves/slot_N.json` (authored data stays `.tres` under `res://`);
@@ -587,14 +656,14 @@ Rules:
 
 | Risk | Impact | Mitigation / owner |
 |---|---|---|
-| Scope creep from an oversized feature wishlist | High | The MVP/Stretch split (Non-Goals above, Gameplan.md section 16/17) is the guardrail - revisit it before adding any new system mid-phase |
+| Scope creep from an oversized feature wishlist | High | The MVP/Stretch split (Non-Goals above; Deferred lane in `TASKBOARD.md`) is the guardrail - revisit it before adding any new system mid-phase |
 | Solo + AI-assisted dev underestimates UI work (menus, inventory, party management) | Medium | UI-heavy phases (4, 5) get dedicated milestones rather than being bundled into "just add combat" |
 | Android export friction (SDK/JDK setup, device-specific quirks) | Medium | Addressed in Phase 0 (M0.3), not deferred to the end |
 | `heygleeson/godot-ldtk-importer` is a community plugin - could break on Godot updates | Low-Medium | Pin Godot to the current 4.7.x and the importer version (2.0); check its GitHub issues before any engine upgrade. **2026-07-07: the 4.6->4.7 upgrade re-verified clean** - importer 2.0 reimported all four `.ldtk` worlds with no errors/deprecations |
 | Ultrawide (21:9) aspect ratios could show too much/too little world at the screen edges under `expand` | Low-Medium | Validated by the T-007 display-scaling spike at 1280x720/1920x1080/3440x1440 before producing more art; revisit `keep`+letterbox if `expand` reads poorly once real level art exists |
 | "Authentic hardware constraint" scope creep (chasing GB/GBA-accuracy that doesn't serve gameplay) | Low | Any remaining hardware-accuracy ideas (e.g. a CRT shader) stay optional, cosmetic Stretch Goals, never load-bearing |
 | Aseprite CLI/Lua automation has a learning curve before it pays off | Low | Start with simple batch-export scripts in M1.1; Pixelorama remains a no-cost manual fallback |
-| **No narrative/story/world-lore design exists yet** - the Gameplan is systems-and-architecture-first, but "go through a story" is part of the founding vision | Medium | Needs deliberate attention before Phase 6 (First Playable Slice) means anything narratively - a vertical slice needs at least one real story beat, not just working systems. Not yet scheduled; flagged here rather than invented unprompted |
+| **No narrative/story/world-lore design exists yet** - the design so far is systems-and-architecture-first, but "go through a story" is part of the founding vision | Medium | Needs deliberate attention before Phase 6 (First Playable Slice) means anything narratively - a vertical slice needs at least one real story beat, not just working systems. Not yet scheduled; flagged here rather than invented unprompted |
 | Grid-based combat with per-unit movement/range is more implementation work than flat menu-only JRPG battles (positioning, move-range calc, attack-range validation, arena layout) | Medium | Reuse the overworld's existing `AStarGrid2D`/grid-movement patterns for combat positioning instead of inventing a parallel system; keep Phase 4 MVP range rules simple (e.g. melee = adjacent tile, ranged = fixed tile distance) and defer tactics depth (flanking, terrain bonuses) to Stretch Goals |
 | **Block-puzzle soft-locks** (added 2026-07-06): pushable blocks + doors that lock behind the player can create unsolvable states - a block shoved into a corner/off the path, leaving the player trapped in a locked room (and Phase 2 death just restarts the game, so a soft-lock is a hard restart). This is *the* classic block-puzzle bug, ongoing across every puzzle room, not just the tutorial | Medium | Mitigations built at T-024/T-027 (keep applying them to every future puzzle room): (1) blocks can never be pushed onto a doorway cell **or its approach cells** (`RoomGrid.no_block_cells`; the approach-cell rule was found by the solver - a block parked on the exit's only approach was just as fatal as one on the exit); (2) the hub's reset **Lever** returns blocks to their start cells; (3) leaving and re-entering a dungeon room rebuilds it fresh; (4) `tests/test_tutorial_softlock.gd` runs an exhaustive BFS over every reachable block/player state of the real shipped rooms (jump- and fixed-brick-aware since 2026-07-07) and fails if any state can neither solve nor recover; (5) fixed bricks (`Movable=false`, 2026-07-07) make wall-shaped block puzzles wedge-proof by construction - only the one loose brick can move at all. Every new puzzle room must be added to that suite |
 
@@ -602,18 +671,18 @@ Rules:
 
 | Decision | Rationale | Date / Source |
 |---|---|---|
-| ~~Godot 4.6.x~~ -> **Godot 4.7.x**, GDScript, Mobile renderer | Original 4.6.x matched the audited toolchain recommendation; **upgraded to 4.7.x on 2026-07-07 (Kayden's explicit decision)** after the local toolchain moved to `4.7.stable` - project verified clean on 4.7 (reimport + unit 18 suites/369 checks + smoke 109/109). Mobile renderer + GDScript unchanged | 2026-06-11, rev. 2026-07-07 / Gameplan.md section 3.2 |
-~~240x160 base resolution (GBA-like, 3:2), nearest filter, integer scaling, `keep` aspect, unrestricted palette~~ - **superseded 2026-07-05, see the flexible HD/ultrawide row below** | GBA-*inspired* not GBC-accurate; more screen real estate than 160x144 while staying grid-friendly (240 = 15x16px, 160 = 10x16px) | 2026-06-11 / Gameplan.md section 3.2 |
+| ~~Godot 4.6.x~~ -> **Godot 4.7.x**, GDScript, Mobile renderer | Original 4.6.x matched the audited toolchain recommendation; **upgraded to 4.7.x on 2026-07-07 (Kayden's explicit decision)** after the local toolchain moved to `4.7.stable` - project verified clean on 4.7 (reimport + unit 18 suites/369 checks + smoke 109/109). Mobile renderer + GDScript unchanged | 2026-06-11, rev. 2026-07-07 / audited_research.md §8 |
+~~240x160 base resolution (GBA-like, 3:2), nearest filter, integer scaling, `keep` aspect, unrestricted palette~~ - **superseded 2026-07-05, see the flexible HD/ultrawide row below** | GBA-*inspired* not GBC-accurate; more screen real estate than 160x144 while staying grid-friendly (240 = 15x16px, 160 = 10x16px) | 2026-06-11 / audited_research.md §8 |
 | Flexible HD/ultrawide base resolution (1280x720 design reference), nearest filter, `canvas_items` stretch mode, `expand` aspect, `fractional` scale mode, unrestricted palette | Kayden decided to drop the fixed low-res GBA-locked canvas in favor of native HD/ultrawide rendering while keeping the retro sprite-art look (nearest-neighbor filtering, chunky pixel silhouettes); `canvas_items`+`expand` shows more world on wider displays (e.g. 3440x1440) instead of pillarboxing, validated by the T-007 display-scaling spike at 1280x720/1920x1080/3440x1440 | 2026-07-05 / this session, supersedes the 2026-06-11 row above |
 | No global palette-swap shader / `SCREEN_TEXTURE` post-process in MVP | Was the source of a Compatibility-renderer bug risk; no longer needed once the palette isn't artificially constrained | 2026-06-11 / audited_research.md section 4.1, section 8 decision #2 |
-| Single Autoload (`SceneManager`); all other state on `Resource` objects | Keeps global state from becoming a junk drawer; save/load becomes trivial since `GameState` is itself a `Resource` | Gameplan.md section 3.1 |
-| Enemies visible on map, ~~synchronized-turn movement~~ **autonomous real-time movement** (revised 2026-07-05), no random encounters | Originally synchronized (audit's Lufia-II pattern) for simplicity; changed after Kayden's playtest - the slime freezing whenever the player stood still felt unnatural. Enemies now step on their own timer (wander, then chase on sight); still grid-snapped, still visible-on-map, still no random encounters | Gameplan.md section 8; revised 2026-07-05 (playtest) |
+| Single Autoload (`SceneManager`); all other state on `Resource` objects | Keeps global state from becoming a junk drawer; save/load becomes trivial since `GameState` is itself a `Resource` | audited_research.md (SceneManager pattern) |
+| Enemies visible on map, ~~synchronized-turn movement~~ **autonomous real-time movement** (revised 2026-07-05), no random encounters | Originally synchronized (audit's Lufia-II pattern) for simplicity; changed after Kayden's playtest - the slime freezing whenever the player stood still felt unnatural. Enemies now step on their own timer (wander, then chase on sight); still grid-snapped, still visible-on-map, still no random encounters | audited_research.md (Lufia-II pattern); revised 2026-07-05 (playtest) |
 | Aseprite primary art tool (Lua/CLI-scriptable), Pixelorama fallback | Scriptable batch export lets an agent drive the art pipeline without manual GUI steps | 2026-06-11 / audited_research.md section 8.1 |
 | Furnace Tracker for audio *sound*, not a literal hardware-channel-emulation engine | Authenticity of sound, not of engine architecture - the hardware-emulation idea was dropped entirely, not deferred | 2026-06-11 / audited_research.md section 8 decision #4 |
-| `game/` subfolder holds the entire Godot project; docs/config live at repo root | Keeps `.godot/` cache and Godot-specific concerns cleanly separated from `docs/`/agent config | Gameplan.md section 4 |
+| `game/` subfolder holds the entire Godot project; docs/config live at repo root | Keeps `.godot/` cache and Godot-specific concerns cleanly separated from `docs/`/agent config | repo-structure decision (audit) |
 | Combat framed as a camera zoom into the encounter point, not a hard scene cut | Founding vision calls for an early-Final-Fantasy-style transition so the overworld reads as bigger than its grid; layers onto the existing SceneManager context-passing pattern rather than replacing it | 2026-07-05 / this session's founding prompt |
-| World authored in this order: forest (Kokiri-Forest mood) -> castle city -> mountains -> rivers | Founding vision's explicit world-progression arc; ties a creative goal to the concrete post-MVP content milestones | 2026-07-05 / this session's founding prompt |
-| Equipment (weapon variety) and elemental/magic systems are the highest-priority Stretch Goals after MVP | Founding vision emphasizes magic and weapon variety; Gameplan already licenses building these "once the base loop is fun" - this reprioritizes within the existing Stretch sequencing rather than reopening MVP scope | 2026-07-05 / this session's founding prompt, Gameplan.md section 10/17 |
+| World authored in this order: forest (Kokiri-Forest mood) -> castle city -> mountains -> rivers -> surrounding wilderness | Founding vision's explicit world-progression arc; ties a creative goal to the concrete post-MVP content milestones | 2026-07-05 / this session's founding prompt |
+| Equipment (weapon variety) and elemental/magic systems are the highest-priority Stretch Goals after MVP | Founding vision emphasizes magic and weapon variety; the plan already licensed building these "once the base loop is fun" - this reprioritizes within the existing Stretch sequencing rather than reopening MVP scope | 2026-07-05 / this session's founding prompt (Stretch sequencing; see `TASKBOARD.md` Deferred) |
 ~~No separate integration branch; branch-per-milestone -> PR directly into `main`~~ - **superseded 2026-07-05 (second session), see the `integration` staging-branch row below** | Solo hobby project - matches how Kayden's other personal-scale projects (e.g. DigitalTome) actually run day to day; the workbench's own 3-tier convention is calibrated for the shared harness repo, not every downstream product | 2026-07-05 / this Adoption run |
 | `integration` branch as staging before `main` - work accumulates on `integration`; Kayden explicitly syncs `integration` -> `main` when ready, rather than every task PRing straight to `main` | Kayden's call once the first-playable slice was working and felt worth protecting - gives a reviewable, shippable line separate from in-progress work, at the cost of one extra branch for a solo project | 2026-07-05 (second session) / this session |
 | Concrete first-playable scenario: forest test area, grid-snapped walk, talk to one NPC, touch a visible enemy, win a simple turn-based battle, return to the same forest position, get a key/reward, open a blocked path | Kayden gave this as the smallest testable slice to build toward - smaller than the full Phase 6 finish line (no boss/save/party depth required), useful as an early integration smoke test once combat exists (see TASKBOARD.md T-013, deferred) | 2026-07-05 / this session |
@@ -634,13 +703,14 @@ Rules:
 | Levels authored **all-in as LDtk entities** (not a code/LDtk hybrid): blocks, plates, doors, chests, NPCs, enemies placed as LDtk entity instances with custom fields (link IDs, key names), instantiated by a post-import hook | Kayden picked all-in but conditioned it on documentation; confirmed the importer's entity path is the well-documented one - `post-import/entity-template.gd` + a complete `entity-spawn-lights.gd` example (match `entity.identifier`, read `entity.fields`, instantiate a scene, `update_instance_reference`) + `docs/classes.md` for `LDTKEntity` | 2026-07-06 round 3 / this session |
 | Jump is a **player-pressed button** (Alt primary, C fallback), not automatic/contextual | Kayden: "I don't want to trust that my character will jump the right way"; adds a `jump` input action (the map's first addition beyond the original 8). Note: Alt is an OS modifier on macOS - C is the safety binding if Alt reads poorly | 2026-07-06 round 3 / this session, supersedes the round-2 "contextual hop" wording |
 | Phase 2 death = restart from the beginning of the game; the richer old-man/room-reset respawn moves to Phase 3 | Kayden: "I agree this is starting to be phase 3" - the dungeon-puzzle-state reset a mid-dungeon respawn needs is the same serialization `SaveData` provides, so it belongs with save/load, not Phase 2 | 2026-07-06 round 3 / this session, supersedes the round-2 respawn row |
-| Overworld is a **single party avatar** (no snake-follow); the party's characters appear only in **Fire-Emblem-Sacred-Stones-style tactical combat** (select a character, WASD picks its destination cell, mini action menu below) | Kayden: "I kinda imagined one character in this overworld being your party... These are party encounters, not character encounters"; concentrates positioning depth in the tactical battles and keeps the overworld simple - **supersedes the snake-follow-formation decision** (Gameplan §10/§15 M5.1) | 2026-07-06 round 3 / this session |
+| Overworld is a **single party avatar** (no snake-follow); the party's characters appear only in **Fire-Emblem-Sacred-Stones-style tactical combat** (select a character, WASD picks its destination cell, mini action menu below) | Kayden: "I kinda imagined one character in this overworld being your party... These are party encounters, not character encounters"; concentrates positioning depth in the tactical battles and keeps the overworld simple - **supersedes the snake-follow-formation decision** (retired Gameplan §10) | 2026-07-06 round 3 / this session |
 | Puzzle geometry primitive: plate at the center of a 3x3 pushing space, block in a corner, 2-cell walking margin around it (the margin enables the around-the-block L-shaped push, since pushing needs the opposite side and there are no diagonals) | Kayden's sketch-in-words for Room 1; exact cells/push-count finalized at build against his drawing | 2026-07-06 round 3 / this session |
 | Placeholder art through Phase 2, one art pass afterward; invest in dev tools (room warp, puzzle reset, grant item, skip combat) as early as possible instead | Kayden: "Lets do art at the end, but build out some dev tools like your suggesting as soon as we can" - Phase 2 validates mechanics, and puzzle iteration is playtest-heavy, so tooling pays back faster than art now | 2026-07-06 round 3 / this session |
 | Tutorial-dungeon build interpretations (T-027, **agent interpretation - confirm in windowed play**): (a) the hub gets a reset **Lever** as the soft-lock escape valve; (b) blocks can never be pushed onto doorway cells or their approach cells; (c) opening the chest is the dungeon's completion beat - it unbolts the locked entry door; (d) the hub's west door is one-way (opens permanently when the player loops back through it from Room 3); (e) the Room 3 key-carrier is a new `dungeon_slime.tres` (10 HP / atk 3, `unique_id key_guardian` so it stays dead); (f) hub -> pit -> fight rooms suspend on the way in and are freed/rebuilt when backed out of, with chest/door/unique-enemy state persisted in `SceneManager.flags` | Fills the gaps Kayden's room spec left open, biased toward classic-Zelda readings and the Known Risks soft-lock mitigation; none of it touches a locked decision. Flag anything that plays wrong and it can be re-cut cheaply - rooms are LDtk data + thin room scripts | 2026-07-06 / this session (Phase 2 build) |
 | **PressurePlate ON HOLD**; dungeon rescoped to four rooms: hub brick wall (13 bricks, one movable - Oracle-style, per Kayden's reference screenshot), new chest room behind a north **locked door** (`dungeon_key`; "I like having the door locked instead" of the chest), pit room gains two 1-wide jumpable ledges before the 2-wide chasm, fight room's guardian drops `dungeon_key` | Kayden's first windowed playthrough (T-032): the plate's momentary re-lock read as broken, so it's shelved rather than debugged mid-tutorial; the brick wall is wedge-proof by construction and keeps Room 1 focused on pushing | 2026-07-07 / playtest-feedback rework |
 | Forest fixes from the same playthrough: every Wall cell now draws its tree tile (colliders were rendering as plain grass - the "random places I run into" bug), stray pit under the spawn cell removed, extra tree clusters added in the open stretch between spawn and the dungeon entry | Kayden: "I would like for there to be more things out in the open between me and the entry like there was. Maybe not a maze, but at least trees or something" | 2026-07-07 / playtest-feedback rework |
-| **Phase 3 round (D-006..D-011, all resolved)**: (a) saves are **JSON** at `user://saves/slot_N.json` - Kayden delegated the pick; agent chose JSON per Gameplan §12's own MVP recommendation plus the `.tres`-from-`user://` script-execution risk; (b) **the shield unlocks Defend** - the command is absent from the combat menu until the shield is in inventory (D-001's answer); (c) **checkpoint respawns + XP-as-punishment** - keep inventory, lose XP never-below-level, dungeon-entrance/healer respawn, and walking into pits = Zelda fall back to the room's last-used entrance (supersedes pits-impassable); (d) **enemies respawn every time a room is left-and-rebuilt**, uniques included - the puzzle escape valve applies to enemies too (supersedes Gameplan §12's stay-dead pattern; `defeated_enemy_ids` dropped from SaveData); (e) EncounterData/MapMeta built now as stubs, wired Phase 4; (f) minimal Continue/New Game boot prompt; dev warps expand to every built room via the map registry | Kayden's 2026-07-07 planning answers, verbatim rationale on the TASKBOARD Pending Decisions table; agent interpretations flagged there (full-HP respawn, suspended-room semantics, fall damage + XP penalty amounts as tunables) | 2026-07-07 / Phase 3 planning round |
+| **Phase 3 round (D-006..D-011, all resolved)**: (a) saves are **JSON** at `user://saves/slot_N.json` - Kayden delegated the pick; agent chose JSON per the retired Gameplan's own MVP JSON recommendation plus the `.tres`-from-`user://` script-execution risk; (b) **the shield unlocks Defend** - the command is absent from the combat menu until the shield is in inventory (D-001's answer); (c) **checkpoint respawns + XP-as-punishment** - keep inventory, lose XP never-below-level, dungeon-entrance/healer respawn, and walking into pits = Zelda fall back to the room's last-used entrance (supersedes pits-impassable); (d) **enemies respawn every time a room is left-and-rebuilt**, uniques included - the puzzle escape valve applies to enemies too (supersedes the Lufia-II stay-dead pattern; `defeated_enemy_ids` dropped from SaveData); (e) EncounterData/MapMeta built now as stubs, wired Phase 4; (f) minimal Continue/New Game boot prompt; dev warps expand to every built room via the map registry | Kayden's 2026-07-07 planning answers, verbatim rationale on the TASKBOARD Pending Decisions table; agent interpretations flagged there (full-HP respawn, suspended-room semantics, fall damage + XP penalty amounts as tunables) | 2026-07-07 / Phase 3 planning round |
+| **Combat is a tactics-RPG, not a JRPG**: BG3's turn-based mode is the functional model (select a unit, move it within a highlighted range on a zoomed-in grid, act via abilities, strict per-unit initiative); Fire Emblem is the *visual* reference only (range highlighting, a dedicated battle mode). Active party size is **four**. The "quick decisions matter more than tactical depth" pillar is retired - the game leans into strategic, tactical combat | Kayden clarified the founding combat vision: "top down tactical BG3 style... control my party of 4 people around this new mini map." Fire Emblem was his closest GBA touchstone for the *look* (range highlights, separate mode), not the mechanics; the engine isn't as limited as first assumed, so depth is now in-scope. Reframes the JRPG/menu language and the earlier readable-over-deep pillar; the locked grid/d10/per-unit-initiative decisions are unchanged | 2026-07-08 / this session |
 
 ## Health Criteria
 

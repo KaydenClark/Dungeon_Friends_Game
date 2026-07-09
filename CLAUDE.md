@@ -8,6 +8,5 @@ and other agents follow the same source of truth.
 
 ## Claude-Specific Notes
 
-- For any milestone from `docs/planning/Gameplan.md` section 15, or any task
-  touching several files, use the task list (TaskCreate/TaskUpdate) to track
-  progress.
+- For any milestone in `TASKBOARD.md`, or any task touching several files,
+  use the task list (TaskCreate/TaskUpdate) to track progress.

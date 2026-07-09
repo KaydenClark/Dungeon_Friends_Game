@@ -1,7 +1,7 @@
 class_name GameState
 extends Resource
 ## The whole mutable session in one serializable Resource (T-036, Phase 3;
-## Gameplan §3.1: GameState is a Resource held by SceneManager, "which makes
+## BLUEPRINT Architecture: GameState is a Resource held by SceneManager, "which makes
 ## save/load trivial"). Party-shaped from day one - dictionaries keyed by
 ## character id - so the Phase 5 party system lands without a save-schema
 ## bump; today the roster is just the hero.

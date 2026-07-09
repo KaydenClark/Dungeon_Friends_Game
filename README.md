@@ -3,14 +3,16 @@
 > Generated from LLM Workbench v2.1. See `RUNBOOK.md` -> Upgrading The
 > Harness.
 
-A retro-pixel-art-inspired 2D top-down Zelda-style adventure game where you
-recruit a team and fight through turn-based combat across dungeons and the
-overworld, rendered natively at flexible HD/ultrawide resolutions rather than
-a locked handheld-style canvas.
+A 2D top-down adventure RPG - **Zelda meets BG3**. Explore a hand-built fantasy
+world Zelda-style (dungeons, puzzles, key items), recruit a party of "Dungeon
+Friends," and fight BG3-style turn-based tactical battles on a zoomed-in grid.
+Retro-pixel-art inspired, rendered natively at flexible HD/ultrawide resolutions
+rather than a locked handheld-style canvas.
 
 A solo, AI-assisted Godot 4.7 project: grid-based overworld and dungeon
-exploration (Zelda-style block/switch/key puzzles), Baldur's-Gate/Fire-Emblem-
-inspired turn-based party combat, and recruitable "Dungeon Friends" party
+exploration (Zelda-style block/switch/key puzzles), BG3-style turn-based
+*tactical* party combat (a dedicated battle mode: select a unit, move it within
+its highlighted range, act), and recruitable "Dungeon Friends" party
 members. The world starts in a fantasy forest and later expands into a castle
 city, mountains, and rivers. Current state: a playable slice on placeholder
 art - walk an LDtk-authored forest, talk to NPCs, bump a visible enemy into a
@@ -52,10 +54,12 @@ before changing anything:
 - [`HARNESS_FEEDBACK.md`](HARNESS_FEEDBACK.md) - the return channel to the
   reusable harness these docs came from.
 
-For the full game-design and architecture rationale, see
-[`docs/planning/Gameplan.md`](docs/planning/Gameplan.md) and
+For the full toolchain and design rationale, see
 [`docs/research/audited_research.md`](docs/research/audited_research.md) -
-`BLUEPRINT.md` is the dense summary; those are the "why."
+`BLUEPRINT.md` is the canonical design doc; the audit is the "why" behind its
+toolchain choices. (The former `docs/planning/Gameplan.md` was retired
+2026-07-08 - its content is absorbed into `BLUEPRINT.md`, `RUNBOOK.md`,
+`TASKBOARD.md`, and the audit.)
 
 This project was originally adopted into the LLM Workbench harness from an
 existing set of planning docs (not bootstrapped from a blank prompt) - see

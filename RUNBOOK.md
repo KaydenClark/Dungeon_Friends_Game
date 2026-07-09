@@ -301,10 +301,10 @@ the same placeholder scene as the editor.
 ~~No separate integration branch - PR directly into `main`~~ - superseded;
   kept here for history. Branch-per-task/milestone naming still applies for
   work branched off of `integration`: `type/short-description` (e.g.
-  `feat/pushable-block`, or the Gameplan milestone ID where applicable, e.g.
-  `m2.1/pushable-block`).
-- Commit messages: imperative subject <= 72 chars, referencing the Gameplan
-  milestone where relevant (e.g. "M2.1: implement PushableBlock +
+  `feat/pushable-block`, or the TASKBOARD task/milestone ID where applicable,
+  e.g. `t-023/pushable-block`).
+- Commit messages: imperative subject <= 72 chars, referencing the TASKBOARD
+  task/milestone where relevant (e.g. "T-023: implement PushableBlock +
   PressurePlate"). One logical change per commit.
 - Run `git status` before committing.
 - Never commit secrets, Android keystores (`.jks`/`.keystore`), local

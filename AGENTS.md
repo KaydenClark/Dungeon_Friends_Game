@@ -19,8 +19,8 @@ When instructions conflict, use this order:
 4. `BLUEPRINT.md`.
 5. `TASKBOARD.md`.
 6. `RUNBOOK.md`.
-7. `docs/planning/Gameplan.md` and `docs/research/audited_research.md` (full
-   rationale behind the decisions summarized in `BLUEPRINT.md`).
+7. `docs/research/audited_research.md` (the toolchain and design rationale
+   behind the decisions summarized in `BLUEPRINT.md`).
 8. `README.md` and `docs/LEGACY_HARNESS.md`.
 
 If docs and the actual project disagree, trust the verified project, flag the
@@ -102,8 +102,8 @@ Default loop:
    fun.
 4. Mark the task `claimed` or `in-progress` before editing.
 5. Do the smallest correct change for that milestone; prefer completing one
-   milestone cleanly over partially starting several (Gameplan.md milestones
-   are sized to 2-3 hour chunks).
+   milestone cleanly over partially starting several (milestones are sized to
+   2-3 hour chunks; the live list is `TASKBOARD.md`).
 6. Verify per `RUNBOOK.md` (headless Godot checks, plus a manual play-check of
    the specific feature).
 7. Update `TASKBOARD.md` with the result, documentation status, and remaining
@@ -124,7 +124,7 @@ change is the documentation owner for that change.
 | Setup, run, build/export, verification procedure | `RUNBOOK.md` |
 | Public-facing usage, project description | `README.md` |
 | Agent rules, scope, authority, verification contract | `AGENTS.md` |
-| Full design/architecture rationale (only for decisions significant enough to need it) | `docs/planning/Gameplan.md` |
+| Full design/architecture rationale (only for decisions significant enough to need it) | `BLUEPRINT.md`, with toolchain rationale in `docs/research/audited_research.md` |
 | Harness itself was unclear, wrong, or slow - not this project's own bug | `HARNESS_FEEDBACK.md` |
 
 If no docs need edits, record `Docs checked; no update needed` in the final
