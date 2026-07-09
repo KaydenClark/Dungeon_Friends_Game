@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="AbilityData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/ability_data.gd" id="1_ab"]
+
+[resource]
+script = ExtResource("1_ab")
+id = "mend"
+display_name = "Mend"
+description = "Knit an ally's wounds. Heals a fixed amount."
+mp_cost = 2
+target_type = 1
+power = 4
+attack_range = 2

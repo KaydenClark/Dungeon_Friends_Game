@@ -137,19 +137,17 @@ there and on the task rows.
 | D-010 | EncounterData/MapMeta now or Phase 4? | **Now, as stubs** (classes + one sample .tres each, wired at Phase 4) - "based on 009 I say yes to this now." Unblocks T-044 | Kayden |
 | D-011 | Boot flow with an existing save? | **Minimal Continue/New Game prompt** when a save exists; no title screen until Phase 6. Kayden's emphasis for current content is checkpoints/respawns over save-scumming - plus **expanded dev warps: "something that lets me go to anywhere we have built"** (spawns T-049, rides the T-038 registry). Unblocks T-040 | Kayden |
 
-### Phase 4 planning round (2026-07-08) - **OPEN, recommendations flagged**
+### Phase 4 planning round (2026-07-08) - **RESOLVED same day (Kayden)**
 
 Gap analysis sources: `BLUEPRINT.md` (Party And Combat Model, Core Logic
 combat rule, the 2026-07-08 tactics-RPG identity row), the current combat
 walking skeleton (`game/scripts/combat/combat.gd` - 1v1, menu-driven,
 placeholder formulas), and the retired Gameplan's M4 milestones (absorbed).
-Neither decision blocks the first lane tasks; recommendations are agent
-picks Kayden can overturn cheaply before T-062 starts.
 
-| ID | Decision | Recommendation (agent - not yet resolved) | Owner |
+| ID | Decision | Resolution | Owner |
 |---|---|---|---|
-| D-012 | **Battle arena source**: is the tactical grid seeded from the local overworld terrain around the contact point ("they entered the same zone and spotted you"), or a dedicated per-region arena scene? | **Seed from local terrain**: copy the room's blocked/pit cells in a window (~11x9) around the contact point into the combat grid, fall back to an open field if the local area is too cramped to place both parties. Closest reading of the BLUEPRINT zoom-in framing; a dedicated arena stays the cheap fallback if it plays poorly | Kayden |
-| D-013 | **Phase 4 party size**: the roster has only the hero until Phase 5 recruitment - ship combat 1-unit, or prove multi-unit control now? | **Build for up to 4 from day one and ship Phase 4 with one temporary debug-flagged companion** (granted via the F1 overlay, clearly marked placeholder) so initiative interleaving and unit selection are actually exercised before Phase 5 builds recruitment on them; the first real recruit replaces it | Kayden |
+| D-012 | **Battle arena source**: local overworld terrain around the contact point, or a dedicated per-region arena scene? | **Local terrain** - Kayden: "use the local terrain where you were touched." The combat grid copies the room's blocked/pit cells in a window around the contact point ("they entered the same zone and spotted you"); open-field fallback if the local area is too cramped to place both parties. Rescopes T-062 | Kayden |
+| D-013 | **Phase 4 party size**: roster has only the hero until Phase 5 - ship combat 1-unit, or prove multi-unit control now? | **Test companion** - Kayden: "give me a test companion for now." Build for up to 4; ship Phase 4 with one clearly-placeholder companion in the party so initiative interleaving and unit selection are actually exercised; the first real Phase 5 recruit replaces it. Rescopes T-062 | Kayden |
 
 ## How To Use This Board
 

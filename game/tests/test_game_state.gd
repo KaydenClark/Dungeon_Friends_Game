@@ -9,8 +9,10 @@ extends "res://tests/gd_test.gd"
 
 func test_fresh_state_defaults_are_party_shaped() -> void:
 	var s := GameState.new()
-	eq(s.party_roster, ["hero"], "roster starts as the lone hero")
+	eq(s.party_roster, ["hero", "companion_test"],
+			"roster starts as hero + the D-013 test companion")
 	eq(s.party_levels.get("hero"), 1, "hero starts at level 1")
+	eq(s.party_levels.get("companion_test"), 1, "companion starts at level 1")
 	eq(s.party_xp.get("hero"), 0, "hero starts with 0 XP")
 	eq(s.inventory.size(), 0, "inventory starts empty")
 	eq(s.flags.size(), 0, "flags start empty")
