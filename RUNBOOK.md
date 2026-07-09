@@ -192,7 +192,7 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
-per-suite tally (e.g. `UNIT TESTS: 19 suites, 115 tests, 391 checks, 0
+per-suite tally (e.g. `UNIT TESTS: 22 suites, 137 tests, 483 checks, 0
 failed`). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a
 few seconds (pure logic and controlled clocks, no real-time waits, unlike the
 slice smoke test; the tutorial soft-lock solver adds a second or two). Run
@@ -202,8 +202,14 @@ data, `DialogueBox`, the puzzle primitives, the LDtk entity pipeline, or the
 SceneManager reward/heal/restart rules.
 
 Coverage lives in `game/tests/`, one suite per area:
-`test_combat_math` (the d10 `hit_threshold`/`needed_roll`/`attack_damage` rules
-the live `_attack` path calls), `test_room_grid` (bounds, blocking, occupancy,
+`test_combat_math` (T-060: the real d10 CombatMath statics the live combat
+path calls - thresholds, roll inversion, ability power, heals),
+`test_turn_manager` (T-061: interleaved-by-speed initiative, deterministic
+tie-breaks, mid-round death skips, round refills), `test_combat_scene`
+(T-068 core: the Defend shield gate, item stock gating, move-range flood
+fill vs solids, ability MP/target gating, mend/potion execution, the D-012
+arena connectivity seed, and a seeded 2v2 auto-battle to completion),
+`test_progression` (T-045: XP curve shape), `test_room_grid` (bounds, blocking, occupancy,
 Manhattan pathfinding, avoid-occupants routing), `test_grid_actor`
 (`try_step` reservation/bump/refusal), `test_data_resources` (the shipped
 hero/slime/boss `.tres` values + the boss-key/locked-door invariant),

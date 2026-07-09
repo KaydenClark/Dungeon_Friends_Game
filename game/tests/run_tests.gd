@@ -11,6 +11,7 @@ extends Node
 const SUITES := [
 	"res://tests/test_combat_math.gd",
 	"res://tests/test_turn_manager.gd",
+	"res://tests/test_combat_scene.gd",
 	"res://tests/test_room_grid.gd",
 	"res://tests/test_grid_actor.gd",
 	"res://tests/test_data_resources.gd",

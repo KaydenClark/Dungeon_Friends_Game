@@ -28,6 +28,9 @@ var arena_blocked: Dictionary = {}   # Vector2i -> true
 var arena_origin := Vector2.ZERO
 
 var units: Array[CombatUnit] = []
+## Tests flip this off to drive _execute_*/_reachable_cells directly
+## without _ready launching a real battle around them.
+var autostart := true
 var tm := TurnManager.new()
 var rng: RandomNumberGenerator
 var auto_play := false
@@ -108,7 +111,8 @@ func _ready() -> void:
 	astar.default_estimate_heuristic = AStarGrid2D.HEURISTIC_MANHATTAN
 	astar.update()
 	_build_view()
-	_run_battle()
+	if autostart:
+		_run_battle()
 
 
 # ---------------------------------------------------------------- Battle FSM
@@ -179,19 +183,29 @@ func _player_turn(u: CombatUnit) -> void:
 	await _action_menu(u)
 
 
+## The root command set for a unit's turn (extracted for unit tests): the
+## locked Attack/Ability/Item/Defend, with Defend absent until the shield is
+## in the inventory (D-007/T-046) and Wait as the always-available turn-end.
+func _build_root_options(u: CombatUnit) -> Array:
+	var opts: Array = []
+	var foes := _targets_in_range(u, u.attack_range, false)
+	opts.append({"label": "Attack", "enabled": not foes.is_empty(), "kind": "attack"})
+	var usable := _usable_abilities(u)
+	opts.append({"label": "Ability", "enabled": not usable.is_empty(), "kind": "ability"})
+	var potions: int = SceneManager.inventory.get("potion", 0)
+	opts.append({"label": "Item", "enabled": potions > 0, "kind": "item"})
+	if defend_unlocked:
+		opts.append({"label": "Defend", "enabled": true, "kind": "defend"})
+	opts.append({"label": "Wait", "enabled": true, "kind": "wait"})
+	return opts
+
+
 ## One menu pass; recursion-free loop so Back always lands here again.
 func _action_menu(u: CombatUnit) -> void:
 	while true:
-		var opts: Array = []
+		var opts := _build_root_options(u)
 		var foes := _targets_in_range(u, u.attack_range, false)
-		opts.append({"label": "Attack", "enabled": not foes.is_empty(), "kind": "attack"})
 		var usable := _usable_abilities(u)
-		opts.append({"label": "Ability", "enabled": not usable.is_empty(), "kind": "ability"})
-		var potions: int = SceneManager.inventory.get("potion", 0)
-		opts.append({"label": "Item", "enabled": potions > 0, "kind": "item"})
-		if defend_unlocked:
-			opts.append({"label": "Defend", "enabled": true, "kind": "defend"})
-		opts.append({"label": "Wait", "enabled": true, "kind": "wait"})
 		var pick: Dictionary = await _menu(u, "What will %s do?" % u.display_name, opts)
 		match pick.get("kind", "wait"):
 			"attack":
@@ -711,6 +725,8 @@ func _cell_pos(c: Vector2i) -> Vector2:
 
 
 func _update_info(u: CombatUnit) -> void:
+	if u.info == null:
+		return
 	var line := "%s %d/%d" % [u.display_name, u.hp, u.max_hp]
 	if u.is_player and u.max_mp > 0:
 		line += "  MP %d/%d" % [u.mp, u.max_mp]
