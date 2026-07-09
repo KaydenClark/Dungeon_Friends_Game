@@ -197,8 +197,9 @@ unbolts the entry. Party defeat restarts from the beginning (T-029/D-004).
 Debug builds carry an F1 dev overlay (T-030). Verified by a 109/109-check
 headless smoke test plus 17 unit suites (351 checks) including the exhaustive
 soft-lock solver, now jump- and fixed-brick-aware, over the real shipped
-rooms. Kayden's windowed re-check is the remaining Phase 2 gate; real art
-comes in the post-Phase-2 art pass.
+rooms. **Kayden's windowed re-check passed 2026-07-08 - Phase 2 is
+accepted** (his one feel note, "block movement is a bit chunky", is parked
+as `TASKBOARD.md` T-059); real art comes in the post-Phase-2 art pass.
 
 The most important quality bar is:
 
@@ -210,18 +211,24 @@ The most important quality bar is:
 
 Current phase:
 
-- **Phase 2 built, reworked once from Kayden's first windowed playthrough
-  (2026-07-07), gated on his re-check.** Everything in "Phase 2 Target:
-  Tutorial Dungeon" below (including the 2026-07-07 revision block) is
-  implemented and headless-verified: the LDtk entity pipeline (T-031), the
-  LDtk-authored forest (T-011, tree tiles fixed), the puzzle primitives
-  (T-023 blocks + fixed bricks, T-025 jump+pits, T-026 chest; T-024 plates
+- **Phase 2 accepted (Kayden's windowed re-check, 2026-07-08); Phase 4
+  (Combat MVP) is the current phase - Kayden's explicit pull-forward.**
+  Everything in "Phase 2 Target: Tutorial Dungeon" below (including the
+  2026-07-07 revision block) is implemented, headless-verified, and now
+  play-confirmed: the LDtk entity pipeline (T-031), the LDtk-authored
+  forest (T-011), the puzzle primitives (T-023/T-025/T-026; T-024 plates
   built but ON HOLD), defeat-restart (T-029), dev tools (T-030), and the
-  four-room tutorial dungeon integration (T-027). Phase 1's only leftover is T-020's windowed 3-resolution check
-  (gated on Kayden), and Phase 0's M0.3 (export presets) stays in the
-  TASKBOARD Backlog. Once Kayden's windowed pass confirms the dungeon,
-  Phase 3 (Data Model & Save/Load) is next - it also inherits the richer
-  death/respawn rule (D-004) and the shield's real effect (D-001/S-001).
+  four-room tutorial dungeon (T-027). Phase 1 is fully done (T-020's
+  windowed 3-resolution check also passed 2026-07-08); Phase 0's M0.3
+  (export presets) stays in the TASKBOARD Backlog. **Build-order
+  re-sequencing (2026-07-08, Kayden):** combat is his main complaint, so
+  Phase 4 starts ahead of Phase 3's save/load half. Phase 3's M3.1
+  data-class half (ItemData, AbilityData, EncounterData/MapMeta stubs, XP
+  shape, stat alignment, shield-gates-Defend) moves with Phase 4 as its
+  data foundation; the M3.2/M3.3 save/load half (SaveData, registry,
+  crystal, load flow, checkpoint respawn, pit falls, enemy respawn) stays
+  planned in `TASKBOARD.md` and resumes after combat. The Phase 4 lane is
+  `TASKBOARD.md` T-060..T-069.
 
 Build order (each phase is a real milestone with a stated "done" condition;
 live milestone tracking is in `TASKBOARD.md`):
@@ -660,7 +667,7 @@ Rules:
 | Solo + AI-assisted dev underestimates UI work (menus, inventory, party management) | Medium | UI-heavy phases (4, 5) get dedicated milestones rather than being bundled into "just add combat" |
 | Android export friction (SDK/JDK setup, device-specific quirks) | Medium | Addressed in Phase 0 (M0.3), not deferred to the end |
 | `heygleeson/godot-ldtk-importer` is a community plugin - could break on Godot updates | Low-Medium | Pin Godot to the current 4.7.x and the importer version (2.0); check its GitHub issues before any engine upgrade. **2026-07-07: the 4.6->4.7 upgrade re-verified clean** - importer 2.0 reimported all four `.ldtk` worlds with no errors/deprecations |
-| Ultrawide (21:9) aspect ratios could show too much/too little world at the screen edges under `expand` | Low-Medium | Validated by the T-007 display-scaling spike at 1280x720/1920x1080/3440x1440 before producing more art; revisit `keep`+letterbox if `expand` reads poorly once real level art exists |
+| Ultrawide (21:9) aspect ratios could show too much/too little world at the screen edges under `expand` | Low-Medium | **Resolved 2026-07-08**: Kayden's windowed T-020 run at 1280x720/1920x1080/3440x1440 with the real tileset confirmed `expand` reads fine - no `keep`+letterbox fallback needed. Re-open only if a future region's level art over-reveals at 21:9 |
 | "Authentic hardware constraint" scope creep (chasing GB/GBA-accuracy that doesn't serve gameplay) | Low | Any remaining hardware-accuracy ideas (e.g. a CRT shader) stay optional, cosmetic Stretch Goals, never load-bearing |
 | Aseprite CLI/Lua automation has a learning curve before it pays off | Low | Start with simple batch-export scripts in M1.1; Pixelorama remains a no-cost manual fallback |
 | **No narrative/story/world-lore design exists yet** - the design so far is systems-and-architecture-first, but "go through a story" is part of the founding vision | Medium | Needs deliberate attention before Phase 6 (First Playable Slice) means anything narratively - a vertical slice needs at least one real story beat, not just working systems. Not yet scheduled; flagged here rather than invented unprompted |
@@ -710,6 +717,7 @@ Rules:
 | **PressurePlate ON HOLD**; dungeon rescoped to four rooms: hub brick wall (13 bricks, one movable - Oracle-style, per Kayden's reference screenshot), new chest room behind a north **locked door** (`dungeon_key`; "I like having the door locked instead" of the chest), pit room gains two 1-wide jumpable ledges before the 2-wide chasm, fight room's guardian drops `dungeon_key` | Kayden's first windowed playthrough (T-032): the plate's momentary re-lock read as broken, so it's shelved rather than debugged mid-tutorial; the brick wall is wedge-proof by construction and keeps Room 1 focused on pushing | 2026-07-07 / playtest-feedback rework |
 | Forest fixes from the same playthrough: every Wall cell now draws its tree tile (colliders were rendering as plain grass - the "random places I run into" bug), stray pit under the spawn cell removed, extra tree clusters added in the open stretch between spawn and the dungeon entry | Kayden: "I would like for there to be more things out in the open between me and the entry like there was. Maybe not a maze, but at least trees or something" | 2026-07-07 / playtest-feedback rework |
 | **Phase 3 round (D-006..D-011, all resolved)**: (a) saves are **JSON** at `user://saves/slot_N.json` - Kayden delegated the pick; agent chose JSON per the retired Gameplan's own MVP JSON recommendation plus the `.tres`-from-`user://` script-execution risk; (b) **the shield unlocks Defend** - the command is absent from the combat menu until the shield is in inventory (D-001's answer); (c) **checkpoint respawns + XP-as-punishment** - keep inventory, lose XP never-below-level, dungeon-entrance/healer respawn, and walking into pits = Zelda fall back to the room's last-used entrance (supersedes pits-impassable); (d) **enemies respawn every time a room is left-and-rebuilt**, uniques included - the puzzle escape valve applies to enemies too (supersedes the Lufia-II stay-dead pattern; `defeated_enemy_ids` dropped from SaveData); (e) EncounterData/MapMeta built now as stubs, wired Phase 4; (f) minimal Continue/New Game boot prompt; dev warps expand to every built room via the map registry | Kayden's 2026-07-07 planning answers, verbatim rationale on the TASKBOARD Pending Decisions table; agent interpretations flagged there (full-HP respawn, suspended-room semantics, fall damage + XP penalty amounts as tunables) | 2026-07-07 / Phase 3 planning round |
+| **Phase 4 (Combat MVP) starts ahead of Phase 3's save/load half**; Phase 3's M3.1 data classes move with it as combat prerequisites, and the M3.2/M3.3 save/load work stays planned and ready, resumed after combat | Kayden accepted Phase 2 in windowed play (2026-07-08) and named combat the priority: "my main complaint right now is combat, which is phase 4. So I think that is a good next place to work." A build-order re-sequencing, not a scope change - the D-006..D-011 save/load resolutions all stand; combat has no dependency on saves, but does need the M3.1 data classes (abilities, items, encounters, XP shape), which is why they ride along | 2026-07-08 / this session |
 | **Combat is a tactics-RPG, not a JRPG**: BG3's turn-based mode is the functional model (select a unit, move it within a highlighted range on a zoomed-in grid, act via abilities, strict per-unit initiative); Fire Emblem is the *visual* reference only (range highlighting, a dedicated battle mode). Active party size is **four**. The "quick decisions matter more than tactical depth" pillar is retired - the game leans into strategic, tactical combat | Kayden clarified the founding combat vision: "top down tactical BG3 style... control my party of 4 people around this new mini map." Fire Emblem was his closest GBA touchstone for the *look* (range highlights, separate mode), not the mechanics; the engine isn't as limited as first assumed, so depth is now in-scope. Reframes the JRPG/menu language and the earlier readable-over-deep pillar; the locked grid/d10/per-unit-initiative decisions are unchanged | 2026-07-08 / this session |
 
 ## Health Criteria
