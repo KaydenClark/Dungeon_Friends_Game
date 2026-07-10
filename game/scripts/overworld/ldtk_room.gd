@@ -26,6 +26,7 @@ var plates: Array = []
 var blocks: Array = []
 var chests: Array = []
 var levers: Array = []
+var crystals: Array = []
 ## Doorway marker cells -> their LDtk fields ({TargetRoom, SpawnX, SpawnY}).
 var doorways := {}
 var spawn_cell := Vector2i.ZERO
@@ -197,6 +198,12 @@ func _adopt_entities(level: Node) -> void:
 				lever.cell = cell
 				register(lever, cell)
 				levers.append(lever)
+			"SaveCrystal":
+				var crystal: SaveCrystal = node
+				crystal.room = self
+				crystal.cell = cell
+				register(crystal, cell)
+				crystals.append(crystal)
 			_:
 				node.free()
 

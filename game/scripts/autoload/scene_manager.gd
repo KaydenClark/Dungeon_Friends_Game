@@ -70,6 +70,26 @@ var transitioning := false
 ## How the booting scene rebuilds the game's starting room - set by main.gd,
 ## used by restart_game() (T-029: party defeat restarts from the beginning).
 var boot_factory := Callable()
+## Where save files live (T-037/T-039). Tests point this at a scratch dir so
+## automated runs can never clobber a real save in user://saves.
+var save_dir: String = SaveManager.DEFAULT_DIR
+
+
+## Snapshot the live session into a save slot (T-039; the SaveCrystal calls
+## this). The map id comes from the registry, the position from the live
+## player. Refuses (false + warning) rather than writing a save it could
+## never load back.
+func save_game(slot: int = 1) -> bool:
+	var map_id := MapRegistry.id_for(current_room)
+	if map_id == "":
+		push_warning("save_game: current room is not a registered map - not saving")
+		return false
+	var player: Variant = current_room.get("player")
+	if not player is Player:
+		push_warning("save_game: current room has no player - not saving")
+		return false
+	var data := SaveManager.capture(state, map_id, player.cell)
+	return SaveManager.write(slot, data, save_dir)
 
 
 func _ready() -> void:

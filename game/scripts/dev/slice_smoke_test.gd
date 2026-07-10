@@ -122,6 +122,26 @@ func _run() -> void:
 	check(SceneManager.hero_hp == SceneManager.hero_stats.max_hp,
 			"healer restored HP to max (%d)" % SceneManager.hero_hp)
 
+	# 6b. Save crystal (T-039): interacting writes slot 1 with the live
+	# position and flags. Saves go to a scratch dir so a smoke run can never
+	# clobber a real save in user://saves.
+	SceneManager.save_dir = "user://saves_smoke_test"
+	check(room.crystals.size() == 1, "a save crystal stands by the campfire")
+	var crystal: SaveCrystal = room.crystals[0]
+	check(await _go(player, crystal.cell + Vector2i.RIGHT), "reached the save crystal")
+	player.set_facing(Vector2i.LEFT)
+	player.interact()
+	await get_tree().process_frame
+	await _pump_dialogue()
+	var saved := SaveManager.load_slot(1, SceneManager.save_dir)
+	check(saved != null, "the crystal wrote save slot 1")
+	if saved != null:
+		check(saved.current_map == "forest", "save records the forest map id")
+		check(saved.player_position == player.cell, "save records the player cell")
+		check(saved.flags == SceneManager.state.flags, "save snapshots the flags")
+		check(saved.inventory == SceneManager.state.inventory,
+				"save snapshots the inventory")
+
 	# 7. Boss fight: hunt the boss until it falls; it drops the key.
 	var boss_ok: bool = await _hunt_boss(player)
 	check(boss_ok, "boss slime defeated")
@@ -326,6 +346,14 @@ func _run() -> void:
 	check(fresh.player.cell == Vector2i(2, 4), "fresh start at the forest spawn cell")
 	check(fresh.boss != null and is_instance_valid(fresh.boss),
 			"boss respawned in the fresh world")
+
+	# Clean up the scratch save dir so smoke runs leave no residue.
+	var scratch := DirAccess.open("user://")
+	if scratch != null and scratch.dir_exists("saves_smoke_test"):
+		for f in DirAccess.open("user://saves_smoke_test").get_files():
+			DirAccess.open("user://saves_smoke_test").remove(f)
+		scratch.remove("saves_smoke_test")
+	SceneManager.save_dir = SaveManager.DEFAULT_DIR
 
 	done = true
 	var total := passes + fails.size()

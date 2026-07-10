@@ -513,6 +513,41 @@
     "pivotX": 0,
     "pivotY": 0,
     "fieldDefs": []
+   },
+   {
+    "identifier": "SaveCrystal",
+    "uid": 101,
+    "tags": [],
+    "exportToToc": false,
+    "allowOutOfBounds": false,
+    "doc": null,
+    "width": 16,
+    "height": 16,
+    "resizableX": false,
+    "resizableY": false,
+    "minWidth": null,
+    "minHeight": null,
+    "maxWidth": null,
+    "maxHeight": null,
+    "keepAspectRatio": false,
+    "tileOpacity": 1,
+    "fillOpacity": 1,
+    "lineOpacity": 1,
+    "hollow": false,
+    "color": "#59E6F2",
+    "renderMode": "Rect",
+    "showName": true,
+    "tilesetId": null,
+    "tileRenderMode": "FitInside",
+    "tileRect": null,
+    "uiTileRect": null,
+    "nineSliceBorders": [],
+    "maxCount": 0,
+    "limitScope": "PerLevel",
+    "limitBehavior": "MoveLastOne",
+    "pivotX": 0,
+    "pivotY": 0,
+    "fieldDefs": []
    }
   ],
   "tilesets": [
@@ -656,8 +691,8 @@
          "__tile": null,
          "defUid": null,
          "realEditorValues": []
-        }
-        ,{
+        },
+        {
          "__identifier": "EncounterId",
          "__type": "String",
          "__value": "forest_pair",
@@ -857,8 +892,8 @@
          "__tile": null,
          "defUid": null,
          "realEditorValues": []
-        }
-        ,{
+        },
+        {
          "__identifier": "EncounterId",
          "__type": "String",
          "__value": "forest_pair",
@@ -899,8 +934,8 @@
          "__tile": null,
          "defUid": null,
          "realEditorValues": []
-        }
-        ,{
+        },
+        {
          "__identifier": "EncounterId",
          "__type": "String",
          "__value": "forest_pair",
@@ -941,8 +976,8 @@
          "__tile": null,
          "defUid": null,
          "realEditorValues": []
-        }
-        ,{
+        },
+        {
          "__identifier": "EncounterId",
          "__type": "String",
          "__value": "forest_pair",
@@ -983,8 +1018,8 @@
          "__tile": null,
          "defUid": null,
          "realEditorValues": []
-        }
-        ,{
+        },
+        {
          "__identifier": "EncounterId",
          "__type": "String",
          "__value": "forest_pair",
@@ -1079,8 +1114,8 @@
          "__tile": null,
          "defUid": null,
          "realEditorValues": []
-        }
-        ,{
+        },
+        {
          "__identifier": "EncounterId",
          "__type": "String",
          "__value": "forest_pair",
@@ -1121,8 +1156,8 @@
          "__tile": null,
          "defUid": null,
          "realEditorValues": []
-        }
-        ,{
+        },
+        {
          "__identifier": "EncounterId",
          "__type": "String",
          "__value": "forest_pair",
@@ -1131,6 +1166,31 @@
          "realEditorValues": []
         }
        ]
+      },
+      {
+       "__identifier": "SaveCrystal",
+       "__grid": [
+        21,
+        14
+       ],
+       "__pivot": [
+        0,
+        0
+       ],
+       "__tags": [],
+       "__tile": null,
+       "__smartColor": "#59E6F2",
+       "__worldX": null,
+       "__worldY": null,
+       "iid": "00000000-0000-0000-0000-000000000039",
+       "width": 16,
+       "height": 16,
+       "defUid": 101,
+       "px": [
+        336,
+        224
+       ],
+       "fieldInstances": []
       }
      ]
     },

@@ -17,6 +17,7 @@
 ##   PressurePlate {Id: String, TargetId: String}
 ##   Chest      {Id: String, KeyId: String, RewardId: String}
 ##   Lever      (cell only)
+##   SaveCrystal (cell only) - save point, writes slot 1 on interact (T-039)
 ##   Doorway    {TargetRoom: String, SpawnX: Int, SpawnY: Int} -> Marker2D
 ## Unknown identifiers get a warning and a bare Marker2D so nothing vanishes
 ## silently. All fields are optional; sensible defaults apply.
@@ -28,6 +29,7 @@ const BlockScript = preload("res://scripts/puzzles/pushable_block.gd")
 const PlateScript = preload("res://scripts/puzzles/pressure_plate.gd")
 const ChestScript = preload("res://scripts/puzzles/chest.gd")
 const LeverScript = preload("res://scripts/puzzles/lever.gd")
+const CrystalScript = preload("res://scripts/puzzles/save_crystal.gd")
 
 
 func post_import(entity_layer: LDTKEntityLayer) -> LDTKEntityLayer:
@@ -96,6 +98,8 @@ func _spawn(entity: Dictionary) -> Node2D:
 			return chest
 		"Lever":
 			return LeverScript.new()
+		"SaveCrystal":
+			return CrystalScript.new()
 	push_warning("entities_post_import: unknown entity '%s' - spawning a marker"
 			% entity.identifier)
 	return Marker2D.new()
