@@ -307,12 +307,14 @@ func _run() -> void:
 	check(door.opened, "door still open after the round trip")
 
 	# 14. Party defeat (T-029, D-004): restart from the beginning of the game.
-	var old_room: Node2D = SceneManager.current_room
+	# Capture the old room's id, not the node - restart_game() frees it, and a
+	# freed node in a lambda capture trips "Lambda capture ... was freed".
+	var old_room_id: int = SceneManager.current_room.get_instance_id()
 	SceneManager.handle_defeat()
 	await _pump_dialogue()
 	check(await _until(func() -> bool:
-			return SceneManager.current_room != old_room \
-			and SceneManager.current_room is ForestRoom),
+			return SceneManager.current_room is ForestRoom \
+			and SceneManager.current_room.get_instance_id() != old_room_id),
 			"defeat rebooted a fresh forest")
 	check(SceneManager.total_xp == 0, "XP reset to zero")
 	check(SceneManager.inventory.size() == 0, "inventory wiped")

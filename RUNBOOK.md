@@ -88,7 +88,10 @@ come from the T-009 input map plus the T-025 jump):
   counts; excluded from release exports): press F1 for the overlay, then
   1-4 warp (Forest / Hub / Pit / Fight rooms), 5 reset the room puzzle,
   6-8 grant forest_key / dungeon_key / shield, 9 heal, 0 toggle skip-combat
-  (touch an enemy = instant win). Off by default every session.
+  (touch an enemy = instant win), P grant 3 potions (consumables have no
+  in-world source yet - a T-069/Phase 5 design call; this is how to
+  exercise the combat Item command meanwhile). Off by default every
+  session.
 
 ## Test And Build
 
@@ -197,7 +200,7 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
-per-suite tally (e.g. `UNIT TESTS: 22 suites, 139 tests, 489 checks, 0
+per-suite tally (e.g. `UNIT TESTS: 22 suites, 140 tests, 490 checks, 0
 failed`). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a
 few seconds (pure logic and controlled clocks, no real-time waits, unlike the
 slice smoke test; the tutorial soft-lock solver adds a second or two). Run
@@ -255,8 +258,9 @@ call (before the move tween or the next `_process` tick) and stay pure.
 ### Phase 4 combat check (T-068/T-069)
 
 Current automated proof is the unit command above plus the slice smoke test:
-22 suites / 139 tests / 489 checks and **111/111 smoke checks on 5/5
-consecutive runs** (T-068, 2026-07-09). `test_combat_scene` covers a seeded
+22 suites / 140 tests / 490 checks and **111/111 smoke checks on 5/5
+consecutive runs** (T-068, 2026-07-09; counts refreshed same day after the
+dev potion grant and the smoke test's freed-lambda-capture fix). `test_combat_scene` covers a seeded
 2v2 battle, D-012 local-terrain connectivity, range refusal, MP/item
 bookkeeping, support actions, shield-gated Defend, and the live turn-order HUD
 format. The smoke test proves a regular forest Enemy's LDtk `EncounterId`

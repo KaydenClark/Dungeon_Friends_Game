@@ -32,6 +32,18 @@ func test_grant_item_deduplicates() -> void:
 	o.queue_free()
 
 
+func test_grant_potions_stacks_quantity() -> void:
+	var saved := SceneManager.inventory
+	SceneManager.inventory = {}
+	var o := _overlay()
+	o.grant_item("potion", 3)
+	o.grant_item("potion", 3)
+	eq(int(SceneManager.inventory.get("potion", 0)), 6,
+			"consumable grants stack instead of deduplicating")
+	SceneManager.inventory = saved
+	o.queue_free()
+
+
 func test_heal_hook_uses_real_rule() -> void:
 	var saved := SceneManager.hero_hp
 	SceneManager.hero_hp = 2

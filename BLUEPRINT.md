@@ -194,7 +194,7 @@ forest's two-enemy party and full XP/loot reward total; encounters zoom in
 before their short hand-off fade and zoom back to the unchanged overworld
 position. The combat HUD shows live turn order, party HP/MP, action prompts,
 and damage/heal feedback. The completed headless battery is green at 22 suites
-/ 139 tests / 489 checks, with the slice smoke at 111/111 on 5/5 runs.
+/ 140 tests / 490 checks, with the slice smoke at 111/111 on 5/5 runs.
 Only T-069, Kayden's windowed balance/feel acceptance, remains in Phase 4.
 Real art remains a separate phase-timed asset pass.
 
@@ -372,7 +372,7 @@ but at least trees or something" (added as scattered clusters).
 | Levels | LDtk, imported via `heygleeson/godot-ldtk-importer`, entities all-in per D-002 | **Importer v2.0 + entity post-import pipeline live 2026-07-06** (T-004/T-031): each `.ldtk` sets `entities_post_import` to `scripts/ldtk/entities_post_import.gd`, which instantiates the matching game object per entity (conventions documented in that script); `LdtkRoom` adopts them into the runtime grid. Current worlds: `forest.ldtk` (T-011), `tutorial_dungeon.ldtk` (4 levels, T-027 + 2026-07-07 rework), `entity_test_room.ldtk` (pipeline test fixture), `test_room.ldtk` (T-004 fixture) - consolidation into one `world.ldtk` can wait for real LDtk-app authoring. The LDtk desktop app is installed (Gatekeeper cleared); the `.ldtk` files are still bootstrap-generated JSON (`assets/levels/_scripts/generate_levels.py`) until Kayden starts hand-authoring |
 | Art | Aseprite (primary, Lua/CLI-scriptable, **not yet installed** - purchase is Kayden's call), Pixelorama (fallback) | 1280x720 design-reference base, flexible HD/ultrawide scaling (see Design Decisions); **grid unit decided at M1.1 (2026-07-06): 16x16 art pixels rendered at 4x = the 64px runtime cell** (`RoomGrid.TILE`). First real art exists (`assets/art/tilesets/test_tiles.png`, `sprites/test_hero.png`), generated deterministically by `assets/art/_scripts/generate_test_tileset.gd` as a stopgap; the Aseprite exporter (`export_sheets.lua`/`.sh`) is ready and takes over the same output paths once Aseprite is installed |
 | Audio | Furnace Tracker -> `.ogg` -> `AudioStreamPlayer`/`AudioStreamPlayer2D` | No hardware-channel-emulation engine (dropped, not deferred) |
-| Testing | First-party headless GDScript unit harness + import/boot checks + end-to-end slice smoke + manual play-check | `game/tests/` (22 suites / 139 tests / 489 checks at the 2026-07-09 Phase 4 completion baseline); exact commands and coverage policy in `RUNBOOK.md` |
+| Testing | First-party headless GDScript unit harness + import/boot checks + end-to-end slice smoke + manual play-check | `game/tests/` (22 suites / 140 tests / 490 checks at the 2026-07-09 Phase 4 completion baseline); exact commands and coverage policy in `RUNBOOK.md` |
 | Deployment/Export | Godot editor Export dialog: macOS, Windows, Android | `RUNBOOK.md` -> Test And Build |
 
 Architecture constraints:

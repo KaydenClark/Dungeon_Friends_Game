@@ -11,6 +11,8 @@ extends CanvasLayer
 ##   6-8  grant forest_key / dungeon_key / shield
 ##   9    heal to full
 ##   0    toggle skip-combat (touch an enemy = instant victory)
+##   P    grant 3 potions (T-064 flagged consumables having no natural
+##        source yet; the in-world source is a T-069/Phase 5 design call)
 ##
 ## Warps tear down the current room graph and boot the target directly, so a
 ## warped-to dungeon room has no forest beneath it - its exit doorways just
@@ -26,7 +28,7 @@ func _ready() -> void:
 	panel = ColorRect.new()
 	panel.color = Color(0.02, 0.05, 0.1, 0.88)
 	panel.position = Vector2(880, 40)
-	panel.size = Vector2(380, 330)
+	panel.size = Vector2(380, 356)
 	panel.visible = false
 	add_child(panel)
 	text = Label.new()
@@ -61,6 +63,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_8: grant_item("shield")
 		KEY_9: SceneManager.heal_hero_to_full()
 		KEY_0: SceneManager.skip_combat = not SceneManager.skip_combat
+		KEY_P: grant_item("potion", 3)
 		_:
 			return
 	get_viewport().set_input_as_handled()
@@ -83,8 +86,8 @@ func reset_puzzle() -> void:
 		current.reset_puzzle()
 
 
-func grant_item(item: String) -> void:
-	SceneManager.add_item(item)  # dedup lives in the one write path (T-036)
+func grant_item(item: String, qty: int = 1) -> void:
+	SceneManager.add_item(item, qty)  # dedup/stack lives in the one write path (T-036)
 
 
 func _refresh() -> void:
@@ -100,6 +103,7 @@ func _refresh() -> void:
 8  Grant shield
 9  Heal to full
 0  Skip combat: %s
+P  Grant 3 potions
 
 Items: %s""" % [
 		"ON" if SceneManager.skip_combat else "off",
