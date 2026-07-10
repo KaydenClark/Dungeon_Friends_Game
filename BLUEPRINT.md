@@ -189,11 +189,14 @@ uses the Phase 2 restart flow until the parked Phase 3 checkpoint work lands.
 Touching a visible enemy now starts a tactical battle on an arena copied from
 the local contact terrain (D-012), with Hero plus the temporary Buddy test
 companion (D-013), interleaved initiative, move/attack highlights, and
-Attack/Ability/Item/Defend. The core headless battery is green at 22 suites /
-137 tests / 483 checks, with the slice smoke recorded at 109/109 on 5/5 runs.
-Remaining Phase 4 work is T-066 EncounterData/LDtk + reward wiring, T-065
-camera zoom, T-067 combat HUD, the final T-068 integration battery, and T-069
-Kayden windowed acceptance. Real art remains a separate phase-timed asset pass.
+Attack/Ability/Item/Defend. LDtk EncounterData now supplies the regular
+forest's two-enemy party and full XP/loot reward total; encounters zoom in
+before their short hand-off fade and zoom back to the unchanged overworld
+position. The combat HUD shows live turn order, party HP/MP, action prompts,
+and damage/heal feedback. The completed headless battery is green at 22 suites
+/ 139 tests / 489 checks, with the slice smoke at 111/111 on 5/5 runs.
+Only T-069, Kayden's windowed balance/feel acceptance, remains in Phase 4.
+Real art remains a separate phase-timed asset pass.
 
 The most important quality bar is:
 
@@ -222,9 +225,10 @@ Current phase:
   data foundation; the M3.2/M3.3 save/load half (SaveData, registry,
   crystal, load flow, checkpoint respawn, pit falls, enemy respawn) stays
   planned in `TASKBOARD.md` and resumes after combat. **Current implementation
-  position (2026-07-09):** T-060..T-064 and their M3.1 data prerequisites are
-  built; finish T-066 -> T-065/T-067 -> T-068 -> T-069. D-012/D-013 are
-  resolved as local contact terrain + a temporary Buddy test companion.
+  position (2026-07-09):** T-060..T-068 and their M3.1 data prerequisites are
+  built and verified; T-069 is the remaining Kayden windowed acceptance gate.
+  D-012/D-013 are resolved as local contact terrain + a temporary Buddy test
+  companion.
 
 Build order (each phase is a real milestone with a stated "done" condition;
 live milestone tracking is in `TASKBOARD.md`):
@@ -368,7 +372,7 @@ but at least trees or something" (added as scattered clusters).
 | Levels | LDtk, imported via `heygleeson/godot-ldtk-importer`, entities all-in per D-002 | **Importer v2.0 + entity post-import pipeline live 2026-07-06** (T-004/T-031): each `.ldtk` sets `entities_post_import` to `scripts/ldtk/entities_post_import.gd`, which instantiates the matching game object per entity (conventions documented in that script); `LdtkRoom` adopts them into the runtime grid. Current worlds: `forest.ldtk` (T-011), `tutorial_dungeon.ldtk` (4 levels, T-027 + 2026-07-07 rework), `entity_test_room.ldtk` (pipeline test fixture), `test_room.ldtk` (T-004 fixture) - consolidation into one `world.ldtk` can wait for real LDtk-app authoring. The LDtk desktop app is installed (Gatekeeper cleared); the `.ldtk` files are still bootstrap-generated JSON (`assets/levels/_scripts/generate_levels.py`) until Kayden starts hand-authoring |
 | Art | Aseprite (primary, Lua/CLI-scriptable, **not yet installed** - purchase is Kayden's call), Pixelorama (fallback) | 1280x720 design-reference base, flexible HD/ultrawide scaling (see Design Decisions); **grid unit decided at M1.1 (2026-07-06): 16x16 art pixels rendered at 4x = the 64px runtime cell** (`RoomGrid.TILE`). First real art exists (`assets/art/tilesets/test_tiles.png`, `sprites/test_hero.png`), generated deterministically by `assets/art/_scripts/generate_test_tileset.gd` as a stopgap; the Aseprite exporter (`export_sheets.lua`/`.sh`) is ready and takes over the same output paths once Aseprite is installed |
 | Audio | Furnace Tracker -> `.ogg` -> `AudioStreamPlayer`/`AudioStreamPlayer2D` | No hardware-channel-emulation engine (dropped, not deferred) |
-| Testing | First-party headless GDScript unit harness + import/boot checks + end-to-end slice smoke + manual play-check | `game/tests/` (22 suites / 137 tests / 483 checks at the 2026-07-09 Phase 4 core baseline); exact commands and coverage policy in `RUNBOOK.md` |
+| Testing | First-party headless GDScript unit harness + import/boot checks + end-to-end slice smoke + manual play-check | `game/tests/` (22 suites / 139 tests / 489 checks at the 2026-07-09 Phase 4 completion baseline); exact commands and coverage policy in `RUNBOOK.md` |
 | Deployment/Export | Godot editor Export dialog: macOS, Windows, Android | `RUNBOOK.md` -> Test And Build |
 
 Architecture constraints:
@@ -416,7 +420,7 @@ Dungeon_Friends_Game/
 |---|---|---|---|
 | `game/scenes/main.tscn` | Root: `SceneManager` wiring, `WorldContainer`/`CombatContainer`/`UILayer`/`TransitionLayer` | working - `scripts/main.gd` registers the containers with `SceneManager` and boots the forest slice into `WorldContainer` | `game/scenes/main.tscn`, `game/scripts/main.gd` |
 | Overworld / Dungeon (LDtk-instanced) | Grid movement, puzzles, visible enemies | working through the LDtk pipeline: `RoomGrid` runtime grid model + `LdtkRoom` base (imports the level, feeds Wall/Pit IntGrids into the grid, adopts post-import-spawned entities) + `ForestRoom` (`forest.ldtk`) | `game/scripts/overworld/`, `game/scripts/ldtk/entities_post_import.gd`, `game/assets/levels/` |
-| Combat | Turn-based tactical party-vs-enemy battle (BG3 turn-based mode) | **Rebuilt 2026-07-08 (T-060..T-064)**: two-layer FSM (Battle FSM in `CombatScene`, per-entity FSM on `CombatUnit`) + `TurnManager` interleaved initiative; party from the GameState roster (hero + D-013 test companion) vs enemy parties (EncounterData-capable); arena seeded from the local room terrain around the contact point, restricted to the contact-connected region (D-012); FE-style move-range highlight + cursor cell pick + threat fringe; Attack/Ability/Item/Defend commands (strike/mend spend MP, potions consume stock, Defend shield-gated per D-007); real `CombatMath` d10 formulas (numbers tunable at T-069); simple close-and-attack AI. Still code-built (no .tscn); fade transition pending the T-065 zoom; HUD strip pending T-067 | `game/scripts/combat/combat.gd`, `combat_unit.gd`, `turn_manager.gd`, `combat_math.gd` |
+| Combat | Turn-based tactical party-vs-enemy battle (BG3 turn-based mode) | **Built through T-068 (2026-07-09):** two-layer FSM (Battle FSM in `CombatScene`, per-entity FSM on `CombatUnit`) + `TurnManager` interleaved initiative; party from the GameState roster (hero + D-013 test companion) vs LDtk-authored `EncounterData` enemy parties; arena seeded from the local room terrain around the contact point, restricted to the contact-connected region (D-012); FE-style move-range highlight + cursor cell pick + threat fringe; Attack/Ability/Item/Defend commands (strike/mend spend MP, potions consume stock, Defend shield-gated per D-007); real `CombatMath` d10 formulas (numbers tunable at T-069); simple close-and-attack AI; contact zoom-in/out transition; turn-order/party-status HUD and damage/heal feedback. Still code-built (no `.tscn`) | `game/scripts/combat/combat.gd`, `combat_unit.gd`, `turn_manager.gd`, `combat_math.gd` |
 | UI (HUD, dialogue, pause, party menu) | Player-facing menus and status | dialogue box exists (`DialogueBox`, code-built); HUD/pause/party menus missing | `game/scripts/ui/dialogue_box.gd` |
 | `game/scenes/dev/display_scaling_spike.tscn` | Throwaway diagnostic - proves the new flexible HD/ultrawide stretch settings render an undistorted tile grid at 1280x720/1920x1080/3440x1440 | working (placeholder ColorRect tiles, no real art yet) | `game/scenes/dev/display_scaling_spike.tscn`, `game/scripts/dev/display_scaling_spike.gd` |
 | Tutorial dungeon (behind the boss door) | The Phase 2 deliverable (T-027, reworked 2026-07-07 after Kayden's playthrough): four LDtk-authored rooms (`tutorial_dungeon.ldtk` levels HubRoom/ChestRoom/PitRoom/FightRoom, scripts `tutorial_*_room.gd`) navigated via `SceneManager.boot_room/enter_room/exit_room(s)` (suspend-not-free downward, freed-and-rebuilt on the way back up - the rebuild is the puzzle escape valve; persistent facts like opened chests/doors and slain unique enemies live in `SceneManager.flags`). Supersedes the T-022 cave stub room, whose wiring it inherits | working and windowed-accepted 2026-07-08; residual chunky block-movement note parked as T-059 | `game/scripts/overworld/tutorial_hub_room.gd` / `tutorial_chest_room.gd` / `tutorial_pit_room.gd` / `tutorial_fight_room.gd`, `game/assets/levels/tutorial_dungeon.ldtk` |
@@ -467,11 +471,10 @@ resources. T-063 resolved the range shape: stats own `move_range` and the
 basic `attack_range`; each ability owns its own `attack_range`. `ItemLibrary`
 resolves ids, session inventory is `{item_id: qty}`, and
 `SceneManager.add_item()/remove_item()` are the only write paths.
-`EncounterData.enemy_group` is already consumed by combat; T-066 still needs
-to carry the EncounterData reference from LDtk overworld enemy instances and
-route real victory XP/loot through it. `SaveData` remains open as parked Phase
-3 work. `EnemyStats.loot_table` deliberately remains a `PackedStringArray` of
-item ids resolved through the library (T-043).
+`EncounterData.enemy_group` is loaded from each regular forest Enemy's LDtk
+`EncounterId`, consumed by combat, and rewarded as a full group. `SaveData`
+remains open as parked Phase 3 work. `EnemyStats.loot_table` deliberately
+remains a `PackedStringArray` of item ids resolved through the library (T-043).
 
 ## Party And Combat Model
 

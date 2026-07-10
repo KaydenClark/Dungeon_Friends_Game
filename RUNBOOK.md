@@ -197,7 +197,7 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
-per-suite tally (e.g. `UNIT TESTS: 22 suites, 137 tests, 483 checks, 0
+per-suite tally (e.g. `UNIT TESTS: 22 suites, 139 tests, 489 checks, 0
 failed`). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a
 few seconds (pure logic and controlled clocks, no real-time waits, unlike the
 slice smoke test; the tutorial soft-lock solver adds a second or two). Run
@@ -254,12 +254,14 @@ call (before the move tween or the next `_process` tick) and stay pure.
 
 ### Phase 4 combat check (T-068/T-069)
 
-Current automated core proof is the unit command above plus the slice smoke
-test. `test_combat_scene` covers a seeded 2v2 battle, D-012 local-terrain
-connectivity, range refusal, MP/item bookkeeping, support actions, and the
-shield-gated Defend command. After T-066 lands, extend the battery through the
-real LDtk `EncounterData` reference and XP/loot return path, add the dedicated
-multi-enemy smoke leg, and rerun the full slice smoke 5/5.
+Current automated proof is the unit command above plus the slice smoke test:
+22 suites / 139 tests / 489 checks and **111/111 smoke checks on 5/5
+consecutive runs** (T-068, 2026-07-09). `test_combat_scene` covers a seeded
+2v2 battle, D-012 local-terrain connectivity, range refusal, MP/item
+bookkeeping, support actions, shield-gated Defend, and the live turn-order HUD
+format. The smoke test proves a regular forest Enemy's LDtk `EncounterId`
+builds the authored two-enemy group, grants both XP rewards, and restores the
+exact overworld position after the zoom transition.
 
 For the windowed T-069 acceptance gate:
 

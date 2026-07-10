@@ -173,3 +173,18 @@ func test_full_auto_battle_runs_to_victory_with_payload() -> void:
 	eq(s1.hp, 0, "first slime down")
 	eq(s2.hp, 0, "second slime down")
 	c.queue_free()
+
+
+func test_turn_order_hud_uses_live_turn_manager_order() -> void:
+	var hero := CombatUnit.from_character("hero", _character("hero"), 20, 5)
+	var buddy := CombatUnit.from_character("companion_test",
+			_character("companion_test"), 14, 6)
+	var slime := CombatUnit.from_enemy(_slime(), 0)
+	var c := _scene([hero, buddy], [slime])
+	c.tm.setup(c.units)
+	eq(c._turn_order_text(), "Turn order: Hero -> Buddy (Test) -> Forest Slime",
+			"HUD follows TurnManager speed order")
+	slime.hp = 0
+	eq(c._turn_order_text(), "Turn order: Hero -> Buddy (Test)",
+			"HUD drops defeated units from the live order")
+	c.free()

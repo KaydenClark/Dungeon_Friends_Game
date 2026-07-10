@@ -48,6 +48,8 @@ var astar := AStarGrid2D.new()
 var layer: CanvasLayer
 var log_label: Label
 var round_label: Label
+var turn_order_label: Label
+var party_status_label: Label
 var menu_panel: ColorRect
 var prompt_label: Label
 var menu_label: Label
@@ -137,6 +139,7 @@ func _run_battle() -> void:
 		if u == null:
 			break
 		round_label.text = "Round %d" % tm.round_number
+		_refresh_hud()
 		await _take_turn(u)
 	battle_state = BattleState.ENCOUNTER_END
 	var victory := tm.players_alive()
@@ -291,6 +294,8 @@ func _execute_attack(atk: CombatUnit, def: CombatUnit, ability: AbilityData) -> 
 		var dmg := CombatMath.attack_damage(atk.attack, def.defense, def.defending, power)
 		def.hp = maxi(0, def.hp - dmg)
 		_update_info(def)
+		_show_popup(def, "-%d" % dmg, Color(1.0, 0.45, 0.35))
+		_refresh_hud()
 		result = "Rolled %d — HIT!  %d damage.  %s: %d/%d HP." % [
 			roll, dmg, def.display_name, def.hp, def.max_hp]
 		if def.hp <= 0:
@@ -299,6 +304,7 @@ func _execute_attack(atk: CombatUnit, def: CombatUnit, ability: AbilityData) -> 
 			result += "  %s is down!" % def.display_name
 	else:
 		result = "Rolled %d — MISS!  (needed %d+)" % [roll, needed]
+		_show_popup(def, "MISS", Color(0.8, 0.8, 0.9))
 	if log_label:
 		log_label.text = intro + "\n" + result
 	print("[combat] ", result)
@@ -316,6 +322,8 @@ func _execute_ability(u: CombatUnit, target: CombatUnit, ability: AbilityData) -
 	target.hp = mini(target.max_hp, target.hp + amount)
 	_update_info(u)
 	_update_info(target)
+	_show_popup(target, "+%d" % amount, Color(0.45, 1.0, 0.6))
+	_refresh_hud()
 	_log("%s casts %s — %s recovers %d HP (%d/%d)." % [
 		u.display_name, ability.display_name, target.display_name,
 		amount, target.hp, target.max_hp])
@@ -333,6 +341,8 @@ func _execute_item(u: CombatUnit) -> void:
 	var amount := CombatMath.heal_amount(int(potion.stat_modifiers.get("heal", 5)))
 	u.hp = mini(u.max_hp, u.hp + amount)
 	_update_info(u)
+	_show_popup(u, "+%d" % amount, Color(0.45, 1.0, 0.6))
+	_refresh_hud()
 	_log("%s drinks a Potion — recovers %d HP (%d/%d)." % [
 		u.display_name, amount, u.hp, u.max_hp])
 	print("[combat] %s drank a potion for %d" % [u.display_name, amount])
@@ -646,6 +656,16 @@ func _build_view() -> void:
 	round_label.add_theme_font_size_override("font_size", 20)
 	round_label.modulate = Color(0.8, 0.8, 0.9)
 	layer.add_child(round_label)
+	turn_order_label = Label.new()
+	turn_order_label.position = Vector2(40, 68)
+	turn_order_label.add_theme_font_size_override("font_size", 17)
+	turn_order_label.modulate = Color(0.95, 0.9, 0.7)
+	layer.add_child(turn_order_label)
+	party_status_label = Label.new()
+	party_status_label.position = Vector2(800, 38)
+	party_status_label.add_theme_font_size_override("font_size", 17)
+	party_status_label.modulate = Color(0.78, 0.9, 1.0)
+	layer.add_child(party_status_label)
 	menu_panel = ColorRect.new()
 	menu_panel.color = Color(0.05, 0.04, 0.09, 0.82)
 	menu_panel.position = Vector2(56, 480)
@@ -670,6 +690,7 @@ func _build_view() -> void:
 	continue_label.text = "▶  Press E / Space to continue"
 	continue_label.visible = false
 	layer.add_child(continue_label)
+	_refresh_hud()
 
 
 func _show_highlights(cells: Array, color: Color) -> void:
@@ -731,6 +752,42 @@ func _update_info(u: CombatUnit) -> void:
 	if u.is_player and u.max_mp > 0:
 		line += "  MP %d/%d" % [u.mp, u.max_mp]
 	u.info.text = line
+
+
+func _turn_order_text() -> String:
+	var names := PackedStringArray()
+	for u in tm.build_order():
+		names.append(u.display_name)
+	return "Turn order: " + " -> ".join(names)
+
+
+func _refresh_hud() -> void:
+	if turn_order_label:
+		turn_order_label.text = _turn_order_text()
+	if party_status_label:
+		var rows := PackedStringArray()
+		for u in units:
+			if u.is_player:
+				rows.append("%s  HP %d/%d  MP %d/%d" % [
+					u.display_name, u.hp, u.max_hp, u.mp, u.max_mp])
+		party_status_label.text = "\n".join(rows)
+
+
+func _show_popup(u: CombatUnit, text: String, color: Color) -> void:
+	if layer == null or u.node == null:
+		return
+	var popup := Label.new()
+	popup.text = text
+	popup.position = u.node.position + Vector2(-18, -100)
+	popup.add_theme_font_size_override("font_size", 22)
+	popup.modulate = color
+	layer.add_child(popup)
+	var tw := create_tween()
+	tw.tween_property(popup, "position:y", popup.position.y - 28.0,
+				0.04 if auto_play else 0.45)
+	tw.parallel().tween_property(popup, "modulate:a", 0.0,
+				0.04 if auto_play else 0.45)
+	tw.tween_callback(popup.queue_free)
 
 
 func _log(msg: String) -> void:

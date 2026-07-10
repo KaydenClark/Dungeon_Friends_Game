@@ -68,6 +68,15 @@ func test_victory_banner_text() -> void:
 	_reset()
 
 
+func test_encounter_rewards_sum_the_authored_enemy_group() -> void:
+	_reset()
+	var pair: EncounterData = load("res://data/encounters/forest_pair.tres")
+	var banner: String = SceneManager.apply_encounter_rewards(pair)
+	eq(SceneManager.total_xp, 10, "two authored slimes grant both XP rewards")
+	eq(banner, "Victory! Gained 10 XP.", "encounter banner reports group reward total")
+	_reset()
+
+
 func test_heal_restores_to_full() -> void:
 	var saved := SceneManager.hero_hp
 	SceneManager.hero_hp = 1

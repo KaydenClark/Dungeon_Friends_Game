@@ -56,6 +56,8 @@ var ui_busy := false
 var last_ui_close_ms := 0
 var in_encounter := false
 var current_dialogue: DialogueBox
+var _combat_camera: Camera2D
+var _combat_camera_zoom := Vector2.ONE
 
 ## Room transitions (T-022). The active room plus a stack of suspended ones:
 ## entering a sub-room (the dungeon behind the boss door) hides and disables
@@ -175,12 +177,13 @@ func start_encounter(enemy: OverworldEnemy) -> void:
 		return
 	if skip_combat:
 		# Dev-tools shortcut (T-030): instant victory, no combat scene.
-		var skip_msg := apply_victory_rewards(enemy.stats)
+		var skip_msg := _apply_enemy_rewards(enemy)
 		enemy.defeated()
 		encounter_finished.emit(true)
 		await show_dialogue(["(Dev: combat skipped.)", skip_msg])
 		return
 	in_encounter = true
+	await _zoom_into_encounter()
 	await _fade_to(1.0)
 	world_container.visible = false
 	world_container.process_mode = Node.PROCESS_MODE_DISABLED
@@ -201,9 +204,10 @@ func start_encounter(enemy: OverworldEnemy) -> void:
 	combat.queue_free()
 	world_container.visible = true
 	world_container.process_mode = Node.PROCESS_MODE_INHERIT
+	await _zoom_out_of_encounter()
 	await _fade_to(0.0)
 	if victory:
-		var msg := apply_victory_rewards(enemy.stats)
+		var msg := _apply_enemy_rewards(enemy)
 		enemy.defeated()
 		in_encounter = false
 		encounter_finished.emit(true)
@@ -219,16 +223,39 @@ func start_encounter(enemy: OverworldEnemy) -> void:
 ## from start_encounter so the reward rules can be unit tested without running
 ## a whole battle (see /RUNBOOK.md -> Unit tests).
 func apply_victory_rewards(enemy_stats: EnemyStats) -> String:
-	total_xp += enemy_stats.xp_reward
-	var drops: PackedStringArray = enemy_stats.loot_table
-	for item in drops:
-		add_item(item)
-	var msg := "Victory! Gained %d XP." % enemy_stats.xp_reward
+	var group: Array[EnemyStats] = [enemy_stats]
+	return _apply_rewards(group)
+
+
+## Reward an authored encounter as one victory. Every enemy in the group
+## contributes XP and its string-id loot; add_item() keeps key/gear dedup.
+func apply_encounter_rewards(encounter: EncounterData) -> String:
+	return _apply_rewards(encounter.enemy_group if encounter != null else [])
+
+
+func _apply_enemy_rewards(enemy: OverworldEnemy) -> String:
+	if enemy.encounter != null and not enemy.encounter.enemy_group.is_empty():
+		return apply_encounter_rewards(enemy.encounter)
+	return apply_victory_rewards(enemy.stats)
+
+
+func _apply_rewards(enemy_group: Array[EnemyStats]) -> String:
+	var xp := 0
+	var drops := PackedStringArray()
+	for enemy_stats in enemy_group:
+		if enemy_stats == null:
+			continue
+		xp += enemy_stats.xp_reward
+		for item in enemy_stats.loot_table:
+			drops.append(item)
+			add_item(item)
+	total_xp += xp
+	var msg := "Victory! Gained %d XP." % xp
 	if drops.size() > 0:
 		var names := PackedStringArray()
 		for item in drops:
 			names.append(ItemLibrary.display_name(item))
-		msg += " The %s dropped: %s!" % [enemy_stats.display_name, ", ".join(names)]
+		msg += " The enemies dropped: %s!" % ", ".join(names)
 	return msg
 
 
@@ -406,3 +433,28 @@ func _fade_to(alpha: float) -> void:
 	var tw := create_tween()
 	tw.tween_property(fade_rect, "modulate:a", alpha, 0.02 if auto_combat else 0.3)
 	await tw.finished
+
+
+## Phase 4 framing (T-065): push through the overworld contact before the
+## short hand-off fade, then restore the exact same player camera afterwards.
+## The room and player remain suspended, so position is never reconstructed.
+func _zoom_into_encounter() -> void:
+	var player: Variant = current_room.get("player") if current_room else null
+	if not player is Player or player.camera == null:
+		return
+	_combat_camera = player.camera
+	_combat_camera_zoom = _combat_camera.zoom
+	var tw := create_tween()
+	tw.tween_property(_combat_camera, "zoom", _combat_camera_zoom * 2.2,
+				0.04 if auto_combat else 0.28)
+	await tw.finished
+
+
+func _zoom_out_of_encounter() -> void:
+	if _combat_camera == null or not is_instance_valid(_combat_camera):
+		return
+	var tw := create_tween()
+	tw.tween_property(_combat_camera, "zoom", _combat_camera_zoom,
+				0.04 if auto_combat else 0.24)
+	await tw.finished
+	_combat_camera = null

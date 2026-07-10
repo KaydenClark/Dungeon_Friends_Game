@@ -22,9 +22,11 @@ movement/attack ranges, win the boss's key, and enter the Phase 2 four-room
 tutorial dungeon: find the one loose brick in the wall, jump the ledges and
 fill the chasm with a block (Alt/C jumps), beat the key guardian, loop back,
 and unlock the side room holding the shield chest. Party defeat restarts from
-the beginning. Phase 4's core is built; remaining work is EncounterData/reward
-wiring, the camera-zoom transition, combat HUD, final automated coverage, and
-Kayden's windowed acceptance. Real art remains a separate phase-timed pass.
+the beginning. Phase 4 is built through its automated acceptance battery:
+regular forest encounters use LDtk-authored two-enemy parties, contact zooms
+into combat and back, and a readable turn-order/party-status HUD gives live
+feedback. Kayden's windowed balance/feel acceptance remains the final Phase 4
+gate. Real art remains a separate phase-timed pass.
 
 ## Screenshots
 
