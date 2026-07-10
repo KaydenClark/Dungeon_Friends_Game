@@ -2,7 +2,7 @@
 
 > Generated from LLM Workbench v2.1. See Upgrading The Harness below.
 
-**Last reviewed:** 2026-07-05
+**Last reviewed:** 2026-07-09
 **Runtime owner:** Kayden (solo developer)
 **Environment:** local (macOS development machine; builds also target Windows
 and Android)
@@ -24,7 +24,7 @@ Required accounts/services:
 
 - GitHub (`KaydenClark/Dungeon_Friends_Game`) for push/PR.
 - Later, for Android export only: OpenJDK 17, Android SDK Platform-Tools
-  >=35.0.0, NDK - not required for Phase 0/1 work.
+  >=35.0.0, NDK - not required for current desktop gameplay work.
 
 Required local files:
 
@@ -59,16 +59,20 @@ Or run the main scene directly without opening the editor UI:
 
 Expected result: a 1280x720 window opens (flexible HD/ultrawide `canvas_items`/
 `expand` scaling, revised 2026-07-05 - see `BLUEPRINT.md` -> Design Decisions)
-showing the first-playable forest slice (placeholder ColorRect art). No
-console errors.
+showing the first-playable forest slice with placeholder-generated tile and
+sprite art. No console errors.
 
-Playing the slice (updated 2026-07-07, Phase 2 rework; controls are the
-T-009 input map plus the T-025 jump):
+Playing the slice (updated 2026-07-09 for the Phase 4 combat core; controls
+come from the T-009 input map plus the T-025 jump):
 
 - WASD / arrow keys: grid-snapped movement. E / Space: talk & interact;
   Enter / Space advances dialogue. Alt (or C): jump one cell over a pit.
-- Loop: talk to the quest NPC -> fight slimes (bump to battle; Up/Down +
-  Enter drives the two-tier menu) -> beat the leashed Boss Slime by the east
+- Loop: talk to the quest NPC -> bump a slime to enter the local-terrain
+  tactical arena (D-012), controlling Hero + Buddy (D-013). WASD/arrows move
+  the combat cursor or menu; E/Space/Enter confirms; X/Escape cancels or stays
+  put. On each party turn, choose a highlighted destination, then
+  Attack/Ability/Item/Defend (Defend appears only after earning the shield) or
+  Wait. Beat the leashed Boss Slime by the east
   door for the Forest Key -> open the door and step through into the
   four-room tutorial dungeon: the entry locks behind you; a wall of 13
   bricks spans the hub and exactly one pushes free (walk into bricks to
@@ -88,8 +92,9 @@ T-009 input map plus the T-025 jump):
 
 ## Test And Build
 
-There is no traditional automated test suite yet - at this stage (Phase 0),
-the verification *is* "does the project open headlessly with zero errors."
+The project has a first-party headless GDScript unit harness, a full-slice
+smoke test, import/boot checks, and manual play gates. A completed gameplay
+task uses all relevant layers; an import-only pass is not sufficient.
 
 Fast check (resource/project validity):
 
@@ -247,6 +252,31 @@ The runner `await`s each test, so a suite method may be a coroutine when a test
 genuinely needs to yield; most tests read state synchronously right after the
 call (before the move tween or the next `_process` tick) and stay pure.
 
+### Phase 4 combat check (T-068/T-069)
+
+Current automated core proof is the unit command above plus the slice smoke
+test. `test_combat_scene` covers a seeded 2v2 battle, D-012 local-terrain
+connectivity, range refusal, MP/item bookkeeping, support actions, and the
+shield-gated Defend command. After T-066 lands, extend the battery through the
+real LDtk `EncounterData` reference and XP/loot return path, add the dedicated
+multi-enemy smoke leg, and rerun the full slice smoke 5/5.
+
+For the windowed T-069 acceptance gate:
+
+1. Run `main.tscn` and touch several slimes in different forest positions.
+2. Confirm the combat arena resembles the terrain around each contact point
+   and never traps either party (D-012).
+3. Control both Hero and the temporary Buddy companion; confirm initiative is
+   per-unit, move/attack highlights are readable, and blocked cells refuse
+   movement.
+4. Exercise Attack, Strike/Mend, Potion, Defend after obtaining the shield,
+   and Wait. Judge the d10 odds, ranges, healing, damage, and first-read
+   difficulty rather than treating the current numbers as final.
+5. After T-065/T-067, judge the zoom transition, exact-position return,
+   HP/MP and turn-order HUD, prompts, and damage/heal feedback.
+6. Record Kayden's verdict in `TASKBOARD.md`; accepted behavior closes T-069,
+   while specific recuts become new scoped tasks.
+
 ### Test Coverage Policy
 
 Verification has three layers, cheapest first: (1) the headless import/run
@@ -257,10 +287,11 @@ concrete manual check of whatever feature changed are the standard for a
 completed gameplay task.
 
 The unit layer favors testing the *real* code path over a re-implementation:
-e.g. the combat math lives in static functions on `CombatScene` that `_attack`
-itself calls, so a formula change can't pass the test while breaking the game.
-Keep it that way - when a system has pure logic worth testing, extract it to a
-callable function the game uses rather than copying the formula into a test.
+for example, combat math lives in `CombatMath` statics called by both
+`CombatScene` and `test_combat_math`, so a formula change cannot pass a copied
+test implementation while breaking the game. Keep it that way - when a system
+has pure logic worth testing, extract it to a callable function the game uses
+rather than copying the formula into a test.
 Use red/green/refactor: write the failing check first, confirm it fails for the
 expected reason, then implement the smallest fix. The eventual move to GUT (or
 an equivalent) remains a Stretch-adjacent decision; this first-party harness is

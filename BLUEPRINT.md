@@ -3,8 +3,8 @@
 > Generated from LLM Workbench v2.1. See `RUNBOOK.md` -> Upgrading The
 > Harness.
 
-**Last reviewed:** 2026-07-05
-**Status:** partial
+**Last reviewed:** 2026-07-09
+**Status:** active - Phase 4 combat core built; M4.4 integration/presentation remains
 **Source root:** `/Users/kayden/GPT_OS/Projects/Dungeon_Friends_Game`
 
 This is the stable reference for what the project is. This file is the
@@ -178,28 +178,22 @@ above (no full dungeon, no boss, no save/load, no full party depth
 required) - treat it as the walking skeleton the fuller Phase 6 slice builds
 on top of, not a replacement for it.
 
-**Status (2026-07-07, post-playtest rework): the Phase 2 tutorial dungeon is
-playable from `main.tscn` in its revised four-room layout** - still
-placeholder art, all through the LDtk pipeline. Kayden's first windowed pass
-(2026-07-07) found the forest's tree colliders rendering as plain grass
-(fixed: every Wall cell now draws its tree tile, plus new open-field
-clusters) and the pressure-plate flow reading as broken (its momentary
-semantics re-lock the door the moment you step off) - **plates are ON HOLD**
-and out of the dungeon. The reworked dungeon (`tutorial_dungeon.ldtk`,
-4 levels): hub with lock-behind entry and an Oracle-style **13-brick wall
-where exactly one brick pushes free** (fixed bricks can't wedge; reset lever
-kept as escape valve); a locked **north door** (dungeon_key) to the new
-**chest room** holding the shield chest (door locked, chest not - Kayden's
-call); the pit room reworked to two 1-wide jumpable ledges plus the 2-wide
-chasm solved by block-fill (T-025 jump, Alt/C); the fight room's Dungeon
-Slime drops the **dungeon_key**; west loop-back shortcut; opening the chest
-unbolts the entry. Party defeat restarts from the beginning (T-029/D-004).
-Debug builds carry an F1 dev overlay (T-030). Verified by a 109/109-check
-headless smoke test plus 17 unit suites (351 checks) including the exhaustive
-soft-lock solver, now jump- and fixed-brick-aware, over the real shipped
-rooms. **Kayden's windowed re-check passed 2026-07-08 - Phase 2 is
-accepted** (his one feel note, "block movement is a bit chunky", is parked
-as `TASKBOARD.md` T-059); real art comes in the post-Phase-2 art pass.
+**Status (2026-07-09): Phase 2 is accepted and the Phase 4 tactical-combat
+core is playable on `feature/phase4-combat-mvp`.** The four-room LDtk tutorial
+dungeon remains the accepted exploration/puzzle slice: a lock-behind hub with
+one loose brick in a 13-brick wall, a north key door to the shield chest room,
+two jumpable ledges plus a block-fill chasm, and a key-guardian fight with a
+west loop-back shortcut. Pressure plates remain on hold; party defeat still
+uses the Phase 2 restart flow until the parked Phase 3 checkpoint work lands.
+
+Touching a visible enemy now starts a tactical battle on an arena copied from
+the local contact terrain (D-012), with Hero plus the temporary Buddy test
+companion (D-013), interleaved initiative, move/attack highlights, and
+Attack/Ability/Item/Defend. The core headless battery is green at 22 suites /
+137 tests / 483 checks, with the slice smoke recorded at 109/109 on 5/5 runs.
+Remaining Phase 4 work is T-066 EncounterData/LDtk + reward wiring, T-065
+camera zoom, T-067 combat HUD, the final T-068 integration battery, and T-069
+Kayden windowed acceptance. Real art remains a separate phase-timed asset pass.
 
 The most important quality bar is:
 
@@ -223,12 +217,14 @@ Current phase:
   (export presets) stays in the TASKBOARD Backlog. **Build-order
   re-sequencing (2026-07-08, Kayden):** combat is his main complaint, so
   Phase 4 starts ahead of Phase 3's save/load half. Phase 3's M3.1
-  data-class half (ItemData, AbilityData, EncounterData/MapMeta stubs, XP
+  data-class half (ItemData, AbilityData, EncounterData/MapMeta, XP
   shape, stat alignment, shield-gates-Defend) moves with Phase 4 as its
   data foundation; the M3.2/M3.3 save/load half (SaveData, registry,
   crystal, load flow, checkpoint respawn, pit falls, enemy respawn) stays
-  planned in `TASKBOARD.md` and resumes after combat. The Phase 4 lane is
-  `TASKBOARD.md` T-060..T-069.
+  planned in `TASKBOARD.md` and resumes after combat. **Current implementation
+  position (2026-07-09):** T-060..T-064 and their M3.1 data prerequisites are
+  built; finish T-066 -> T-065/T-067 -> T-068 -> T-069. D-012/D-013 are
+  resolved as local contact terrain + a temporary Buddy test companion.
 
 Build order (each phase is a real milestone with a stated "done" condition;
 live milestone tracking is in `TASKBOARD.md`):
@@ -372,7 +368,7 @@ but at least trees or something" (added as scattered clusters).
 | Levels | LDtk, imported via `heygleeson/godot-ldtk-importer`, entities all-in per D-002 | **Importer v2.0 + entity post-import pipeline live 2026-07-06** (T-004/T-031): each `.ldtk` sets `entities_post_import` to `scripts/ldtk/entities_post_import.gd`, which instantiates the matching game object per entity (conventions documented in that script); `LdtkRoom` adopts them into the runtime grid. Current worlds: `forest.ldtk` (T-011), `tutorial_dungeon.ldtk` (4 levels, T-027 + 2026-07-07 rework), `entity_test_room.ldtk` (pipeline test fixture), `test_room.ldtk` (T-004 fixture) - consolidation into one `world.ldtk` can wait for real LDtk-app authoring. The LDtk desktop app is installed (Gatekeeper cleared); the `.ldtk` files are still bootstrap-generated JSON (`assets/levels/_scripts/generate_levels.py`) until Kayden starts hand-authoring |
 | Art | Aseprite (primary, Lua/CLI-scriptable, **not yet installed** - purchase is Kayden's call), Pixelorama (fallback) | 1280x720 design-reference base, flexible HD/ultrawide scaling (see Design Decisions); **grid unit decided at M1.1 (2026-07-06): 16x16 art pixels rendered at 4x = the 64px runtime cell** (`RoomGrid.TILE`). First real art exists (`assets/art/tilesets/test_tiles.png`, `sprites/test_hero.png`), generated deterministically by `assets/art/_scripts/generate_test_tileset.gd` as a stopgap; the Aseprite exporter (`export_sheets.lua`/`.sh`) is ready and takes over the same output paths once Aseprite is installed |
 | Audio | Furnace Tracker -> `.ogg` -> `AudioStreamPlayer`/`AudioStreamPlayer2D` | No hardware-channel-emulation engine (dropped, not deferred) |
-| Testing | Headless Godot CLI checks (`--import`, `--quit-after`) | No GDScript test framework yet - see `RUNBOOK.md` |
+| Testing | First-party headless GDScript unit harness + import/boot checks + end-to-end slice smoke + manual play-check | `game/tests/` (22 suites / 137 tests / 483 checks at the 2026-07-09 Phase 4 core baseline); exact commands and coverage policy in `RUNBOOK.md` |
 | Deployment/Export | Godot editor Export dialog: macOS, Windows, Android | `RUNBOOK.md` -> Test And Build |
 
 Architecture constraints:
@@ -423,7 +419,7 @@ Dungeon_Friends_Game/
 | Combat | Turn-based tactical party-vs-enemy battle (BG3 turn-based mode) | **Rebuilt 2026-07-08 (T-060..T-064)**: two-layer FSM (Battle FSM in `CombatScene`, per-entity FSM on `CombatUnit`) + `TurnManager` interleaved initiative; party from the GameState roster (hero + D-013 test companion) vs enemy parties (EncounterData-capable); arena seeded from the local room terrain around the contact point, restricted to the contact-connected region (D-012); FE-style move-range highlight + cursor cell pick + threat fringe; Attack/Ability/Item/Defend commands (strike/mend spend MP, potions consume stock, Defend shield-gated per D-007); real `CombatMath` d10 formulas (numbers tunable at T-069); simple close-and-attack AI. Still code-built (no .tscn); fade transition pending the T-065 zoom; HUD strip pending T-067 | `game/scripts/combat/combat.gd`, `combat_unit.gd`, `turn_manager.gd`, `combat_math.gd` |
 | UI (HUD, dialogue, pause, party menu) | Player-facing menus and status | dialogue box exists (`DialogueBox`, code-built); HUD/pause/party menus missing | `game/scripts/ui/dialogue_box.gd` |
 | `game/scenes/dev/display_scaling_spike.tscn` | Throwaway diagnostic - proves the new flexible HD/ultrawide stretch settings render an undistorted tile grid at 1280x720/1920x1080/3440x1440 | working (placeholder ColorRect tiles, no real art yet) | `game/scenes/dev/display_scaling_spike.tscn`, `game/scripts/dev/display_scaling_spike.gd` |
-| Tutorial dungeon (behind the boss door) | The Phase 2 deliverable (T-027, reworked 2026-07-07 after Kayden's playthrough): four LDtk-authored rooms (`tutorial_dungeon.ldtk` levels HubRoom/ChestRoom/PitRoom/FightRoom, scripts `tutorial_*_room.gd`) navigated via `SceneManager.boot_room/enter_room/exit_room(s)` (suspend-not-free downward, freed-and-rebuilt on the way back up - the rebuild is the puzzle escape valve; persistent facts like opened chests/doors and slain unique enemies live in `SceneManager.flags`). Supersedes the T-022 cave stub room, whose wiring it inherits | working (2026-07-07 layout), Kayden's windowed re-check pending | `game/scripts/overworld/tutorial_hub_room.gd` / `tutorial_chest_room.gd` / `tutorial_pit_room.gd` / `tutorial_fight_room.gd`, `game/assets/levels/tutorial_dungeon.ldtk` |
+| Tutorial dungeon (behind the boss door) | The Phase 2 deliverable (T-027, reworked 2026-07-07 after Kayden's playthrough): four LDtk-authored rooms (`tutorial_dungeon.ldtk` levels HubRoom/ChestRoom/PitRoom/FightRoom, scripts `tutorial_*_room.gd`) navigated via `SceneManager.boot_room/enter_room/exit_room(s)` (suspend-not-free downward, freed-and-rebuilt on the way back up - the rebuild is the puzzle escape valve; persistent facts like opened chests/doors and slain unique enemies live in `SceneManager.flags`). Supersedes the T-022 cave stub room, whose wiring it inherits | working and windowed-accepted 2026-07-08; residual chunky block-movement note parked as T-059 | `game/scripts/overworld/tutorial_hub_room.gd` / `tutorial_chest_room.gd` / `tutorial_pit_room.gd` / `tutorial_fight_room.gd`, `game/assets/levels/tutorial_dungeon.ldtk` |
 
 ### Commands
 
@@ -457,33 +453,25 @@ shown on mobile exports; Godot 4 auto-detects most standard gamepads.
 
 | Entity | Key fields | Stored where | Notes |
 |---|---|---|---|
-| `CharacterStats` | `id, display_name, max_hp, max_mp, attack, defense, speed, sprite_frames, starting_abilities` | `game/data/characters/*.tres` | Party member stat block |
-| `EnemyStats` | `id, display_name, max_hp, attack, defense, speed, abilities, ai_behavior, xp_reward, loot_table` | `game/data/enemies/*.tres` | `ai_behavior`: `RANDOM_WALK` / `BIASED_TRACKING` / `PATTERN` |
+| `CharacterStats` | `id, display_name, max_hp, max_mp, attack, defense, speed, move_range, attack_range, sprite_frames, starting_abilities, portrait, combat_sprite` | `game/data/characters/*.tres` | Party member stat block; T-063 range shape is built |
+| `EnemyStats` | `id, display_name, max_hp, attack, defense, speed, move_range, attack_range, abilities, ai_behavior, xp_reward, loot_table, portrait, combat_sprite` | `game/data/enemies/*.tres` | `ai_behavior`: `RANDOM_WALK` / `BIASED_TRACKING` / `PATTERN`; loot stays string ids through `ItemLibrary` |
 | `ItemData` | `id, display_name, item_type, stat_modifiers, on_use_ability` | `game/data/items/*.tres` | `item_type`: `KEY_ITEM` / `CONSUMABLE` / `EQUIPMENT` |
-| `AbilityData` | `id, display_name, mp_cost, target_type, element, power, overworld_use` | `game/data/abilities/*.tres` | `element`/equipment-adjacent fields exist for Stretch Goals 1-2, unused at MVP |
+| `AbilityData` | `id, display_name, mp_cost, target_type, power, attack_range, element, overworld_use` | `game/data/abilities/*.tres` | Each ability owns its Manhattan reach; `element`/`overworld_use` remain unused stretch fields |
 | `MapMeta` | `ldtk_level_id, display_name, music_track, encounter_table` | one companion `.tres` per level | LDtk is the source of truth for layout; this covers non-visual metadata |
 | `EncounterData` | `id, enemy_group, background_id` | `game/data/encounters/*.tres` | Referenced directly by overworld enemy instances - no random rolls |
 | `SaveData` | `schema_version, current_map, player_position, party_roster, party_levels/xp/hp/mp, inventory, flags` | `user://saves/slot_N.json` (JSON - D-006, 2026-07-07) | Never saved mid-combat; 3 slots from the start; no `defeated_enemy_ids` - enemies always respawn (D-009) |
 
-*Note (2026-07-05, reaffirmed 2026-07-08):* the tactics-RPG combat model means
-`CharacterStats`/`EnemyStats`/`AbilityData` **will need** move-range and
-attack-range fields (they drive the highlighted movement/attack ranges in
-battle) - not yet added to the table above; exact field names/shape are a
-Phase 3/4 implementation decision, not decided here.
-
-*Status (2026-07-05, second session; ItemData row updated 2026-07-08):*
-`CharacterStats` and `EnemyStats` exist (`game/scripts/data/`) with the
-fields listed above, plus first instances `game/data/characters/hero.tres`
-and `game/data/enemies/forest_slime.tres`. **`ItemData` is built (T-034,
-2026-07-08)**: `item_data.gd` + `item_library.gd` (id -> ItemData lookup
-over `game/data/items/`, where forest_key/dungeon_key/shield now live as
-`.tres`), and the session inventory is a `{item_id: qty}` Dictionary on
-`GameState` - key items/equipment never stack, consumables do, and
+*Status (2026-07-09):* `CharacterStats`, `EnemyStats`, `ItemData`,
+`AbilityData`, `MapMeta`, and `EncounterData` exist with shipped sample
+resources. T-063 resolved the range shape: stats own `move_range` and the
+basic `attack_range`; each ability owns its own `attack_range`. `ItemLibrary`
+resolves ids, session inventory is `{item_id: qty}`, and
 `SceneManager.add_item()/remove_item()` are the only write paths.
-`AbilityData`/`MapMeta`/`EncounterData`/`SaveData` are still open (T-035/
-T-044/T-037). `EnemyStats.loot_table` deliberately stays a
-`PackedStringArray` of item ids resolved through the library - the T-043
-deviation.
+`EncounterData.enemy_group` is already consumed by combat; T-066 still needs
+to carry the EncounterData reference from LDtk overworld enemy instances and
+route real victory XP/loot through it. `SaveData` remains open as parked Phase
+3 work. `EnemyStats.loot_table` deliberately remains a `PackedStringArray` of
+item ids resolved through the library (T-043).
 
 ## Party And Combat Model
 
@@ -556,9 +544,15 @@ Rules:
   and turn-based, with a party of up to four units the player selects and moves
   within a highlighted move range. Resolved with a **d10 percentage system** -
   roll 1-10 against a stat-derived success threshold, so success chances map
-  directly to clean percentages (e.g. a threshold of 7 reads as a 70% chance). Exact threshold/damage formula is TBD at the Phase 3/4
-  combat-math implementation (red/green/refactor per `AGENTS.md` ->
-  Verification And Proof), not decided here. Two-layer FSM - Battle FSM
+  directly to clean percentages (e.g. a threshold of 7 reads as a 70% chance).
+  **T-060 formula:** hit tier = `clamp(5 + attack - defense - defend_bonus,
+  1, 9)`, where defending subtracts 2; roll-high succeeds on
+  `d10 >= 11 - tier`. Hit damage is
+  `max(1, attack + ability_power - floor(defense / 2))`, then defending halves
+  it again with a minimum of 1. Support healing is flat ability/item power,
+  minimum 1. These numbers are first-cut T-069 tunables; the clamped 10%-90%
+  band, roll-high shape, and minimum-1 damage are the tested contract.
+  Two-layer FSM - Battle FSM
   (`Initialize -> CalculateInitiative -> UnitTurn (loop) -> EncounterEnd`) and
   per-Entity FSM (`AwaitingTurn -> CheckRange (move + attack range) -> Moving
   -> SelectingAction -> ExecutingCommand -> TakingDamage/Healing -> back or
@@ -702,7 +696,7 @@ Rules:
 | GBA-fantasy-adventure visual language: bright, readable, toy-like overworlds with chunky silhouettes, dense environmental texture, clean top-down camera; tiles built from 8x8/16x16 units | Kayden's explicit visual-reference table (GBA-era fantasy-adventure art direction as the touchstone, not any one licensed title); narrows rather than contradicts the flexible-HD/ultrawide rendering decision above - the canvas renders natively at 1280x720+, the art itself is built from small GBA-style tile units | 2026-07-05 / this session, see Visual Language section |
 | General moment-to-moment loop confirmed as explore -> interact with an object/NPC/enemy -> take an action -> see the consequence -> continue exploring | Kayden's explicit framing for what "first playable" should feel like at every scale; confirms rather than changes the existing concrete first-playable scenario (row above) | 2026-07-05 / this session |
 | Combat is grid-based (units occupy cells, check move/attack range, can move each turn); turn order is strict per-character initiative (speed), never a whole-team phase | Kayden's explicit combat-loop framing: check ranges -> move -> attack phase -> results, repeated per unit in initiative order, not team-by-team; the `TurnManager` design already sorted all combatants together by speed - only the Battle FSM's stale `PlayerPhase`/`EnemyPhase` state names implied team-phasing, and those are retired | 2026-07-05 / this session |
-| Combat resolution uses a d10 percentage system (roll 1-10 against a stat-derived success threshold) instead of flat deterministic damage-only math | Kayden's explicit request for a system where success chances read as clean percentages; exact threshold/damage formula is a Phase 3/4 combat-math implementation decision (red/green/refactor per `AGENTS.md`), not decided here | 2026-07-05 / this session |
+| Combat resolution uses a d10 percentage system (roll 1-10 against a stat-derived success threshold) instead of flat deterministic damage-only math | Kayden's explicit request for a system where success chances read as clean percentages. T-060 resolved the concrete first-cut formula under red/green; see Core Logic above. Numbers remain tunable at T-069 without changing the d10/clamp/minimum-damage contract | 2026-07-05; resolved 2026-07-08 / T-060 |
 | Movement-state roadmap locked: (1) walk/face/act lock-in, (2) door transitions/ledges/stairs, (3) push/pull, (4) dash/roll, (5) swim - rows 1-3 MVP, rows 4-5 Deferred (S-009/S-010) | Kayden's explicit priority table; sequences movement investment by feel-impact and keeps dash/swim from being built early | 2026-07-06 / this session, see Movement-State Roadmap |
 | Grid movement must *feel* continuous (Zelda/Pokemon bar): held steps chain with no hitch, tap turns-in-place before stepping, no "clicking into place" read - the grid-snap invariant itself is unchanged | Kayden: "In zelda and pokemon games I am locked into a grid but it never feels like I am clicking into place" - a feel requirement layered on the locked invariant, not a relitigation of it | 2026-07-06 / this session (T-021) |
 | Jump added to MVP: contextual grid-snapped hop at ledge/pit edges, max exactly 1 cell, Tween-arc implementation (never physics) | Kayden: "not whenever but like when there are ledges and pits I want to be able to jump over them with my party"; the 1-cell limit is load-bearing for Room 2 of the tutorial dungeon (the pit is exactly at the jump limit) | 2026-07-06 / this session |
@@ -724,7 +718,7 @@ Rules:
 | Forest fixes from the same playthrough: every Wall cell now draws its tree tile (colliders were rendering as plain grass - the "random places I run into" bug), stray pit under the spawn cell removed, extra tree clusters added in the open stretch between spawn and the dungeon entry | Kayden: "I would like for there to be more things out in the open between me and the entry like there was. Maybe not a maze, but at least trees or something" | 2026-07-07 / playtest-feedback rework |
 | **Phase 3 round (D-006..D-011, all resolved)**: (a) saves are **JSON** at `user://saves/slot_N.json` - Kayden delegated the pick; agent chose JSON per the retired Gameplan's own MVP JSON recommendation plus the `.tres`-from-`user://` script-execution risk; (b) **the shield unlocks Defend** - the command is absent from the combat menu until the shield is in inventory (D-001's answer); (c) **checkpoint respawns + XP-as-punishment** - keep inventory, lose XP never-below-level, dungeon-entrance/healer respawn, and walking into pits = Zelda fall back to the room's last-used entrance (supersedes pits-impassable); (d) **enemies respawn every time a room is left-and-rebuilt**, uniques included - the puzzle escape valve applies to enemies too (supersedes the Lufia-II stay-dead pattern; `defeated_enemy_ids` dropped from SaveData); (e) EncounterData/MapMeta built now as stubs, wired Phase 4; (f) minimal Continue/New Game boot prompt; dev warps expand to every built room via the map registry | Kayden's 2026-07-07 planning answers, verbatim rationale on the TASKBOARD Pending Decisions table; agent interpretations flagged there (full-HP respawn, suspended-room semantics, fall damage + XP penalty amounts as tunables) | 2026-07-07 / Phase 3 planning round |
 | **Phase 4 (Combat MVP) starts ahead of Phase 3's save/load half**; Phase 3's M3.1 data classes move with it as combat prerequisites, and the M3.2/M3.3 save/load work stays planned and ready, resumed after combat | Kayden accepted Phase 2 in windowed play (2026-07-08) and named combat the priority: "my main complaint right now is combat, which is phase 4. So I think that is a good next place to work." A build-order re-sequencing, not a scope change - the D-006..D-011 save/load resolutions all stand; combat has no dependency on saves, but does need the M3.1 data classes (abilities, items, encounters, XP shape), which is why they ride along | 2026-07-08 / this session |
-| **Phase 4 round (D-012/D-013, resolved 2026-07-08)**: (a) the battle arena is **seeded from the local overworld terrain** around the contact point - the combat grid copies the room's blocked/pit cells in a window where the encounter began, with an open-field fallback if too cramped; (b) Phase 4 ships with a **temporary test companion** in the party so multi-unit selection and interleaved initiative are real before Phase 5 recruitment replaces it | Kayden's picks ("use the local terrain where you were touched", "give me a test companion for now") - the local-terrain read matches the zoom-in framing (the world reads bigger because you fight *in* it); the companion proves the party machinery the whole phase exists to build | 2026-07-08 / this session |
+| **Phase 4 round (D-012/D-013, resolved 2026-07-08; reaffirmed 2026-07-09)**: (a) the battle arena is **seeded from the local overworld terrain** around the contact point - the combat grid copies the room's blocked/pit cells in a window where the encounter began, with an open-field fallback if too cramped; (b) Phase 4 ships with a **temporary test companion** in the party so multi-unit selection and interleaved initiative are real before Phase 5 recruitment replaces it | Kayden's picks ("use the local terrain where you were touched", "give me a test companion for now") - the local-terrain read matches the zoom-in framing (the world reads bigger because you fight *in* it); the companion proves the party machinery the whole phase exists to build | 2026-07-08; reaffirmed 2026-07-09 / Kayden |
 | **Combat is a tactics-RPG, not a JRPG**: BG3's turn-based mode is the functional model (select a unit, move it within a highlighted range on a zoomed-in grid, act via abilities, strict per-unit initiative); Fire Emblem is the *visual* reference only (range highlighting, a dedicated battle mode). Active party size is **four**. The "quick decisions matter more than tactical depth" pillar is retired - the game leans into strategic, tactical combat | Kayden clarified the founding combat vision: "top down tactical BG3 style... control my party of 4 people around this new mini map." Fire Emblem was his closest GBA touchstone for the *look* (range highlights, separate mode), not the mechanics; the engine isn't as limited as first assumed, so depth is now in-scope. Reframes the JRPG/menu language and the earlier readable-over-deep pillar; the locked grid/d10/per-unit-initiative decisions are unchanged | 2026-07-08 / this session |
 
 ## Health Criteria
