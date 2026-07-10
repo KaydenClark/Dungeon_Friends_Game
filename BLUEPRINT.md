@@ -10,6 +10,7 @@
 This is the stable reference for what the project is. This file is the
 canonical design doc and the summary a future agent should read first; the
 toolchain research behind its decisions is in [`docs/research/audited_research.md`](docs/research/audited_research.md).
+Ongoing world/story details live in [`docs/WORLD_LORE.md`](docs/WORLD_LORE.md).
 (The former `docs/planning/Gameplan.md` was retired 2026-07-08 - its content is
 absorbed here, in `RUNBOOK.md`, and in `TASKBOARD.md`.)
 
@@ -27,8 +28,9 @@ model), and spending ability-driven turns in strict initiative order. This is
 **not a JRPG**: positioning, range, and ability choice carry real weight; the
 party is not a menu-driven line-up. The player explores a hand-authored world -
 beginning in a fantasy forest with a Kokiri-Forest-from-Ocarina-of-Time mood,
-later opening into a castle city, mountains, rivers, and surrounding wilderness -
-while recruiting the party members who fight alongside them.
+then opening through a River Valley, a Mountain region, a City region, and a
+final Dragon Lair arc - while recruiting the party members who fight alongside
+them.
 
 Visually it's retro-pixel-art *inspired*, not any specific handheld-accurate:
 a flexible HD/ultrawide base resolution (1280x720 design reference, scaling
@@ -53,7 +55,7 @@ Core promise:
 > standing, early-Final-Fantasy style, so the world reads as bigger than its
 > actual grid), command your party of Dungeon Friends on the zoomed-in grid,
 > solve a block/switch/key puzzle, and grow that party across a forest, a
-> castle city, and a mountain/river region.
+> river valley, a mountain region, a city, and the final dragon arc.
 
 Primary users:
 
@@ -258,10 +260,11 @@ live milestone tracking is in `TASKBOARD.md`):
 7. **Phase 6 - First Playable Slice** - one full forest dungeon (3-5 rooms,
    puzzles, encounters, boss) proving the whole loop end to end. This is the
    MVP finish line.
-8. **World expansion (post-MVP, content work, no new architecture)** - castle
-   city, then mountains, then rivers, and the surrounding wilderness, each
-   authored as new `world.ldtk` regions using the systems already built for the
-   forest.
+8. **World expansion (post-MVP, content work, no new architecture)** - starting
+   from the forest MVP, expand through the River Valley, Mountain, City, and
+   final Dragon Lair story spine in `docs/WORLD_LORE.md`; each region stays a
+   dense village/dungeon loop authored as new `world.ldtk` content using the
+   systems already built for the forest.
 9. **Stretch goals (sequenced)** - see `TASKBOARD.md` Deferred lane: equipment/
    weapon variety and elemental/magic system are the two highest-priority
    stretch items given the emphasis on magic and weapon variety in this
@@ -710,7 +713,8 @@ Rules:
 | Furnace Tracker for audio *sound*, not a literal hardware-channel-emulation engine | Authenticity of sound, not of engine architecture - the hardware-emulation idea was dropped entirely, not deferred | 2026-06-11 / audited_research.md section 8 decision #4 |
 | `game/` subfolder holds the entire Godot project; docs/config live at repo root | Keeps `.godot/` cache and Godot-specific concerns cleanly separated from `docs/`/agent config | repo-structure decision (audit) |
 | Combat framed as a camera zoom into the encounter point, not a hard scene cut | Founding vision calls for an early-Final-Fantasy-style transition so the overworld reads as bigger than its grid; layers onto the existing SceneManager context-passing pattern rather than replacing it | 2026-07-05 / this session's founding prompt |
-| World authored in this order: forest (Kokiri-Forest mood) -> castle city -> mountains -> rivers -> surrounding wilderness | Founding vision's explicit world-progression arc; ties a creative goal to the concrete post-MVP content milestones | 2026-07-05 / this session's founding prompt |
+| ~~World authored in this order: forest (Kokiri-Forest mood) -> castle city -> mountains -> rivers -> surrounding wilderness~~ - **superseded 2026-07-09, see the world/story spine row below** | Founding vision's explicit world-progression arc; tied a creative goal to the concrete post-MVP content milestones | 2026-07-05 / this session's founding prompt |
+| World/story spine: Forest Village -> Forest Dungeon -> River Valley village/dungeon -> Mountain village/dungeon -> City region -> final Dragon Lair; the party gathers four working-name legendary items (Sword of Slaying, Shield of Protecting, Ring of Magic, Circlet of Strength) before fighting the dragon | Kayden's story pass clarified the regional loop: each main region has a village hub, a local problem, a dungeon, and a legendary item or clue that points to the next region. The four-item count matches the four-hero/player party shape. Details and open lore questions live in `docs/WORLD_LORE.md` | 2026-07-09 / Kayden story pass |
 | Equipment (weapon variety) and elemental/magic systems are the highest-priority Stretch Goals after MVP | Founding vision emphasizes magic and weapon variety; the plan already licensed building these "once the base loop is fun" - this reprioritizes within the existing Stretch sequencing rather than reopening MVP scope | 2026-07-05 / this session's founding prompt (Stretch sequencing; see `TASKBOARD.md` Deferred) |
 ~~No separate integration branch; branch-per-milestone -> PR directly into `main`~~ - **superseded 2026-07-05 (second session), see the `integration` staging-branch row below** | Solo hobby project - matches how Kayden's other personal-scale projects (e.g. DigitalTome) actually run day to day; the workbench's own 3-tier convention is calibrated for the shared harness repo, not every downstream product | 2026-07-05 / this Adoption run |
 | `integration` branch as staging before `main` - work accumulates on `integration`; Kayden explicitly syncs `integration` -> `main` when ready, rather than every task PRing straight to `main` | Kayden's call once the first-playable slice was working and felt worth protecting - gives a reviewable, shippable line separate from in-progress work, at the cost of one extra branch for a solo project | 2026-07-05 (second session) / this session |
