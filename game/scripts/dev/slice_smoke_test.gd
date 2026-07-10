@@ -235,6 +235,16 @@ func _run() -> void:
 	check(pit_block.movable and pit_block.cell == Vector2i(3, 5),
 			"block waits on the chasm's near bank")
 	check(await _go_grid(pit, pit_player, Vector2i(5, 10)), "walked to the first ledge")
+
+	# 11b. Pit fall (T-047): stepping into the ledge pit is a fall, not a
+	# refusal - 1 HP and a walk of shame back to the room's entrance.
+	var hp_before_fall: int = SceneManager.hero_hp
+	check(await _step(pit_player, Vector2i.UP), "stepped into the ledge pit")
+	check(pit_player.cell == Vector2i(5, 11),
+			"fall respawned at the pit-room entrance")
+	check(SceneManager.hero_hp == hp_before_fall - 1, "the fall cost 1 HP")
+	check(await _go_grid(pit, pit_player, Vector2i(5, 10)),
+			"walked back to the first ledge")
 	pit_player.set_facing(Vector2i.UP)
 	check(pit_player.try_jump(), "jumped the first 1-wide ledge")
 	await _until(func() -> bool: return not pit_player.moving)

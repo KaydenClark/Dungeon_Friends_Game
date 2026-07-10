@@ -19,6 +19,11 @@ var occupants := {}  # Vector2i -> Node2D (player, enemies, NPCs, doors, blocks)
 var no_block_cells := {}
 var enemies: Array = []
 var astar := AStarGrid2D.new()
+## The last entrance the player came through into this room (T-047): the
+## spawn cell on build, re-stamped by SceneManager when the room is restored
+## off the stack. Pit falls respawn the player here - "you just walk back
+## through the last entrance you came through" (Kayden, D-008 part 4).
+var entry_cell := Vector2i.ZERO
 
 signal player_moved
 ## Emitted whenever a cell gains or loses an occupant (register, unregister,

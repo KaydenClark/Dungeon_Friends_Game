@@ -198,6 +198,11 @@ func exit_rooms(count: int) -> void:
 		prev_player.camera.make_current()
 	if current_room.has_method("on_room_restored"):
 		current_room.on_room_restored()
+	# The player re-entered this room through wherever they now stand (the
+	# doorway they left from, or wherever on_room_restored moved them) - that
+	# is the new "last entrance" a pit fall walks back to (T-047).
+	if current_room is RoomGrid and prev_player is Player:
+		current_room.entry_cell = prev_player.cell
 	await _fade_to(0.0)
 	transitioning = false
 

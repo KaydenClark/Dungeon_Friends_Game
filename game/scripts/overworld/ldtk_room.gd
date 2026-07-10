@@ -211,6 +211,7 @@ func _adopt_entities(level: Node) -> void:
 func _spawn_player() -> void:
 	if spawn_override != Vector2i(-1, -1):
 		spawn_cell = spawn_override
+	entry_cell = spawn_cell   # where a pit fall walks you back to (T-047)
 	player = Player.new()
 	register(player, spawn_cell)
 	player.camera.limit_left = 0

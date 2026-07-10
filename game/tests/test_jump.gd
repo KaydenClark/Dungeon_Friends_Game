@@ -71,11 +71,12 @@ func test_jump_onto_occupant_is_refused() -> void:
 
 
 func test_unfilled_pit_blocks_walking_and_pathing() -> void:
+	# T-047 supersedes the old "stepping into a pit is refused" player rule -
+	# the player now FALLS (see test_pit_fall.gd); walkability and pathing
+	# still treat pits as solid.
 	var g := _make_grid()
 	g.set_pit(Vector2i(3, 2), true)
 	not_ok(g.is_walkable(Vector2i(3, 2)), "pit cell is not walkable")
-	var p := _player(g, Vector2i(2, 2))
-	not_ok(p.try_step(Vector2i.RIGHT), "stepping into a pit is refused")
 	# Pathing must route around the pit column, never through it.
 	for y in g.height:
 		g.set_pit(Vector2i(3, y), true)

@@ -31,6 +31,7 @@ const SUITES := [
 	"res://tests/test_pushable_block.gd",
 	"res://tests/test_pressure_plate.gd",
 	"res://tests/test_jump.gd",
+	"res://tests/test_pit_fall.gd",
 	"res://tests/test_chest.gd",
 	"res://tests/test_ldtk_pipeline.gd",
 	"res://tests/test_tutorial_softlock.gd",
