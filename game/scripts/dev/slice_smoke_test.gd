@@ -96,11 +96,18 @@ func _run() -> void:
 	await _pump_dialogue()
 	check(not SceneManager.ui_busy, "NPC dialogue closed after advancing")
 
-	# 5. Regular slime fight: hunt the nearest non-boss enemy; victory must
-	# grant XP but no key.
+	# 5. Phase 4 integration: a real LDtk EncounterId resolves to its authored
+	# two-enemy group, then returns its summed rewards to the exact overworld.
+	var encounter_enemy := _nearest_regular(player)
+	check(encounter_enemy != null and encounter_enemy.encounter != null,
+			"regular forest enemy carries EncounterData from LDtk")
+	check(encounter_enemy != null and encounter_enemy.encounter.enemy_group.size() == 2,
+			"EncounterData builds the authored two-enemy party")
+	var xp_before := SceneManager.total_xp
 	var beaten: int = await _hunt_regular(player)
 	check(beaten > 0, "regular slime fight ended in victory")
-	check(SceneManager.total_xp > 0, "XP gained: %d" % SceneManager.total_xp)
+	check(SceneManager.total_xp == xp_before + 10,
+			"EncounterData group granted 10 XP (got %d)" % SceneManager.total_xp)
 	check(not SceneManager.inventory.has("forest_key"),
 			"no key from a regular slime")
 	check(SceneManager.hero_hp > 0, "hero HP carried back: %d" % SceneManager.hero_hp)
@@ -300,12 +307,14 @@ func _run() -> void:
 	check(door.opened, "door still open after the round trip")
 
 	# 14. Party defeat (T-029, D-004): restart from the beginning of the game.
-	var old_room: Node2D = SceneManager.current_room
+	# Capture the old room's id, not the node - restart_game() frees it, and a
+	# freed node in a lambda capture trips "Lambda capture ... was freed".
+	var old_room_id: int = SceneManager.current_room.get_instance_id()
 	SceneManager.handle_defeat()
 	await _pump_dialogue()
 	check(await _until(func() -> bool:
-			return SceneManager.current_room != old_room \
-			and SceneManager.current_room is ForestRoom),
+			return SceneManager.current_room is ForestRoom \
+			and SceneManager.current_room.get_instance_id() != old_room_id),
 			"defeat rebooted a fresh forest")
 	check(SceneManager.total_xp == 0, "XP reset to zero")
 	check(SceneManager.inventory.size() == 0, "inventory wiped")

@@ -85,9 +85,12 @@ nearest filter, unrestricted palette; `TileMapLayer`
 only, never the deprecated `TileMap` node; grid-snapped `Tween` movement only
 (never velocity-based free movement); `AStarGrid2D` pathfinding (no diagonals);
 all game data as `Resource` (`.tres`) subclasses; single Autoload
-(`SceneManager`); two-layer combat FSM + `TurnManager`; enemies visible on the
-map, no random encounters; levels authored in one LDtk project; Furnace Tracker
-audio with no literal hardware-channel-emulation engine.
+(`SceneManager`); two-layer combat FSM + `TurnManager`; Phase 4 battles seed
+their arena from the local terrain at the contact point (D-012) and use a
+temporary test companion until Phase 5 supplies the first real recruit
+(D-013); enemies visible on the map, no random encounters; levels authored in
+one LDtk project; Furnace Tracker audio with no literal
+hardware-channel-emulation engine.
 
 ## Work Selection
 
@@ -132,22 +135,25 @@ response and in the relevant `TASKBOARD.md` proof row, with a short reason.
 
 ## Verification And Proof
 
-There is no automated GDScript test framework yet (a Stretch-adjacent decision,
-not yet made - see `RUNBOOK.md` -> Test Coverage Policy). Until one exists,
-verification is:
+The repository has a first-party headless GDScript unit harness under
+`game/tests/`; adopting a third-party framework remains undecided. Verification
+uses the layers defined in `RUNBOOK.md` -> Test Coverage Policy:
 
 1. Headless Godot checks - `--import` (resources/project valid) and
    `--quit-after 1` on the relevant scene (scene graph + autoloads run without
    error). Exact commands in `RUNBOOK.md` -> Test And Build.
-2. A concrete manual check of the actual feature - open the project in the
+2. Relevant first-party unit suites, especially for pure/deterministic logic.
+3. The end-to-end slice smoke test for gameplay, LDtk, transition, reward, or
+   room-flow changes.
+4. A concrete manual check of the actual feature - open the project in the
    Godot editor (or use the preview tools if available) and exercise the
    change directly. Screenshot or describe what you saw; do not claim a visual
    or gameplay result you did not observe.
 
-Once Phase 3 (Data Model) introduces pure-logic code (Resource classes, combat
-damage math, XP curves), use red/green/refactor for that code specifically:
-define expected behavior, add a failing check, confirm it fails for the
-expected reason, implement the smallest fix, re-run.
+For pure-logic code (Resource classes, combat damage math, XP curves, range
+calculation, turn order), use red/green/refactor: define expected behavior, add
+a failing check, confirm it fails for the expected reason, implement the
+smallest fix, and re-run.
 
 Every completed task leaves proof in two places:
 

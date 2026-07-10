@@ -19,7 +19,7 @@ func test_panel_hidden_by_default() -> void:
 
 func test_grant_item_deduplicates() -> void:
 	var saved := SceneManager.inventory
-	SceneManager.inventory = PackedStringArray()
+	SceneManager.inventory = {}
 	var o := _overlay()
 	o.grant_item("chest_key")
 	o.grant_item("chest_key")
@@ -28,6 +28,18 @@ func test_grant_item_deduplicates() -> void:
 		if item == "chest_key":
 			count += 1
 	eq(count, 1, "granting twice keeps a single copy")
+	SceneManager.inventory = saved
+	o.queue_free()
+
+
+func test_grant_potions_stacks_quantity() -> void:
+	var saved := SceneManager.inventory
+	SceneManager.inventory = {}
+	var o := _overlay()
+	o.grant_item("potion", 3)
+	o.grant_item("potion", 3)
+	eq(int(SceneManager.inventory.get("potion", 0)), 6,
+			"consumable grants stack instead of deduplicating")
 	SceneManager.inventory = saved
 	o.queue_free()
 

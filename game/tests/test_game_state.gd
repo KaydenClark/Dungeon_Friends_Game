@@ -9,8 +9,10 @@ extends "res://tests/gd_test.gd"
 
 func test_fresh_state_defaults_are_party_shaped() -> void:
 	var s := GameState.new()
-	eq(s.party_roster, ["hero"], "roster starts as the lone hero")
+	eq(s.party_roster, ["hero", "companion_test"],
+			"roster starts as hero + the D-013 test companion")
 	eq(s.party_levels.get("hero"), 1, "hero starts at level 1")
+	eq(s.party_levels.get("companion_test"), 1, "companion starts at level 1")
 	eq(s.party_xp.get("hero"), 0, "hero starts with 0 XP")
 	eq(s.inventory.size(), 0, "inventory starts empty")
 	eq(s.flags.size(), 0, "flags start empty")
@@ -23,7 +25,7 @@ func test_two_states_never_share_containers() -> void:
 	var b := GameState.new()
 	a.party_xp["hero"] = 99
 	a.flags["door_x_opened"] = true
-	a.inventory.append("shield")
+	a.inventory["shield"] = 1
 	eq(b.party_xp.get("hero"), 0, "xp dictionaries are per-instance")
 	not_ok(b.flags.has("door_x_opened"), "flags dictionaries are per-instance")
 	eq(b.inventory.size(), 0, "inventories are per-instance")

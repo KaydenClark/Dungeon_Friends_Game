@@ -11,7 +11,7 @@
 ## Entity-layer conventions (the contract level authors follow):
 ##   PlayerSpawn                  -> Marker2D (cell only)
 ##   Npc        {Lines: Array<String>, Heals: Bool, ColorHex: String}
-##   Enemy      {StatsId: String, IsBoss: Bool, LeashRadius: Int, UniqueId: String}
+##   Enemy      {StatsId: String, EncounterId: String, IsBoss: Bool, LeashRadius: Int, UniqueId: String}
 ##   LockedDoor {KeyId: String, LinkId: String}
 ##   PushableBlock {LinkId: String, Movable: Bool (default true; false = fixed brick)}
 ##   PressurePlate {Id: String, TargetId: String}
@@ -66,6 +66,9 @@ func _spawn(entity: Dictionary) -> Node2D:
 			var enemy: Node2D = EnemyScript.new()
 			enemy.stats = load("res://data/enemies/%s.tres" % str(
 					fields.get("StatsId", "forest_slime")))
+			var encounter_id := str(fields.get("EncounterId", ""))
+			if encounter_id != "":
+				enemy.encounter = load("res://data/encounters/%s.tres" % encounter_id)
 			enemy.is_boss = bool(fields.get("IsBoss", false))
 			enemy.leash_radius = int(fields.get("LeashRadius", -1))
 			enemy.unique_id = str(fields.get("UniqueId", ""))

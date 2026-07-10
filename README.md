@@ -16,11 +16,17 @@ its highlighted range, act), and recruitable "Dungeon Friends" party
 members. The world starts in a fantasy forest and later expands into a castle
 city, mountains, and rivers. Current state: a playable slice on placeholder
 art - walk an LDtk-authored forest, talk to NPCs, bump a visible enemy into a
-turn-based d10 battle, win the boss's key, and enter the Phase 2 four-room
+tactical d10 battle on terrain copied from the contact area, control Hero plus
+a temporary test companion with interleaved initiative and highlighted
+movement/attack ranges, win the boss's key, and enter the Phase 2 four-room
 tutorial dungeon: find the one loose brick in the wall, jump the ledges and
 fill the chasm with a block (Alt/C jumps), beat the key guardian, loop back,
 and unlock the side room holding the shield chest. Party defeat restarts from
-the beginning. Real art and the full combat system are next.
+the beginning. Phase 4 is built through its automated acceptance battery:
+regular forest encounters use LDtk-authored two-enemy parties, contact zooms
+into combat and back, and a readable turn-order/party-status HUD gives live
+feedback. Kayden's windowed balance/feel acceptance remains the final Phase 4
+gate. Real art remains a separate phase-timed pass.
 
 ## Screenshots
 

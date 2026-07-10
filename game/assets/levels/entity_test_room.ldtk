@@ -695,6 +695,14 @@
          "realEditorValues": []
         },
         {
+         "__identifier": "EncounterId",
+         "__type": "String",
+         "__value": "forest_pair",
+         "__tile": null,
+         "defUid": null,
+         "realEditorValues": []
+        },
+        {
          "__identifier": "LeashRadius",
          "__type": "Int",
          "__value": 1,

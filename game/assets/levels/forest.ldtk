@@ -657,6 +657,14 @@
          "defUid": null,
          "realEditorValues": []
         }
+        ,{
+         "__identifier": "EncounterId",
+         "__type": "String",
+         "__value": "forest_pair",
+         "__tile": null,
+         "defUid": null,
+         "realEditorValues": []
+        }
        ]
       },
       {
@@ -850,6 +858,14 @@
          "defUid": null,
          "realEditorValues": []
         }
+        ,{
+         "__identifier": "EncounterId",
+         "__type": "String",
+         "__value": "forest_pair",
+         "__tile": null,
+         "defUid": null,
+         "realEditorValues": []
+        }
        ]
       },
       {
@@ -880,6 +896,14 @@
          "__identifier": "StatsId",
          "__type": "String",
          "__value": "forest_slime",
+         "__tile": null,
+         "defUid": null,
+         "realEditorValues": []
+        }
+        ,{
+         "__identifier": "EncounterId",
+         "__type": "String",
+         "__value": "forest_pair",
          "__tile": null,
          "defUid": null,
          "realEditorValues": []
@@ -918,6 +942,14 @@
          "defUid": null,
          "realEditorValues": []
         }
+        ,{
+         "__identifier": "EncounterId",
+         "__type": "String",
+         "__value": "forest_pair",
+         "__tile": null,
+         "defUid": null,
+         "realEditorValues": []
+        }
        ]
       },
       {
@@ -948,6 +980,14 @@
          "__identifier": "StatsId",
          "__type": "String",
          "__value": "forest_slime",
+         "__tile": null,
+         "defUid": null,
+         "realEditorValues": []
+        }
+        ,{
+         "__identifier": "EncounterId",
+         "__type": "String",
+         "__value": "forest_pair",
          "__tile": null,
          "defUid": null,
          "realEditorValues": []
@@ -1040,6 +1080,14 @@
          "defUid": null,
          "realEditorValues": []
         }
+        ,{
+         "__identifier": "EncounterId",
+         "__type": "String",
+         "__value": "forest_pair",
+         "__tile": null,
+         "defUid": null,
+         "realEditorValues": []
+        }
        ]
       },
       {
@@ -1070,6 +1118,14 @@
          "__identifier": "StatsId",
          "__type": "String",
          "__value": "forest_slime",
+         "__tile": null,
+         "defUid": null,
+         "realEditorValues": []
+        }
+        ,{
+         "__identifier": "EncounterId",
+         "__type": "String",
+         "__value": "forest_pair",
          "__tile": null,
          "defUid": null,
          "realEditorValues": []

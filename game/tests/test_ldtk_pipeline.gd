@@ -36,6 +36,9 @@ func test_entities_adopted_at_cells() -> void:
 	var enemy: OverworldEnemy = room.enemies[0]
 	eq(enemy.cell, Vector2i(9, 5), "enemy at its LDtk cell")
 	eq(enemy.stats.id, "forest_slime", "enemy stats loaded from StatsId")
+	not_null(enemy.encounter, "enemy encounter loaded from LDtk EncounterId")
+	if enemy.encounter != null:
+		eq(enemy.encounter.id, "forest_pair", "EncounterId selects the authored group")
 	eq(enemy.leash_radius, 1, "leash radius carried")
 	eq(enemy.target_player, room.player, "enemy wired to the player")
 	eq(room.doors.size(), 1, "door adopted")

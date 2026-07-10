@@ -65,7 +65,7 @@ func interact() -> void:
 	if required_key != "" and SceneManager.inventory.has(required_key):
 		open_permanently()
 		SceneManager.show_dialogue([
-			"You use the %s." % required_key.capitalize(),
+			"You use the %s." % ItemLibrary.display_name(required_key),
 			"The old door creaks open!",
 		])
 	elif not locked_lines.is_empty():

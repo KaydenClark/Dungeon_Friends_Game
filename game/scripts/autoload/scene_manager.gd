@@ -40,10 +40,10 @@ var hero_hp: int:
 var total_xp: int:
 	get: return state.party_xp.get("hero", 0)
 	set(v): state.party_xp["hero"] = v
-## NOTE: reads return a copy-on-write PackedStringArray - never call
-## .append() on it from outside; use add_item() (the write would land on the
-## copy and vanish). Assignment and .has() are safe.
-var inventory: PackedStringArray:
+## {item_id: qty} (T-034). Write through add_item()/remove_item(), never
+## directly - they own the stack-vs-dedup rules. Reads (.has(), .size(),
+## iteration over ids) are safe.
+var inventory: Dictionary:
 	get: return state.inventory
 	set(v): state.inventory = v
 var flags: Dictionary:
@@ -56,6 +56,8 @@ var ui_busy := false
 var last_ui_close_ms := 0
 var in_encounter := false
 var current_dialogue: DialogueBox
+var _combat_camera: Camera2D
+var _combat_camera_zoom := Vector2.ONE
 
 ## Room transitions (T-022). The active room plus a stack of suspended ones:
 ## entering a sub-room (the dungeon behind the boss door) hides and disables
@@ -175,29 +177,37 @@ func start_encounter(enemy: OverworldEnemy) -> void:
 		return
 	if skip_combat:
 		# Dev-tools shortcut (T-030): instant victory, no combat scene.
-		var skip_msg := apply_victory_rewards(enemy.stats)
+		var skip_msg := _apply_enemy_rewards(enemy)
 		enemy.defeated()
 		encounter_finished.emit(true)
 		await show_dialogue(["(Dev: combat skipped.)", skip_msg])
 		return
 	in_encounter = true
+	await _zoom_into_encounter()
 	await _fade_to(1.0)
 	world_container.visible = false
 	world_container.process_mode = Node.PROCESS_MODE_DISABLED
 	var combat := CombatScene.new()
-	combat.setup(hero_stats, hero_hp, enemy.stats, rng, auto_combat)
+	combat.setup(_build_party_units(), _build_enemy_units(enemy),
+			_arena_from_room(enemy.cell), rng, auto_combat,
+			inventory.has("shield"))
 	combat_container.add_child(combat)
 	await _fade_to(0.0)
 	var result: Array = await combat.finished
 	var victory: bool = result[0]
-	hero_hp = result[1]
+	var payload: Dictionary = result[1]
+	for id in payload.get("party_hp", {}):
+		state.party_hp[id] = payload["party_hp"][id]
+	for id in payload.get("party_mp", {}):
+		state.party_mp[id] = payload["party_mp"][id]
 	await _fade_to(1.0)
 	combat.queue_free()
 	world_container.visible = true
 	world_container.process_mode = Node.PROCESS_MODE_INHERIT
+	await _zoom_out_of_encounter()
 	await _fade_to(0.0)
 	if victory:
-		var msg := apply_victory_rewards(enemy.stats)
+		var msg := _apply_enemy_rewards(enemy)
 		enemy.defeated()
 		in_encounter = false
 		encounter_finished.emit(true)
@@ -213,29 +223,174 @@ func start_encounter(enemy: OverworldEnemy) -> void:
 ## from start_encounter so the reward rules can be unit tested without running
 ## a whole battle (see /RUNBOOK.md -> Unit tests).
 func apply_victory_rewards(enemy_stats: EnemyStats) -> String:
-	total_xp += enemy_stats.xp_reward
-	var drops: PackedStringArray = enemy_stats.loot_table
-	for item in drops:
-		add_item(item)
-	var msg := "Victory! Gained %d XP." % enemy_stats.xp_reward
+	var group: Array[EnemyStats] = [enemy_stats]
+	return _apply_rewards(group)
+
+
+## Reward an authored encounter as one victory. Every enemy in the group
+## contributes XP and its string-id loot; add_item() keeps key/gear dedup.
+func apply_encounter_rewards(encounter: EncounterData) -> String:
+	return _apply_rewards(encounter.enemy_group if encounter != null else [])
+
+
+func _apply_enemy_rewards(enemy: OverworldEnemy) -> String:
+	if enemy.encounter != null and not enemy.encounter.enemy_group.is_empty():
+		return apply_encounter_rewards(enemy.encounter)
+	return apply_victory_rewards(enemy.stats)
+
+
+func _apply_rewards(enemy_group: Array[EnemyStats]) -> String:
+	var xp := 0
+	var drops := PackedStringArray()
+	for enemy_stats in enemy_group:
+		if enemy_stats == null:
+			continue
+		xp += enemy_stats.xp_reward
+		for item in enemy_stats.loot_table:
+			drops.append(item)
+			add_item(item)
+	total_xp += xp
+	var msg := "Victory! Gained %d XP." % xp
 	if drops.size() > 0:
-		msg += " The %s dropped: %s!" % [enemy_stats.display_name, ", ".join(drops)]
+		var names := PackedStringArray()
+		for item in drops:
+			names.append(ItemLibrary.display_name(item))
+		msg += " The enemies dropped: %s!" % ", ".join(names)
 	return msg
 
 
-## Add an item id to the inventory once - every current item is a unique
-## key or gear piece (stacking arrives with ItemData at T-034). The single
-## write path for inventory from outside this autoload.
-func add_item(item: String) -> void:
-	if not state.inventory.has(item):
-		state.inventory.append(item)
+## Add an item to the {id: qty} inventory (T-034). Key items and equipment
+## never stack - a second copy is ignored (the loot-dedup rule); consumables
+## increment by qty. The single write path for inventory from outside this
+## autoload.
+func add_item(item: String, qty: int = 1) -> void:
+	var data := ItemLibrary.get_item(item)
+	if data != null and data.stacks():
+		state.inventory[item] = int(state.inventory.get(item, 0)) + qty
+	elif not state.inventory.has(item):
+		state.inventory[item] = 1
 
 
-## Restore the hero to full HP. Shared by the healer NPC and the post-defeat
-## recovery so both apply the exact same rule.
+## Remove qty of an item (consumable use, T-064). Refuses - and changes
+## nothing - if fewer than qty are held; erases the entry at zero so
+## has()/size() keep their old meanings.
+func remove_item(item: String, qty: int = 1) -> bool:
+	var have := int(state.inventory.get(item, 0))
+	if have < qty:
+		return false
+	if have == qty:
+		state.inventory.erase(item)
+	else:
+		state.inventory[item] = have - qty
+	return true
+
+
+## One-line inventory readout for the HUD and dev overlay: display names
+## from ItemData, "x qty" suffix only when stacked, "-" when empty.
+func inventory_summary() -> String:
+	if state.inventory.is_empty():
+		return "-"
+	var parts := PackedStringArray()
+	for item in state.inventory:
+		var qty := int(state.inventory[item])
+		var display := ItemLibrary.display_name(item)
+		parts.append(display if qty <= 1 else "%s x%d" % [display, qty])
+	return ", ".join(parts)
+
+
+## Cached CharacterStats lookup for every roster member (the hero keeps its
+## dedicated hero_stats var for legacy call sites; this is the general path).
+var _character_stats_cache: Dictionary = {}
+func character_stats_for(id: String) -> CharacterStats:
+	if not _character_stats_cache.has(id):
+		_character_stats_cache[id] = load("res://data/characters/%s.tres" % id)
+	return _character_stats_cache[id]
+
+
+## The player's side of a battle (T-062): one CombatUnit per roster member,
+## with current HP/MP carried in (defaults: full).
+func _build_party_units() -> Array[CombatUnit]:
+	var out: Array[CombatUnit] = []
+	for id in state.party_roster:
+		var stats := character_stats_for(id)
+		if stats == null:
+			push_warning("No CharacterStats for roster id %s" % id)
+			continue
+		var hp: int = state.party_hp.get(id, stats.max_hp)
+		var mp: int = state.party_mp.get(id, stats.max_mp)
+		out.append(CombatUnit.from_character(id, stats, hp, mp))
+	return out
+
+
+## The enemy side (T-062): the touched enemy's EncounterData party when it
+## carries one (T-066 wires the LDtk field), else the single enemy itself.
+func _build_enemy_units(enemy: OverworldEnemy) -> Array[CombatUnit]:
+	var out: Array[CombatUnit] = []
+	if enemy.encounter != null and not enemy.encounter.enemy_group.is_empty():
+		for i in enemy.encounter.enemy_group.size():
+			out.append(CombatUnit.from_enemy(enemy.encounter.enemy_group[i], i))
+	else:
+		out.append(CombatUnit.from_enemy(enemy.stats, 0))
+	return out
+
+
+## D-012 (Kayden: "use the local terrain where you were touched"): seed the
+## combat grid from the current room's cells in a window around the contact
+## point. Blocked terrain and pits both read as obstacles. Falls back to an
+## open field when the local area can't fit both parties.
+const ARENA_W := 9
+const ARENA_H := 5
+func _arena_from_room(contact: Vector2i) -> Dictionary:
+	var open_field := {"w": ARENA_W, "h": ARENA_H, "blocked": []}
+	var room := current_room as RoomGrid
+	if room == null or room.width <= 0:
+		return open_field
+	var w: int = mini(ARENA_W, room.width)
+	var h: int = mini(ARENA_H, room.height)
+	var origin := contact - Vector2i(w / 2, h / 2)
+	origin.x = clampi(origin.x, 0, room.width - w)
+	origin.y = clampi(origin.y, 0, room.height - h)
+	var walkable: Dictionary = {}
+	for y in h:
+		for x in w:
+			var world_cell := origin + Vector2i(x, y)
+			if not (room.blocked.has(world_cell) or room.pits.has(world_cell)):
+				walkable[Vector2i(x, y)] = true
+	# Keep only the connected region around the contact point, so the two
+	# parties can always reach each other (a wall pocket would otherwise
+	# stalemate the battle). Everything else reads as an obstacle.
+	var start := contact - origin
+	if not walkable.has(start):
+		return open_field
+	var component: Dictionary = {start: true}
+	var frontier: Array[Vector2i] = [start]
+	while not frontier.is_empty():
+		var c: Vector2i = frontier.pop_front()
+		for d in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+			var n: Vector2i = c + d
+			if walkable.has(n) and not component.has(n):
+				component[n] = true
+				frontier.append(n)
+	# Both parties (up to 4 + 4) plus room to maneuver, or fight in a field.
+	if component.size() < 12:
+		return open_field
+	var blocked: Array[Vector2i] = []
+	for y in h:
+		for x in w:
+			var c := Vector2i(x, y)
+			if not component.has(c):
+				blocked.append(c)
+	return {"w": w, "h": h, "blocked": blocked}
+
+
+## Restore the whole party to full HP/MP. Shared by the healer NPC and the
+## post-defeat recovery so both apply the exact same rule.
 func heal_hero_to_full() -> void:
-	if hero_stats:
-		hero_hp = hero_stats.max_hp
+	for id in state.party_roster:
+		var stats := character_stats_for(id)
+		if stats:
+			state.party_hp[id] = stats.max_hp
+			state.party_mp[id] = stats.max_mp
 
 
 ## Party defeat (T-029, locked decision D-004): restart from the beginning of
@@ -278,3 +433,28 @@ func _fade_to(alpha: float) -> void:
 	var tw := create_tween()
 	tw.tween_property(fade_rect, "modulate:a", alpha, 0.02 if auto_combat else 0.3)
 	await tw.finished
+
+
+## Phase 4 framing (T-065): push through the overworld contact before the
+## short hand-off fade, then restore the exact same player camera afterwards.
+## The room and player remain suspended, so position is never reconstructed.
+func _zoom_into_encounter() -> void:
+	var player: Variant = current_room.get("player") if current_room else null
+	if not player is Player or player.camera == null:
+		return
+	_combat_camera = player.camera
+	_combat_camera_zoom = _combat_camera.zoom
+	var tw := create_tween()
+	tw.tween_property(_combat_camera, "zoom", _combat_camera_zoom * 2.2,
+				0.04 if auto_combat else 0.28)
+	await tw.finished
+
+
+func _zoom_out_of_encounter() -> void:
+	if _combat_camera == null or not is_instance_valid(_combat_camera):
+		return
+	var tw := create_tween()
+	tw.tween_property(_combat_camera, "zoom", _combat_camera_zoom,
+				0.04 if auto_combat else 0.24)
+	await tw.finished
+	_combat_camera = null

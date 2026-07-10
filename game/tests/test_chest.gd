@@ -9,7 +9,7 @@ extends "res://tests/gd_test.gd"
 
 
 func _reset() -> void:
-	SceneManager.inventory = PackedStringArray()
+	SceneManager.inventory = {}
 	SceneManager.flags = {}
 
 

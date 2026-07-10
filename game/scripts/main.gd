@@ -36,7 +36,6 @@ func _process(_delta: float) -> void:
 	# status, so playtesters can see combat and loot actually change state.
 	if SceneManager.hero_stats == null:
 		return
-	var items := ", ".join(SceneManager.inventory) if SceneManager.inventory.size() > 0 else "-"
 	hud.text = "HP %d/%d    XP %d    Items: %s" % [
 		SceneManager.hero_hp, SceneManager.hero_stats.max_hp,
-		SceneManager.total_xp, items]
+		SceneManager.total_xp, SceneManager.inventory_summary()]

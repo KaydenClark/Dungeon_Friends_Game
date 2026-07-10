@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = "forest_key"
+display_name = "Forest Key"
+description = "A worn bronze key the Boss Slime guarded. Opens the sealed door in the forest."
+item_type = 0

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CharacterStats" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/character_stats.gd" id="1_hero"]
+[ext_resource type="Resource" path="res://data/abilities/strike.tres" id="2_strike"]
+[ext_resource type="Resource" path="res://data/abilities/mend.tres" id="3_mend"]
+
+[resource]
+script = ExtResource("1_hero")
+id = "companion_test"
+display_name = "Buddy (Test)"
+max_hp = 14
+max_mp = 6
+attack = 3
+defense = 1
+speed = 4
+move_range = 3
+attack_range = 1
+starting_abilities = [ExtResource("2_strike"), ExtResource("3_mend")]
