@@ -12,4 +12,4 @@ defense = 1
 speed = 2
 ai_behavior = 1
 xp_reward = 12
-loot_table = PackedStringArray("dungeon_key")
+loot_table = PackedStringArray("dungeon_key", "potion")

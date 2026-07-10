@@ -86,10 +86,11 @@ come from the T-009 input map plus the T-025 jump):
 - Saving and dying (Phase 3, built 2026-07-10): the cyan **save crystal**
   beside the healer's campfire writes slot 1 on interact; booting with a
   save shows a minimal Continue (E/Space) / New Game (X/Esc) prompt
-  (D-011). **Walking into a pit** is a Zelda-style fall: 1 HP and a walk
+  (D-011). **Walking into a pit** is a Zelda-style fall: 10% of max HP and a walk
   back to the room's last-used entrance; jumping is unchanged (T-047).
-  **Party defeat** is a checkpoint, not a restart (T-041): keep inventory,
-  lose XP down to the level floor, full HP; in the dungeon you wake at the
+  **Party defeat** is a checkpoint, not a restart (T-041, tuned per D-014/
+  D-015): keep inventory, lose 25% of your progress toward the next level,
+  come back at 80% HP; in the dungeon you wake at the
   hub entrance (rooms between reset - enemies respawn on every rebuilt
   room per D-009), outside you wake by the healer. Defeat never touches
   save files.
@@ -144,7 +145,7 @@ door locked without its key, two 1-wide ledge jumps, 2-wide chasm crossing
 via block-fill + jump, key-guardian fight -> dungeon_key, west loop back,
 north door unlock, chest room -> shield -> entry unbolts, return to the
 preserved forest, plus the Phase 3 save/load slice: a save-crystal write by
-the campfire, a ledge-pit fall (1 HP + entrance respawn), forced defeats
+the campfire, a ledge-pit fall (10% max HP + entrance respawn), forced defeats
 proving the T-041 checkpoint respawns (dungeon -> fresh hub entrance,
 outside -> the healer), and a final load leg rolling back to the crystal
 save):
@@ -219,7 +220,7 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
-per-suite tally (e.g. `UNIT TESTS: 27 suites, 169 tests, 615 checks, 0
+per-suite tally (e.g. `UNIT TESTS: 27 suites, 169 tests, 619 checks, 0
 failed`). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a
 few seconds (pure logic and controlled clocks, no real-time waits, unlike the
 slice smoke test; the tutorial soft-lock solver adds a second or two). Run
@@ -311,7 +312,7 @@ Automated proof is the unit command above plus the slice smoke test: at the
 T-068 gate that was 22 suites / 140 tests / 490 checks and **111/111 smoke
 checks on 5/5 consecutive runs** (2026-07-09; counts refreshed same day after
 the dev potion grant and the smoke test's freed-lambda-capture fix); the
-Phase 3 save/load lane grew the totals to 27 suites / 169 tests / 615 checks
+Phase 3 save/load lane grew the totals to 27 suites / 169 tests / 619 checks
 and 136/136 smoke on 5/5 runs (2026-07-10) with the combat legs unchanged. `test_combat_scene` covers a seeded
 2v2 battle, D-012 local-terrain connectivity, range refusal, MP/item
 bookkeeping, support actions, shield-gated Defend, and the live turn-order HUD

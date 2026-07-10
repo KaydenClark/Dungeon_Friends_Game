@@ -20,10 +20,12 @@ static func total_xp_for_level(level: int) -> int:
 	return total
 
 
-## Fraction of above-floor progress lost on defeat (T-041/D-008). 1.0 = the
-## whole "progress toward the next level" first cut - TUNABLE, flagged for
-## Kayden's playtest (money loss may join/replace this once currency exists).
-const DEFEAT_XP_LOSS := 1.0
+## Fraction of above-floor progress lost on defeat (T-041/D-008). Kayden's
+## 2026-07-10 tuning: "lose some % of how much you have left to lose so it
+## never feels too harsh" - 25% of above-floor progress, replacing the
+## lose-it-all first cut. Still TUNABLE ("we can make it feel worse if we
+## need to later"; money loss may join/replace this once currency exists).
+const DEFEAT_XP_LOSS := 0.25
 
 
 ## XP after a defeat: lose DEFEAT_XP_LOSS of the progress past the current

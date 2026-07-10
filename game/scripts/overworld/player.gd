@@ -31,10 +31,19 @@ const TURN_DELAY := 0.1
 const JUMP_TIME := 0.22
 const HOP_TIME := 0.14
 ## Pit falls (T-047, D-008 part 4): walking into a pit drops the player,
-## costs FALL_DAMAGE, and respawns them at the room's entry_cell. Both
-## numbers are first-cut tunables.
-const FALL_DAMAGE := 1
+## costs fall_damage(), and respawns them at the room's entry_cell.
+## Kayden's 2026-07-10 tuning: "10% damage and go back to entrance" - the
+## fraction is of the hero's max HP, never less than 1. Still tunable.
+const FALL_DAMAGE_FRACTION := 0.10
 const FALL_TIME := 0.3
+
+
+## 10% of the hero's max HP, floored at 1 (so a tiny early max HP still
+## stings a little).
+func fall_damage() -> int:
+	if SceneManager.hero_stats == null:
+		return 1
+	return maxi(1, int(round(SceneManager.hero_stats.max_hp * FALL_DAMAGE_FRACTION)))
 
 const DIR_ACTIONS := {
 	"move_up": Vector2i.UP,
@@ -242,7 +251,7 @@ func _fall_into_pit(pit: Vector2i) -> void:
 	tw.tween_property(self, "scale", Vector2(0.1, 0.1), FALL_TIME) \
 			.set_delay(FALL_TIME * 0.25)
 	await tw.finished
-	SceneManager.hero_hp = maxi(SceneManager.hero_hp - FALL_DAMAGE, 0)
+	SceneManager.hero_hp = maxi(SceneManager.hero_hp - fall_damage(), 0)
 	var fatal: bool = SceneManager.hero_hp <= 0
 	if not fatal:
 		room.teleport(self, room.entry_cell)

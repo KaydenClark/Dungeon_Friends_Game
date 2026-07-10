@@ -449,9 +449,9 @@ func heal_hero_to_full() -> void:
 
 ## Party defeat (T-041, D-004/D-008): checkpoints, not restarts - "not having
 ## to do things over again is never the punishment". Keep inventory and
-## flags; lose XP down to the current level's floor (Progression tunable);
-## come back at full HP (agent interpretation - defeat already costs XP;
-## flagged for T-069). In a dungeon: respawn at the dungeon entrance on a
+## flags; lose 25% of above-floor XP progress (Progression.DEFEAT_XP_LOSS);
+## come back at 80% HP (both Kayden's 2026-07-10 tuning, still tunable).
+## In a dungeon: respawn at the dungeon entrance on a
 ## fresh hub (T-048 rebuild = puzzle + enemy reset), the suspended forest
 ## kept beneath. Outside: respawn by the healer's campfire in the same
 ## room. Defeat NEVER touches save files. Unregistered rooms (dev spikes)
@@ -468,7 +468,7 @@ func handle_defeat() -> void:
 		restart_game()
 		return
 	var lost := apply_defeat_xp_penalty()
-	heal_hero_to_full()
+	restore_party_after_defeat()
 	var lines := PackedStringArray(["You were defeated..."])
 	if lost > 0:
 		lines.append("(%d XP slips away...)" % lost)
@@ -481,6 +481,23 @@ func handle_defeat() -> void:
 		respawn_at_healer()
 	else:
 		respawn_at_dungeon_entrance()
+
+
+## Respawn HP after a defeat (Kayden's 2026-07-10 tuning): "set you to 80%
+## health when you come back" - a slight lasting hit, like waking with
+## Zelda's three hearts but gentler; a meal/heal tops you back up. Tunable.
+const RESPAWN_HP_FRACTION := 0.8
+
+
+## Post-defeat recovery: every roster member comes back at 80% of max HP
+## (never below 1) with full MP (agent interpretation - MP has no food/rest
+## economy yet; flag if wrong). The healer NPC still heals to genuine full.
+func restore_party_after_defeat() -> void:
+	for id in state.party_roster:
+		var stats := character_stats_for(id)
+		if stats:
+			state.party_hp[id] = maxi(1, int(round(stats.max_hp * RESPAWN_HP_FRACTION)))
+			state.party_mp[id] = stats.max_mp
 
 
 ## Apply the D-008 XP penalty to every roster member; returns the total lost.

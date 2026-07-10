@@ -12,4 +12,4 @@ defense = 2
 speed = 3
 ai_behavior = 1
 xp_reward = 25
-loot_table = PackedStringArray("forest_key")
+loot_table = PackedStringArray("forest_key", "potion", "potion")

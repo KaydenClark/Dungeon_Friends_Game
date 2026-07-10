@@ -615,7 +615,8 @@ Rules:
     lethal")**: a 1-cell-wide pit can be jumped (see Jump above); a
     `PushableBlock` pushed into a pit **fills it**, permanently converting
     that cell to walkable floor (classic Zelda). **Walking into a pit is a
-    Zelda-style fall** (T-047): small damage (tunable, first cut 1 HP) and
+    Zelda-style fall** (T-047): **10% of max HP** in damage (floored at 1 -
+    Kayden's 2026-07-10 D-016 tuning, replacing the flat-1-HP first cut) and
     respawn at the last entrance the player came through into that room; a
     fall that reaches 0 HP triggers the defeat flow. Enemies and pathfinding
     still treat pits as blocked.
@@ -631,12 +632,16 @@ Rules:
   level's floor** (T-045 curve; exact penalty tunable); respawn at the
   **dungeon entrance** when defeated inside a dungeon (rooms between reset -
   puzzles and enemies alike), or at the healer's campfire outside. Defeat
-  never touches save files. Full HP on respawn (agent interpretation, flag
-  if wrong). **Built 2026-07-10 (T-041/T-047):** the restart-from-the-
-  beginning rule is retired (`restart_game()` remains a dev tool);
-  `Progression.xp_after_defeat` owns the floor-clamped penalty
-  (`DEFEAT_XP_LOSS = 1.0`, tunable); pit falls cost `Player.FALL_DAMAGE`
-  (1, tunable) and respawn at `RoomGrid.entry_cell`.
+  never touches save files. **Built 2026-07-10 (T-041/T-047), tuned same day
+  by Kayden (D-014/D-015/D-016):** the restart-from-the-beginning rule is
+  retired (`restart_game()` remains a dev tool);
+  `Progression.xp_after_defeat` owns the floor-clamped penalty - **lose 25%
+  of above-floor progress** ("some % of how much you have left to lose so it
+  never feels too harsh"; `DEFEAT_XP_LOSS`, tunable); the party **respawns
+  at 80% of max HP** ("like Zelda's three hearts, but 80% - eat a meal to
+  get back to full"; MP restores in full, an agent interpretation until an
+  MP/food economy exists); pit falls cost **10% of max HP** (floored at 1;
+  `FALL_DAMAGE_FRACTION`) and respawn at `RoomGrid.entry_cell`.
 - **Enemy respawns (added 2026-07-07, D-009)**: **enemies respawn every time
   a room is left and rebuilt** - the same reset that un-wedges puzzles
   applies to enemies, uniques and bosses included (duplicate key drops are
@@ -737,6 +742,7 @@ Rules:
 | **Phase 4 (Combat MVP) starts ahead of Phase 3's save/load half**; Phase 3's M3.1 data classes move with it as combat prerequisites, and the M3.2/M3.3 save/load work stays planned and ready, resumed after combat | Kayden accepted Phase 2 in windowed play (2026-07-08) and named combat the priority: "my main complaint right now is combat, which is phase 4. So I think that is a good next place to work." A build-order re-sequencing, not a scope change - the D-006..D-011 save/load resolutions all stand; combat has no dependency on saves, but does need the M3.1 data classes (abilities, items, encounters, XP shape), which is why they ride along | 2026-07-08 / this session |
 | **Phase 4 round (D-012/D-013, resolved 2026-07-08; reaffirmed 2026-07-09)**: (a) the battle arena is **seeded from the local overworld terrain** around the contact point - the combat grid copies the room's blocked/pit cells in a window where the encounter began, with an open-field fallback if too cramped; (b) Phase 4 ships with a **temporary test companion** in the party so multi-unit selection and interleaved initiative are real before Phase 5 recruitment replaces it | Kayden's picks ("use the local terrain where you were touched", "give me a test companion for now") - the local-terrain read matches the zoom-in framing (the world reads bigger because you fight *in* it); the companion proves the party machinery the whole phase exists to build | 2026-07-08; reaffirmed 2026-07-09 / Kayden |
 | **Combat is a tactics-RPG, not a JRPG**: BG3's turn-based mode is the functional model (select a unit, move it within a highlighted range on a zoomed-in grid, act via abilities, strict per-unit initiative); Fire Emblem is the *visual* reference only (range highlighting, a dedicated battle mode). Active party size is **four**. The "quick decisions matter more than tactical depth" pillar is retired - the game leans into strategic, tactical combat | Kayden clarified the founding combat vision: "top down tactical BG3 style... control my party of 4 people around this new mini map." Fire Emblem was his closest GBA touchstone for the *look* (range highlights, separate mode), not the mechanics; the engine isn't as limited as first assumed, so depth is now in-scope. Reframes the JRPG/menu language and the earlier readable-over-deep pillar; the locked grid/d10/per-unit-initiative decisions are unchanged | 2026-07-08 / this session |
+| **Phase 3 tuning round (D-014..D-017, resolved 2026-07-10)**: defeat costs **25% of above-floor XP progress** (not all of it); respawn at **80% of max HP** ("eat a meal to get back to full" - Zelda's three hearts, gentler); pit falls cost **10% of max HP** (floored at 1); **consumables come from every source** - enemy loot as an end-of-battle total collection, chests, and (later) shops, with mini-bosses dropping their key plus potions now and regular-enemy food/potion drops gated on a drop-chance model (T-070); shops/treasure ride the future currency system (T-071) | Kayden's answers ahead of his PC playtest: "some % of how much you have left to lose so it never feels too harsh", "80% health... you just need to eat a meal again", "10% damage and go back to entrance", "consumables should come from all of the places you mentioned... an end battle total collection... mini type bosses... should drop the key... and maybe some potions". All fractions remain single-constant tunables | 2026-07-10 / Kayden |
 
 ## Health Criteria
 

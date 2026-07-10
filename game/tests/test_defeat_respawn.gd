@@ -104,11 +104,17 @@ func test_defeat_penalty_clamps_xp_and_restores_hp() -> void:
 	SceneManager.state.party_xp["companion_test"] = 7
 	SceneManager.hero_hp = 1
 	var lost := SceneManager.apply_defeat_xp_penalty()
-	eq(lost, 22, "penalty reports the total XP lost across the party")
-	eq(SceneManager.total_xp, 0, "hero XP clamped to the level floor")
-	eq(SceneManager.state.party_xp.get("companion_test"), 0,
-			"companion pays the same penalty")
-	SceneManager.heal_hero_to_full()
-	eq(SceneManager.hero_hp, SceneManager.hero_stats.max_hp,
-			"party comes back at full HP (flagged interpretation)")
+	# Kayden's 2026-07-10 tuning: 25% of above-floor progress.
+	eq(SceneManager.total_xp, 11, "hero keeps 75% of above-floor XP (15 -> 11)")
+	eq(SceneManager.state.party_xp.get("companion_test"), 5,
+			"companion pays the same 25% (7 -> 5)")
+	eq(lost, 6, "penalty reports the total XP lost across the party")
+	SceneManager.restore_party_after_defeat()
+	eq(SceneManager.hero_hp, 16,
+			"party comes back at 80% HP (hero 20 -> 16; Kayden 2026-07-10)")
+	eq(SceneManager.state.party_hp.get("companion_test"), 11,
+			"companion at 80% too (14 -> 11)")
+	eq(SceneManager.state.party_mp.get("hero"),
+			SceneManager.hero_stats.max_mp,
+			"MP restored in full (flagged interpretation - no MP economy yet)")
 	_teardown()

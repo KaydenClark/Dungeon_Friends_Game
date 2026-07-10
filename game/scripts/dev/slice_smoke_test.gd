@@ -240,12 +240,13 @@ func _run() -> void:
 	check(await _go_grid(pit, pit_player, Vector2i(5, 10)), "walked to the first ledge")
 
 	# 11b. Pit fall (T-047): stepping into the ledge pit is a fall, not a
-	# refusal - 1 HP and a walk of shame back to the room's entrance.
+	# refusal - 10% of max HP and a walk of shame back to the room's entrance.
 	var hp_before_fall: int = SceneManager.hero_hp
 	check(await _step(pit_player, Vector2i.UP), "stepped into the ledge pit")
 	check(pit_player.cell == Vector2i(5, 11),
 			"fall respawned at the pit-room entrance")
-	check(SceneManager.hero_hp == hp_before_fall - 1, "the fall cost 1 HP")
+	check(SceneManager.hero_hp == hp_before_fall - pit_player.fall_damage(),
+			"the fall cost 10% of max HP (%d)" % pit_player.fall_damage())
 	check(await _go_grid(pit, pit_player, Vector2i(5, 10)),
 			"walked back to the first ledge")
 	pit_player.set_facing(Vector2i.UP)
@@ -350,6 +351,7 @@ func _run() -> void:
 			"re-entered the tutorial hub for the defeat check")
 	var old_hub_id: int = SceneManager.current_room.get_instance_id()
 	SceneManager.hero_hp = 1
+	var xp_before_defeat: int = SceneManager.total_xp
 	SceneManager.handle_defeat()
 	await _pump_dialogue()
 	check(await _until(func() -> bool:
@@ -366,9 +368,12 @@ func _run() -> void:
 			and SceneManager.room_stack[0] == room,
 			"the suspended forest survives the dungeon defeat")
 	check(SceneManager.inventory.has("shield"), "inventory kept on defeat (D-008)")
-	check(SceneManager.total_xp == 0, "XP clamped to the level-1 floor")
-	check(SceneManager.hero_hp == SceneManager.hero_stats.max_hp,
-			"party respawns at full HP")
+	check(SceneManager.total_xp == Progression.xp_after_defeat(xp_before_defeat, 1),
+			"defeat cost 25% of above-floor XP (%d -> %d)"
+			% [xp_before_defeat, SceneManager.total_xp])
+	check(SceneManager.hero_hp == int(round(
+			SceneManager.hero_stats.max_hp * SceneManager.RESPAWN_HP_FRACTION)),
+			"party respawns at 80% HP (%d)" % SceneManager.hero_hp)
 	check(SceneManager.flags.get("hub_seen", false),
 			"flags NOT wiped - checkpoints, not restarts")
 
@@ -388,8 +393,9 @@ func _run() -> void:
 			+ absi(room.player.cell.y - room.healer.cell.y)
 	check(healer_dist == 1, "respawned beside the healer's campfire")
 	check(SceneManager.inventory.has("shield"), "inventory still intact")
-	check(SceneManager.hero_hp == SceneManager.hero_stats.max_hp,
-			"full HP after the outside respawn")
+	check(SceneManager.hero_hp == int(round(
+			SceneManager.hero_stats.max_hp * SceneManager.RESPAWN_HP_FRACTION)),
+			"80% HP after the outside respawn")
 
 	# 16. Load leg (T-040/T-042): the crystal save from 6b restores position,
 	# XP, and inventory through the real load path - rolling back everything

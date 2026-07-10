@@ -1,7 +1,8 @@
 extends "res://tests/gd_test.gd"
 ## Unit tests for pit falls (T-047, D-008 part 4 - supersedes "pits are
 ## impassable" for the PLAYER only). Walking into a pit is a Zelda-style
-## fall: FALL_DAMAGE HP (1, tunable) and a respawn at the room's entry cell
+## fall: fall_damage() HP (10% of max HP, floored at 1 - Kayden's 2026-07-10
+## tuning) and a respawn at the room's entry cell
 ## (the last entrance the player came through). Jumping is unchanged and
 ## never falls; enemies and pathfinding still treat pits as solid; a fall
 ## that reaches 0 HP chains into the T-041 defeat flow.
@@ -41,8 +42,9 @@ func test_walking_into_a_pit_falls_and_respawns_at_entry() -> void:
 	eq(g.get_occupant(g.entry_cell), p, "occupancy follows the respawn")
 	is_null(g.get_occupant(Vector2i(2, 2)), "takeoff cell released")
 	is_null(g.get_occupant(Vector2i(3, 2)), "the pit cell was never claimed")
-	eq(SceneManager.hero_hp, hp_before - Player.FALL_DAMAGE,
-			"the fall costs FALL_DAMAGE HP")
+	eq(SceneManager.hero_hp, hp_before - p.fall_damage(),
+			"the fall costs 10% of max HP (Kayden's 2026-07-10 tuning)")
+	eq(p.fall_damage(), 2, "10% of the hero's 20 max HP = 2, floored at 1")
 	ok(g.is_pit(Vector2i(3, 2)), "the pit itself is unchanged")
 	g.queue_free()
 	SceneManager.reset_session_state()

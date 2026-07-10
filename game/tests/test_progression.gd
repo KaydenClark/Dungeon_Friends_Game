@@ -31,15 +31,18 @@ func test_total_xp_accumulates_the_steps() -> void:
 	eq(Progression.total_xp_for_level(4), by_hand, "level 4 total sums steps 1-3")
 
 
-## D-008 defeat penalty (T-041): lose progress toward the next level, never
-## below the current level's floor. First cut loses ALL above-floor progress
-## (DEFEAT_XP_LOSS = 1.0, a tunable flagged for Kayden's playtest).
-func test_defeat_drops_xp_to_the_level_floor() -> void:
-	eq(Progression.xp_after_defeat(15, 1), 0,
-			"level 1 (floor 0): mid-progress XP drops to 0")
+## D-008 defeat penalty (T-041): lose a fraction of the progress toward the
+## next level, never below the current level's floor. Kayden's 2026-07-10
+## tuning: 25% of above-floor progress ("never feels too harsh"), replacing
+## the lose-it-all first cut.
+func test_defeat_costs_a_quarter_of_above_floor_progress() -> void:
+	eq(Progression.DEFEAT_XP_LOSS, 0.25,
+			"the tuned penalty fraction is pinned (Kayden, 2026-07-10)")
+	eq(Progression.xp_after_defeat(20, 1), 15,
+			"level 1 (floor 0): 20 XP keeps 75% -> 15")
 	var floor_2 := Progression.total_xp_for_level(2)
-	eq(Progression.xp_after_defeat(floor_2 + 13, 2), floor_2,
-			"level 2: above-floor progress is lost, floor kept")
+	eq(Progression.xp_after_defeat(floor_2 + 12, 2), floor_2 + 9,
+			"level 2: only above-floor progress pays the 25%")
 
 
 func test_defeat_never_drops_below_the_floor() -> void:
