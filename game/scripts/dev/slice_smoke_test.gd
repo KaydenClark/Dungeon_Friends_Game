@@ -8,8 +8,9 @@ extends Node
 ## ledges jumped, 2-wide chasm unjumpable, block fills one cell) -> fight
 ## room (key guardian drops the dungeon key) -> west loop back to the hub ->
 ## dungeon key opens the north door -> chest room (shield) -> entry door
-## unbolts -> back to the forest with state intact -> forced defeat restarts
-## from the beginning of the game (T-029).
+## unbolts -> back to the forest with state intact -> forced defeats prove
+## the T-041 checkpoint respawns (dungeon -> fresh hub entrance; outside ->
+## the healer's campfire; inventory kept, XP clamped, saves untouched).
 ## The forest has several autonomous enemies, so navigation is tolerant:
 ## any unplanned encounter is fought to completion and the walk resumes.
 ## Run: Godot --headless --path . scenes/dev/slice_smoke_test.tscn
@@ -47,6 +48,9 @@ func _run() -> void:
 	print("SLICE SMOKE TEST: begin")
 	SceneManager.rng.seed = 1234
 	SceneManager.auto_combat = true
+	# Scratch save dir BEFORE main boots: a real save in user://saves would
+	# otherwise pop the T-040 Continue/New Game prompt and stall the run.
+	SceneManager.save_dir = "user://saves_smoke_test"
 	var main: Node = (load("res://scenes/main.tscn") as PackedScene).instantiate()
 	add_child(main)
 	await get_tree().process_frame
@@ -122,12 +126,33 @@ func _run() -> void:
 	check(SceneManager.hero_hp == SceneManager.hero_stats.max_hp,
 			"healer restored HP to max (%d)" % SceneManager.hero_hp)
 
+	# 6b. Save crystal (T-039): interacting writes slot 1 with the live
+	# position and flags (into the scratch dir set at boot).
+	check(room.crystals.size() == 1, "a save crystal stands by the campfire")
+	var crystal: SaveCrystal = room.crystals[0]
+	check(await _go(player, crystal.cell + Vector2i.RIGHT), "reached the save crystal")
+	player.set_facing(Vector2i.LEFT)
+	player.interact()
+	await get_tree().process_frame
+	await _pump_dialogue()
+	var saved := SaveManager.load_slot(1, SceneManager.save_dir)
+	check(saved != null, "the crystal wrote save slot 1")
+	if saved != null:
+		check(saved.current_map == "forest", "save records the forest map id")
+		check(saved.player_position == player.cell, "save records the player cell")
+		check(saved.flags == SceneManager.state.flags, "save snapshots the flags")
+		check(saved.inventory == SceneManager.state.inventory,
+				"save snapshots the inventory")
+	# Remembered for the load leg at the end of the run (T-042).
+	var save_cell: Vector2i = player.cell
+	var save_xp: int = SceneManager.total_xp
+
 	# 7. Boss fight: hunt the boss until it falls; it drops the key.
 	var boss_ok: bool = await _hunt_boss(player)
 	check(boss_ok, "boss slime defeated")
 	check(SceneManager.inventory.has("forest_key"), "boss dropped the forest key")
-	check(SceneManager.flags.get("defeated_forest_boss", false),
-			"unique boss defeat recorded in flags")
+	check(not SceneManager.flags.has("defeated_forest_boss"),
+			"no stay-dead flag is written (D-009: enemies respawn on rebuild)")
 
 	# 8. Locked door + key (reward flow): unlock, then walk into the doorway.
 	var door: LockedDoor = room.door
@@ -213,6 +238,16 @@ func _run() -> void:
 	check(pit_block.movable and pit_block.cell == Vector2i(3, 5),
 			"block waits on the chasm's near bank")
 	check(await _go_grid(pit, pit_player, Vector2i(5, 10)), "walked to the first ledge")
+
+	# 11b. Pit fall (T-047): stepping into the ledge pit is a fall, not a
+	# refusal - 1 HP and a walk of shame back to the room's entrance.
+	var hp_before_fall: int = SceneManager.hero_hp
+	check(await _step(pit_player, Vector2i.UP), "stepped into the ledge pit")
+	check(pit_player.cell == Vector2i(5, 11),
+			"fall respawned at the pit-room entrance")
+	check(SceneManager.hero_hp == hp_before_fall - 1, "the fall cost 1 HP")
+	check(await _go_grid(pit, pit_player, Vector2i(5, 10)),
+			"walked back to the first ledge")
 	pit_player.set_facing(Vector2i.UP)
 	check(pit_player.try_jump(), "jumped the first 1-wide ledge")
 	await _until(func() -> bool: return not pit_player.moving)
@@ -251,8 +286,8 @@ func _run() -> void:
 	var guardian_ok := await _hunt_all(fight, fight_player)
 	check(guardian_ok, "key guardian defeated")
 	check(SceneManager.inventory.has("dungeon_key"), "guardian dropped the dungeon key")
-	check(SceneManager.flags.get("defeated_key_guardian", false),
-			"guardian defeat recorded (won't respawn)")
+	check(not SceneManager.flags.has("defeated_key_guardian"),
+			"no stay-dead flag for the guardian (D-009: rebuilt rooms respawn it)")
 	check(await _go_grid(fight, fight_player, Vector2i(1, 4)), "reached the west door")
 	await _step(fight_player, Vector2i.LEFT)
 	check(await _until(func() -> bool: return SceneManager.current_room == hub),
@@ -306,26 +341,80 @@ func _run() -> void:
 			"forest state preserved across the trip (boss still defeated)")
 	check(door.opened, "door still open after the round trip")
 
-	# 14. Party defeat (T-029, D-004): restart from the beginning of the game.
-	# Capture the old room's id, not the node - restart_game() frees it, and a
-	# freed node in a lambda capture trips "Lambda capture ... was freed".
-	var old_room_id: int = SceneManager.current_room.get_instance_id()
+	# 14. Party defeat inside the dungeon (T-041, D-004/D-008): checkpoint
+	# respawn at the hub entrance on a FRESH hub, forest kept beneath,
+	# inventory intact, XP clamped to the level floor, full HP.
+	await _step(room.player, Vector2i.DOWN)  # off the doorway cell...
+	await _step(room.player, Vector2i.UP)    # ...and back on: re-enter the hub
+	check(await _until(func() -> bool: return SceneManager.current_room is TutorialHubRoom),
+			"re-entered the tutorial hub for the defeat check")
+	var old_hub_id: int = SceneManager.current_room.get_instance_id()
+	SceneManager.hero_hp = 1
 	SceneManager.handle_defeat()
 	await _pump_dialogue()
 	check(await _until(func() -> bool:
-			return SceneManager.current_room is ForestRoom \
-			and SceneManager.current_room.get_instance_id() != old_room_id),
-			"defeat rebooted a fresh forest")
-	check(SceneManager.total_xp == 0, "XP reset to zero")
-	check(SceneManager.inventory.size() == 0, "inventory wiped")
-	check(SceneManager.flags.size() == 0, "flags wiped (dungeon fully resets)")
+			return SceneManager.current_room is TutorialHubRoom \
+			and SceneManager.current_room.get_instance_id() != old_hub_id),
+			"dungeon defeat respawned into a FRESH hub")
+	var respawn_hub: TutorialHubRoom = SceneManager.current_room
+	check(await _until(func() -> bool: return respawn_hub.player != null),
+			"respawn hub spawned a player")
+	check(respawn_hub.player.cell == Vector2i(7, 11),
+			"respawned at the dungeon entrance (hub spawn)")
+	check(respawn_hub.blocks.size() > 0, "brick wall reset with the fresh hub")
+	check(SceneManager.room_stack.size() == 1 \
+			and SceneManager.room_stack[0] == room,
+			"the suspended forest survives the dungeon defeat")
+	check(SceneManager.inventory.has("shield"), "inventory kept on defeat (D-008)")
+	check(SceneManager.total_xp == 0, "XP clamped to the level-1 floor")
 	check(SceneManager.hero_hp == SceneManager.hero_stats.max_hp,
-			"hero restored to full for the fresh start")
-	var fresh: ForestRoom = SceneManager.current_room
-	check(await _until(func() -> bool: return fresh.player != null), "fresh player spawned")
-	check(fresh.player.cell == Vector2i(2, 4), "fresh start at the forest spawn cell")
-	check(fresh.boss != null and is_instance_valid(fresh.boss),
-			"boss respawned in the fresh world")
+			"party respawns at full HP")
+	check(SceneManager.flags.get("hub_seen", false),
+			"flags NOT wiped - checkpoints, not restarts")
+
+	# 15. Defeat outside (T-041): walk out, then respawn by the healer's
+	# campfire in the SAME forest instance.
+	check(await _go_grid(respawn_hub, respawn_hub.player, Vector2i(7, 11)),
+			"standing on the hub exit approach")
+	await _step(respawn_hub.player, Vector2i.DOWN)
+	check(await _until(func() -> bool: return SceneManager.current_room == room),
+			"walked back out to the suspended forest")
+	SceneManager.hero_hp = 1
+	SceneManager.handle_defeat()
+	await _pump_dialogue()
+	check(SceneManager.current_room == room,
+			"outside defeat keeps the same forest instance")
+	var healer_dist: int = absi(room.player.cell.x - room.healer.cell.x) \
+			+ absi(room.player.cell.y - room.healer.cell.y)
+	check(healer_dist == 1, "respawned beside the healer's campfire")
+	check(SceneManager.inventory.has("shield"), "inventory still intact")
+	check(SceneManager.hero_hp == SceneManager.hero_stats.max_hp,
+			"full HP after the outside respawn")
+
+	# 16. Load leg (T-040/T-042): the crystal save from 6b restores position,
+	# XP, and inventory through the real load path - rolling back everything
+	# that happened since (shield, keys, dungeon flags).
+	check(SceneManager.load_game(1), "load_game read the crystal save back")
+	check(await _until(func() -> bool:
+			return SceneManager.current_room is ForestRoom \
+			and SceneManager.current_room != room \
+			and SceneManager.current_room.player != null),
+			"load booted a fresh forest with a player")
+	var lforest: ForestRoom = SceneManager.current_room
+	check(lforest.player.cell == save_cell, "player back at the save-point cell")
+	check(SceneManager.total_xp == save_xp,
+			"XP rolled back to the save point (%d)" % save_xp)
+	check(not SceneManager.inventory.has("shield"),
+			"post-save loot rolled back (no shield yet at the crystal)")
+	check(SceneManager.room_stack.is_empty(), "load cleared the room stack")
+
+	# Clean up the scratch save dir so smoke runs leave no residue.
+	var scratch := DirAccess.open("user://")
+	if scratch != null and scratch.dir_exists("saves_smoke_test"):
+		for f in DirAccess.open("user://saves_smoke_test").get_files():
+			DirAccess.open("user://saves_smoke_test").remove(f)
+		scratch.remove("saves_smoke_test")
+	SceneManager.save_dir = SaveManager.DEFAULT_DIR
 
 	done = true
 	var total := passes + fails.size()

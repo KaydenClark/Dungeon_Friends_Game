@@ -26,6 +26,7 @@ var plates: Array = []
 var blocks: Array = []
 var chests: Array = []
 var levers: Array = []
+var crystals: Array = []
 ## Doorway marker cells -> their LDtk fields ({TargetRoom, SpawnX, SpawnY}).
 var doorways := {}
 var spawn_cell := Vector2i.ZERO
@@ -108,9 +109,9 @@ func _find_tile_layer(root: Node, name_part: String) -> TileMapLayer:
 
 
 ## Walk the level's entity layers and move every post-import-spawned game
-## object into the runtime grid. Defeated unique enemies, opened doors, and
-## opened chests restore their persisted state from SceneManager.flags
-## (rooms are freed and rebuilt on re-entry).
+## object into the runtime grid. Opened doors and opened chests restore
+## their persisted state from SceneManager.flags (rooms are freed and
+## rebuilt on re-entry); enemies always respawn on a rebuild (D-009/T-048).
 func _adopt_entities(level: Node) -> void:
 	var adoptable: Array[Node2D] = []
 	var stack: Array[Node] = [level]
@@ -150,11 +151,12 @@ func _adopt_entities(level: Node) -> void:
 				elif not p_npc.heals and npc == null:
 					npc = p_npc
 			"Enemy":
+				# D-009 (T-048): enemies ALWAYS respawn on a freed-and-rebuilt
+				# room, uniques and bosses included - the room-reset escape
+				# valve applies to fights too. Loot dedup prevents duplicate
+				# key drops; suspended rooms keep their in-visit state because
+				# they are never rebuilt.
 				var enemy: OverworldEnemy = node
-				if enemy.unique_id != "" \
-						and SceneManager.flags.get("defeated_%s" % enemy.unique_id, false):
-					node.free()
-					continue
 				enemy.home_cell = cell
 				register(enemy, cell)
 				enemies.append(enemy)
@@ -196,6 +198,12 @@ func _adopt_entities(level: Node) -> void:
 				lever.cell = cell
 				register(lever, cell)
 				levers.append(lever)
+			"SaveCrystal":
+				var crystal: SaveCrystal = node
+				crystal.room = self
+				crystal.cell = cell
+				register(crystal, cell)
+				crystals.append(crystal)
 			_:
 				node.free()
 
@@ -203,6 +211,7 @@ func _adopt_entities(level: Node) -> void:
 func _spawn_player() -> void:
 	if spawn_override != Vector2i(-1, -1):
 		spawn_cell = spawn_override
+	entry_cell = spawn_cell   # where a pit fall walks you back to (T-047)
 	player = Player.new()
 	register(player, spawn_cell)
 	player.camera.limit_left = 0

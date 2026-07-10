@@ -115,8 +115,7 @@ func _manhattan(a: Vector2i, b: Vector2i) -> int:
 
 
 func defeated() -> void:
-	if unique_id != "":
-		SceneManager.flags["defeated_%s" % unique_id] = true
+	# No stay-dead flag (D-009/T-048): a rebuilt room respawns everyone.
 	if room:
 		room.unregister(self)
 		room.enemies.erase(self)

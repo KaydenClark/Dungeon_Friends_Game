@@ -6,8 +6,10 @@ extends CanvasLayer
 ## hidden until toggled, so a debug session stays clean by default.
 ##
 ## F1 toggles the panel. While it is open:
-##   1-4  warp: fresh Forest / Tutorial Hub / Pit Room / Fight Room
-##   5    reset the current room's puzzle (blocks back to start)
+##   1-5  warp: a fresh copy of any registered map (T-049: the list IS the
+##        MapRegistry - "go to anywhere we have built"; a new room registered
+##        there gets its warp entry automatically, up to MAX_WARPS)
+##   R    reset the current room's puzzle (blocks back to start)
 ##   6-8  grant forest_key / dungeon_key / shield
 ##   9    heal to full
 ##   0    toggle skip-combat (touch an enemy = instant victory)
@@ -22,13 +24,28 @@ var panel: ColorRect
 var text: Label
 var open := false
 
+## Number keys reserved for warps before the grant keys start at 6. If the
+## registry ever outgrows this, the overlay needs a paging rework - warn
+## loudly instead of silently dropping rooms.
+const MAX_WARPS := 5
+const WARP_KEYS := [KEY_1, KEY_2, KEY_3, KEY_4, KEY_5]
+
+
+## The warp list is the registry, in registry order (T-049).
+func warp_ids() -> Array[String]:
+	var ids := MapRegistry.ids()
+	if ids.size() > MAX_WARPS:
+		push_warning("DebugOverlay: %d registered maps but only %d warp keys"
+				% [ids.size(), MAX_WARPS])
+	return ids
+
 
 func _ready() -> void:
 	layer = 90   # above gameplay, below the fade layer (100)
 	panel = ColorRect.new()
 	panel.color = Color(0.02, 0.05, 0.1, 0.88)
 	panel.position = Vector2(880, 40)
-	panel.size = Vector2(380, 356)
+	panel.size = Vector2(380, 384)
 	panel.visible = false
 	add_child(panel)
 	text = Label.new()
@@ -52,12 +69,14 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if SceneManager.in_encounter or SceneManager.transitioning:
 		return
+	var warp_slot: int = WARP_KEYS.find(key)
+	if warp_slot >= 0 and warp_slot < warp_ids().size():
+		_warp(warp_ids()[warp_slot])
+		get_viewport().set_input_as_handled()
+		_refresh()
+		return
 	match key:
-		KEY_1: _warp(func() -> Node2D: return ForestRoom.new())
-		KEY_2: _warp(func() -> Node2D: return TutorialHubRoom.new())
-		KEY_3: _warp(func() -> Node2D: return TutorialPitRoom.new())
-		KEY_4: _warp(func() -> Node2D: return TutorialFightRoom.new())
-		KEY_5: reset_puzzle()
+		KEY_R: reset_puzzle()
 		KEY_6: grant_item("forest_key")
 		KEY_7: grant_item("dungeon_key")
 		KEY_8: grant_item("shield")
@@ -70,14 +89,17 @@ func _unhandled_input(event: InputEvent) -> void:
 	_refresh()
 
 
-func _warp(factory: Callable) -> void:
+func _warp(map_id: String) -> void:
+	var room := MapRegistry.build(map_id)
+	if room == null:
+		return
 	for r in SceneManager.room_stack:
 		r.queue_free()
 	SceneManager.room_stack.clear()
 	if SceneManager.current_room:
 		SceneManager.current_room.queue_free()
 		SceneManager.current_room = null
-	SceneManager.boot_room(factory.call())
+	SceneManager.boot_room(room)
 
 
 func reset_puzzle() -> void:
@@ -91,13 +113,13 @@ func grant_item(item: String, qty: int = 1) -> void:
 
 
 func _refresh() -> void:
+	var warps := ""
+	var ids := warp_ids()
+	for i in mini(ids.size(), MAX_WARPS):
+		warps += "%d  Warp: %s (fresh)\n" % [i + 1, MapRegistry.label(ids[i])]
 	text.text = """DEV TOOLS (F1 to close)
 
-1  Warp: Forest (fresh)
-2  Warp: Tutorial Hub
-3  Warp: Pit Room
-4  Warp: Fight Room
-5  Reset room puzzle
+%sR  Reset room puzzle
 6  Grant forest_key
 7  Grant dungeon_key
 8  Grant shield
@@ -106,6 +128,7 @@ func _refresh() -> void:
 P  Grant 3 potions
 
 Items: %s""" % [
+		warps,
 		"ON" if SceneManager.skip_combat else "off",
 		SceneManager.inventory_summary(),
 	]

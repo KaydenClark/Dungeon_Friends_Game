@@ -81,17 +81,32 @@ come from the T-009 input map plus the T-025 jump):
   chasm and jump the remaining gap; beat the Dungeon Slime for the Dungeon
   Key; loop back through the west shortcut; unlock the hub's north door and
   open the side room's chest for the shield - the entry unbolts and you
-  walk back out to the forest. Party defeat restarts from the beginning of
-  the game (T-029). The pressure plate is on hold (B-06) - no shipped room
-  uses one.
+  walk back out to the forest. The pressure plate is on hold (B-06) - no
+  shipped room uses one.
+- Saving and dying (Phase 3, built 2026-07-10): the cyan **save crystal**
+  beside the healer's campfire writes slot 1 on interact; booting with a
+  save shows a minimal Continue (E/Space) / New Game (X/Esc) prompt
+  (D-011). **Walking into a pit** is a Zelda-style fall: 1 HP and a walk
+  back to the room's last-used entrance; jumping is unchanged (T-047).
+  **Party defeat** is a checkpoint, not a restart (T-041): keep inventory,
+  lose XP down to the level floor, full HP; in the dungeon you wake at the
+  hub entrance (rooms between reset - enemies respawn on every rebuilt
+  room per D-009), outside you wake by the healer. Defeat never touches
+  save files.
 - Dev tools (T-030, debug builds only - running from the editor or CLI
   counts; excluded from release exports): press F1 for the overlay, then
-  1-4 warp (Forest / Hub / Pit / Fight rooms), 5 reset the room puzzle,
+  1-5 warp to any registered map (the list IS the T-038 MapRegistry -
+  T-049), R reset the room puzzle,
   6-8 grant forest_key / dungeon_key / shield, 9 heal, 0 toggle skip-combat
   (touch an enemy = instant win), P grant 3 potions (consumables have no
   in-world source yet - a T-069/Phase 5 design call; this is how to
   exercise the combat Item command meanwhile). Off by default every
   session.
+- Save files live at `user://saves/slot_N.json` - on macOS:
+  `~/Library/Application Support/Godot/app_userdata/Dungeon Friends/saves/`.
+  To wipe saves, delete that `saves/` directory (automated runs use
+  scratch dirs - `saves_smoke_test`, `saves_battery`, `saves_test*` - and
+  clean up after themselves).
 
 ## Test And Build
 
@@ -128,14 +143,18 @@ Phase 2 tutorial dungeon in its 2026-07-07 layout: hub lock-in, the
 door locked without its key, two 1-wide ledge jumps, 2-wide chasm crossing
 via block-fill + jump, key-guardian fight -> dungeon_key, west loop back,
 north door unlock, chest room -> shield -> entry unbolts, return to the
-preserved forest, and a forced-defeat restart-from-the-beginning pass):
+preserved forest, plus the Phase 3 save/load slice: a save-crystal write by
+the campfire, a ledge-pit fall (1 HP + entrance respawn), forced defeats
+proving the T-041 checkpoint respawns (dungeon -> fresh hub entrance,
+outside -> the healer), and a final load leg rolling back to the crystal
+save):
 
 ```bash
 cd game
 /Applications/Godot.app/Contents/MacOS/Godot --headless --path . scenes/dev/slice_smoke_test.tscn
 ```
 
-Expected result: exit `0` and a final `SLICE SMOKE TEST: PASS (109/109
+Expected result: exit `0` and a final `SLICE SMOKE TEST: PASS (136/136
 checks)` line (~40-80s; the watchdog fails the run at 180s). A benign `ObjectDB instances leaked` warning
 at exit is known noise from quitting mid-coroutines; any `CHECK FAILED:` line
 or exit `1` is a real failure. Because roaming enemies move on real-time
@@ -200,7 +219,7 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
-per-suite tally (e.g. `UNIT TESTS: 22 suites, 140 tests, 490 checks, 0
+per-suite tally (e.g. `UNIT TESTS: 27 suites, 169 tests, 615 checks, 0
 failed`). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a
 few seconds (pure logic and controlled clocks, no real-time waits, unlike the
 slice smoke test; the tutorial soft-lock solver adds a second or two). Run
@@ -217,7 +236,16 @@ tie-breaks, mid-round death skips, round refills), `test_combat_scene`
 (T-068 core: the Defend shield gate, item stock gating, move-range flood
 fill vs solids, ability MP/target gating, mend/potion execution, the D-012
 arena connectivity seed, and a seeded 2v2 auto-battle to completion),
-`test_progression` (T-045: XP curve shape), `test_room_grid` (bounds, blocking, occupancy,
+`test_progression` (T-045 XP curve shape + the T-041 defeat-penalty floor
+clamp), `test_save_manager` (T-037: JSON round-trip, atomic write, tolerant
+corrupt/missing loads, slot isolation, int re-coercion), `test_map_registry`
+(T-038: every id builds its room headless, id_for round-trips, labels),
+`test_load_flow` (T-040: save/load session restore + flag-honoring rebuilt
+rooms, soft-failing empty/unknown loads), `test_defeat_respawn` (T-041:
+fresh-hub dungeon respawn with the forest kept beneath, healer respawn,
+party-wide XP penalty), `test_pit_fall` (T-047: fall damage + entry-cell
+respawn, jump-crosses-free, enemies still refused, fatal-fall defeat
+chain), `test_room_grid` (bounds, blocking, occupancy,
 Manhattan pathfinding, avoid-occupants routing), `test_grid_actor`
 (`try_step` reservation/bump/refusal), `test_data_resources` (the shipped
 hero/slime/boss `.tres` values + the boss-key/locked-door invariant),
@@ -255,12 +283,36 @@ The runner `await`s each test, so a suite method may be a coroutine when a test
 genuinely needs to yield; most tests read state synchronously right after the
 call (before the move tween or the next `_process` tick) and stay pure.
 
+### Phase 3 save/load check (T-042)
+
+The two-process acceptance battery - the literal "save -> quit -> relaunch
+-> load" M3.2 done condition, plus M3.3's puzzle-state persistence (the
+tutorial chest's solved state and an opened door surviving the cycle):
+
+```bash
+cd game
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path . scenes/dev/saveload_battery.tscn -- --phase=save \
+&& /Applications/Godot.app/Contents/MacOS/Godot --headless --path . scenes/dev/saveload_battery.tscn -- --phase=load
+```
+
+Expected result: both processes exit `0`, printing `SAVELOAD BATTERY SAVE
+PHASE: PASS (10/10 checks)` then `... LOAD PHASE: PASS (11/11 checks)`. The
+save phase opens the chest and the boss door through their real interact
+paths and saves at the crystal; the load phase relaunches, answers the boot
+prompt with a real confirm input event, and asserts position, flags,
+inventory, and rebuilt-room door/chest state. Saves are confined to
+`user://saves_battery` (wiped on success), never `user://saves`. Run after
+any change to SaveData/SaveManager, MapRegistry, the load/boot flow, the
+crystal, or flag-restored room state.
+
 ### Phase 4 combat check (T-068/T-069)
 
-Current automated proof is the unit command above plus the slice smoke test:
-22 suites / 140 tests / 490 checks and **111/111 smoke checks on 5/5
-consecutive runs** (T-068, 2026-07-09; counts refreshed same day after the
-dev potion grant and the smoke test's freed-lambda-capture fix). `test_combat_scene` covers a seeded
+Automated proof is the unit command above plus the slice smoke test: at the
+T-068 gate that was 22 suites / 140 tests / 490 checks and **111/111 smoke
+checks on 5/5 consecutive runs** (2026-07-09; counts refreshed same day after
+the dev potion grant and the smoke test's freed-lambda-capture fix); the
+Phase 3 save/load lane grew the totals to 27 suites / 169 tests / 615 checks
+and 136/136 smoke on 5/5 runs (2026-07-10) with the combat legs unchanged. `test_combat_scene` covers a seeded
 2v2 battle, D-012 local-terrain connectivity, range refusal, MP/item
 bookkeeping, support actions, shield-gated Defend, and the live turn-order HUD
 format. The smoke test proves a regular forest Enemy's LDtk `EncounterId`
@@ -393,6 +445,8 @@ If a downstream lesson should flow *back* to the harness, capture it in
 | Godot editor opens the project but behaves unexpectedly / editor UI looks wrong | Wrong Godot version installed (this project targets 4.7.x as of 2026-07-07) | `/Applications/Godot.app/Contents/MacOS/Godot --version` | Install/switch to Godot 4.7.x |
 | Headless `--import` run is slow the first time | Expected - first import scans the filesystem and builds the global script class cache from scratch | Re-run the same command | Subsequent runs are faster; not a bug |
 | `--quit-after 1` output has no `SceneManager ready.` line | `SceneManager` autoload not registered, or `main.tscn` isn't the scene passed | Check `game/project.godot` -> `[autoload]` section and the command's scene path | Fix the autoload path or the invoked scene |
+| Game boots to a dark "A saved adventure awaits." screen instead of the forest | Expected (T-040/D-011): a save exists in `user://saves`, so the Continue/New Game prompt is waiting | E/Space continues from the save; X/Esc starts fresh | To never see it, delete the saves dir (see Run Locally -> save files) |
+| A save slot won't load / boot went to a fresh game after Continue | Corrupt or hand-edited slot JSON, or its `current_map` id is not in `MapRegistry` | Run with a console: `SaveManager:` warnings name the file and reason | Fix or delete `user://saves/slot_N.json`; loads are tolerant and never crash |
 
 ## Recovery And Rollback
 

@@ -30,6 +30,11 @@ const TURN_DELAY := 0.1
 ## Airtime for a real jump across a gap, and for the refused in-place hop.
 const JUMP_TIME := 0.22
 const HOP_TIME := 0.14
+## Pit falls (T-047, D-008 part 4): walking into a pit drops the player,
+## costs FALL_DAMAGE, and respawns them at the room's entry_cell. Both
+## numbers are first-cut tunables.
+const FALL_DAMAGE := 1
+const FALL_TIME := 0.3
 
 const DIR_ACTIONS := {
 	"move_up": Vector2i.UP,
@@ -210,6 +215,44 @@ func _bob_body(duration: float) -> void:
 	var tw := create_tween()
 	tw.tween_property(body, "position:y", rest.y - 20.0, duration * 0.5)
 	tw.tween_property(body, "position:y", rest.y, duration * 0.5)
+
+
+## Walking into a pit is a fall, not a refusal (T-047 supersedes "pits are
+## impassable" - for the player only; enemies and pathing still treat pits
+## as solid). Jumping goes through try_jump and never lands here.
+func try_step(dir: Vector2i) -> bool:
+	if not moving and room != null:
+		var target := cell + dir
+		if room.is_pit(target) and room.get_occupant(target) == null:
+			set_facing(dir)
+			_fall_into_pit(target)
+			return true
+	return super.try_step(dir)
+
+
+## Zelda-style fall: slide over the pit while shrinking away, take the
+## damage, then either walk back in at the room's entry cell or - at 0 HP -
+## hand over to the T-041 defeat flow. Occupancy never claims the pit cell;
+## the respawn teleport does all the bookkeeping.
+func _fall_into_pit(pit: Vector2i) -> void:
+	moving = true
+	var tw := create_tween()
+	tw.set_parallel(true)
+	tw.tween_property(self, "position", room.cell_to_pos(pit), FALL_TIME * 0.5)
+	tw.tween_property(self, "scale", Vector2(0.1, 0.1), FALL_TIME) \
+			.set_delay(FALL_TIME * 0.25)
+	await tw.finished
+	SceneManager.hero_hp = maxi(SceneManager.hero_hp - FALL_DAMAGE, 0)
+	var fatal: bool = SceneManager.hero_hp <= 0
+	if not fatal:
+		room.teleport(self, room.entry_cell)
+	else:
+		position = room.cell_to_pos(cell)   # settle back on the takeoff cell
+	scale = Vector2.ONE
+	moving = false
+	move_finished.emit()
+	if fatal:
+		SceneManager.handle_defeat()
 
 
 func interact() -> void:

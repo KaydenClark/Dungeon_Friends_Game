@@ -75,10 +75,34 @@ func test_plate_door_wired_by_controller() -> void:
 	SceneManager.flags = {}
 
 
+## T-048 / D-009 (Kayden: "enemies respawn every time you leave the room"):
+## a freed-and-rebuilt room respawns ALL its enemies, uniques and bosses
+## included. Loot dedup (add_item) is what keeps re-kills from duplicating
+## keys, not a stay-dead flag.
+func test_unique_enemies_respawn_on_rebuild() -> void:
+	SceneManager.reset_session_state()
+	var room := TutorialFightRoom.new()
+	add_child(room)
+	eq(room.enemies.size(), 1, "the key guardian spawns")
+	if room.enemies.size() == 1:
+		var guardian: OverworldEnemy = room.enemies[0]
+		SceneManager.apply_victory_rewards(guardian.stats)
+		guardian.defeated()
+	room.free()
+	var rebuilt := TutorialFightRoom.new()
+	add_child(rebuilt)
+	eq(rebuilt.enemies.size(), 1, "the guardian respawns on rebuild (D-009)")
+	if rebuilt.enemies.size() == 1:
+		SceneManager.apply_victory_rewards(rebuilt.enemies[0].stats)
+	eq(SceneManager.inventory.get("dungeon_key"), 1,
+			"re-killing the guardian never duplicates its key")
+	rebuilt.free()
+	SceneManager.reset_session_state()
+
+
 func test_persistence_flags_respected_on_build() -> void:
-	SceneManager.flags = {"defeated_key_guardian": false}
-	var room := _make_room()   # fixture enemy has no unique id - always spawns
-	eq(room.enemies.size(), 1, "no-unique-id enemy unaffected by flags")
+	var room := _make_room()
+	eq(room.enemies.size(), 1, "enemy spawns on build")
 	room.queue_free()
 	# A door already opened stays open on rebuild.
 	SceneManager.flags = {"door_test_door_opened": true}

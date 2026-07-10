@@ -18,3 +18,18 @@ static func total_xp_for_level(level: int) -> int:
 	for l in range(1, level):
 		total += xp_to_next(l)
 	return total
+
+
+## Fraction of above-floor progress lost on defeat (T-041/D-008). 1.0 = the
+## whole "progress toward the next level" first cut - TUNABLE, flagged for
+## Kayden's playtest (money loss may join/replace this once currency exists).
+const DEFEAT_XP_LOSS := 1.0
+
+
+## XP after a defeat: lose DEFEAT_XP_LOSS of the progress past the current
+## level's floor, and never end below that floor - "not having to do things
+## over again is never the punishment" (Kayden, D-008).
+static func xp_after_defeat(current_xp: int, level: int) -> int:
+	var floor_xp := total_xp_for_level(level)
+	var progress := maxi(current_xp - floor_xp, 0)
+	return floor_xp + int(round(progress * (1.0 - DEFEAT_XP_LOSS)))

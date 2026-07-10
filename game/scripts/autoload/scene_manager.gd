@@ -70,6 +70,55 @@ var transitioning := false
 ## How the booting scene rebuilds the game's starting room - set by main.gd,
 ## used by restart_game() (T-029: party defeat restarts from the beginning).
 var boot_factory := Callable()
+## Where save files live (T-037/T-039). Tests point this at a scratch dir so
+## automated runs can never clobber a real save in user://saves.
+var save_dir: String = SaveManager.DEFAULT_DIR
+
+
+## Snapshot the live session into a save slot (T-039; the SaveCrystal calls
+## this). The map id comes from the registry, the position from the live
+## player. Refuses (false + warning) rather than writing a save it could
+## never load back.
+func save_game(slot: int = 1) -> bool:
+	var map_id := MapRegistry.id_for(current_room)
+	if map_id == "":
+		push_warning("save_game: current room is not a registered map - not saving")
+		return false
+	var player: Variant = current_room.get("player")
+	if not player is Player:
+		push_warning("save_game: current room has no player - not saving")
+		return false
+	var data := SaveManager.capture(state, map_id, player.cell)
+	return SaveManager.write(slot, data, save_dir)
+
+
+## Restore a saved session (T-040, D-011): swap in the saved GameState, tear
+## down the live room graph, and boot the saved map via the registry with the
+## player at the saved cell. Rooms rebuild opened doors/chests from flags in
+## _ready(), so no per-object load code exists here by design. A failed load
+## (missing/corrupt file, unknown map id) returns false and leaves the live
+## session untouched.
+func load_game(slot: int = 1) -> bool:
+	if world_container == null:
+		push_warning("load_game: no world container registered - not loading")
+		return false
+	var data := SaveManager.load_slot(slot, save_dir)
+	if data == null:
+		return false
+	var room := MapRegistry.build(data.current_map)
+	if room == null:
+		return false
+	state = data.to_game_state()
+	for r in room_stack:
+		r.queue_free()
+	room_stack.clear()
+	if current_room:
+		current_room.queue_free()
+		current_room = null
+	if room is LdtkRoom:
+		room.spawn_override = data.player_position
+	boot_room(room)
+	return true
 
 
 func _ready() -> void:
@@ -149,6 +198,11 @@ func exit_rooms(count: int) -> void:
 		prev_player.camera.make_current()
 	if current_room.has_method("on_room_restored"):
 		current_room.on_room_restored()
+	# The player re-entered this room through wherever they now stand (the
+	# doorway they left from, or wherever on_room_restored moved them) - that
+	# is the new "last entrance" a pit fall walks back to (T-047).
+	if current_room is RoomGrid and prev_player is Player:
+		current_room.entry_cell = prev_player.cell
 	await _fade_to(0.0)
 	transitioning = false
 
@@ -393,17 +447,90 @@ func heal_hero_to_full() -> void:
 			state.party_mp[id] = stats.max_mp
 
 
-## Party defeat (T-029, locked decision D-004): restart from the beginning of
-## the game - the simplest possible rule, no state snapshotting. The richer
-## respawn (healer NPC outside, dungeon room 1 with puzzle reset inside) is
-## deferred to Phase 3, where it rides on save/load serialization.
+## Party defeat (T-041, D-004/D-008): checkpoints, not restarts - "not having
+## to do things over again is never the punishment". Keep inventory and
+## flags; lose XP down to the current level's floor (Progression tunable);
+## come back at full HP (agent interpretation - defeat already costs XP;
+## flagged for T-069). In a dungeon: respawn at the dungeon entrance on a
+## fresh hub (T-048 rebuild = puzzle + enemy reset), the suspended forest
+## kept beneath. Outside: respawn by the healer's campfire in the same
+## room. Defeat NEVER touches save files. Unregistered rooms (dev spikes)
+## keep the old restart-from-scratch flow; restart_game() itself stays for
+## the dev overlay.
 func handle_defeat() -> void:
-	await show_dialogue([
-		"You were defeated...",
-		"Everything fades to black.",
-		"...and the adventure begins anew.",
-	])
-	restart_game()
+	var map_id := MapRegistry.id_for(current_room)
+	if map_id == "":
+		await show_dialogue([
+			"You were defeated...",
+			"Everything fades to black.",
+			"...and the adventure begins anew.",
+		])
+		restart_game()
+		return
+	var lost := apply_defeat_xp_penalty()
+	heal_hero_to_full()
+	var lines := PackedStringArray(["You were defeated..."])
+	if lost > 0:
+		lines.append("(%d XP slips away...)" % lost)
+	if map_id == "forest":
+		lines.append("You come to by the healer's campfire.")
+	else:
+		lines.append("You come to at the dungeon's entrance.")
+	await show_dialogue(lines)
+	if map_id == "forest":
+		respawn_at_healer()
+	else:
+		respawn_at_dungeon_entrance()
+
+
+## Apply the D-008 XP penalty to every roster member; returns the total lost.
+func apply_defeat_xp_penalty() -> int:
+	var lost := 0
+	for id in state.party_roster:
+		var level: int = state.party_levels.get(id, 1)
+		var current: int = state.party_xp.get(id, 0)
+		var after := Progression.xp_after_defeat(current, level)
+		state.party_xp[id] = after
+		lost += maxi(current - after, 0)
+	return lost
+
+
+## In-dungeon respawn (T-041): free the current room and every suspended room
+## above the forest, then boot a FRESH hub - the T-048 rebuild rule resets
+## its puzzle and enemies for free. The suspended forest (when the player
+## came in the normal way) stays intact beneath; a dev-warped dungeon with an
+## empty stack just gets the fresh hub.
+func respawn_at_dungeon_entrance() -> void:
+	var keep: Node2D = null
+	if not room_stack.is_empty() and MapRegistry.id_for(room_stack[0]) == "forest":
+		keep = room_stack[0]
+	for r in room_stack:
+		if r != keep:
+			r.queue_free()
+	room_stack.clear()
+	if keep != null:
+		room_stack.append(keep)
+	if current_room:
+		current_room.queue_free()
+		current_room = null
+	boot_room(MapRegistry.build("tutorial_hub"))
+
+
+## Outside respawn (T-041): same room instance, player moved to a walkable
+## cell beside the healer (falling back to the room spawn if the campfire is
+## somehow crowded, and to a full restart if the room has no player at all).
+func respawn_at_healer() -> void:
+	var room := current_room as LdtkRoom
+	if room == null or room.player == null:
+		restart_game()
+		return
+	var anchor: Vector2i = room.healer.cell if room.healer != null else room.spawn_cell
+	var target := room.spawn_cell
+	for d in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.UP]:
+		if room.is_walkable(anchor + d):
+			target = anchor + d
+			break
+	room.teleport(room.player, target)
 
 
 ## Wipe the session and boot a fresh starting room via boot_factory.
