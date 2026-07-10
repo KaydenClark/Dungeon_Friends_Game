@@ -17,6 +17,15 @@ func test_panel_hidden_by_default() -> void:
 	o.queue_free()
 
 
+func test_warp_list_matches_the_registry() -> void:
+	# T-049: every registered map gets a warp entry automatically - the
+	# overlay never hardcodes room constructors again.
+	var o := _overlay()
+	eq(o.warp_ids(), MapRegistry.ids(),
+			"warp entries are the registry's ids, in registry order")
+	o.queue_free()
+
+
 func test_grant_item_deduplicates() -> void:
 	var saved := SceneManager.inventory
 	SceneManager.inventory = {}
