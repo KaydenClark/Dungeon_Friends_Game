@@ -126,8 +126,8 @@ func _run() -> void:
 	var boss_ok: bool = await _hunt_boss(player)
 	check(boss_ok, "boss slime defeated")
 	check(SceneManager.inventory.has("forest_key"), "boss dropped the forest key")
-	check(SceneManager.flags.get("defeated_forest_boss", false),
-			"unique boss defeat recorded in flags")
+	check(not SceneManager.flags.has("defeated_forest_boss"),
+			"no stay-dead flag is written (D-009: enemies respawn on rebuild)")
 
 	# 8. Locked door + key (reward flow): unlock, then walk into the doorway.
 	var door: LockedDoor = room.door
@@ -251,8 +251,8 @@ func _run() -> void:
 	var guardian_ok := await _hunt_all(fight, fight_player)
 	check(guardian_ok, "key guardian defeated")
 	check(SceneManager.inventory.has("dungeon_key"), "guardian dropped the dungeon key")
-	check(SceneManager.flags.get("defeated_key_guardian", false),
-			"guardian defeat recorded (won't respawn)")
+	check(not SceneManager.flags.has("defeated_key_guardian"),
+			"no stay-dead flag for the guardian (D-009: rebuilt rooms respawn it)")
 	check(await _go_grid(fight, fight_player, Vector2i(1, 4)), "reached the west door")
 	await _step(fight_player, Vector2i.LEFT)
 	check(await _until(func() -> bool: return SceneManager.current_room == hub),

@@ -25,12 +25,8 @@ func _init() -> void:
 
 
 func _room_ready() -> void:
-	if boss == null and enemies.is_empty() \
-			and not SceneManager.flags.get("fight_room_seen_empty", false) \
-			and SceneManager.flags.get("defeated_key_guardian", false):
-		SceneManager.flags["fight_room_seen_empty"] = true
-		SceneManager.show_dialogue(["The chamber lies quiet now."])
-		return
+	# The guardian respawns on every rebuild (D-009/T-048), so there is no
+	# "quiet chamber" empty state anymore - the intro line just plays once.
 	if not SceneManager.flags.get("fight_room_seen", false):
 		SceneManager.flags["fight_room_seen"] = true
 		SceneManager.show_dialogue([
