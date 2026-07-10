@@ -223,12 +223,15 @@ Current phase:
   data-class half (ItemData, AbilityData, EncounterData/MapMeta, XP
   shape, stat alignment, shield-gates-Defend) moves with Phase 4 as its
   data foundation; the M3.2/M3.3 save/load half (SaveData, registry,
-  crystal, load flow, checkpoint respawn, pit falls, enemy respawn) stays
-  planned in `TASKBOARD.md` and resumes after combat. **Current implementation
-  position (2026-07-09):** T-060..T-068 and their M3.1 data prerequisites are
-  built and verified; T-069 is the remaining Kayden windowed acceptance gate.
-  D-012/D-013 are resolved as local contact terrain + a temporary Buddy test
-  companion.
+  crystal, load flow, checkpoint respawn, pit falls, enemy respawn) was
+  parked behind combat and **resumed + built 2026-07-10 on Kayden's
+  explicit request** (T-037..T-042, T-047..T-049 - see TASKBOARD proof
+  log). **Current implementation position (2026-07-10):** T-060..T-068 and
+  the full Phase 3 save/load lane are built and verified; T-069 (combat
+  windowed acceptance) is the remaining Kayden gate, and the new save/load
+  slice adds its own windowed items to that pass (boot prompt, crystal,
+  pit falls, respawns, F1 warps). D-012/D-013 are resolved as local
+  contact terrain + a temporary Buddy test companion.
 
 Build order (each phase is a real milestone with a stated "done" condition;
 live milestone tracking is in `TASKBOARD.md`):
@@ -473,7 +476,9 @@ resolves ids, session inventory is `{item_id: qty}`, and
 `SceneManager.add_item()/remove_item()` are the only write paths.
 `EncounterData.enemy_group` is loaded from each regular forest Enemy's LDtk
 `EncounterId`, consumed by combat, and rewarded as a full group. `SaveData`
-remains open as parked Phase 3 work. `EnemyStats.loot_table` deliberately
+is built (2026-07-10, T-037): JSON snapshots via `SaveManager` with atomic
+writes and tolerant loads, exactly the table's shape (no
+`defeated_enemy_ids`). `EnemyStats.loot_table` deliberately
 remains a `PackedStringArray` of item ids resolved through the library (T-043).
 
 ## Party And Combat Model
@@ -627,8 +632,11 @@ Rules:
   **dungeon entrance** when defeated inside a dungeon (rooms between reset -
   puzzles and enemies alike), or at the healer's campfire outside. Defeat
   never touches save files. Full HP on respawn (agent interpretation, flag
-  if wrong). The Phase 2 restart-from-the-beginning rule is retired once
-  T-041 lands; `restart_game()` remains a dev tool.
+  if wrong). **Built 2026-07-10 (T-041/T-047):** the restart-from-the-
+  beginning rule is retired (`restart_game()` remains a dev tool);
+  `Progression.xp_after_defeat` owns the floor-clamped penalty
+  (`DEFEAT_XP_LOSS = 1.0`, tunable); pit falls cost `Player.FALL_DAMAGE`
+  (1, tunable) and respawn at `RoomGrid.entry_cell`.
 - **Enemy respawns (added 2026-07-07, D-009)**: **enemies respawn every time
   a room is left and rebuilt** - the same reset that un-wedges puzzles
   applies to enemies, uniques and bosses included (duplicate key drops are
@@ -636,12 +644,18 @@ Rules:
   Suspended-and-restored rooms (mid-trip) keep their in-visit state.
   Deliberate deviation from the original Lufia-II defeated-enemies-stay-dead
   pattern (retired Gameplan §12); `SaveData` carries no `defeated_enemy_ids`.
+  **Built 2026-07-10 (T-048)**: no `defeated_*` flags are written at all.
 - **Save (revised 2026-07-07, D-006/D-011)**: save points are physical map
   objects (SaveCrystal); `SaveData` serializes to **JSON** at
   `user://saves/slot_N.json` (authored data stays `.tres` under `res://`);
   never saved mid-combat; defeat/checkpoints never write saves; 3 slots in
   the format, slot 1 via the crystal at MVP; a minimal Continue/New Game
-  prompt when a save exists at boot.
+  prompt when a save exists at boot. **Built 2026-07-10
+  (T-037/T-039/T-040/T-042)**: `SaveManager` (atomic temp+rename writes,
+  tolerant loads), the forest SaveCrystal beside the healer's campfire,
+  `BootPrompt`, and the two-process `saveload_battery` acceptance proof;
+  map ids resolve through `MapRegistry` (T-038), which also feeds the F1
+  warp list (T-049).
 
 Do not duplicate this logic in:
 
