@@ -8,8 +8,9 @@ extends Node
 ## ledges jumped, 2-wide chasm unjumpable, block fills one cell) -> fight
 ## room (key guardian drops the dungeon key) -> west loop back to the hub ->
 ## dungeon key opens the north door -> chest room (shield) -> entry door
-## unbolts -> back to the forest with state intact -> forced defeat restarts
-## from the beginning of the game (T-029).
+## unbolts -> back to the forest with state intact -> forced defeats prove
+## the T-041 checkpoint respawns (dungeon -> fresh hub entrance; outside ->
+## the healer's campfire; inventory kept, XP clamped, saves untouched).
 ## The forest has several autonomous enemies, so navigation is tolerant:
 ## any unplanned encounter is fought to completion and the walk resumes.
 ## Run: Godot --headless --path . scenes/dev/slice_smoke_test.tscn
@@ -327,26 +328,55 @@ func _run() -> void:
 			"forest state preserved across the trip (boss still defeated)")
 	check(door.opened, "door still open after the round trip")
 
-	# 14. Party defeat (T-029, D-004): restart from the beginning of the game.
-	# Capture the old room's id, not the node - restart_game() frees it, and a
-	# freed node in a lambda capture trips "Lambda capture ... was freed".
-	var old_room_id: int = SceneManager.current_room.get_instance_id()
+	# 14. Party defeat inside the dungeon (T-041, D-004/D-008): checkpoint
+	# respawn at the hub entrance on a FRESH hub, forest kept beneath,
+	# inventory intact, XP clamped to the level floor, full HP.
+	await _step(room.player, Vector2i.DOWN)  # off the doorway cell...
+	await _step(room.player, Vector2i.UP)    # ...and back on: re-enter the hub
+	check(await _until(func() -> bool: return SceneManager.current_room is TutorialHubRoom),
+			"re-entered the tutorial hub for the defeat check")
+	var old_hub_id: int = SceneManager.current_room.get_instance_id()
+	SceneManager.hero_hp = 1
 	SceneManager.handle_defeat()
 	await _pump_dialogue()
 	check(await _until(func() -> bool:
-			return SceneManager.current_room is ForestRoom \
-			and SceneManager.current_room.get_instance_id() != old_room_id),
-			"defeat rebooted a fresh forest")
-	check(SceneManager.total_xp == 0, "XP reset to zero")
-	check(SceneManager.inventory.size() == 0, "inventory wiped")
-	check(SceneManager.flags.size() == 0, "flags wiped (dungeon fully resets)")
+			return SceneManager.current_room is TutorialHubRoom \
+			and SceneManager.current_room.get_instance_id() != old_hub_id),
+			"dungeon defeat respawned into a FRESH hub")
+	var respawn_hub: TutorialHubRoom = SceneManager.current_room
+	check(await _until(func() -> bool: return respawn_hub.player != null),
+			"respawn hub spawned a player")
+	check(respawn_hub.player.cell == Vector2i(7, 11),
+			"respawned at the dungeon entrance (hub spawn)")
+	check(respawn_hub.blocks.size() > 0, "brick wall reset with the fresh hub")
+	check(SceneManager.room_stack.size() == 1 \
+			and SceneManager.room_stack[0] == room,
+			"the suspended forest survives the dungeon defeat")
+	check(SceneManager.inventory.has("shield"), "inventory kept on defeat (D-008)")
+	check(SceneManager.total_xp == 0, "XP clamped to the level-1 floor")
 	check(SceneManager.hero_hp == SceneManager.hero_stats.max_hp,
-			"hero restored to full for the fresh start")
-	var fresh: ForestRoom = SceneManager.current_room
-	check(await _until(func() -> bool: return fresh.player != null), "fresh player spawned")
-	check(fresh.player.cell == Vector2i(2, 4), "fresh start at the forest spawn cell")
-	check(fresh.boss != null and is_instance_valid(fresh.boss),
-			"boss respawned in the fresh world")
+			"party respawns at full HP")
+	check(SceneManager.flags.get("hub_seen", false),
+			"flags NOT wiped - checkpoints, not restarts")
+
+	# 15. Defeat outside (T-041): walk out, then respawn by the healer's
+	# campfire in the SAME forest instance.
+	check(await _go_grid(respawn_hub, respawn_hub.player, Vector2i(7, 11)),
+			"standing on the hub exit approach")
+	await _step(respawn_hub.player, Vector2i.DOWN)
+	check(await _until(func() -> bool: return SceneManager.current_room == room),
+			"walked back out to the suspended forest")
+	SceneManager.hero_hp = 1
+	SceneManager.handle_defeat()
+	await _pump_dialogue()
+	check(SceneManager.current_room == room,
+			"outside defeat keeps the same forest instance")
+	var healer_dist: int = absi(room.player.cell.x - room.healer.cell.x) \
+			+ absi(room.player.cell.y - room.healer.cell.y)
+	check(healer_dist == 1, "respawned beside the healer's campfire")
+	check(SceneManager.inventory.has("shield"), "inventory still intact")
+	check(SceneManager.hero_hp == SceneManager.hero_stats.max_hp,
+			"full HP after the outside respawn")
 
 	# Clean up the scratch save dir so smoke runs leave no residue.
 	var scratch := DirAccess.open("user://")

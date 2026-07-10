@@ -24,6 +24,7 @@ const SUITES := [
 	"res://tests/test_save_manager.gd",
 	"res://tests/test_map_registry.gd",
 	"res://tests/test_load_flow.gd",
+	"res://tests/test_defeat_respawn.gd",
 	"res://tests/test_enemy_ai.gd",
 	"res://tests/test_dialogue_cooldown.gd",
 	"res://tests/test_player_movement.gd",

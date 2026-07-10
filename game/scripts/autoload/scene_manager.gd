@@ -442,17 +442,90 @@ func heal_hero_to_full() -> void:
 			state.party_mp[id] = stats.max_mp
 
 
-## Party defeat (T-029, locked decision D-004): restart from the beginning of
-## the game - the simplest possible rule, no state snapshotting. The richer
-## respawn (healer NPC outside, dungeon room 1 with puzzle reset inside) is
-## deferred to Phase 3, where it rides on save/load serialization.
+## Party defeat (T-041, D-004/D-008): checkpoints, not restarts - "not having
+## to do things over again is never the punishment". Keep inventory and
+## flags; lose XP down to the current level's floor (Progression tunable);
+## come back at full HP (agent interpretation - defeat already costs XP;
+## flagged for T-069). In a dungeon: respawn at the dungeon entrance on a
+## fresh hub (T-048 rebuild = puzzle + enemy reset), the suspended forest
+## kept beneath. Outside: respawn by the healer's campfire in the same
+## room. Defeat NEVER touches save files. Unregistered rooms (dev spikes)
+## keep the old restart-from-scratch flow; restart_game() itself stays for
+## the dev overlay.
 func handle_defeat() -> void:
-	await show_dialogue([
-		"You were defeated...",
-		"Everything fades to black.",
-		"...and the adventure begins anew.",
-	])
-	restart_game()
+	var map_id := MapRegistry.id_for(current_room)
+	if map_id == "":
+		await show_dialogue([
+			"You were defeated...",
+			"Everything fades to black.",
+			"...and the adventure begins anew.",
+		])
+		restart_game()
+		return
+	var lost := apply_defeat_xp_penalty()
+	heal_hero_to_full()
+	var lines := PackedStringArray(["You were defeated..."])
+	if lost > 0:
+		lines.append("(%d XP slips away...)" % lost)
+	if map_id == "forest":
+		lines.append("You come to by the healer's campfire.")
+	else:
+		lines.append("You come to at the dungeon's entrance.")
+	await show_dialogue(lines)
+	if map_id == "forest":
+		respawn_at_healer()
+	else:
+		respawn_at_dungeon_entrance()
+
+
+## Apply the D-008 XP penalty to every roster member; returns the total lost.
+func apply_defeat_xp_penalty() -> int:
+	var lost := 0
+	for id in state.party_roster:
+		var level: int = state.party_levels.get(id, 1)
+		var current: int = state.party_xp.get(id, 0)
+		var after := Progression.xp_after_defeat(current, level)
+		state.party_xp[id] = after
+		lost += maxi(current - after, 0)
+	return lost
+
+
+## In-dungeon respawn (T-041): free the current room and every suspended room
+## above the forest, then boot a FRESH hub - the T-048 rebuild rule resets
+## its puzzle and enemies for free. The suspended forest (when the player
+## came in the normal way) stays intact beneath; a dev-warped dungeon with an
+## empty stack just gets the fresh hub.
+func respawn_at_dungeon_entrance() -> void:
+	var keep: Node2D = null
+	if not room_stack.is_empty() and MapRegistry.id_for(room_stack[0]) == "forest":
+		keep = room_stack[0]
+	for r in room_stack:
+		if r != keep:
+			r.queue_free()
+	room_stack.clear()
+	if keep != null:
+		room_stack.append(keep)
+	if current_room:
+		current_room.queue_free()
+		current_room = null
+	boot_room(MapRegistry.build("tutorial_hub"))
+
+
+## Outside respawn (T-041): same room instance, player moved to a walkable
+## cell beside the healer (falling back to the room spawn if the campfire is
+## somehow crowded, and to a full restart if the room has no player at all).
+func respawn_at_healer() -> void:
+	var room := current_room as LdtkRoom
+	if room == null or room.player == null:
+		restart_game()
+		return
+	var anchor: Vector2i = room.healer.cell if room.healer != null else room.spawn_cell
+	var target := room.spawn_cell
+	for d in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.UP]:
+		if room.is_walkable(anchor + d):
+			target = anchor + d
+			break
+	room.teleport(room.player, target)
 
 
 ## Wipe the session and boot a fresh starting room via boot_factory.
