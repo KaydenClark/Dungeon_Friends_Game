@@ -143,6 +143,9 @@ func _run() -> void:
 		check(saved.flags == SceneManager.state.flags, "save snapshots the flags")
 		check(saved.inventory == SceneManager.state.inventory,
 				"save snapshots the inventory")
+	# Remembered for the load leg at the end of the run (T-042).
+	var save_cell: Vector2i = player.cell
+	var save_xp: int = SceneManager.total_xp
 
 	# 7. Boss fight: hunt the boss until it falls; it drops the key.
 	var boss_ok: bool = await _hunt_boss(player)
@@ -387,6 +390,23 @@ func _run() -> void:
 	check(SceneManager.inventory.has("shield"), "inventory still intact")
 	check(SceneManager.hero_hp == SceneManager.hero_stats.max_hp,
 			"full HP after the outside respawn")
+
+	# 16. Load leg (T-040/T-042): the crystal save from 6b restores position,
+	# XP, and inventory through the real load path - rolling back everything
+	# that happened since (shield, keys, dungeon flags).
+	check(SceneManager.load_game(1), "load_game read the crystal save back")
+	check(await _until(func() -> bool:
+			return SceneManager.current_room is ForestRoom \
+			and SceneManager.current_room != room \
+			and SceneManager.current_room.player != null),
+			"load booted a fresh forest with a player")
+	var lforest: ForestRoom = SceneManager.current_room
+	check(lforest.player.cell == save_cell, "player back at the save-point cell")
+	check(SceneManager.total_xp == save_xp,
+			"XP rolled back to the save point (%d)" % save_xp)
+	check(not SceneManager.inventory.has("shield"),
+			"post-save loot rolled back (no shield yet at the crystal)")
+	check(SceneManager.room_stack.is_empty(), "load cleared the room stack")
 
 	# Clean up the scratch save dir so smoke runs leave no residue.
 	var scratch := DirAccess.open("user://")
