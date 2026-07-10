@@ -11,8 +11,9 @@ var hud: Label
 func _ready() -> void:
 	SceneManager.register_main(
 		$WorldContainer, $CombatContainer, $UILayer, $TransitionLayer)
-	# The factory lets a party defeat rebuild the game from the start (T-029).
-	SceneManager.boot_factory = func() -> Node2D: return ForestRoom.new()
+	# The factory lets a party defeat rebuild the game from the start (T-029);
+	# it resolves through the map registry like every other room build (T-038).
+	SceneManager.boot_factory = func() -> Node2D: return MapRegistry.build("forest")
 	SceneManager.boot_room(SceneManager.boot_factory.call())
 	var hint := Label.new()
 	hint.text = "WASD / Arrows: move    E or Space: talk & interact"
