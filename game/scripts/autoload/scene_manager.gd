@@ -92,6 +92,35 @@ func save_game(slot: int = 1) -> bool:
 	return SaveManager.write(slot, data, save_dir)
 
 
+## Restore a saved session (T-040, D-011): swap in the saved GameState, tear
+## down the live room graph, and boot the saved map via the registry with the
+## player at the saved cell. Rooms rebuild opened doors/chests from flags in
+## _ready(), so no per-object load code exists here by design. A failed load
+## (missing/corrupt file, unknown map id) returns false and leaves the live
+## session untouched.
+func load_game(slot: int = 1) -> bool:
+	if world_container == null:
+		push_warning("load_game: no world container registered - not loading")
+		return false
+	var data := SaveManager.load_slot(slot, save_dir)
+	if data == null:
+		return false
+	var room := MapRegistry.build(data.current_map)
+	if room == null:
+		return false
+	state = data.to_game_state()
+	for r in room_stack:
+		r.queue_free()
+	room_stack.clear()
+	if current_room:
+		current_room.queue_free()
+		current_room = null
+	if room is LdtkRoom:
+		room.spawn_override = data.player_position
+	boot_room(room)
+	return true
+
+
 func _ready() -> void:
 	rng.randomize()
 	hero_stats = load("res://data/characters/hero.tres")

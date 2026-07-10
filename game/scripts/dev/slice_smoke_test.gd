@@ -47,6 +47,9 @@ func _run() -> void:
 	print("SLICE SMOKE TEST: begin")
 	SceneManager.rng.seed = 1234
 	SceneManager.auto_combat = true
+	# Scratch save dir BEFORE main boots: a real save in user://saves would
+	# otherwise pop the T-040 Continue/New Game prompt and stall the run.
+	SceneManager.save_dir = "user://saves_smoke_test"
 	var main: Node = (load("res://scenes/main.tscn") as PackedScene).instantiate()
 	add_child(main)
 	await get_tree().process_frame
@@ -123,9 +126,7 @@ func _run() -> void:
 			"healer restored HP to max (%d)" % SceneManager.hero_hp)
 
 	# 6b. Save crystal (T-039): interacting writes slot 1 with the live
-	# position and flags. Saves go to a scratch dir so a smoke run can never
-	# clobber a real save in user://saves.
-	SceneManager.save_dir = "user://saves_smoke_test"
+	# position and flags (into the scratch dir set at boot).
 	check(room.crystals.size() == 1, "a save crystal stands by the campfire")
 	var crystal: SaveCrystal = room.crystals[0]
 	check(await _go(player, crystal.cell + Vector2i.RIGHT), "reached the save crystal")
