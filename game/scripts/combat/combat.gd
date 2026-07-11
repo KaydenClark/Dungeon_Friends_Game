@@ -116,8 +116,12 @@ func _place_units(party: Array[CombatUnit], enemies: Array[CombatUnit]) -> void:
 
 
 func _ready() -> void:
-	arena_origin = Vector2((1280 - arena_w * TILE) / 2.0,
-			(720 - arena_h * TILE) / 2.0 - 20)
+	# B-11: center on the actual viewport, not a hardcoded 1280x720 - with
+	# canvas_items/expand stretch (flexible HD/ultrawide decision) the visible
+	# canvas is only 1280x720 at exactly 16:9.
+	var vs := get_viewport_rect().size
+	arena_origin = Vector2((vs.x - arena_w * TILE) / 2.0,
+			(vs.y - arena_h * TILE) / 2.0 - 20)
 	astar.region = Rect2i(0, 0, arena_w, arena_h)
 	astar.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_NEVER
 	astar.default_compute_heuristic = AStarGrid2D.HEURISTIC_MANHATTAN
@@ -597,8 +601,13 @@ func _menu_input(event: InputEvent) -> void:
 			menu_confirmed.emit(menu_index)
 	elif event.is_action_pressed("cancel"):
 		get_viewport().set_input_as_handled()
-		# Cancel picks the last entry (Wait / Back) so Q always backs out.
-		menu_confirmed.emit(menu_options.size() - 1)
+		# B-13: Q backs out only when the menu actually has a Back entry
+		# (target/ability/item submenus). On the root command menu the last
+		# entry is Wait, and a reflexive Q was silently ending the whole turn -
+		# there cancel is now a no-op; ending the turn takes a deliberate
+		# confirm on Wait.
+		if menu_options[menu_options.size() - 1].get("kind", "") == "back":
+			menu_confirmed.emit(menu_options.size() - 1)
 
 
 func _cursor_input(event: InputEvent) -> void:
@@ -645,6 +654,9 @@ func _next_enabled(from: int, step: int) -> int:
 # -------------------------------------------------------------------- view
 
 func _build_view() -> void:
+	# B-11: panel/label positions derive from the live viewport size (offsets
+	# preserve the original 1280x720 layout exactly at 16:9).
+	var vs := get_viewport_rect().size
 	layer = CanvasLayer.new()
 	layer.layer = 5
 	add_child(layer)
@@ -702,6 +714,11 @@ func _build_view() -> void:
 		u.info.add_theme_font_size_override("font_size", 15)
 		u.node.add_child(u.info)
 		_update_info(u)
+		# B-10: a unit that enters the battle already at 0 HP (a companion who
+		# fell last fight) must not stand on the field looking alive.
+		if not u.alive():
+			u.state = CombatUnit.EntityState.DEAD
+			u.node.visible = false
 		layer.add_child(u.node)
 	cursor_rect = ColorRect.new()
 	cursor_rect.color = Color(1, 1, 0.6, 0.35)
@@ -725,32 +742,34 @@ func _build_view() -> void:
 	turn_order_label.modulate = Color(0.95, 0.9, 0.7)
 	layer.add_child(turn_order_label)
 	party_status_label = Label.new()
-	party_status_label.position = Vector2(800, 38)
+	party_status_label.position = Vector2(vs.x - 480, 38)
 	party_status_label.add_theme_font_size_override("font_size", 17)
 	party_status_label.modulate = Color(0.78, 0.9, 1.0)
 	layer.add_child(party_status_label)
 	menu_panel = ColorRect.new()
 	menu_panel.color = Color(0.05, 0.04, 0.09, 0.82)
-	menu_panel.position = Vector2(56, 480)
+	menu_panel.position = Vector2(56, vs.y - 240)
 	menu_panel.size = Vector2(420, 210)
 	menu_panel.visible = false
 	layer.add_child(menu_panel)
 	prompt_label = Label.new()
-	prompt_label.position = Vector2(76, 492)
+	prompt_label.position = Vector2(76, vs.y - 228)
 	prompt_label.add_theme_font_size_override("font_size", 24)
 	prompt_label.modulate = Color(1, 0.95, 0.7)
 	prompt_label.visible = false
 	layer.add_child(prompt_label)
 	menu_label = Label.new()
-	menu_label.position = Vector2(92, 534)
+	menu_label.position = Vector2(92, vs.y - 186)
 	menu_label.add_theme_font_size_override("font_size", 24)
 	menu_label.visible = false
 	layer.add_child(menu_label)
 	continue_label = Label.new()
-	continue_label.position = Vector2(432, 466)
+	continue_label.position = Vector2(432, vs.y - 254)
 	continue_label.add_theme_font_size_override("font_size", 22)
 	continue_label.modulate = Color(0.75, 1.0, 0.75)
-	continue_label.text = "▶  Press E / Space to continue"
+	# B-09: E only - Space is the benched traversal action (D-022) and was
+	# never accepted by the CONTINUE handler; prompts are keyboard-only (D-019).
+	continue_label.text = "▶  Press E to continue"
 	continue_label.visible = false
 	layer.add_child(continue_label)
 	_refresh_hud()
@@ -831,8 +850,12 @@ func _refresh_hud() -> void:
 		var rows := PackedStringArray()
 		for u in units:
 			if u.is_player:
-				rows.append("%s  HP %d/%d  MP %d/%d" % [
-					u.display_name, u.hp, u.max_hp, u.mp, u.max_mp])
+				# B-10: a downed party member reads as DOWN, not as a live row.
+				if u.hp <= 0:
+					rows.append("%s  DOWN" % u.display_name)
+				else:
+					rows.append("%s  HP %d/%d  MP %d/%d" % [
+						u.display_name, u.hp, u.max_hp, u.mp, u.max_mp])
 		party_status_label.text = "\n".join(rows)
 
 

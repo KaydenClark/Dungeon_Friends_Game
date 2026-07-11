@@ -227,7 +227,10 @@ func show_dialogue(lines: PackedStringArray) -> void:
 
 
 func start_encounter(enemy: OverworldEnemy) -> void:
-	if in_encounter or world_container == null:
+	# B-12: refuse during a room transition - an encounter starting mid-fade
+	# would fight enter_room/exit_rooms over the fade rect and world container,
+	# and could seed its arena from the wrong room.
+	if in_encounter or transitioning or world_container == null:
 		return
 	if skip_combat:
 		# Dev-tools shortcut (T-030): instant victory, no combat scene.

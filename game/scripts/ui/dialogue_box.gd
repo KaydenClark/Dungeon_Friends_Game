@@ -58,6 +58,9 @@ func advance() -> void:
 func _show_line() -> void:
 	if idx < lines.size():
 		label.text = lines[idx]
+		# B-19: the hint distinguishes "more text" from "this closes the box",
+		# so the player knows when the next E ends the conversation.
+		hint.text = "E ▸" if idx < lines.size() - 1 else "E ■"
 
 
 func _unhandled_input(event: InputEvent) -> void:

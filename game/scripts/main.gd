@@ -36,7 +36,18 @@ func _ready() -> void:
 		add_child(prompt)
 		var continue_game: bool = await prompt.chosen
 		prompt.queue_free()
-		if continue_game and SceneManager.load_game(1):
+		if continue_game:
+			if SceneManager.load_game(1):
+				return
+			# B-14: never fall through to a fresh game silently - the player
+			# chose Continue and needs to know the load failed (the save file
+			# itself is untouched; load_game leaves it on disk).
+			SceneManager.boot_room(SceneManager.boot_factory.call())
+			await SceneManager.show_dialogue([
+				"The saved adventure could not be loaded...",
+				"(The save file was left untouched.)",
+				"Starting a new adventure for now.",
+			])
 			return
 	SceneManager.boot_room(SceneManager.boot_factory.call())
 
@@ -44,8 +55,19 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	# Tiny placeholder HUD (real UI is a later phase): live HP / XP / key
 	# status, so playtesters can see combat and loot actually change state.
+	# B-16: every roster member gets an HP readout - Buddy's post-fight health
+	# was invisible outside combat, so "is my companion down?" was unanswerable.
 	if SceneManager.hero_stats == null:
 		return
-	hud.text = "HP %d/%d    XP %d    Items: %s" % [
-		SceneManager.hero_hp, SceneManager.hero_stats.max_hp,
-		SceneManager.total_xp, SceneManager.inventory_summary()]
+	var rows := PackedStringArray()
+	for id in SceneManager.state.party_roster:
+		var stats := SceneManager.character_stats_for(id)
+		if stats == null:
+			continue
+		var hp: int = SceneManager.state.party_hp.get(id, stats.max_hp)
+		if hp <= 0:
+			rows.append("%s DOWN" % stats.display_name)
+		else:
+			rows.append("%s %d/%d" % [stats.display_name, hp, stats.max_hp])
+	hud.text = "%s    XP %d    Items: %s" % [
+		" | ".join(rows), SceneManager.total_xp, SceneManager.inventory_summary()]

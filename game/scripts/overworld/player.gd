@@ -41,6 +41,14 @@ const FALL_TIME := 0.3
 func fall_damage() -> int:
 	return FALL_DAMAGE
 
+## B-08 (2026-07-11, Kayden): overworld actors temporarily use the colored
+## placeholder bodies again. The runtime idle sprites have no directional
+## frames and no facing marker, which made interact/push targeting guesswork.
+## The square + face marker restores readable facing until the Mac Mini asset
+## merge supplies directional-capable art; combat keeps its sprites (no facing
+## there). Flip to true once directional sprites land.
+const USE_SPRITE_BODY := false
+
 const DIR_ACTIONS := {
 	"move_up": Vector2i.UP,
 	"move_down": Vector2i.DOWN,
@@ -60,7 +68,7 @@ var _pressed_stack: Array[Vector2i] = []
 
 func _ready() -> void:
 	var hero: CharacterStats = load("res://data/characters/hero.tres")
-	if not _make_sprite(hero.sprite_frames, 0.5):
+	if not USE_SPRITE_BODY or not _make_sprite(hero.sprite_frames, 0.5):
 		_make_body(Color(0.25, 0.5, 0.95))
 	# Snappier per-step tween than the default so grid movement reads as crisp
 	# steps rather than a laggy glide (playtest feedback 2026-07-05).

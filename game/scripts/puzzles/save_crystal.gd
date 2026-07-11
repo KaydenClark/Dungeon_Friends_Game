@@ -37,7 +37,9 @@ func interact() -> void:
 			"(Adventure saved.)",
 		])
 	else:
+		# B-18: player-facing copy - "check the log" means nothing to a player;
+		# the diagnostic detail already lands in push_warning from save_game().
 		SceneManager.show_dialogue([
 			"The crystal flickers... and dims.",
-			"(Saving failed - check the log.)",
+			"(Something is wrong - the adventure was not saved.)",
 		])
