@@ -104,3 +104,13 @@ func test_filled_pit_is_walkable_and_jumpable_from() -> void:
 	ok(p.try_jump(), "the remaining 1-cell gap is jumpable from the filled cell")
 	eq(p.cell, Vector2i(5, 2), "player lands beyond the pit")
 	g.queue_free()
+func test_space_is_jump_and_q_is_secondary_cancel() -> void:
+	var jump_keys := InputMap.action_get_events("jump") \
+			.filter(func(e: InputEvent) -> bool: return e is InputEventKey) \
+			.map(func(e: InputEventKey) -> int: return e.physical_keycode)
+	var cancel_keys := InputMap.action_get_events("cancel") \
+			.filter(func(e: InputEvent) -> bool: return e is InputEventKey) \
+			.map(func(e: InputEventKey) -> int: return e.physical_keycode)
+	ok(jump_keys.has(KEY_SPACE), "Space is the primary jump button")
+	ok(cancel_keys.has(KEY_Q), "Q is the keyboard cancel/stay button")
+	not_ok(cancel_keys.has(KEY_X), "X is no longer presented as stay/cancel")

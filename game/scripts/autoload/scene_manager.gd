@@ -392,8 +392,8 @@ func _build_enemy_units(enemy: OverworldEnemy) -> Array[CombatUnit]:
 ## combat grid from the current room's cells in a window around the contact
 ## point. Blocked terrain and pits both read as obstacles. Falls back to an
 ## open field when the local area can't fit both parties.
-const ARENA_W := 9
-const ARENA_H := 5
+const ARENA_W := 17
+const ARENA_H := 7
 func _arena_from_room(contact: Vector2i) -> Dictionary:
 	var open_field := {"w": ARENA_W, "h": ARENA_H, "blocked": []}
 	var room := current_room as RoomGrid
@@ -432,6 +432,11 @@ func _arena_from_room(contact: Vector2i) -> Dictionary:
 	for y in h:
 		for x in w:
 			var c := Vector2i(x, y)
+			# Keep three clear deployment columns at each edge. The local forest
+			# still shapes the middle of the battlefield, but can never box a
+			# party member in before their first turn.
+			if x < 3 or x >= w - 3:
+				continue
 			if not component.has(c):
 				blocked.append(c)
 	return {"w": w, "h": h, "blocked": blocked}
@@ -445,6 +450,16 @@ func heal_hero_to_full() -> void:
 		if stats:
 			state.party_hp[id] = stats.max_hp
 			state.party_mp[id] = stats.max_mp
+
+
+## The overworld avatar represents the whole traveling party. Environmental
+## hazards therefore persist damage for every member, not Hero alone.
+func damage_party(amount: int) -> void:
+	for id in state.party_roster:
+		var stats := character_stats_for(id)
+		if stats:
+			var hp: int = state.party_hp.get(id, stats.max_hp)
+			state.party_hp[id] = maxi(hp - amount, 0)
 
 
 ## Party defeat (T-041, D-004/D-008): checkpoints, not restarts - "not having

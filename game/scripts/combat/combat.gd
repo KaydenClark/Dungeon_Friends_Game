@@ -22,8 +22,8 @@ enum InputMode { NONE, MENU, CURSOR_MOVE, CURSOR_TARGET, CONTINUE }
 
 const TILE := 64
 
-var arena_w := 9
-var arena_h := 5
+var arena_w := 17
+var arena_h := 7
 var arena_blocked: Dictionary = {}   # Vector2i -> true
 var arena_origin := Vector2.ZERO
 
@@ -66,8 +66,8 @@ func setup(party: Array[CombatUnit], enemies: Array[CombatUnit],
 	rng = p_rng
 	auto_play = p_auto
 	defend_unlocked = p_defend_unlocked
-	arena_w = arena.get("w", 9)
-	arena_h = arena.get("h", 5)
+	arena_w = arena.get("w", 17)
+	arena_h = arena.get("h", 7)
 	for c in arena.get("blocked", []):
 		arena_blocked[c] = true
 	units.append_array(party)
@@ -75,19 +75,30 @@ func setup(party: Array[CombatUnit], enemies: Array[CombatUnit],
 	_place_units(party, enemies)
 
 
-## Deterministic spawn placement: party fills the leftmost free cells,
-## enemies the rightmost (column by column, top to bottom).
+## Deterministic formation placement: each side deploys vertically near its
+## edge, centered on the board. Allies never consume the cell directly in
+## front of Hero, and SceneManager keeps these deployment columns clear.
 func _place_units(party: Array[CombatUnit], enemies: Array[CombatUnit]) -> void:
 	var taken: Dictionary = {}
 	var free_left: Array[Vector2i] = []
 	var free_right: Array[Vector2i] = []
-	for x in arena_w:
-		for y in arena_h:
+	var center_y := arena_h / 2
+	for x in [mini(1, arena_w - 1), 0, mini(2, arena_w - 1)]:
+		for offset in arena_h:
+			var y: int = center_y + (offset + 1) / 2 * (1 if offset % 2 == 1 else -1)
+			if y < 0 or y >= arena_h:
+				continue
 			var c := Vector2i(x, y)
 			if not arena_blocked.has(c):
 				free_left.append(c)
-	free_right = free_left.duplicate()
-	free_right.reverse()
+	for x in [maxi(arena_w - 2, 0), arena_w - 1, maxi(arena_w - 3, 0)]:
+		for offset in arena_h:
+			var y: int = center_y + (offset + 1) / 2 * (1 if offset % 2 == 1 else -1)
+			if y < 0 or y >= arena_h:
+				continue
+			var c := Vector2i(x, y)
+			if not arena_blocked.has(c):
+				free_right.append(c)
 	var li := 0
 	for u in party:
 		while li < free_left.size() and taken.has(free_left[li]):
@@ -176,7 +187,7 @@ func _player_turn(u: CombatUnit) -> void:
 	# Moving: pick a destination inside the highlight (confirm on own cell or
 	# cancel = stay put).
 	u.state = CombatUnit.EntityState.MOVING
-	var dest := await _pick_cell(u.cell, reachable, "Move %s (E confirm, X stay)" % u.display_name)
+	var dest := await _pick_cell(u.cell, reachable, "Move %s (E confirm, Q stay)" % u.display_name)
 	_clear_highlights()
 	if dest != u.cell:
 		await _walk(u, dest)
@@ -546,7 +557,7 @@ func _menu_input(event: InputEvent) -> void:
 			menu_confirmed.emit(menu_index)
 	elif event.is_action_pressed("cancel"):
 		get_viewport().set_input_as_handled()
-		# Cancel picks the last entry (Wait / Back) so X always backs out.
+		# Cancel picks the last entry (Wait / Back) so Q always backs out.
 		menu_confirmed.emit(menu_options.size() - 1)
 
 
@@ -565,7 +576,7 @@ func _cursor_input(event: InputEvent) -> void:
 		cursor_confirmed.emit(cursor_cell)
 		return
 	elif event.is_action_pressed("cancel"):
-		# X = stay put: back out of the move without spending it.
+		# Q = stay put: back out of the move without spending it.
 		get_viewport().set_input_as_handled()
 		cursor_confirmed.emit(cursor_start)
 		return

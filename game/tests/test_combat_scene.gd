@@ -137,14 +137,31 @@ func test_arena_seed_keeps_only_the_contact_connected_region() -> void:
 	SceneManager.current_room = room
 	var arena: Dictionary = SceneManager._arena_from_room(Vector2i(4, 3))
 	SceneManager.current_room = saved_room
-	eq(arena["w"], 9, "window width clamps to 9")
+	eq(arena["w"], 12, "small rooms use their full width inside the 17-cell arena cap")
 	var blocked: Array = arena["blocked"]
 	ok(blocked.size() > 0, "the wall and pocket read as obstacles")
 	# The wall column sits at local x = 8 - origin.x; contact side stays open.
-	var origin_x: int = clampi(4 - 9 / 2, 0, 12 - 9)
+	var origin_x: int = 0
 	ok(blocked.has(Vector2i(8 - origin_x, 3)), "wall cell blocked in arena coords")
 	not_ok(blocked.has(Vector2i(4 - origin_x, 3)), "contact cell open")
 	room.free()
+
+
+func test_party_deploys_vertically_with_forward_space() -> void:
+	var hero := CombatUnit.from_character("hero", _character("hero"), 20, 5)
+	var buddy := CombatUnit.from_character("companion_test",
+			_character("companion_test"), 14, 6)
+	var foe := CombatUnit.from_enemy(_slime(), 0)
+	var c := _scene([hero, buddy], [foe])
+	c.arena_w = 17
+	c.arena_h = 7
+	c._place_units([hero, buddy], [foe])
+	eq(hero.cell.x, buddy.cell.x, "Buddy deploys beside Hero, never in front of Hero")
+	not_ok(c.arena_blocked.has(hero.cell + Vector2i.RIGHT),
+			"Hero always has an open forward deployment cell")
+	not_ok(buddy.cell == hero.cell + Vector2i.RIGHT,
+			"Buddy cannot consume Hero's first forward move")
+	c.free()
 
 
 func test_full_auto_battle_runs_to_victory_with_payload() -> void:

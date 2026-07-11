@@ -240,13 +240,17 @@ func _run() -> void:
 	check(await _go_grid(pit, pit_player, Vector2i(5, 10)), "walked to the first ledge")
 
 	# 11b. Pit fall (T-047): stepping into the ledge pit is a fall, not a
-	# refusal - 10% of max HP and a walk of shame back to the room's entrance.
+	# refusal - 10 HP party-wide and a walk of shame back to the room entrance.
 	var hp_before_fall: int = SceneManager.hero_hp
+	var buddy_hp_before_fall: int = SceneManager.state.party_hp.get("companion_test", 14)
 	check(await _step(pit_player, Vector2i.UP), "stepped into the ledge pit")
 	check(pit_player.cell == Vector2i(5, 11),
 			"fall respawned at the pit-room entrance")
 	check(SceneManager.hero_hp == hp_before_fall - pit_player.fall_damage(),
-			"the fall cost 10% of max HP (%d)" % pit_player.fall_damage())
+			"the fall cost 10 HP (%d)" % pit_player.fall_damage())
+	check(SceneManager.state.party_hp.get("companion_test", 0) \
+			== maxi(buddy_hp_before_fall - pit_player.fall_damage(), 0),
+			"the overworld fall injured Buddy too")
 	check(await _go_grid(pit, pit_player, Vector2i(5, 10)),
 			"walked back to the first ledge")
 	pit_player.set_facing(Vector2i.UP)
@@ -369,11 +373,11 @@ func _run() -> void:
 			"the suspended forest survives the dungeon defeat")
 	check(SceneManager.inventory.has("shield"), "inventory kept on defeat (D-008)")
 	check(SceneManager.total_xp == Progression.xp_after_defeat(xp_before_defeat, 1),
-			"defeat cost 25% of above-floor XP (%d -> %d)"
+			"defeat cost 25 percent of above-floor XP (%d -> %d)"
 			% [xp_before_defeat, SceneManager.total_xp])
 	check(SceneManager.hero_hp == int(round(
 			SceneManager.hero_stats.max_hp * SceneManager.RESPAWN_HP_FRACTION)),
-			"party respawns at 80% HP (%d)" % SceneManager.hero_hp)
+			"party respawns at 80 percent HP (%d)" % SceneManager.hero_hp)
 	check(SceneManager.flags.get("hub_seen", false),
 			"flags NOT wiped - checkpoints, not restarts")
 

@@ -28,6 +28,6 @@ func interact() -> void:
 	if room:
 		room.reset_puzzle()
 	SceneManager.show_dialogue([
-		"You pull the lever. Gears grind somewhere below...",
-		"The room's blocks slide back to where they began.",
+		"Reset lever - use only if a block gets stuck.",
+		"You pull it. Every movable block returns to where it began.",
 	])
