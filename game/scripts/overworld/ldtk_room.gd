@@ -77,6 +77,7 @@ func _build() -> void:
 	puzzle = PuzzleController.new()
 	puzzle.plates = plates
 	puzzle.doors = doors
+	puzzle.levers = levers
 	add_child(puzzle)
 	puzzle.wire()
 

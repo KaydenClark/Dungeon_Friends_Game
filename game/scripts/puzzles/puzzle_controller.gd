@@ -9,6 +9,7 @@ extends Node
 
 var plates: Array = []
 var doors: Array = []
+var levers: Array = []
 
 
 func wire() -> void:
@@ -30,6 +31,17 @@ func wire() -> void:
 		# Adopt the plate's current state (a block may already sit on it).
 		if plate.pressed:
 			door.set_held_open(true)
+	for lever: Lever in levers:
+		if lever.target_id == "":
+			continue
+		var door := _door_with_link(lever.target_id)
+		if door == null:
+			push_warning("PuzzleController: lever targets unknown door '%s'"
+					% lever.target_id)
+			continue
+		door.plate_driven = true
+		door.refresh_look()
+		lever.target_door = door
 
 
 func _door_with_link(id: String) -> LockedDoor:

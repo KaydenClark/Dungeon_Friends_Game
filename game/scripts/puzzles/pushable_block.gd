@@ -23,6 +23,8 @@ var sunk := false
 
 
 func _ready() -> void:
+	# Blocks must cover floor switches when used as their persistent weight.
+	z_index = 1
 	# Placeholder art until the post-Phase-2 art pass: a stone-grey slab with
 	# a lighter top face so it reads as a heavy, grabbable object.
 	body = ColorRect.new()

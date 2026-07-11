@@ -67,10 +67,8 @@ prompts show keyboard keys only until T-079 supplies controller glyphs):
 
 - WASD / arrow keys: grid-snapped movement. E: talk, interact, and confirm.
   Q: cancel/back. The controller equivalents remain D-pad, A, and X.
-- **Current implementation until T-078:** Space/B still jumps one cell over a
-  pit because the old dungeon route requires it. This behavior is superseded
-  in the plan: T-078 removes required jumping and recuts the dungeon around a
-  latching lever, momentary pressure plate, and pushable blocks.
+- Space/B remains reserved for a future traversal item, but no shipped room
+  requires manual jumping. The tutorial route uses mechanisms instead.
 - Loop: talk to the quest NPC -> bump a slime to enter the local-terrain
   tactical arena (D-012), controlling Hero + Buddy (D-013). WASD/arrows move
   the combat cursor or menu; E confirms; Q cancels or stays
@@ -81,19 +79,18 @@ prompts show keyboard keys only until T-079 supplies controller glyphs):
   four-room tutorial dungeon: the entry locks behind you; a wall of 13
   bricks spans the hub and exactly one pushes free (walk into bricks to
   test them; the optional reset lever is only for returning a stuck loose
-  brick to its starting cell); through the east gap, jump
-  the pit room's two 1-wide ledges, then push the block into the 2-wide
-  chasm and jump the remaining gap; beat the Dungeon Slime for the Dungeon
+  brick to its starting cell); through the east gap, step on the brass floor
+  plate to open the north gate, step off to see it close, then push the heavy
+  block left onto that same plate to hold the gate open; beat the Dungeon Slime for the Dungeon
   Key; loop back through the west shortcut; unlock the hub's north door and
   open the side room's chest for the shield - the entry unbolts and you
-  walk back out to the forest. The pressure plate is on hold (B-06) - no
-  shipped room uses one.
+  walk back out to the forest. The room is one continuous floor with no pits;
+  its east-side lever only resets a wedged block.
 - Saving and dying (Phase 3, built 2026-07-10): the cyan **save crystal**
   beside the healer's campfire writes slot 1 on interact; booting with a
   save shows a minimal Continue (E) / New Game (Q) prompt
   (D-011). **Walking into a pit** is a Zelda-style fall: 10 HP party-wide and a walk
-  back to the room's last-used entrance; current jumping is unchanged until
-  T-078 removes it from the required route (T-047).
+  back to the room's last-used entrance (T-047).
   **Party defeat** is a checkpoint, not a restart (T-041, tuned per D-014/
   D-015): keep inventory, lose 25% of your progress toward the next level,
   come back at 80% HP; in the dungeon you wake at the
@@ -145,13 +142,13 @@ autoload initialized.
 
 End-to-end scripted run of the whole slice (input map, movement/collision,
 NPC dialogue, enemy encounters, seeded d10 combat, key/door, then the full
-Phase 2 tutorial dungeon in its 2026-07-07 layout: hub lock-in, the
+Phase 2 tutorial dungeon in its current layout: hub lock-in, the
 13-brick wall's one loose brick (fixed bricks refuse the push), the north
-door locked without its key, two 1-wide ledge jumps, 2-wide chasm crossing
-via block-fill + jump, key-guardian fight -> dungeon_key, west loop back,
+door locked without its key, step-on/step-off momentary plate demonstration,
+block-held north gate with reset lever and no pits/jump, key-guardian fight -> dungeon_key, west loop back,
 north door unlock, chest room -> shield -> entry unbolts, return to the
 preserved forest, plus the Phase 3 save/load slice: a save-crystal write by
-the campfire, a ledge-pit fall (10 HP party-wide + entrance respawn), forced defeats
+the campfire, forced defeats
 proving the T-041 checkpoint respawns (dungeon -> fresh hub entrance,
 outside -> the healer), and a final load leg rolling back to the crystal
 save):
@@ -161,7 +158,7 @@ cd game
 /Applications/Godot.app/Contents/MacOS/Godot --headless --path . scenes/dev/slice_smoke_test.tscn
 ```
 
-Expected result: exit `0` and a final `SLICE SMOKE TEST: PASS (137/137
+Expected result: exit `0` and a final `SLICE SMOKE TEST: PASS (134/134
 checks)` line (~40-80s; the watchdog fails the run at 180s). A benign `ObjectDB instances leaked` warning
 at exit is known noise from quitting mid-coroutines; any `CHECK FAILED:` line
 or exit `1` is a real failure. Because roaming enemies move on real-time
@@ -226,7 +223,7 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
-per-suite tally (currently `UNIT TESTS: 27 suites, 171 tests, 626 checks, 0
+per-suite tally (currently `UNIT TESTS: 27 suites, 174 tests, 633 checks, 0
 failed`). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a
 few seconds (pure logic and controlled clocks, no real-time waits, unlike the
 slice smoke test; the tutorial soft-lock solver adds a second or two). Run
@@ -335,7 +332,8 @@ For the windowed T-069 acceptance gate:
 3. Control both Hero and the temporary Buddy companion; confirm initiative is
    per-unit, move/attack highlights are readable, and blocked cells refuse
    movement.
-4. Exercise Attack, Strike/Mend, Potion, Defend after obtaining the shield,
+4. Exercise Attack, Strike/Mend, named Potion selection (quantity + acting
+   unit shown before confirmation), Defend after obtaining the shield,
    and Wait. Judge the d10 odds, ranges, healing, damage, and first-read
    difficulty rather than treating the current numbers as final.
 5. After T-065/T-067, judge the zoom transition, exact-position return,

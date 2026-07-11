@@ -206,8 +206,9 @@ func _build_root_options(u: CombatUnit) -> Array:
 	opts.append({"label": "Attack", "enabled": not foes.is_empty(), "kind": "attack"})
 	var usable := _usable_abilities(u)
 	opts.append({"label": "Ability", "enabled": not usable.is_empty(), "kind": "ability"})
-	var potions: int = SceneManager.inventory.get("potion", 0)
-	opts.append({"label": "Item", "enabled": potions > 0, "kind": "item"})
+	var usable_items := _usable_item_ids()
+	opts.append({"label": "Item" if not usable_items.is_empty() else "Item (none)",
+			"enabled": not usable_items.is_empty(), "kind": "item"})
 	if defend_unlocked:
 		opts.append({"label": "Defend", "enabled": true, "kind": "defend"})
 	opts.append({"label": "Wait", "enabled": true, "kind": "wait"})
@@ -245,9 +246,12 @@ func _action_menu(u: CombatUnit) -> void:
 				await _execute_ability(u, target, ability)
 				return
 			"item":
-				# MVP item rule: a potion swigs on the spot - the acting unit
-				# heals itself (targeted item throws arrive with real item UI).
-				await _execute_item(u)
+				var item_pick: Dictionary = await _menu(u,
+						"Use which item on %s?" % u.display_name,
+						_build_item_options(u))
+				if item_pick.get("kind") != "item_choice":
+					continue
+				await _execute_item(u, item_pick["item_id"])
 				return
 			"defend":
 				u.defending = true
@@ -342,21 +346,57 @@ func _execute_ability(u: CombatUnit, target: CombatUnit, ability: AbilityData) -
 	await _wait_for_continue()
 
 
-func _execute_item(u: CombatUnit) -> void:
+## Combat-only item list. The full inventory belongs to Phase 5; this surface
+## deliberately includes only consumables with an implemented combat effect.
+func _usable_item_ids() -> Array[String]:
+	var ids: Array[String] = []
+	for raw_id in SceneManager.inventory:
+		var item_id := str(raw_id)
+		if int(SceneManager.inventory.get(item_id, 0)) <= 0:
+			continue
+		var item := ItemLibrary.get_item(item_id)
+		if item == null or item.item_type != ItemData.ItemType.CONSUMABLE:
+			continue
+		if int(item.stat_modifiers.get("heal", 0)) <= 0:
+			continue
+		ids.append(item_id)
+	ids.sort_custom(func(a: String, b: String) -> bool:
+		return ItemLibrary.display_name(a) < ItemLibrary.display_name(b))
+	return ids
+
+
+func _build_item_options(u: CombatUnit) -> Array:
+	var opts: Array = []
+	for item_id in _usable_item_ids():
+		var qty := int(SceneManager.inventory.get(item_id, 0))
+		opts.append({
+			"label": "%s x%d -> %s" % [ItemLibrary.display_name(item_id), qty,
+					u.display_name],
+			"enabled": true,
+			"kind": "item_choice",
+			"item_id": item_id,
+		})
+	opts.append({"label": "Back", "enabled": true, "kind": "back"})
+	return opts
+
+
+func _execute_item(u: CombatUnit, item_id := "potion") -> void:
 	u.state = CombatUnit.EntityState.EXECUTING_COMMAND
-	var potion := ItemLibrary.get_item("potion")
-	if potion == null or not SceneManager.remove_item("potion"):
-		_log("No potions left!")
+	var item := ItemLibrary.get_item(item_id)
+	if item == null or item.item_type != ItemData.ItemType.CONSUMABLE \
+			or int(item.stat_modifiers.get("heal", 0)) <= 0 \
+			or not SceneManager.remove_item(item_id):
+		_log("That item cannot be used right now.")
 		await _wait(0.4)
 		return
-	var amount := CombatMath.heal_amount(int(potion.stat_modifiers.get("heal", 5)))
+	var amount := CombatMath.heal_amount(int(item.stat_modifiers["heal"]))
 	u.hp = mini(u.max_hp, u.hp + amount)
 	_update_info(u)
 	_show_popup(u, "+%d" % amount, Color(0.45, 1.0, 0.6))
 	_refresh_hud()
-	_log("%s drinks a Potion — recovers %d HP (%d/%d)." % [
-		u.display_name, amount, u.hp, u.max_hp])
-	print("[combat] %s drank a potion for %d" % [u.display_name, amount])
+	_log("%s uses %s — recovers %d HP (%d/%d)." % [
+		u.display_name, item.display_name, amount, u.hp, u.max_hp])
+	print("[combat] %s used %s for %d" % [u.display_name, item_id, amount])
 	await _wait_for_continue()
 
 

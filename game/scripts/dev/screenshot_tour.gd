@@ -19,8 +19,11 @@ func _ready() -> void:
 
 
 func _run() -> void:
+	# Never let a real player save cover the tour with the boot prompt.
+	_clear_tour_saves()
+	SceneManager.save_dir = "user://saves_screenshot_tour"
 	# Skip the one-time room intros so dialogue boxes don't cover the shots.
-	for flag in ["hub_seen", "pit_room_seen", "chasm_hint_seen",
+	for flag in ["hub_seen", "pit_room_seen", "plate_hint_seen",
 			"fight_room_seen", "chest_room_seen"]:
 		SceneManager.flags[flag] = true
 	var main: Node = (load("res://scenes/main.tscn") as PackedScene).instantiate()
@@ -32,8 +35,21 @@ func _run() -> void:
 		_warp(room[1].new())
 		await _frames(20)
 		await _shot(room[0])
+	_clear_tour_saves()
+	SceneManager.save_dir = SaveManager.DEFAULT_DIR
 	print("SCREENSHOT TOUR: done -> ", out_dir)
 	get_tree().quit(0)
+
+
+func _clear_tour_saves() -> void:
+	var root := DirAccess.open("user://")
+	if root == null or not root.dir_exists("saves_screenshot_tour"):
+		return
+	var saves := DirAccess.open("user://saves_screenshot_tour")
+	if saves != null:
+		for f in saves.get_files():
+			saves.remove(f)
+	root.remove("saves_screenshot_tour")
 
 
 ## Same teardown the DebugOverlay warps use: boot the room with no stack.

@@ -180,14 +180,15 @@ above (no full dungeon, no boss, no save/load, no full party depth
 required) - treat it as the walking skeleton the fuller Phase 6 slice builds
 on top of, not a replacement for it.
 
-**Status (2026-07-10): Phase 2's puzzle acceptance is narrowly reopened and
-the Phase 4 tactical-combat core is playable.** The latest playthrough retired
+**Status (2026-07-10): Phase 2's puzzle recut is built and the Phase 4
+tactical-combat core is playable.** The latest playthrough retired
 jumping from the current dungeon: standing still and pressing jump reads as a
 janky hop rather than a believable gap crossing. Jump stays benched until a
-future Zelda-style traversal item gives it a clear rule. The tutorial dungeon
-will instead prove the first three puzzle primitives: a latching on/off lever,
-a momentary pressure plate, and pushable blocks. This is Phase 2 gap-closure
-work, not a new phase or a new system family.
+future Zelda-style traversal item gives it a clear rule. The tutorial's second
+room now teaches one idea on one continuous floor: player weight opens a
+momentary pressure-plate gate, stepping off closes it, and a pushable block
+holds it open. There are no pits or latching lever in that room; its remaining
+lever is only the block-reset escape valve.
 
 Touching a visible enemy now starts a near-full-screen 17x7 tactical battle.
 The literal local-terrain generator is being replaced by D-018's authored,
@@ -201,8 +202,9 @@ before their short hand-off fade and zoom back to the unchanged overworld
 position. The combat HUD shows live turn order, party HP/MP, action prompts,
 and damage/heal feedback. The completed headless battery is green at 22 suites
 / 140 tests / 490 checks, with the slice smoke at 111/111 on 5/5 runs.
-Phase 4 still needs the authored arena lane, readable Item selection, and the
-final T-069 windowed acceptance. After that and the tutorial puzzle recut pass,
+Item now opens a named consumable list showing quantity and acting unit before
+confirmation; Back consumes nothing. Phase 4 still needs the authored arena
+lane and final T-069 windowed acceptance. After that pass,
 Phase 5 (party/progression and character menu) is the next development phase.
 Real art remains a separate phase-timed asset pass.
 
@@ -223,8 +225,10 @@ Current phase:
   play-confirmed except for the newly reopened puzzle presentation: the LDtk
   entity pipeline (T-031), the LDtk-authored forest (T-011), puzzle primitives,
   dev tools (T-030), and the four-room tutorial dungeon (T-027). Jump is now
-  benched behind a future traversal item; pressure plates return alongside a
-  real latching lever and pushable blocks. Phase 1 is fully done (T-020's
+  benched behind a future traversal item; the reopened tutorial room now
+  focuses only on a momentary pressure plate plus its pushable-block solution.
+  The latching-lever primitive remains available for a later dedicated room.
+  Phase 1 is fully done (T-020's
   windowed 3-resolution check also passed 2026-07-08); Phase 0's M0.3
   (export presets) stays in the TASKBOARD Backlog. **Build-order
   re-sequencing (2026-07-08, Kayden):** combat is his main complaint, so
@@ -462,7 +466,7 @@ Dungeon_Friends_Game/
 | Combat | Turn-based tactical party-vs-enemy battle (BG3 turn-based mode) | **Built through T-068 (2026-07-09):** two-layer FSM (Battle FSM in `CombatScene`, per-entity FSM on `CombatUnit`) + `TurnManager` interleaved initiative; party from the GameState roster (hero + D-013 test companion) vs LDtk-authored `EncounterData` enemy parties; arena seeded from the local room terrain around the contact point, restricted to the contact-connected region (D-012); FE-style move-range highlight + cursor cell pick + threat fringe; Attack/Ability/Item/Defend commands (strike/mend spend MP, potions consume stock, Defend shield-gated per D-007); real `CombatMath` d10 formulas (numbers tunable at T-069); simple close-and-attack AI; contact zoom-in/out transition; turn-order/party-status HUD and damage/heal feedback. Still code-built (no `.tscn`) | `game/scripts/combat/combat.gd`, `combat_unit.gd`, `turn_manager.gd`, `combat_math.gd` |
 | UI (HUD, dialogue, pause, party menu) | Player-facing menus and status | dialogue box exists (`DialogueBox`, code-built); HUD/pause/party menus missing | `game/scripts/ui/dialogue_box.gd` |
 | `game/scenes/dev/display_scaling_spike.tscn` | Throwaway diagnostic - proves the new flexible HD/ultrawide stretch settings render an undistorted tile grid at 1280x720/1920x1080/3440x1440 | working (placeholder ColorRect tiles, no real art yet) | `game/scenes/dev/display_scaling_spike.tscn`, `game/scripts/dev/display_scaling_spike.gd` |
-| Tutorial dungeon (behind the boss door) | Four LDtk-authored rooms (`tutorial_dungeon.ldtk` levels HubRoom/ChestRoom/PitRoom/FightRoom, scripts `tutorial_*_room.gd`) navigated via `SceneManager.boot_room/enter_room/exit_room(s)`. T-078 will recut the required puzzle path around latching lever + momentary pressure plate + pushable blocks and remove manual jump requirements. | playable, but puzzle acceptance reopened 2026-07-10; T-078 ready | `game/scripts/overworld/tutorial_*_room.gd`, `game/assets/levels/tutorial_dungeon.ldtk` |
+| Tutorial dungeon (behind the boss door) | Four LDtk-authored rooms (`tutorial_dungeon.ldtk` levels HubRoom/ChestRoom/PitRoom/FightRoom, scripts `tutorial_*_room.gd`) navigated via `SceneManager.boot_room/enter_room/exit_room(s)`. T-078's second room is one continuous floor with a visible momentary plate, one heavy block, one plate-driven north gate, and a reset lever; no pits or required jump. | playable; automated puzzle acceptance green, windowed readability re-check pending | `game/scripts/overworld/tutorial_*_room.gd`, `game/assets/levels/tutorial_dungeon.ldtk` |
 
 ### Commands
 
@@ -814,7 +818,7 @@ Rules:
 | **D-020 ally collision is intentional combat balance:** allied units occupy cells and cannot move through each other. | Kayden's repeated teammate blocking felt like meaningful positioning pressure. Arena safety prevents unavoidable spawn traps, but movement order and lane management remain part of combat. | 2026-07-10 / Kayden latest playthrough |
 | **D-021 Item command must identify the item before use.** Phase 4 needs a minimal named item selection/confirmation surface; the full inventory/character-menu system remains Phase 5. | Pressing a generic Item command and consuming an unidentified item violates the Readable Tactical Combat pillar even if only one potion exists. | 2026-07-10 / Kayden latest playthrough |
 | **D-022 manual jumping benched until a traversal item.** Current dungeon progression cannot require the standing facing-hop or a forward+jump timing chord. | The old implementation was mechanically understandable but visually and physically incoherent. A future Zelda-style item can reintroduce traversal under a clearer contract. | 2026-07-10 / Kayden latest playthrough |
-| **D-023 first puzzle set:** latching on/off lever, momentary pressure plate, and pushable blocks. | This is the compact reusable Phase 2 vocabulary Kayden wants every early dungeon to build from. T-078 replaces the jump lesson and proves all three with readable state changes. | 2026-07-10 / Kayden latest playthrough |
+| **D-023 first puzzle vocabulary:** latching on/off lever, momentary pressure plate, and pushable blocks. **Playtest clarification:** do not teach them all in one room. T-078's second room isolates the plate/block lesson on a pit-free continuous floor; latching levers can appear in a later dedicated room. | The first recut mixed two mechanisms with pit-like visual bands and obscured the lesson. The ALTTP reference works because stepping on/off the floor switch produces one immediately visible gate response before the block becomes the lasting weight. | 2026-07-10 / Kayden screenshot playtest |
 
 ## Health Criteria
 

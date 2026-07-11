@@ -33,13 +33,23 @@ func _door(g: RoomGrid, c: Vector2i, link := "door_a") -> LockedDoor:
 	return d
 
 
-func _wire(plates: Array, doors: Array) -> PuzzleController:
+func _wire(plates: Array, doors: Array, levers: Array = []) -> PuzzleController:
 	var pc := PuzzleController.new()
 	pc.plates = plates
 	pc.doors = doors
+	pc.levers = levers
 	add_child(pc)
 	pc.wire()
 	return pc
+
+
+func _lever(g: RoomGrid, c: Vector2i, target := "door_a") -> Lever:
+	var lever := Lever.new()
+	lever.room = g
+	lever.cell = c
+	lever.target_id = target
+	g.register(lever, c)
+	return lever
 
 
 func test_player_press_and_release() -> void:
@@ -136,4 +146,20 @@ func test_key_door_unaffected_by_plates() -> void:
 	g.register(p, Vector2i(3, 4))
 	p.try_step(Vector2i.UP)
 	not_ok(door.held_open, "pressing an unrelated plate leaves the door shut")
+	g.queue_free()
+
+
+func test_latching_lever_toggles_linked_door() -> void:
+	var g := _make_grid()
+	var door := _door(g, Vector2i(5, 3))
+	var lever := _lever(g, Vector2i(2, 3))
+	_wire([], [door], [lever])
+	ok(door.plate_driven, "linked lever marks the door mechanism-driven")
+	not_ok(lever.latched, "lever starts off")
+	lever.interact()
+	ok(lever.latched and door.held_open, "first pull latches on and opens door")
+	ok(g.is_walkable(door.cell), "latched-open door is walkable")
+	lever.interact()
+	not_ok(lever.latched or door.held_open, "second pull latches off and closes door")
+	not_ok(g.is_walkable(door.cell), "latched-off door blocks again")
 	g.queue_free()
