@@ -41,13 +41,9 @@ const FALL_TIME := 0.3
 func fall_damage() -> int:
 	return FALL_DAMAGE
 
-## B-08 (2026-07-11, Kayden): overworld actors temporarily use the colored
-## placeholder bodies again. The runtime idle sprites have no directional
-## frames and no facing marker, which made interact/push targeting guesswork.
-## The square + face marker restores readable facing until the Mac Mini asset
-## merge supplies directional-capable art; combat keeps its sprites (no facing
-## there). Flip to true once directional sprites land.
-const USE_SPRITE_BODY := false
+## The Kenney skeleton is enabled for visual playtesting. Directional animation
+## remains a later polish pass, but the promoted sprite is intentional here.
+const USE_SPRITE_BODY := true
 
 const DIR_ACTIONS := {
 	"move_up": Vector2i.UP,

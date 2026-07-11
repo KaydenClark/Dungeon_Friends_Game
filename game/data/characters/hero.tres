@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/data/character_stats.gd" id="1_hero"]
 [ext_resource type="Resource" path="res://data/abilities/strike.tres" id="2_strike"]
-[ext_resource type="SpriteFrames" path="res://data/sprites/hero_knight_idle.tres" id="3_sprite"]
+[ext_resource type="SpriteFrames" path="res://data/sprites/kenney_hero.tres" id="3_sprite"]
 
 [resource]
 script = ExtResource("1_hero")

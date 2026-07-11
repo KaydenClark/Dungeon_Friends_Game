@@ -36,6 +36,8 @@ const SUITES := [
 	"res://tests/test_ldtk_pipeline.gd",
 	"res://tests/test_tutorial_softlock.gd",
 	"res://tests/test_debug_overlay.gd",
+	"res://tests/test_kenney_manifest.gd",
+	"res://tests/test_input_prompts.gd",
 ]
 
 

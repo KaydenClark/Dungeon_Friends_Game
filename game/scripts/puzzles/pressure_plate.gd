@@ -17,31 +17,16 @@ var cell := Vector2i.ZERO
 ## link id of the LockedDoor this plate drives (wired by PuzzleController).
 @export var target_id := ""
 var pressed := false
-var _face: ColorRect
-var _center: ColorRect
+var _sprite: Sprite2D
 
 
 func _ready() -> void:
-	# Placeholder art: a flush brass floor switch, inspired by the readable
-	# round pressure buttons in A Link to the Past. It stays under actors.
-	# The imported floor TileMap is drawn first. Keep the switch above that
-	# floor; actors/blocks use a higher z-index and still cover it naturally.
 	z_index = 0
-	var rim := ColorRect.new()
-	rim.color = Color(0.28, 0.18, 0.08)
-	rim.position = Vector2(-24, -24)
-	rim.size = Vector2(48, 48)
-	add_child(rim)
-	_face = ColorRect.new()
-	_face.color = Color(0.86, 0.58, 0.16)
-	_face.position = Vector2(-19, -19)
-	_face.size = Vector2(38, 38)
-	add_child(_face)
-	_center = ColorRect.new()
-	_center.color = Color(1.0, 0.82, 0.32)
-	_center.position = Vector2(-9, -9)
-	_center.size = Vector2(18, 18)
-	add_child(_center)
+	_sprite = Sprite2D.new()
+	_sprite.texture = load("res://assets/art/objects/kenney/pressure_plate.png")
+	_sprite.scale = Vector2.ONE * 3.0
+	_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	add_child(_sprite)
 	_refresh()
 
 
@@ -65,8 +50,7 @@ func _refresh() -> void:
 	if now == pressed:
 		return
 	pressed = now
-	if _face:
-		_face.color = Color(0.48, 0.30, 0.08) if pressed else Color(0.86, 0.58, 0.16)
-	if _center:
-		_center.color = Color(0.62, 0.40, 0.10) if pressed else Color(1.0, 0.82, 0.32)
+	if _sprite:
+		_sprite.modulate = Color(0.55, 0.55, 0.55) if pressed else Color.WHITE
+		_sprite.position.y = 4.0 if pressed else 0.0
 	pressed_changed.emit(pressed)

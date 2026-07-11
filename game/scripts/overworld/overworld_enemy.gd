@@ -37,14 +37,12 @@ var home_cell := Vector2i.ZERO
 var _step_accum := 0.0
 
 
-## B-08 (2026-07-11): see Player.USE_SPRITE_BODY - overworld actors revert to
-## placeholder bodies until directional-capable art lands in the asset merge.
-const USE_SPRITE_BODY := false
-
-
 func _ready() -> void:
-	if USE_SPRITE_BODY and stats != null \
-			and _make_sprite(stats.sprite_frames, 0.68 if is_boss else 0.5):
+	if stats != null and _make_sprite(stats.sprite_frames, 0.68 if is_boss else 0.5):
+		if body is AnimatedSprite2D:
+			body.scale = Vector2.ONE * (5.0 if is_boss else 4.0)
+			body.modulate = Color(0.95, 0.42, 0.5) if is_boss else (Color(0.55, 0.7, 1.0) \
+					if stats.id == "dungeon_slime" else Color.WHITE)
 		return
 	var tri := Polygon2D.new()
 	var s := 30.0 if is_boss else 24.0

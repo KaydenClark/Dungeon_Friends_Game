@@ -13,21 +13,15 @@ var cell := Vector2i.ZERO
 @export var target_id := ""
 var target_door: LockedDoor
 var latched := false
-var _handle: ColorRect
+var _sprite: Sprite2D
 
 
 func _ready() -> void:
-	# Placeholder art: a bronze base with an upright handle.
-	var base := ColorRect.new()
-	base.color = Color(0.42, 0.32, 0.2)
-	base.position = Vector2(-20, 2)
-	base.size = Vector2(40, 22)
-	add_child(base)
-	_handle = ColorRect.new()
-	_handle.color = Color(0.75, 0.62, 0.3)
-	_handle.position = Vector2(-4, -24)
-	_handle.size = Vector2(8, 28)
-	add_child(_handle)
+	_sprite = Sprite2D.new()
+	_sprite.texture = load("res://assets/art/objects/kenney/reset_lever.png")
+	_sprite.scale = Vector2.ONE * 4.0
+	_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	add_child(_sprite)
 	_refresh_look()
 
 
@@ -50,7 +44,7 @@ func interact() -> void:
 
 
 func _refresh_look() -> void:
-	if _handle == null:
+	if _sprite == null:
 		return
-	_handle.position = Vector2(8, -18) if latched else Vector2(-4, -24)
-	_handle.color = Color(0.45, 0.95, 0.55) if latched else Color(0.75, 0.62, 0.3)
+	_sprite.flip_h = latched
+	_sprite.modulate = Color(0.62, 1.0, 0.68) if latched else Color.WHITE
