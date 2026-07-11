@@ -58,6 +58,12 @@ func set_facing(dir: Vector2i) -> void:
 	facing = dir
 	if face_marker:
 		face_marker.position = Vector2(-6, -6) + Vector2(dir) * 18.0
+	# Beta facing readability (B-08 follow-up): idle-only sprites get a
+	# horizontal flip on sideways facing. Front-facing art makes this a no-op;
+	# side-facing art reads correctly. Assumes right-facing native art - if the
+	# Kenney sheet faces left, invert the comparison.
+	if body is AnimatedSprite2D and dir.x != 0:
+		body.flip_h = dir.x < 0
 
 
 ## Called when a step is blocked by another occupant. Subclasses override
