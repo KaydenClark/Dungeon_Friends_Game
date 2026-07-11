@@ -62,14 +62,18 @@ Expected result: a 1280x720 window opens (flexible HD/ultrawide `canvas_items`/
 showing the first-playable forest slice with placeholder-generated tile and
 sprite art. No console errors.
 
-Playing the slice (updated 2026-07-09 for the Phase 4 combat core; controls
-come from the T-009 input map plus the T-025 jump):
+Playing the slice (updated 2026-07-10 after the latest playthrough; on-screen
+prompts show keyboard keys only until T-079 supplies controller glyphs):
 
-- WASD / arrow keys: grid-snapped movement. E: talk & interact;
-  Enter / Space advances dialogue. Space (or C): jump one cell over a pit.
+- WASD / arrow keys: grid-snapped movement. E: talk, interact, and confirm.
+  Q: cancel/back. The controller equivalents remain D-pad, A, and X.
+- **Current implementation until T-078:** Space/B still jumps one cell over a
+  pit because the old dungeon route requires it. This behavior is superseded
+  in the plan: T-078 removes required jumping and recuts the dungeon around a
+  latching lever, momentary pressure plate, and pushable blocks.
 - Loop: talk to the quest NPC -> bump a slime to enter the local-terrain
   tactical arena (D-012), controlling Hero + Buddy (D-013). WASD/arrows move
-  the combat cursor or menu; E/Space/Enter confirms; Q/Escape cancels or stays
+  the combat cursor or menu; E confirms; Q cancels or stays
   put. On each party turn, choose a highlighted destination, then
   Attack/Ability/Item/Defend (Defend appears only after earning the shield) or
   Wait. Beat the leashed Boss Slime by the east
@@ -86,9 +90,10 @@ come from the T-009 input map plus the T-025 jump):
   shipped room uses one.
 - Saving and dying (Phase 3, built 2026-07-10): the cyan **save crystal**
   beside the healer's campfire writes slot 1 on interact; booting with a
-  save shows a minimal Continue (E/Space) / New Game (Q/Esc) prompt
+  save shows a minimal Continue (E) / New Game (Q) prompt
   (D-011). **Walking into a pit** is a Zelda-style fall: 10 HP party-wide and a walk
-  back to the room's last-used entrance; jumping is unchanged (T-047).
+  back to the room's last-used entrance; current jumping is unchanged until
+  T-078 removes it from the required route (T-047).
   **Party defeat** is a checkpoint, not a restart (T-041, tuned per D-014/
   D-015): keep inventory, lose 25% of your progress toward the next level,
   come back at 80% HP; in the dungeon you wake at the

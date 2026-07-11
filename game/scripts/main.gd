@@ -15,7 +15,7 @@ func _ready() -> void:
 	# it resolves through the map registry like every other room build (T-038).
 	SceneManager.boot_factory = func() -> Node2D: return MapRegistry.build("forest")
 	var hint := Label.new()
-	hint.text = "WASD / Arrows: move    E or Space: talk & interact"
+	hint.text = "WASD / Arrows: move    E: talk & interact    Space: jump"
 	hint.position = Vector2(16, 8)
 	hint.add_theme_font_size_override("font_size", 16)
 	hint.modulate = Color(1, 1, 1, 0.75)

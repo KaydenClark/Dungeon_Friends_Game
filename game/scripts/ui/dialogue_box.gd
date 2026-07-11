@@ -31,7 +31,7 @@ func _init() -> void:
 	label.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	vbox.add_child(label)
 	hint = Label.new()
-	hint.text = "E / Space / Enter ▸"
+	hint.text = "E ▸"
 	hint.add_theme_font_size_override("font_size", 14)
 	hint.modulate = Color(1, 1, 1, 0.5)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT

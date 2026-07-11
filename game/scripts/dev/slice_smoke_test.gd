@@ -55,9 +55,9 @@ func _run() -> void:
 	add_child(main)
 	await get_tree().process_frame
 
-	# 1. Input map (T-009 + T-025): all 9 actions exist with >= 1 binding.
+	# 1. Input map (T-009 + T-025): all 10 actions exist with >= 1 binding.
 	for a in ["move_up", "move_down", "move_left", "move_right",
-			"interact", "confirm", "cancel", "menu", "jump"]:
+			"interact", "confirm", "cancel", "menu", "character_menu", "jump"]:
 		check(InputMap.has_action(a) and InputMap.action_get_events(a).size() > 0,
 				"input action bound: " + a)
 
