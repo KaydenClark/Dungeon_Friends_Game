@@ -487,6 +487,16 @@ writes and tolerant loads, exactly the table's shape (no
 `defeated_enemy_ids`). `EnemyStats.loot_table` deliberately
 remains a `PackedStringArray` of item ids resolved through the library (T-043).
 
+**Enemy archetypes and variants (2026-07-10):** LDtk Enemy instances stay
+lightweight placement records. Their `StatsId` selects one shared
+`EnemyStats` resource under `game/data/enemies/`; changing that `.tres`
+updates every placed enemy with the same id. Instance-only map behavior
+(spawn cell, patrol `LeashRadius`, boss flag, encounter group, unique id)
+stays in LDtk. New tiers/elements are new explicit resources and ids rather
+than copied per-instance numbers (for example `slime_1`, `slime_1_boss`,
+`slime_1_miniboss`, `slime_2_fire`, `slime_2_ice`). Display names remain
+player-facing and may change without changing the stable id.
+
 ## Party And Combat Model
 
 Clarified 2026-07-06, combat model sharpened 2026-07-08 (Kayden) - this shapes
@@ -600,6 +610,12 @@ Rules:
   `Wall`/`Water`-`Pit`/`PuzzleTrigger`; entity layers for spawns, NPCs,
   enemies, pushable blocks, locked doors, room-transition triggers. Use
   `TileMapLayer`, never the deprecated `TileMap` node.
+  - Transitional source state (2026-07-10): the four existing 1.5.3 projects
+    under `game/assets/levels/` are repaired as editor-openable sources while
+    the planned `world.ldtk` consolidation remains future work. Saving in
+    LDtk requires a Godot reimport before play. Forest regular slimes use
+    `StatsId=forest_slime` and patrol within `LeashRadius=3`; the boss keeps
+    its authored radius of 2.
 - **Puzzle primitives**: `PushableBlock`, `PressurePlate`, `Switch`/`Lever`,
   `LockedDoor` - LDtk entity custom fields carry linking IDs; a per-room
   `PuzzleController` wires signals at `_ready()` (MVP choice - simpler to

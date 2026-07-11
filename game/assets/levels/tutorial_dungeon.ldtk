@@ -11,7 +11,7 @@
  "iid": "00000000-0000-0000-0000-000000000055",
  "jsonVersion": "1.5.3",
  "appBuildId": 473703,
- "nextUid": 1000,
+ "nextUid": 1011,
  "identifierStyle": "Capitalize",
  "toc": [],
  "worldLayout": "GridVania",
@@ -220,7 +220,7 @@
     "lineOpacity": 1,
     "hollow": false,
     "color": "#4FC3F7",
-    "renderMode": "Rect",
+    "renderMode": "Rectangle",
     "showName": true,
     "tilesetId": null,
     "tileRenderMode": "FitInside",
@@ -255,7 +255,7 @@
     "lineOpacity": 1,
     "hollow": false,
     "color": "#EEC643",
-    "renderMode": "Rect",
+    "renderMode": "Rectangle",
     "showName": true,
     "tilesetId": null,
     "tileRenderMode": "FitInside",
@@ -290,7 +290,7 @@
     "lineOpacity": 1,
     "hollow": false,
     "color": "#D9312E",
-    "renderMode": "Rect",
+    "renderMode": "Rectangle",
     "showName": true,
     "tilesetId": null,
     "tileRenderMode": "FitInside",
@@ -302,7 +302,119 @@
     "limitBehavior": "MoveLastOne",
     "pivotX": 0,
     "pivotY": 0,
-    "fieldDefs": []
+    "fieldDefs": [
+     {
+      "identifier": "StatsId",
+      "doc": null,
+      "__type": "String",
+      "uid": 1005,
+      "type": "F_String",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     },
+     {
+      "identifier": "LeashRadius",
+      "doc": null,
+      "__type": "Int",
+      "uid": 1006,
+      "type": "F_Int",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     },
+     {
+      "identifier": "UniqueId",
+      "doc": null,
+      "__type": "String",
+      "uid": 1007,
+      "type": "F_String",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     }
+    ]
    },
    {
     "identifier": "LockedDoor",
@@ -325,7 +437,7 @@
     "lineOpacity": 1,
     "hollow": false,
     "color": "#8A5A2B",
-    "renderMode": "Rect",
+    "renderMode": "Rectangle",
     "showName": true,
     "tilesetId": null,
     "tileRenderMode": "FitInside",
@@ -337,7 +449,82 @@
     "limitBehavior": "MoveLastOne",
     "pivotX": 0,
     "pivotY": 0,
-    "fieldDefs": []
+    "fieldDefs": [
+     {
+      "identifier": "KeyId",
+      "doc": null,
+      "__type": "String",
+      "uid": 1000,
+      "type": "F_String",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     },
+     {
+      "identifier": "LinkId",
+      "doc": null,
+      "__type": "String",
+      "uid": 1001,
+      "type": "F_String",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     }
+    ]
    },
    {
     "identifier": "PushableBlock",
@@ -360,7 +547,7 @@
     "lineOpacity": 1,
     "hollow": false,
     "color": "#8E8A84",
-    "renderMode": "Rect",
+    "renderMode": "Rectangle",
     "showName": true,
     "tilesetId": null,
     "tileRenderMode": "FitInside",
@@ -372,7 +559,82 @@
     "limitBehavior": "MoveLastOne",
     "pivotX": 0,
     "pivotY": 0,
-    "fieldDefs": []
+    "fieldDefs": [
+     {
+      "identifier": "LinkId",
+      "doc": null,
+      "__type": "String",
+      "uid": 1003,
+      "type": "F_String",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     },
+     {
+      "identifier": "Movable",
+      "doc": null,
+      "__type": "Bool",
+      "uid": 1004,
+      "type": "F_Bool",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     }
+    ]
    },
    {
     "identifier": "PressurePlate",
@@ -395,7 +657,7 @@
     "lineOpacity": 1,
     "hollow": false,
     "color": "#9FA8B5",
-    "renderMode": "Rect",
+    "renderMode": "Rectangle",
     "showName": true,
     "tilesetId": null,
     "tileRenderMode": "FitInside",
@@ -430,7 +692,7 @@
     "lineOpacity": 1,
     "hollow": false,
     "color": "#C08A3E",
-    "renderMode": "Rect",
+    "renderMode": "Rectangle",
     "showName": true,
     "tilesetId": null,
     "tileRenderMode": "FitInside",
@@ -442,7 +704,119 @@
     "limitBehavior": "MoveLastOne",
     "pivotX": 0,
     "pivotY": 0,
-    "fieldDefs": []
+    "fieldDefs": [
+     {
+      "identifier": "Id",
+      "doc": null,
+      "__type": "String",
+      "uid": 1008,
+      "type": "F_String",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     },
+     {
+      "identifier": "KeyId",
+      "doc": null,
+      "__type": "String",
+      "uid": 1009,
+      "type": "F_String",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     },
+     {
+      "identifier": "RewardId",
+      "doc": null,
+      "__type": "String",
+      "uid": 1010,
+      "type": "F_String",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     }
+    ]
    },
    {
     "identifier": "Lever",
@@ -465,7 +839,7 @@
     "lineOpacity": 1,
     "hollow": false,
     "color": "#B8944D",
-    "renderMode": "Rect",
+    "renderMode": "Rectangle",
     "showName": true,
     "tilesetId": null,
     "tileRenderMode": "FitInside",
@@ -500,7 +874,7 @@
     "lineOpacity": 1,
     "hollow": false,
     "color": "#7E57C2",
-    "renderMode": "Rect",
+    "renderMode": "Rectangle",
     "showName": true,
     "tilesetId": null,
     "tileRenderMode": "FitInside",
@@ -512,7 +886,45 @@
     "limitBehavior": "MoveLastOne",
     "pivotX": 0,
     "pivotY": 0,
-    "fieldDefs": []
+    "fieldDefs": [
+     {
+      "identifier": "TargetRoom",
+      "doc": null,
+      "__type": "String",
+      "uid": 1002,
+      "type": "F_String",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     }
+    ]
    }
   ],
   "tilesets": [
@@ -531,7 +943,8 @@
     "tags": [],
     "tagsSourceEnumUid": null,
     "enumTags": [],
-    "customData": []
+    "customData": [],
+    "savedSelections": []
    }
   ],
   "enums": [],
@@ -664,16 +1077,30 @@
          "__type": "String",
          "__value": "",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1000,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            ""
+           ]
+          }
+         ]
         },
         {
          "__identifier": "LinkId",
          "__type": "String",
          "__value": "hub_entry",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1001,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "hub_entry"
+           ]
+          }
+         ]
         }
        ]
       },
@@ -706,8 +1133,15 @@
          "__type": "String",
          "__value": "forest_exit",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1002,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "forest_exit"
+           ]
+          }
+         ]
         }
        ]
       },
@@ -740,16 +1174,30 @@
          "__type": "String",
          "__value": "",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1000,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            ""
+           ]
+          }
+         ]
         },
         {
          "__identifier": "LinkId",
          "__type": "String",
          "__value": "hub_west",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1001,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "hub_west"
+           ]
+          }
+         ]
         }
        ]
       },
@@ -782,8 +1230,15 @@
          "__type": "String",
          "__value": "fight_room_shortcut",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1002,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "fight_room_shortcut"
+           ]
+          }
+         ]
         }
        ]
       },
@@ -816,16 +1271,30 @@
          "__type": "String",
          "__value": "dungeon_key",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1000,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "dungeon_key"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "LinkId",
          "__type": "String",
          "__value": "chest_door",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1001,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "chest_door"
+           ]
+          }
+         ]
         }
        ]
       },
@@ -858,8 +1327,15 @@
          "__type": "String",
          "__value": "chest_room",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1002,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "chest_room"
+           ]
+          }
+         ]
         }
        ]
       },
@@ -892,8 +1368,15 @@
          "__type": "String",
          "__value": "pit_room",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1002,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "pit_room"
+           ]
+          }
+         ]
         }
        ]
       },
@@ -926,16 +1409,30 @@
          "__type": "String",
          "__value": "hub_wall_1",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1003,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "hub_wall_1"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "Movable",
          "__type": "Bool",
          "__value": false,
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1004,
+         "realEditorValues": [
+          {
+           "id": "V_Bool",
+           "params": [
+            false
+           ]
+          }
+         ]
         }
        ]
       },
@@ -968,16 +1465,30 @@
          "__type": "String",
          "__value": "hub_wall_2",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1003,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "hub_wall_2"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "Movable",
          "__type": "Bool",
          "__value": false,
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1004,
+         "realEditorValues": [
+          {
+           "id": "V_Bool",
+           "params": [
+            false
+           ]
+          }
+         ]
         }
        ]
       },
@@ -1010,16 +1521,30 @@
          "__type": "String",
          "__value": "hub_wall_3",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1003,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "hub_wall_3"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "Movable",
          "__type": "Bool",
          "__value": false,
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1004,
+         "realEditorValues": [
+          {
+           "id": "V_Bool",
+           "params": [
+            false
+           ]
+          }
+         ]
         }
        ]
       },
@@ -1052,16 +1577,30 @@
          "__type": "String",
          "__value": "hub_wall_4",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1003,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "hub_wall_4"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "Movable",
          "__type": "Bool",
          "__value": false,
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1004,
+         "realEditorValues": [
+          {
+           "id": "V_Bool",
+           "params": [
+            false
+           ]
+          }
+         ]
         }
        ]
       },
@@ -1094,16 +1633,30 @@
          "__type": "String",
          "__value": "hub_wall_5",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1003,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "hub_wall_5"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "Movable",
          "__type": "Bool",
          "__value": false,
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1004,
+         "realEditorValues": [
+          {
+           "id": "V_Bool",
+           "params": [
+            false
+           ]
+          }
+         ]
         }
        ]
       },
@@ -1136,16 +1689,30 @@
          "__type": "String",
          "__value": "hub_block",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1003,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "hub_block"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "Movable",
          "__type": "Bool",
          "__value": true,
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1004,
+         "realEditorValues": [
+          {
+           "id": "V_Bool",
+           "params": [
+            true
+           ]
+          }
+         ]
         }
        ]
       },
@@ -1178,16 +1745,30 @@
          "__type": "String",
          "__value": "hub_wall_7",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1003,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "hub_wall_7"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "Movable",
          "__type": "Bool",
          "__value": false,
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1004,
+         "realEditorValues": [
+          {
+           "id": "V_Bool",
+           "params": [
+            false
+           ]
+          }
+         ]
         }
        ]
       },
@@ -1220,16 +1801,30 @@
          "__type": "String",
          "__value": "hub_wall_8",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1003,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "hub_wall_8"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "Movable",
          "__type": "Bool",
          "__value": false,
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1004,
+         "realEditorValues": [
+          {
+           "id": "V_Bool",
+           "params": [
+            false
+           ]
+          }
+         ]
         }
        ]
       },
@@ -1262,16 +1857,30 @@
          "__type": "String",
          "__value": "hub_wall_9",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1003,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "hub_wall_9"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "Movable",
          "__type": "Bool",
          "__value": false,
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1004,
+         "realEditorValues": [
+          {
+           "id": "V_Bool",
+           "params": [
+            false
+           ]
+          }
+         ]
         }
        ]
       },
@@ -1304,16 +1913,30 @@
          "__type": "String",
          "__value": "hub_wall_10",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1003,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "hub_wall_10"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "Movable",
          "__type": "Bool",
          "__value": false,
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1004,
+         "realEditorValues": [
+          {
+           "id": "V_Bool",
+           "params": [
+            false
+           ]
+          }
+         ]
         }
        ]
       },
@@ -1346,16 +1969,30 @@
          "__type": "String",
          "__value": "hub_wall_11",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1003,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "hub_wall_11"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "Movable",
          "__type": "Bool",
          "__value": false,
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1004,
+         "realEditorValues": [
+          {
+           "id": "V_Bool",
+           "params": [
+            false
+           ]
+          }
+         ]
         }
        ]
       },
@@ -1388,16 +2025,30 @@
          "__type": "String",
          "__value": "hub_wall_12",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1003,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "hub_wall_12"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "Movable",
          "__type": "Bool",
          "__value": false,
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1004,
+         "realEditorValues": [
+          {
+           "id": "V_Bool",
+           "params": [
+            false
+           ]
+          }
+         ]
         }
        ]
       },
@@ -1430,16 +2081,30 @@
          "__type": "String",
          "__value": "hub_wall_13",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1003,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "hub_wall_13"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "Movable",
          "__type": "Bool",
          "__value": false,
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1004,
+         "realEditorValues": [
+          {
+           "id": "V_Bool",
+           "params": [
+            false
+           ]
+          }
+         ]
         }
        ]
       }
@@ -5135,16 +5800,30 @@
          "__type": "String",
          "__value": "pit_block",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1003,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "pit_block"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "Movable",
          "__type": "Bool",
          "__value": true,
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1004,
+         "realEditorValues": [
+          {
+           "id": "V_Bool",
+           "params": [
+            true
+           ]
+          }
+         ]
         }
        ]
       },
@@ -5177,8 +5856,15 @@
          "__type": "String",
          "__value": "fight_room",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1002,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "fight_room"
+           ]
+          }
+         ]
         }
        ]
       },
@@ -5211,8 +5897,15 @@
          "__type": "String",
          "__value": "hub_return",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1002,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "hub_return"
+           ]
+          }
+         ]
         }
        ]
       }
@@ -7396,24 +8089,45 @@
          "__type": "String",
          "__value": "dungeon_slime",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1005,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "dungeon_slime"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "LeashRadius",
          "__type": "Int",
          "__value": 3,
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1006,
+         "realEditorValues": [
+          {
+           "id": "V_Int",
+           "params": [
+            3
+           ]
+          }
+         ]
         },
         {
          "__identifier": "UniqueId",
          "__type": "String",
          "__value": "key_guardian",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1007,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "key_guardian"
+           ]
+          }
+         ]
         }
        ]
       },
@@ -7446,8 +8160,15 @@
          "__type": "String",
          "__value": "pit_room_return",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1002,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "pit_room_return"
+           ]
+          }
+         ]
         }
        ]
       },
@@ -7480,8 +8201,15 @@
          "__type": "String",
          "__value": "hub_loop",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1002,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "hub_loop"
+           ]
+          }
+         ]
         }
        ]
       }
@@ -9449,24 +10177,45 @@
          "__type": "String",
          "__value": "tutorial_chest",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1008,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "tutorial_chest"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "KeyId",
          "__type": "String",
          "__value": "",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1009,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            ""
+           ]
+          }
+         ]
         },
         {
          "__identifier": "RewardId",
          "__type": "String",
          "__value": "shield",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1010,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "shield"
+           ]
+          }
+         ]
         }
        ]
       },
@@ -9499,8 +10248,15 @@
          "__type": "String",
          "__value": "hub_return",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1002,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "hub_return"
+           ]
+          }
+         ]
         }
        ]
       }

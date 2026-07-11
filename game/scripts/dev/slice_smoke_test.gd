@@ -74,8 +74,9 @@ func _run() -> void:
 		if not ok:
 			break
 		moved_steps += 1
-	check(moved_steps == 3, "walked 3 grid steps up from spawn (got %d)" % moved_steps)
-	check(player.cell.y == 1, "blocked by tree wall at y=1 (at %s)" % str(player.cell))
+	check(moved_steps > 0, "walked north from spawn before meeting a wall (got %d)" % moved_steps)
+	check(not room.is_walkable(player.cell + Vector2i.UP),
+			"stopped at the redesigned forest's north wall (at %s)" % str(player.cell))
 	check(player.position == room.cell_to_pos(player.cell),
 			"player rests exactly on the grid")
 
@@ -130,8 +131,10 @@ func _run() -> void:
 	# position and flags (into the scratch dir set at boot).
 	check(room.crystals.size() == 1, "a save crystal stands by the campfire")
 	var crystal: SaveCrystal = room.crystals[0]
-	check(await _go(player, crystal.cell + Vector2i.RIGHT), "reached the save crystal")
-	player.set_facing(Vector2i.LEFT)
+	var crystal_approach := _reachable_neighbor(player, crystal.cell)
+	check(crystal_approach != crystal.cell and await _go(player, crystal_approach),
+			"reached the save crystal")
+	player.set_facing(crystal.cell - player.cell)
 	player.interact()
 	await get_tree().process_frame
 	await _pump_dialogue()
@@ -543,6 +546,16 @@ func _nearest_regular(player: Player) -> OverworldEnemy:
 			best_d = d
 			best = e
 	return best
+
+
+## Pick a currently reachable cardinal neighbor instead of pinning an
+## interactable's approach side to one authored map layout.
+func _reachable_neighbor(player: Player, target: Vector2i) -> Vector2i:
+	for dir in [Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP]:
+		var candidate: Vector2i = target + dir
+		if room.is_walkable(candidate) and room.find_path(player.cell, candidate).size() >= 2:
+			return candidate
+	return target
 
 
 ## Walk at the boss until it is defeated (the hero may lose and retry - a
