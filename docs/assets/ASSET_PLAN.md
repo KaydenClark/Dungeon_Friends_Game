@@ -229,6 +229,13 @@ Remaining:
 **Phase:** Phase 4.
 **Taskboard:** T-055.
 
+**Source intake (2026-07-10):** three generated concept sheets were added under
+`game/assets/art/sprites/` (armored knight, wizard, and red ooze) and logged in
+`docs/assets/IMAGE_PROMPTS.md`. They are source references only: each has a
+baked checkerboard rather than transparency, irregular frame bounds, and
+incomplete original prompt/model provenance. Do not wire them into runtime
+SpriteFrames until those gaps are resolved and character roles are assigned.
+
 Required:
 
 - Combat unit sprites for hero, slime, boss slime, dungeon slime.
