@@ -25,6 +25,8 @@ func _setup_containers() -> void:
 	SceneManager.register_main(_world, _combat, _ui, _transition)
 	SceneManager.save_dir = TEST_DIR
 	SceneManager.reset_session_state()
+	SceneManager.current_room = null
+	SceneManager.room_stack.clear()
 
 
 func _teardown() -> void:
