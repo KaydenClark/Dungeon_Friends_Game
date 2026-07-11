@@ -20,6 +20,20 @@ notes in [`IMAGE_PROMPTS.md`](IMAGE_PROMPTS.md).
 - Runtime audio path: `game/assets/audio/`.
 - Level source path: `game/assets/levels/`.
 
+## Kenney Test Library Intake
+
+**Added:** 2026-07-11 under `game/assets/kenney/`.
+
+Six original Kenney packs are checked in as an evaluation library: Input
+Prompts Pixel, Pixel UI, Roguelike Caves & Dungeons, Roguelike Characters,
+Roguelike Indoors, and Roguelike RPG Pack. Each pack includes its original
+CC0 `License.txt`; the library inventory and promotion rules are documented in
+`game/assets/kenney/README.md`.
+
+The intake does not replace the batch requirements below and is not wired into
+runtime scenes yet. Candidate adoption should happen incrementally through the
+matching batch/task, with nearest-filter and windowed readability verification.
+
 ## Global Art Constraints
 
 - Retro pixel-art-inspired, not hardware-accurate.

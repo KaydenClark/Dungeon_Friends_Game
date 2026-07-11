@@ -18,21 +18,30 @@ var cell := Vector2i.ZERO
 @export var target_id := ""
 var pressed := false
 var _face: ColorRect
+var _center: ColorRect
 
 
 func _ready() -> void:
-	# Placeholder art: a recessed steel plate, darker while pressed.
-	z_index = -1  # under whatever stands on it
+	# Placeholder art: a flush brass floor switch, inspired by the readable
+	# round pressure buttons in A Link to the Past. It stays under actors.
+	# The imported floor TileMap is drawn first. Keep the switch above that
+	# floor; actors/blocks use a higher z-index and still cover it naturally.
+	z_index = 0
 	var rim := ColorRect.new()
-	rim.color = Color(0.3, 0.3, 0.34)
+	rim.color = Color(0.28, 0.18, 0.08)
 	rim.position = Vector2(-24, -24)
 	rim.size = Vector2(48, 48)
 	add_child(rim)
 	_face = ColorRect.new()
-	_face.color = Color(0.55, 0.57, 0.62)
+	_face.color = Color(0.86, 0.58, 0.16)
 	_face.position = Vector2(-19, -19)
 	_face.size = Vector2(38, 38)
 	add_child(_face)
+	_center = ColorRect.new()
+	_center.color = Color(1.0, 0.82, 0.32)
+	_center.position = Vector2(-9, -9)
+	_center.size = Vector2(18, 18)
+	add_child(_center)
 	_refresh()
 
 
@@ -57,5 +66,7 @@ func _refresh() -> void:
 		return
 	pressed = now
 	if _face:
-		_face.color = Color(0.38, 0.42, 0.4) if pressed else Color(0.55, 0.57, 0.62)
+		_face.color = Color(0.48, 0.30, 0.08) if pressed else Color(0.86, 0.58, 0.16)
+	if _center:
+		_center.color = Color(0.62, 0.40, 0.10) if pressed else Color(1.0, 0.82, 0.32)
 	pressed_changed.emit(pressed)

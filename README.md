@@ -22,8 +22,10 @@ LDtk-authored forest, talk to NPCs, bump a visible enemy into a
 tactical d10 battle on terrain copied from the contact area, control Hero plus
 a temporary test companion with interleaved initiative and highlighted
 movement/attack ranges, win the boss's key, and enter the Phase 2 four-room
-tutorial dungeon: find the one loose brick in the wall, jump the ledges and
-fill the chasm with a block (Space jumps), beat the key guardian, loop back,
+tutorial dungeon: find the one loose brick in the wall, step on and off a
+floor pressure plate to see its gate react, push the heavy block onto that
+plate to hold the gate open,
+beat the key guardian, loop back,
 and unlock the side room holding the shield chest. Phase 3's save/load slice
 is built (2026-07-10): save at the crystal by the healer's campfire, a
 Continue/New Game prompt on boot, checkpoint respawns on defeat (keep
@@ -47,7 +49,7 @@ Current playable-slice tour (captured with
 |---|---|
 | ![Forest overworld](docs/screenshots/forest.png) | ![Dungeon hub room](docs/screenshots/hub.png) |
 
-| Pit room (jump/block puzzle) | Fight room (guardian) | Chest room |
+| Pressure-plate room (plate/block/gate) | Fight room (guardian) | Chest room |
 |---|---|---|
 | ![Pit room](docs/screenshots/pit.png) | ![Fight room](docs/screenshots/fight.png) | ![Chest room](docs/screenshots/chest.png) |
 

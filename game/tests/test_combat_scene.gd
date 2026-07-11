@@ -64,6 +64,40 @@ func test_item_option_tracks_potion_stock() -> void:
 	SceneManager.reset_session_state()
 
 
+func test_item_menu_names_consumables_quantity_and_user() -> void:
+	var hero := CombatUnit.from_character("hero", _character("hero"), 20, 5)
+	var foe := CombatUnit.from_enemy(_slime(), 0)
+	var c := _scene([hero], [foe])
+	SceneManager.inventory = {"potion": 2, "shield": 1}
+	var options: Array = c._build_item_options(hero)
+	eq(options.size(), 2, "one usable consumable plus Back")
+	eq(options[0]["label"], "Potion x2 -> Hero", "choice names item, quantity, and user")
+	eq(options[0]["item_id"], "potion", "choice carries the selected item id")
+	eq(options[1]["kind"], "back", "cancel path is explicit")
+	c.free()
+	SceneManager.reset_session_state()
+
+
+func test_selected_item_only_consumes_its_own_id() -> void:
+	var tonic := ItemData.new()
+	tonic.id = "test_tonic"
+	tonic.display_name = "Small Tonic"
+	tonic.item_type = ItemData.ItemType.CONSUMABLE
+	tonic.stat_modifiers = {"heal": 2}
+	ItemLibrary.register(tonic)
+	var hero := CombatUnit.from_character("hero", _character("hero"), 10, 5)
+	var foe := CombatUnit.from_enemy(_slime(), 0)
+	var c := _scene([hero], [foe])
+	add_child(c)
+	SceneManager.inventory = {"potion": 2, "test_tonic": 1}
+	await c._execute_item(hero, "test_tonic")
+	eq(hero.hp, 12, "selected tonic applies its own heal value")
+	eq(SceneManager.inventory.get("test_tonic", 0), 0, "selected tonic consumed")
+	eq(SceneManager.inventory.get("potion", 0), 2, "unselected potion untouched")
+	c.queue_free()
+	SceneManager.reset_session_state()
+
+
 func test_reachable_cells_respect_move_range_and_solids() -> void:
 	var hero := CombatUnit.from_character("hero", _character("hero"), 20, 5)
 	hero.cell = Vector2i(4, 2)

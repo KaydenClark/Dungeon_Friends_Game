@@ -16,7 +16,7 @@
 ##   PushableBlock {LinkId: String, Movable: Bool (default true; false = fixed brick)}
 ##   PressurePlate {Id: String, TargetId: String}
 ##   Chest      {Id: String, KeyId: String, RewardId: String}
-##   Lever      (cell only)
+##   Lever      {TargetId: String (empty = reset lever)}
 ##   SaveCrystal (cell only) - save point, writes slot 1 on interact (T-039)
 ##   Doorway    {TargetRoom: String, SpawnX: Int, SpawnY: Int} -> Marker2D
 ## Unknown identifiers get a warning and a bare Marker2D so nothing vanishes
@@ -97,7 +97,9 @@ func _spawn(entity: Dictionary) -> Node2D:
 			chest.reward_item = str(fields.get("RewardId", ""))
 			return chest
 		"Lever":
-			return LeverScript.new()
+			var lever: Node2D = LeverScript.new()
+			lever.target_id = str(fields.get("TargetId", ""))
+			return lever
 		"SaveCrystal":
 			return CrystalScript.new()
 	push_warning("entities_post_import: unknown entity '%s' - spawning a marker"

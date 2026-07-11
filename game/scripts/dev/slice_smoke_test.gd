@@ -4,8 +4,8 @@ extends Node
 ## input map -> wall collision -> NPC dialogue -> regular slime fight (no key)
 ## -> healer restore -> boss slime fight (key drop) -> unlock door -> the
 ## Phase 2 tutorial dungeon (T-027, 2026-07-07 rework): hub (door locks
-## behind, 13-brick wall where only one brick budges) -> pit room (two 1-wide
-## ledges jumped, 2-wide chasm unjumpable, block fills one cell) -> fight
+## behind, 13-brick wall where only one brick budges) -> pressure-plate room
+## (step-on/off demonstration, then block-held plate; no pits/jump) -> fight
 ## room (key guardian drops the dungeon key) -> west loop back to the hub ->
 ## dungeon key opens the north door -> chest room (shield) -> entry door
 ## unbolts -> back to the forest with state intact -> forced defeats prove
@@ -50,10 +50,18 @@ func _run() -> void:
 	SceneManager.auto_combat = true
 	# Scratch save dir BEFORE main boots: a real save in user://saves would
 	# otherwise pop the T-040 Continue/New Game prompt and stall the run.
+	# Clear residue first too: an interrupted prior smoke must not make the
+	# next run open its own Continue prompt and wait forever.
+	_clear_smoke_saves()
 	SceneManager.save_dir = "user://saves_smoke_test"
 	var main: Node = (load("res://scenes/main.tscn") as PackedScene).instantiate()
 	add_child(main)
-	await get_tree().process_frame
+	# Room construction can take more than one frame when the editor or an
+	# importer is active. Wait for the deferred boot instead of racing it.
+	check(await _until(func() -> bool:
+		return SceneManager.world_container != null \
+				and SceneManager.world_container.get_child_count() > 0),
+			"main boot populated the world container")
 
 	# 1. Input map (T-009 + T-025): all 10 actions exist with >= 1 binding.
 	for a in ["move_up", "move_down", "move_left", "move_right",
@@ -189,9 +197,9 @@ func _run() -> void:
 
 	# 10. Hub brick wall (2026-07-07 rework): 13 identical bricks, only one
 	# budges; fixed bricks refuse the push. The north chest-room door stays
-	# locked without its key. No pressure plate anywhere (on hold).
+	# locked without its key. The hub itself has no pressure plate.
 	check(hub.blocks.size() == 13, "hub wall has its 13 bricks")
-	check(hub.plates.size() == 0, "no pressure plate in the hub (on hold)")
+	check(hub.plates.size() == 0, "pressure-plate lesson stays in the next room")
 	check(hub.chests.size() == 0, "no chest in the hub (moved to the side room)")
 	var brick: PushableBlock = null
 	var fixed: PushableBlock = null
@@ -227,8 +235,8 @@ func _run() -> void:
 	await _pump_dialogue()
 	check(not chest_door.opened, "north door stays locked without the dungeon key")
 
-	# 11. Pit room (T-025 rework): two 1-wide ledges teach the jump, the
-	# 2-wide chasm refuses it; sink the block, cross on the filled cell.
+	# 11. Pressure-plate room (T-078): step on/off to prove the momentary
+	# behavior, then hold the same plate with the block. No pits or jump.
 	check(await _go_grid(hub, hub_player, Vector2i(13, 6)), "reached the east gap")
 	await _step(hub_player, Vector2i.RIGHT)
 	check(await _until(func() -> bool: return SceneManager.current_room is TutorialPitRoom),
@@ -238,52 +246,37 @@ func _run() -> void:
 	var pit_player: Player = pit.player
 	var pit_block: PushableBlock = pit.blocks[0]
 	check(pit_player.cell == Vector2i(5, 11), "player at the pit-room entry")
-	check(pit_block.movable and pit_block.cell == Vector2i(3, 5),
-			"block waits on the chasm's near bank")
-	check(await _go_grid(pit, pit_player, Vector2i(5, 10)), "walked to the first ledge")
-
-	# 11b. Pit fall (T-047): stepping into the ledge pit is a fall, not a
-	# refusal - 10 HP party-wide and a walk of shame back to the room entrance.
-	var hp_before_fall: int = SceneManager.hero_hp
-	var buddy_hp_before_fall: int = SceneManager.state.party_hp.get("companion_test", 14)
-	check(await _step(pit_player, Vector2i.UP), "stepped into the ledge pit")
-	check(pit_player.cell == Vector2i(5, 11),
-			"fall respawned at the pit-room entrance")
-	check(SceneManager.hero_hp == hp_before_fall - pit_player.fall_damage(),
-			"the fall cost 10 HP (%d)" % pit_player.fall_damage())
-	check(SceneManager.state.party_hp.get("companion_test", 0) \
-			== maxi(buddy_hp_before_fall - pit_player.fall_damage(), 0),
-			"the overworld fall injured Buddy too")
-	check(await _go_grid(pit, pit_player, Vector2i(5, 10)),
-			"walked back to the first ledge")
-	pit_player.set_facing(Vector2i.UP)
-	check(pit_player.try_jump(), "jumped the first 1-wide ledge")
-	await _until(func() -> bool: return not pit_player.moving)
-	check(pit_player.cell == Vector2i(5, 8), "landed between the ledges")
-	pit_player.set_facing(Vector2i.UP)
-	check(pit_player.try_jump(), "jumped the second ledge")
-	await _until(func() -> bool: return not pit_player.moving)
-	check(pit_player.cell == Vector2i(5, 6), "landed on the chasm's near bank")
-	await _pump_dialogue()   # chasm hint
-	check(await _go_grid(pit, pit_player, Vector2i(5, 5)), "walked to the chasm edge")
+	check(pit.pits.is_empty(), "pressure-plate room has one unambiguous floor")
+	check(pit_block.movable and pit_block.cell == Vector2i(5, 9),
+			"heavy block waits on the plate's row")
+	var plate: PressurePlate = pit.plates[0]
+	var plate_door: LockedDoor = pit.doors[0]
+	check(plate.cell == Vector2i(2, 9), "floor plate is visible near the entrance")
+	check(plate_door.cell == Vector2i(5, 1), "north gate visibly guards the exit")
+	check(await _go_grid(pit, pit_player, Vector2i(2, 10)), "walked beside the plate")
+	check(await _step(pit_player, Vector2i.UP), "stepped onto the pressure plate")
+	check(plate.pressed and plate_door.held_open, "player weight opens the north gate")
 	await _pump_dialogue()
-	pit_player.set_facing(Vector2i.UP)
-	check(not pit_player.try_jump(), "the 2-wide chasm is not jumpable (T-025 limit)")
-	await _until(func() -> bool: return not pit_player.moving)
-	check(await _go_grid(pit, pit_player, Vector2i(3, 6)), "stood behind the block")
-	await _push(pit_player, pit_block, Vector2i.UP)
-	await _until(func() -> bool: return pit_block.sunk)
-	check(pit_block.sunk, "block sank into the chasm")
-	check(pit.is_walkable(Vector2i(3, 4)), "filled chasm cell is walkable floor")
-	check(await _go_grid(pit, pit_player, Vector2i(3, 4)), "stood on the filled cell")
-	pit_player.set_facing(Vector2i.UP)
-	check(pit_player.try_jump(), "jumped the remaining 1-cell gap")
-	await _until(func() -> bool: return not pit_player.moving)
-	check(pit_player.cell == Vector2i(3, 2), "landed on the far side of the chasm")
+	check(await _step(pit_player, Vector2i.DOWN), "stepped back off the plate")
+	check(not plate.pressed and not plate_door.held_open,
+			"leaving the plate closes the gate again")
+
+	check(await _go_grid(pit, pit_player, Vector2i(6, 9)), "stood right of the block")
+	await _push(pit_player, pit_block, Vector2i.LEFT)
+	await _until(func() -> bool: return not pit_block.moving)
+	check(await _step(pit_player, Vector2i.LEFT), "followed the block after push one")
+	await _push(pit_player, pit_block, Vector2i.LEFT)
+	await _until(func() -> bool: return not pit_block.moving)
+	check(await _step(pit_player, Vector2i.LEFT), "followed the block after push two")
+	await _push(pit_player, pit_block, Vector2i.LEFT)
+	await _until(func() -> bool: return not pit_block.moving)
+	check(pit_block.cell == plate.cell, "block parked on the pressure plate")
+	check(plate.pressed and plate_door.held_open,
+			"heavy block keeps the north gate open")
 
 	# 12. Fight room: the key guardian drops the dungeon key; the west door
 	# loops straight back to the hub.
-	check(await _go_grid(pit, pit_player, Vector2i(5, 1)), "crossed to the north door")
+	check(await _go_grid(pit, pit_player, Vector2i(5, 1)), "crossed the open floor to the north gate")
 	await _step(pit_player, Vector2i.UP)
 	check(await _until(func() -> bool: return SceneManager.current_room is TutorialFightRoom),
 			"north doorway entered the fight room")
@@ -422,11 +415,7 @@ func _run() -> void:
 	check(SceneManager.room_stack.is_empty(), "load cleared the room stack")
 
 	# Clean up the scratch save dir so smoke runs leave no residue.
-	var scratch := DirAccess.open("user://")
-	if scratch != null and scratch.dir_exists("saves_smoke_test"):
-		for f in DirAccess.open("user://saves_smoke_test").get_files():
-			DirAccess.open("user://saves_smoke_test").remove(f)
-		scratch.remove("saves_smoke_test")
+	_clear_smoke_saves()
 	SceneManager.save_dir = SaveManager.DEFAULT_DIR
 
 	done = true
@@ -449,6 +438,17 @@ func _until(pred: Callable, max_frames := 300) -> bool:
 			return true
 		await get_tree().process_frame
 	return pred.call()
+
+
+func _clear_smoke_saves() -> void:
+	var scratch := DirAccess.open("user://")
+	if scratch == null or not scratch.dir_exists("saves_smoke_test"):
+		return
+	var saves := DirAccess.open("user://saves_smoke_test")
+	if saves != null:
+		for f in saves.get_files():
+			saves.remove(f)
+	scratch.remove("saves_smoke_test")
 
 
 func _hub_door(hub: TutorialHubRoom, link: String) -> LockedDoor:
