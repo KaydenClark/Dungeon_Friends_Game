@@ -16,7 +16,7 @@ its highlighted range, act), and recruitable "Dungeon Friends" party
 members. The world starts in a fantasy forest and later expands into a castle
 city, mountains, and rivers. Current state: a playable slice on placeholder
 art - walk an LDtk-authored forest, talk to NPCs, bump a visible enemy into a
-tactical d10 battle on terrain copied from the contact area, control Hero plus
+tactical d10 battle on an authored biome-consistent arena, control Hero plus
 a temporary test companion with interleaved initiative and highlighted
 movement/attack ranges, win the boss's key, and enter the Phase 2 four-room
 tutorial dungeon: find the one loose brick in the wall, jump the ledges and
@@ -44,6 +44,12 @@ Placeholder-art tour of the current playable slice (captured with
 | Pit room (jump/block puzzle) | Fight room (guardian) | Chest room |
 |---|---|---|
 | ![Pit room](docs/screenshots/pit.png) | ![Fight room](docs/screenshots/fight.png) | ![Chest room](docs/screenshots/chest.png) |
+
+Authored combat arena proof (`RUNBOOK.md` -> Authored battle-arena gallery):
+
+| Arena gallery | Combat showcase |
+|---|---|
+| ![Authored arena gallery](docs/screenshots/authored_arena_gallery.png) | ![Authored arena combat showcase](docs/screenshots/authored_arena_combat.png) |
 
 ## How This Project Is Run
 

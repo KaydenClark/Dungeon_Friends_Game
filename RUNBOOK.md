@@ -186,6 +186,30 @@ Expected result: exit `0`, five `wrote .../<room>.png` lines and a final
 `SCREENSHOT TOUR: done`. Omitting `--out=` writes into the project's
 `user://screenshots` directory.
 
+### Authored battle-arena gallery (T-072..T-075)
+
+The first forest pool lives in `game/assets/levels/battle_arenas.ldtk`: seven
+named 17x7 LDtk levels with editable `Wall` IntGrid terrain, `ArenaMetadata`,
+and eight `PartyDeployment`/`EnemyDeployment` marker slots per side. The
+gallery renders the actual imported levels, their metadata, deployment slots,
+and the shared validator result; the showcase proves the same level reaches
+the live `CombatScene` renderer.
+
+From the current Windows checkout:
+
+```powershell
+$godot = 'E:\Godot\godot.cmd'
+& $godot --headless --path game --import
+& $godot --path game scenes/dev/arena_gallery.tscn -- --out="$PWD\docs\screenshots\authored_arena_gallery.png"
+& $godot --path game scenes/dev/authored_arena_showcase.tscn -- --out="$PWD\docs\screenshots\authored_arena_combat.png"
+```
+
+Expected result: both windowed commands exit `0` and print `AUTHORED ARENA
+GALLERY: wrote ...` / `AUTHORED ARENA COMBAT SHOWCASE: wrote ...`. Inspect the
+gallery after any LDtk edit. It must show seven `VALID` cards, the 2/3/2
+empty/mid/hard split, 5/2/1 per-template weights, and green/red deployment
+zones. Run it windowed; headless image output is not visual proof.
+
 ### Display-scaling spike (T-007)
 
 Checks the flexible HD/ultrawide stretch settings (revised 2026-07-05, see
@@ -309,24 +333,24 @@ crystal, or flag-restored room state.
 
 ### Phase 4 combat check (T-068/T-069)
 
-Automated proof is the unit command above plus the slice smoke test: at the
-T-068 gate that was 22 suites / 140 tests / 490 checks and **111/111 smoke
-checks on 5/5 consecutive runs** (2026-07-09; counts refreshed same day after
-the dev potion grant and the smoke test's freed-lambda-capture fix); the
-Phase 3 save/load plus the first T-069 playtest recut grew the totals to
-27 suites / 171 tests / 626 checks and 137/137 smoke (2026-07-10), with the
-combat legs unchanged. `test_combat_scene` covers a seeded
-2v2 battle, D-012 local-terrain connectivity, range refusal, MP/item
-bookkeeping, support actions, shield-gated Defend, and the live turn-order HUD
-format. The smoke test proves a regular forest Enemy's LDtk `EncounterId`
-builds the authored two-enemy group, grants both XP rewards, and restores the
-exact overworld position after the zoom transition.
+Automated proof is the unit command above plus the slice smoke test. The
+authored-arena lane is green at **30 suites / 187 tests / 852 checks** and
+**137/137 smoke checks** (2026-07-11). The selector, loader, validator, and
+CombatScene tests cover the actual seven-record 2/3/2 forest pool, 5/2/1
+weighted tickets, biome/tag filtering, no immediate repeat, save/load
+continuation, fixed overrides, 4v4-safe deployment zones, contact side
+orientation, and imported LDtk rendering. The smoke test proves a regular
+forest Enemy's LDtk `EncounterId` builds the authored two-enemy group, grants
+both XP rewards, and restores the exact overworld position after the zoom
+transition.
 
 For the windowed T-069 acceptance gate:
 
 1. Run `main.tscn` and touch several slimes in different forest positions.
-2. Confirm the combat arena resembles the terrain around each contact point
-   and never traps either party (D-012).
+2. Confirm each battle uses a readable, biome-consistent authored LDtk arena
+   rather than a tiny copied contact patch; observe empty, mid, and hard boards
+   through the gallery if normal draws do not show all three. Confirm neither
+   party spawns trapped (D-018).
 3. Control both Hero and the temporary Buddy companion; confirm initiative is
    per-unit, move/attack highlights are readable, and blocked cells refuse
    movement.

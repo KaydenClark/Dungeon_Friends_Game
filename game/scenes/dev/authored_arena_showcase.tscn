@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/dev/authored_arena_showcase.gd" id="1_showcase"]
+
+[node name="AuthoredArenaShowcase" type="Node"]
+script = ExtResource("1_showcase")

@@ -189,17 +189,17 @@ west loop-back shortcut. Pressure plates remain on hold; party defeat still
 uses the Phase 2 restart flow until the parked Phase 3 checkpoint work lands.
 
 Touching a visible enemy now starts a near-full-screen 17x7 tactical battle.
-The literal local-terrain generator is being replaced by D-018's authored,
-biome-consistent weighted arena pool after Kayden's second windowed pass proved
-it could still create unfightable boards. Contact context will select and orient
-an eligible arena rather than copying nearby walls. Hero plus the temporary Buddy test
-companion (D-013), interleaved initiative, move/attack highlights, and
+D-018's authored, biome-consistent weighted arena pool has replaced the
+literal local-terrain generator after Kayden's second windowed pass proved it
+could still create unfightable boards. Contact context now selects and orients
+one of seven editable forest LDtk arenas rather than copying nearby walls.
+Hero plus the temporary Buddy test companion (D-013), interleaved initiative, move/attack highlights, and
 Attack/Ability/Item/Defend. LDtk EncounterData now supplies the regular
 forest's two-enemy party and full XP/loot reward total; encounters zoom in
 before their short hand-off fade and zoom back to the unchanged overworld
 position. The combat HUD shows live turn order, party HP/MP, action prompts,
-and damage/heal feedback. The completed headless battery is green at 22 suites
-/ 140 tests / 490 checks, with the slice smoke at 111/111 on 5/5 runs.
+and damage/heal feedback. The authored-arena battery is green at 30 suites /
+187 tests / 852 checks, with the slice smoke at 137/137.
 Only T-069, Kayden's windowed balance/feel acceptance, remains in Phase 4.
 Real art remains a separate phase-timed asset pass.
 
@@ -231,12 +231,13 @@ Current phase:
   crystal, load flow, checkpoint respawn, pit falls, enemy respawn) was
   parked behind combat and **resumed + built 2026-07-10 on Kayden's
   explicit request** (T-037..T-042, T-047..T-049 - see TASKBOARD proof
-  log). **Current implementation position (2026-07-10):** T-060..T-068 and
-  the full Phase 3 save/load lane are built and verified; T-069 (combat
+  log). **Current implementation position (2026-07-11):** T-060..T-068,
+  T-072..T-075, and the full Phase 3 save/load lane are built and verified; T-069 (combat
   windowed acceptance) is the remaining Kayden gate, and the new save/load
   slice adds its own windowed items to that pass (boot prompt, crystal,
-  pit falls, respawns, F1 warps). D-012/D-013 are resolved as local
-  contact terrain + a temporary Buddy test companion.
+  pit falls, respawns, F1 warps). D-012/D-018 are resolved as authored
+  biome-consistent arenas selected from contact context, and D-013 remains
+  the temporary Buddy test companion.
 
 Build order (each phase is a real milestone with a stated "done" condition;
 live milestone tracking is in `TASKBOARD.md`):

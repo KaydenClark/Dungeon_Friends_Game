@@ -7,9 +7,9 @@ extends Node2D
 ## CalculateInitiative -> UnitTurn loop -> EncounterEnd) drives a
 ## TurnManager that interleaves ALL combatants by speed; each unit runs the
 ## per-entity FSM on CombatUnit (CheckRange -> Moving -> SelectingAction ->
-## ExecutingCommand). The arena is seeded from the local overworld terrain
-## around the contact point (D-012) and the party comes from the GameState
-## roster (D-013's test companion included). Math lives in CombatMath;
+## ExecutingCommand). D-018 supplies an authored, biome-consistent LDtk arena
+## with explicit deployment zones; the party comes from the GameState roster
+## (D-013's test companion included). Math lives in CombatMath;
 ## rendering is screen-space (CanvasLayer) placeholder art.
 
 signal finished(victory: bool, result: Dictionary)
@@ -21,11 +21,19 @@ enum BattleState { INITIALIZE, CALCULATE_INITIATIVE, UNIT_TURN, ENCOUNTER_END }
 enum InputMode { NONE, MENU, CURSOR_MOVE, CURSOR_TARGET, CONTINUE }
 
 const TILE := 64
+const MOVE_HIGHLIGHT_FILL := Color(0.10, 0.42, 1.0, 0.42)
+const ATTACK_HIGHLIGHT_FILL := Color(0.96, 0.16, 0.16, 0.35)
 
 var arena_w := 17
 var arena_h := 7
 var arena_blocked: Dictionary = {}   # Vector2i -> true
 var arena_origin := Vector2.ZERO
+var arena_id := ""
+var arena_tier := ""
+var arena_mirrored := false
+var party_deployment: Array[Vector2i] = []
+var enemy_deployment: Array[Vector2i] = []
+var arena_visual: Node2D
 
 var units: Array[CombatUnit] = []
 ## Tests flip this off to drive _execute_*/_reachable_cells directly
@@ -60,6 +68,7 @@ var highlight_root: Control
 
 ## party/enemies are prebuilt CombatUnits (SceneManager owns the GameState
 ## snapshot); arena is {"w": int, "h": int, "blocked": Array[Vector2i]}.
+## Authored arenas also carry deployment zones plus an imported LDtk visual.
 func setup(party: Array[CombatUnit], enemies: Array[CombatUnit],
 		arena: Dictionary, p_rng: RandomNumberGenerator, p_auto: bool,
 		p_defend_unlocked: bool) -> void:
@@ -68,6 +77,12 @@ func setup(party: Array[CombatUnit], enemies: Array[CombatUnit],
 	defend_unlocked = p_defend_unlocked
 	arena_w = arena.get("w", 17)
 	arena_h = arena.get("h", 7)
+	arena_id = str(arena.get("id", ""))
+	arena_tier = str(arena.get("tier", ""))
+	arena_mirrored = bool(arena.get("mirrored", false))
+	arena_visual = arena.get("visual") as Node2D
+	party_deployment = _arena_cells(arena.get("party_zone", []))
+	enemy_deployment = _arena_cells(arena.get("enemy_zone", []))
 	for c in arena.get("blocked", []):
 		arena_blocked[c] = true
 	units.append_array(party)
@@ -79,6 +94,12 @@ func setup(party: Array[CombatUnit], enemies: Array[CombatUnit],
 ## edge, centered on the board. Allies never consume the cell directly in
 ## front of Hero, and SceneManager keeps these deployment columns clear.
 func _place_units(party: Array[CombatUnit], enemies: Array[CombatUnit]) -> void:
+	if party_deployment.size() >= party.size() and enemy_deployment.size() >= enemies.size():
+		for i in party.size():
+			party[i].cell = party_deployment[i]
+		for i in enemies.size():
+			enemies[i].cell = enemy_deployment[i]
+		return
 	var taken: Dictionary = {}
 	var free_left: Array[Vector2i] = []
 	var free_right: Array[Vector2i] = []
@@ -113,6 +134,15 @@ func _place_units(party: Array[CombatUnit], enemies: Array[CombatUnit]) -> void:
 		if ri < free_right.size():
 			u.cell = free_right[ri]
 			taken[u.cell] = true
+
+
+static func _arena_cells(raw: Variant) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	if raw is Array:
+		for cell in raw:
+			if cell is Vector2i:
+				out.append(cell)
+	return out
 
 
 func _ready() -> void:
@@ -612,19 +642,21 @@ func _build_view() -> void:
 	bg.color = Color(0.09, 0.07, 0.13)
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	layer.add_child(bg)
-	for y in arena_h:
-		for x in arena_w:
-			var c := Vector2i(x, y)
-			var t := ColorRect.new()
-			if arena_blocked.has(c):
-				# Terrain carried in from the overworld (D-012): read as an
-				# obstacle, same palette family as the forest walls.
-				t.color = Color(0.10, 0.16, 0.10)
-			else:
-				t.color = Color(0.18, 0.24, 0.18) if (x + y) % 2 == 0 else Color(0.16, 0.21, 0.16)
-			t.position = arena_origin + Vector2(c) * TILE + Vector2(1, 1)
-			t.size = Vector2(TILE - 2, TILE - 2)
-			layer.add_child(t)
+	if arena_visual != null:
+		arena_visual.position = arena_origin
+		layer.add_child(arena_visual)
+	else:
+		for y in arena_h:
+			for x in arena_w:
+				var c := Vector2i(x, y)
+				var t := ColorRect.new()
+				if arena_blocked.has(c):
+					t.color = Color(0.10, 0.16, 0.10)
+				else:
+					t.color = Color(0.18, 0.24, 0.18) if (x + y) % 2 == 0 else Color(0.16, 0.21, 0.16)
+				t.position = arena_origin + Vector2(c) * TILE + Vector2(1, 1)
+				t.size = Vector2(TILE - 2, TILE - 2)
+				layer.add_child(t)
 	highlight_root = Control.new()
 	layer.add_child(highlight_root)
 	for u in units:
@@ -667,6 +699,16 @@ func _build_view() -> void:
 	round_label.add_theme_font_size_override("font_size", 20)
 	round_label.modulate = Color(0.8, 0.8, 0.9)
 	layer.add_child(round_label)
+	if arena_id != "":
+		var arena_label := Label.new()
+		arena_label.position = Vector2(40, 96)
+		arena_label.add_theme_font_size_override("font_size", 14)
+		arena_label.modulate = Color(0.72, 0.9, 0.72)
+		var detail := "%s  %s" % [arena_id, arena_tier]
+		if arena_mirrored:
+			detail += "  mirrored"
+		arena_label.text = detail
+		layer.add_child(arena_label)
 	turn_order_label = Label.new()
 	turn_order_label.position = Vector2(40, 68)
 	turn_order_label.add_theme_font_size_override("font_size", 17)

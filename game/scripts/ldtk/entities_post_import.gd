@@ -19,6 +19,8 @@
 ##   Lever      (cell only)
 ##   SaveCrystal (cell only) - save point, writes slot 1 on interact (T-039)
 ##   Doorway    {TargetRoom: String, SpawnX: Int, SpawnY: Int} -> Marker2D
+##   ArenaMetadata {ArenaId, Biome, Tier, Weight, Tags, MirrorSafe} -> Marker2D
+##   PartyDeployment / EnemyDeployment {Slot: Int} -> Marker2D (T-073)
 ## Unknown identifiers get a warning and a bare Marker2D so nothing vanishes
 ## silently. All fields are optional; sensible defaults apply.
 
@@ -51,7 +53,7 @@ func post_import(entity_layer: LDTKEntityLayer) -> LDTKEntityLayer:
 func _spawn(entity: Dictionary) -> Node2D:
 	var fields: Dictionary = entity.fields
 	match entity.identifier:
-		"PlayerSpawn", "Doorway":
+		"PlayerSpawn", "Doorway", "ArenaMetadata", "PartyDeployment", "EnemyDeployment":
 			return Marker2D.new()
 		"Npc":
 			var npc: Node2D = NpcScript.new()

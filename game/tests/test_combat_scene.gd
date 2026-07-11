@@ -126,27 +126,6 @@ func test_potion_heals_and_consumes_stock() -> void:
 	SceneManager.reset_session_state()
 
 
-func test_arena_seed_keeps_only_the_contact_connected_region() -> void:
-	# A 12x7 room with a full-height wall at x=8, pocket beyond it. Contact
-	# at (4,3): the pocket columns must come back blocked, the main region open.
-	var room := RoomGrid.new()
-	room.setup_grid(12, 7)
-	for y in 7:
-		room.set_blocked(Vector2i(8, y), true)
-	var saved_room: Node2D = SceneManager.current_room
-	SceneManager.current_room = room
-	var arena: Dictionary = SceneManager._arena_from_room(Vector2i(4, 3))
-	SceneManager.current_room = saved_room
-	eq(arena["w"], 12, "small rooms use their full width inside the 17-cell arena cap")
-	var blocked: Array = arena["blocked"]
-	ok(blocked.size() > 0, "the wall and pocket read as obstacles")
-	# The wall column sits at local x = 8 - origin.x; contact side stays open.
-	var origin_x: int = 0
-	ok(blocked.has(Vector2i(8 - origin_x, 3)), "wall cell blocked in arena coords")
-	not_ok(blocked.has(Vector2i(4 - origin_x, 3)), "contact cell open")
-	room.free()
-
-
 func test_party_deploys_vertically_with_forward_space() -> void:
 	var hero := CombatUnit.from_character("hero", _character("hero"), 20, 5)
 	var buddy := CombatUnit.from_character("companion_test",
