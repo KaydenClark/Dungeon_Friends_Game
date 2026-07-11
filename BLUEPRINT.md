@@ -3,8 +3,8 @@
 > Generated from LLM Workbench v2.1. See `RUNBOOK.md` -> Upgrading The
 > Harness.
 
-**Last reviewed:** 2026-07-09
-**Status:** active - Phase 4 combat core built; M4.4 integration/presentation remains
+**Last reviewed:** 2026-07-10
+**Status:** active - Phase 4/puzzle acceptance gap closure; Phase 5 is next
 **Source root:** `/Users/kayden/GPT_OS/Projects/Dungeon_Friends_Game`
 
 This is the stable reference for what the project is. This file is the
@@ -180,13 +180,14 @@ above (no full dungeon, no boss, no save/load, no full party depth
 required) - treat it as the walking skeleton the fuller Phase 6 slice builds
 on top of, not a replacement for it.
 
-**Status (2026-07-09): Phase 2 is accepted and the Phase 4 tactical-combat
-core is playable on `feature/phase4-combat-mvp`.** The four-room LDtk tutorial
-dungeon remains the accepted exploration/puzzle slice: a lock-behind hub with
-one loose brick in a 13-brick wall, a north key door to the shield chest room,
-two jumpable ledges plus a block-fill chasm, and a key-guardian fight with a
-west loop-back shortcut. Pressure plates remain on hold; party defeat still
-uses the Phase 2 restart flow until the parked Phase 3 checkpoint work lands.
+**Status (2026-07-10): Phase 2's puzzle acceptance is narrowly reopened and
+the Phase 4 tactical-combat core is playable.** The latest playthrough retired
+jumping from the current dungeon: standing still and pressing jump reads as a
+janky hop rather than a believable gap crossing. Jump stays benched until a
+future Zelda-style traversal item gives it a clear rule. The tutorial dungeon
+will instead prove the first three puzzle primitives: a latching on/off lever,
+a momentary pressure plate, and pushable blocks. This is Phase 2 gap-closure
+work, not a new phase or a new system family.
 
 Touching a visible enemy now starts a near-full-screen 17x7 tactical battle.
 The literal local-terrain generator is being replaced by D-018's authored,
@@ -200,7 +201,9 @@ before their short hand-off fade and zoom back to the unchanged overworld
 position. The combat HUD shows live turn order, party HP/MP, action prompts,
 and damage/heal feedback. The completed headless battery is green at 22 suites
 / 140 tests / 490 checks, with the slice smoke at 111/111 on 5/5 runs.
-Only T-069, Kayden's windowed balance/feel acceptance, remains in Phase 4.
+Phase 4 still needs the authored arena lane, readable Item selection, and the
+final T-069 windowed acceptance. After that and the tutorial puzzle recut pass,
+Phase 5 (party/progression and character menu) is the next development phase.
 Real art remains a separate phase-timed asset pass.
 
 The most important quality bar is:
@@ -213,14 +216,15 @@ The most important quality bar is:
 
 Current phase:
 
-- **Phase 2 accepted (Kayden's windowed re-check, 2026-07-08); Phase 4
-  (Combat MVP) is the current phase - Kayden's explicit pull-forward.**
+- **Phase 4 (Combat MVP) remains the current phase; a narrow Phase 2 puzzle
+  gap closure is reopened by Kayden's 2026-07-10 playthrough.**
   Everything in "Phase 2 Target: Tutorial Dungeon" below (including the
   2026-07-07 revision block) is implemented, headless-verified, and now
-  play-confirmed: the LDtk entity pipeline (T-031), the LDtk-authored
-  forest (T-011), the puzzle primitives (T-023/T-025/T-026; T-024 plates
-  built but ON HOLD), defeat-restart (T-029), dev tools (T-030), and the
-  four-room tutorial dungeon (T-027). Phase 1 is fully done (T-020's
+  play-confirmed except for the newly reopened puzzle presentation: the LDtk
+  entity pipeline (T-031), the LDtk-authored forest (T-011), puzzle primitives,
+  dev tools (T-030), and the four-room tutorial dungeon (T-027). Jump is now
+  benched behind a future traversal item; pressure plates return alongside a
+  real latching lever and pushable blocks. Phase 1 is fully done (T-020's
   windowed 3-resolution check also passed 2026-07-08); Phase 0's M0.3
   (export presets) stays in the TASKBOARD Backlog. **Build-order
   re-sequencing (2026-07-08, Kayden):** combat is his main complaint, so
@@ -235,8 +239,9 @@ Current phase:
   the full Phase 3 save/load lane are built and verified; T-069 (combat
   windowed acceptance) is the remaining Kayden gate, and the new save/load
   slice adds its own windowed items to that pass (boot prompt, crystal,
-  pit falls, respawns, F1 warps). D-012/D-013 are resolved as local
-  contact terrain + a temporary Buddy test companion.
+  pit falls, respawns, F1 warps). T-072..T-075 replace literal contact terrain;
+  T-077 makes Item use identify the selected consumable; T-078 recuts the
+  tutorial puzzle set. Phase 5 starts only after those acceptance gaps close.
 
 Build order (each phase is a real milestone with a stated "done" condition;
 live milestone tracking is in `TASKBOARD.md`):
@@ -284,7 +289,7 @@ do not build them early.
 | Priority | Movement type | Why | Where it lands |
 |---:|---|---|---|
 | 1 | Walk, face, act lock-in | Core feel | Phase 1 - T-021 (walk exists; feel polish + turn-in-place is the open work) |
-| 2 | Door transitions, ledges, stairs | Room/world structure | T-022 (door transition, Phase 1) + T-025 (ledges/pits + jump, Phase 2) |
+| 2 | Door transitions, ledges, stairs | Room/world structure | T-022 (door transition, Phase 1); manual jumping is benched until a future traversal item gives it a coherent rule |
 | 3 | Push/pull objects | Zelda puzzle baseline | Phase 2 - T-023 (PushableBlock) |
 | 4 | Dash/roll | Makes overworld feel better | Deferred S-009 |
 | 5 | Swim (or similar) | First major traversal upgrade | Deferred S-010 - pairs naturally with the post-MVP rivers region |
@@ -369,6 +374,31 @@ grass (every collider now draws its tree tile) and Kayden wants obstacles
 "out in the open" between spawn and the dungeon entry - "maybe not a maze,
 but at least trees or something" (added as scattered clusters).
 
+#### 2026-07-10 revision (Kayden's latest playthrough)
+
+The prior jump/chasm lesson is no longer accepted. A standing, facing-based hop
+made the character appear to jump vertically while crossing a horizontal gap;
+requiring forward+jump would add timing complexity that fights the precise
+grid-movement quality bar. Manual jumping is therefore **benched**, not retuned,
+until a future traversal item (a Zelda-style item is the reference) defines a
+clear authored use case.
+
+The replacement Phase 2 tutorial vocabulary is:
+
+- **On/off lever:** a deliberate interaction toggles and visibly latches linked
+  state until the lever is used again. The existing reset-only lever does not
+  satisfy this role.
+- **Pressure plate:** visibly active only while the player or a block occupies
+  it; linked state releases on vacate. Room geometry must make the cause/effect
+  readable and allow a block to hold it without a softlock.
+- **Pushable blocks:** the reusable object that changes the state of the room,
+  including holding plates. Fixed bricks may remain for boundaries, but the
+  tutorial must not hide its entire puzzle behind guessing which wall moves.
+
+T-078 owns the smallest LDtk room recut that teaches all three without requiring
+jump. Pit falls may remain environmental hazards, but no required route assumes
+the player can cross a pit manually.
+
 ## Architecture
 
 | Layer | Choice | Source / Notes |
@@ -432,7 +462,7 @@ Dungeon_Friends_Game/
 | Combat | Turn-based tactical party-vs-enemy battle (BG3 turn-based mode) | **Built through T-068 (2026-07-09):** two-layer FSM (Battle FSM in `CombatScene`, per-entity FSM on `CombatUnit`) + `TurnManager` interleaved initiative; party from the GameState roster (hero + D-013 test companion) vs LDtk-authored `EncounterData` enemy parties; arena seeded from the local room terrain around the contact point, restricted to the contact-connected region (D-012); FE-style move-range highlight + cursor cell pick + threat fringe; Attack/Ability/Item/Defend commands (strike/mend spend MP, potions consume stock, Defend shield-gated per D-007); real `CombatMath` d10 formulas (numbers tunable at T-069); simple close-and-attack AI; contact zoom-in/out transition; turn-order/party-status HUD and damage/heal feedback. Still code-built (no `.tscn`) | `game/scripts/combat/combat.gd`, `combat_unit.gd`, `turn_manager.gd`, `combat_math.gd` |
 | UI (HUD, dialogue, pause, party menu) | Player-facing menus and status | dialogue box exists (`DialogueBox`, code-built); HUD/pause/party menus missing | `game/scripts/ui/dialogue_box.gd` |
 | `game/scenes/dev/display_scaling_spike.tscn` | Throwaway diagnostic - proves the new flexible HD/ultrawide stretch settings render an undistorted tile grid at 1280x720/1920x1080/3440x1440 | working (placeholder ColorRect tiles, no real art yet) | `game/scenes/dev/display_scaling_spike.tscn`, `game/scripts/dev/display_scaling_spike.gd` |
-| Tutorial dungeon (behind the boss door) | The Phase 2 deliverable (T-027, reworked 2026-07-07 after Kayden's playthrough): four LDtk-authored rooms (`tutorial_dungeon.ldtk` levels HubRoom/ChestRoom/PitRoom/FightRoom, scripts `tutorial_*_room.gd`) navigated via `SceneManager.boot_room/enter_room/exit_room(s)` (suspend-not-free downward, freed-and-rebuilt on the way back up - the rebuild is the puzzle escape valve; persistent facts like opened chests/doors and slain unique enemies live in `SceneManager.flags`). Supersedes the T-022 cave stub room, whose wiring it inherits | working and windowed-accepted 2026-07-08; residual chunky block-movement note parked as T-059 | `game/scripts/overworld/tutorial_hub_room.gd` / `tutorial_chest_room.gd` / `tutorial_pit_room.gd` / `tutorial_fight_room.gd`, `game/assets/levels/tutorial_dungeon.ldtk` |
+| Tutorial dungeon (behind the boss door) | Four LDtk-authored rooms (`tutorial_dungeon.ldtk` levels HubRoom/ChestRoom/PitRoom/FightRoom, scripts `tutorial_*_room.gd`) navigated via `SceneManager.boot_room/enter_room/exit_room(s)`. T-078 will recut the required puzzle path around latching lever + momentary pressure plate + pushable blocks and remove manual jump requirements. | playable, but puzzle acceptance reopened 2026-07-10; T-078 ready | `game/scripts/overworld/tutorial_*_room.gd`, `game/assets/levels/tutorial_dungeon.ldtk` |
 
 ### Commands
 
@@ -445,18 +475,29 @@ keyboard, controller, and mobile touch - per-device bindings below):
 | `interact` / `confirm` | Interact with objects/NPCs; confirm menu selection | yes |
 | `cancel` / `back` | Cancel or back out of a menu | yes |
 | `menu` | Open pause/party menu | yes |
-| `jump` | Hop one cell over a pit/ledge in the facing direction (Phase 2) - bound to Space primary, C fallback (2026-07-10 playtest correction) | yes (from Phase 2) |
+| `character_menu` | Open the character menu (UI not built yet) | no - future UI |
+| `jump` | Reserved traversal action; benched until a future traversal item defines it | no - dormant |
 
 Per-device bindings (Godot Input Map is the single binding source; migrated
 from the retired Gameplan §11):
 
 | Action | Keyboard | Controller | Touch (mobile) |
 |---|---|---|---|
-| `move_*` | Arrow keys / WASD | D-pad / left stick | On-screen virtual D-pad |
-| `interact` / `confirm` | E / Enter (Space remains confirm in menus/dialogue) | A (Xbox) / Cross (PS) | On-screen "A" |
-| `cancel` / `back` | Q / Escape | B / Circle | On-screen "B" |
-| `menu` | Enter / Tab | Start / Options | On-screen menu icon |
-| `jump` | Space (primary) / C (fallback) | (TBD) | On-screen button |
+| `move_*` | Arrow keys / WASD | D-pad | On-screen virtual D-pad |
+| `interact` / `confirm` | E | A | On-screen "A" |
+| `cancel` / `back` | Q | X | On-screen "X" |
+| `menu` | Tab | Start / Options | On-screen menu icon |
+| `jump` | Space | B | On-screen "B" |
+| `character_menu` | F | Y | On-screen "Y" |
+
+**Keyboard/controller anchor (locked by Kayden 2026-07-10):** keyboard and
+controller controls map 1:1: E/A interact and confirm, Space/B is the reserved
+traversal action, Q/X cancels or goes back, F/Y opens the future character menu,
+Tab/Start opens the broader menu, and WASD/D-pad moves. The `character_menu`
+action is bound now, but its UI does not exist yet. **Current on-screen prompts
+show keyboard keys only.** Mixed labels such as `E / A` were confusing; replace
+keyboard labels with controller glyphs as one coherent UI pass later (T-079),
+not as slash-separated text now.
 
 `TouchScreenButton` nodes map directly to Input Map actions, so gameplay code
 reads `Input.is_action_pressed(...)` regardless of source; the touch UI is only
@@ -522,6 +563,11 @@ formation" party idea** (from the retired Gameplan §10, never built):
   spend its turn on an ability-driven action. Units act one at a time in strict
   initiative order; when the enemy party is defeated the battle ends and play
   returns to exploration at the contact point.
+- **Allied units occupy and block cells.** The player cannot walk through a
+  teammate. That positioning friction is an intentional combat-balancing rule,
+  not a bug to solve with ally pass-through. Arena/deployment design must still
+  avoid unavoidable starting softlocks; the counterplay is planning movement
+  order and routes.
 - This keeps the overworld simple and readable while concentrating the
   positioning depth in the tactical battles, and is consistent with the
   already-locked grid-based, per-unit-initiative, d10 combat below (it names the
@@ -550,17 +596,13 @@ Rules:
     continued press steps (turn-in-place); facing locks during
     interactions. This is a feel requirement on top of the invariant, not a
     change to it (T-021).
-- **Jump (added 2026-07-06, revised same day - Kayden)**: a **player-pressed
-  button** (`jump` input action, bound to Alt primary / C fallback - see
-  Commands), not automatic - Kayden: "I don't want to trust that my character
-  will jump the right way." Pressing jump hops one cell in the facing
-  direction as a `Tween` arc (like any other step, never physics). **Max jump
-  distance is exactly 1 cell** - a 1-cell gap is the definitional jumpable
-  gap; 2+ cells is never jumpable. The jump only *succeeds* over a
-  jumpable gap/ledge (a jump into a wall or across too-wide a pit just plays
-  a small in-place hop or is refused); it is not a free traversal everywhere.
-  Single overworld avatar (see Party model below), so no follower-jump to
-  coordinate.
+- **Jump/traversal (benched 2026-07-10 - Kayden):** the `jump` action and its
+  Space/B anchor may remain in the Input Map, but current rooms must not require
+  or advertise manual jumping. The facing-only standing hop looked vertical
+  while moving across a gap; adding a forward+jump timing chord would make the
+  grid controls jankier. Reintroduce traversal only with a future Zelda-style
+  item and a new explicit movement contract; do not silently reactivate the old
+  one-cell hop.
 - **Pathfinding**: `AStarGrid2D`, `diagonal_mode = DIAGONAL_MODE_NEVER`,
   Manhattan heuristic.
 - **Combat**: a **tactics-RPG battle** (BG3 turn-based mode as the model, Fire
@@ -620,29 +662,29 @@ Rules:
   `LockedDoor` - LDtk entity custom fields carry linking IDs; a per-room
   `PuzzleController` wires signals at `_ready()` (MVP choice - simpler to
   debug than fully-automatic wiring). Semantics confirmed 2026-07-06 (Kayden):
-  - **PressurePlate is momentary** (pressed while any grid occupant - player
-    *or* block - stands on it, released the moment the cell is vacated; a
-    plate-driven door re-locks on release), **and is ON HOLD as of
-    2026-07-07**: in Kayden's windowed playthrough the re-lock made the flow
-    read as broken ("the pressure plate never worked in the game"). The
-    primitive and its unit suite stay in the codebase, but no shipped room
-    uses a plate until the mechanic is revisited (likely needing a visible
-    cause-effect cue or latching variant).
+  - **PressurePlate is active Phase 2 vocabulary again (2026-07-10):** it is
+    momentary while any grid occupant - player or block - stands on it and
+    releases on vacate. The original implementation read as broken because the
+    room did not communicate cause/effect. T-078 must add visible pressed/
+    released state, a clearly linked result, and geometry where a block can
+    hold the plate without a softlock.
+  - **Lever is latching on/off:** interact toggles its linked state and the
+    lever visibly remains on or off until used again. A reset-only escape lever
+    is a dev/safety affordance, not the tutorial's on/off lever mechanic.
   - **PushableBlock.movable (added 2026-07-07)**: `Movable=false` makes a
     fixed brick - identical placeholder look, occupies and blocks its cell,
     refuses every push. This is the hub brick-wall primitive ("wall where
     you can only push some bricks, so we don't soft lock ourselves"); the
     2026-07-06 3x3-plate geometry note is retired with the plate hold.
-  - **Pits (revised 2026-07-07, D-008 - supersedes "impassable, not
-    lethal")**: a 1-cell-wide pit can be jumped (see Jump above); a
-    `PushableBlock` pushed into a pit **fills it**, permanently converting
+  - **Pits (revised 2026-07-10)**: manual pit jumping is benched. A
+    `PushableBlock` pushed into a pit may **fill it**, permanently converting
     that cell to walkable floor (classic Zelda). **Walking into a pit is a
     Zelda-style fall** (T-047): **10 HP to every party member** (Kayden's
     2026-07-10 windowed-playtest correction, superseding D-016's 10%-of-max
     first tuning) and
     respawn at the last entrance the player came through into that room; a
     fall that reaches 0 HP triggers the defeat flow. Enemies and pathfinding
-    still treat pits as blocked.
+    still treat pits as blocked. No required route may assume manual jumping.
   - **Chests**: a `Chest` interactable holds a reward and may be locked
     (opens only with its matching key item), reusing the `LockedDoor`
     key-check pattern. Chests are placed visibly in the room from the start -
@@ -754,7 +796,7 @@ Rules:
 | Enemy aggro telegraph (oozes get visibly angry + faster when they spot you, replacing ambiguous wander-to-chase) is a real task, deferred until sprites exist | Kayden's clarification of "attack lock-in" from the movement table - it's an *enemy* feel feature, not player movement; parked as T-028 until T-003 art gives it something to show | 2026-07-06 round 2 / this session |
 | Shield is a plain inventory item at Phase 2 (D-001 resolved) | Kayden: "We are building the skeleton so we can just continue to ask the questions like 'Well, what does the shield do'" - effect decided at Phase 3/S-001. **Answered 2026-07-07 (D-007): the shield unlocks the Defend command** - see the Phase 3 rows below | 2026-07-06 round 2 / this session |
 | Levels authored **all-in as LDtk entities** (not a code/LDtk hybrid): blocks, plates, doors, chests, NPCs, enemies placed as LDtk entity instances with custom fields (link IDs, key names), instantiated by a post-import hook | Kayden picked all-in but conditioned it on documentation; confirmed the importer's entity path is the well-documented one - `post-import/entity-template.gd` + a complete `entity-spawn-lights.gd` example (match `entity.identifier`, read `entity.fields`, instantiate a scene, `update_instance_reference`) + `docs/classes.md` for `LDTKEntity` | 2026-07-06 round 3 / this session |
-| Jump is a **player-pressed button** (Alt primary, C fallback), not automatic/contextual | Kayden: "I don't want to trust that my character will jump the right way"; adds a `jump` input action (the map's first addition beyond the original 8). Note: Alt is an OS modifier on macOS - C is the safety binding if Alt reads poorly | 2026-07-06 round 3 / this session, supersedes the round-2 "contextual hop" wording |
+| Jump is a **player-pressed button** (Space), not automatic/contextual | Kayden: "I don't want to trust that my character will jump the right way"; adds a `jump` input action (the map's first addition beyond the original 8). Superseded by the locked 2026-07-07 keyboard scheme: Space only, with no Alt/C fallback. | 2026-07-06 round 3 / this session; binding revised 2026-07-07 |
 | Phase 2 death = restart from the beginning of the game; the richer old-man/room-reset respawn moves to Phase 3 | Kayden: "I agree this is starting to be phase 3" - the dungeon-puzzle-state reset a mid-dungeon respawn needs is the same serialization `SaveData` provides, so it belongs with save/load, not Phase 2 | 2026-07-06 round 3 / this session, supersedes the round-2 respawn row |
 | Overworld is a **single party avatar** (no snake-follow); the party's characters appear only in **Fire-Emblem-Sacred-Stones-style tactical combat** (select a character, WASD picks its destination cell, mini action menu below) | Kayden: "I kinda imagined one character in this overworld being your party... These are party encounters, not character encounters"; concentrates positioning depth in the tactical battles and keeps the overworld simple - **supersedes the snake-follow-formation decision** (retired Gameplan §10) | 2026-07-06 round 3 / this session |
 | Puzzle geometry primitive: plate at the center of a 3x3 pushing space, block in a corner, 2-cell walking margin around it (the margin enables the around-the-block L-shaped push, since pushing needs the opposite side and there are no diagonals) | Kayden's sketch-in-words for Room 1; exact cells/push-count finalized at build against his drawing | 2026-07-06 round 3 / this session |
@@ -768,6 +810,11 @@ Rules:
 | **D-018 authored weighted battle arenas:** battle context filters a pool of editable LDtk templates by biome/tags; contact side orients deployment; a deterministic weighted shuffle bag selects among 2 `empty` templates (weight 5 each), 3 `mid` templates (weight 2 each), and 2 `hard` templates (weight 1 each), with no immediate repeat. Enemy number/strength varies independently. Boss encounters may pin a dedicated arena. Every arena imports to `TileMapLayer` and must pass deployment/connectivity validation. | Preserves the useful meaning of D-012 (a forest fight looks like a forest fight; a dry dungeon does not invent a river) while making every topology visible, editable, testable, and reliably fightable. The 5/2/1 tickets yield an initial approximately 56% empty / 33% mid / 11% hard mix and remain tunable. | 2026-07-10 / Kayden second T-069 pass |
 | **Combat is a tactics-RPG, not a JRPG**: BG3's turn-based mode is the functional model (select a unit, move it within a highlighted range on a zoomed-in grid, act via abilities, strict per-unit initiative); Fire Emblem is the *visual* reference only (range highlighting, a dedicated battle mode). Active party size is **four**. The "quick decisions matter more than tactical depth" pillar is retired - the game leans into strategic, tactical combat | Kayden clarified the founding combat vision: "top down tactical BG3 style... control my party of 4 people around this new mini map." Fire Emblem was his closest GBA touchstone for the *look* (range highlights, separate mode), not the mechanics; the engine isn't as limited as first assumed, so depth is now in-scope. Reframes the JRPG/menu language and the earlier readable-over-deep pillar; the locked grid/d10/per-unit-initiative decisions are unchanged | 2026-07-08 / this session |
 | **Phase 3 tuning round (D-014..D-017, resolved 2026-07-10; pit tuning superseded after playtest)**: defeat costs **25% of above-floor XP progress**; respawn at **80% of max HP**; pit falls now cost **10 HP party-wide** because the initial 10%-of-max implementation was too soft and incorrectly left Buddy untouched; **consumables come from every source** - enemy loot, chests, and later shops | Kayden's windowed pass superseded only D-016's first number. Because the overworld avatar represents the party, environmental damage now persists to every member and two early-game falls defeat a full-health Hero. | 2026-07-10 / Kayden |
+| **D-019 keyboard/controller anchor, prompt policy revised:** E/A interact+confirm, Space/B traversal, Q/X cancel/back, F/Y character menu, Tab/Start broader menu, WASD/D-pad movement. Until controller glyphs are implemented, on-screen prompts show keyboard keys only rather than confusing slash-separated keyboard/controller text. | Preserves the 1:1 physical layout while keeping each prompt immediately readable. T-079 owns the later coherent controller-glyph pass. | 2026-07-10 / Kayden latest playthrough |
+| **D-020 ally collision is intentional combat balance:** allied units occupy cells and cannot move through each other. | Kayden's repeated teammate blocking felt like meaningful positioning pressure. Arena safety prevents unavoidable spawn traps, but movement order and lane management remain part of combat. | 2026-07-10 / Kayden latest playthrough |
+| **D-021 Item command must identify the item before use.** Phase 4 needs a minimal named item selection/confirmation surface; the full inventory/character-menu system remains Phase 5. | Pressing a generic Item command and consuming an unidentified item violates the Readable Tactical Combat pillar even if only one potion exists. | 2026-07-10 / Kayden latest playthrough |
+| **D-022 manual jumping benched until a traversal item.** Current dungeon progression cannot require the standing facing-hop or a forward+jump timing chord. | The old implementation was mechanically understandable but visually and physically incoherent. A future Zelda-style item can reintroduce traversal under a clearer contract. | 2026-07-10 / Kayden latest playthrough |
+| **D-023 first puzzle set:** latching on/off lever, momentary pressure plate, and pushable blocks. | This is the compact reusable Phase 2 vocabulary Kayden wants every early dungeon to build from. T-078 replaces the jump lesson and proves all three with readable state changes. | 2026-07-10 / Kayden latest playthrough |
 
 ## Health Criteria
 

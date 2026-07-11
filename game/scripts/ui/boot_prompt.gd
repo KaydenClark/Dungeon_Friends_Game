@@ -1,7 +1,7 @@
 class_name BootPrompt
 extends CanvasLayer
 ## Minimal Continue/New Game prompt (T-040, D-011: when a save exists, ask;
-## no title screen until Phase 6). Keyboard only, same actions as dialogue:
+## no title screen until Phase 6). Same actions as dialogue:
 ## confirm/interact continues, cancel starts fresh. main.gd awaits `chosen`
 ## before booting a room, so nothing else is running underneath it.
 
@@ -15,7 +15,7 @@ func _ready() -> void:
 	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(panel)
 	var text := Label.new()
-	text.text = "A saved adventure awaits.\n\nE / Space   Continue\nQ / Esc     New Game"
+	text.text = "A saved adventure awaits.\n\nE   Continue\nQ   New Game"
 	text.add_theme_font_size_override("font_size", 30)
 	text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	text.set_anchors_preset(Control.PRESET_CENTER)
