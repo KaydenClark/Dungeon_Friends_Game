@@ -8,26 +8,43 @@ extends Node2D
 
 var room: RoomGrid
 var cell := Vector2i.ZERO
+## Optional link to a mechanism door. Empty keeps the original puzzle-reset
+## behavior; a linked lever latches its door open/closed on each interaction.
+@export var target_id := ""
+var target_door: LockedDoor
+var latched := false
+var _sprite: Sprite2D
 
 
 func _ready() -> void:
-	# Placeholder art: a bronze base with an upright handle.
-	var base := ColorRect.new()
-	base.color = Color(0.42, 0.32, 0.2)
-	base.position = Vector2(-20, 2)
-	base.size = Vector2(40, 22)
-	add_child(base)
-	var handle := ColorRect.new()
-	handle.color = Color(0.75, 0.62, 0.3)
-	handle.position = Vector2(-4, -24)
-	handle.size = Vector2(8, 28)
-	add_child(handle)
+	_sprite = Sprite2D.new()
+	_sprite.texture = load("res://assets/art/objects/kenney/reset_lever.png")
+	_sprite.scale = Vector2.ONE * 4.0
+	_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	add_child(_sprite)
+	_refresh_look()
 
 
 func interact() -> void:
+	if target_door != null:
+		latched = not latched
+		target_door.set_held_open(latched)
+		_refresh_look()
+		SceneManager.show_dialogue([
+			"You pull the lever %s." % ("ON" if latched else "OFF"),
+			"The linked gate %s." % ("slides open" if latched else "slides shut"),
+		])
+		return
 	if room:
 		room.reset_puzzle()
 	SceneManager.show_dialogue([
 		"Reset lever - use only if a block gets stuck.",
 		"You pull it. Every movable block returns to where it began.",
 	])
+
+
+func _refresh_look() -> void:
+	if _sprite == null:
+		return
+	_sprite.flip_h = latched
+	_sprite.modulate = Color(0.62, 1.0, 0.68) if latched else Color.WHITE

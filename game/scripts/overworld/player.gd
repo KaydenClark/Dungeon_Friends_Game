@@ -41,6 +41,10 @@ const FALL_TIME := 0.3
 func fall_damage() -> int:
 	return FALL_DAMAGE
 
+## The Kenney skeleton is enabled for visual playtesting. Directional animation
+## remains a later polish pass, but the promoted sprite is intentional here.
+const USE_SPRITE_BODY := true
+
 const DIR_ACTIONS := {
 	"move_up": Vector2i.UP,
 	"move_down": Vector2i.DOWN,
@@ -48,7 +52,17 @@ const DIR_ACTIONS := {
 	"move_right": Vector2i.RIGHT,
 }
 
+## Beta facing affordance (B-08 follow-up, 2026-07-11): the idle-only sprite
+## can't show facing, so a small translucent chevron sits at the cell edge in
+## the faced direction, under the sprite. It warms to gold when the faced cell
+## holds something interactable - the at-a-glance "E will do something here"
+## read. Player-only: enemy/NPC facing carries no gameplay meaning.
+const PIP_NEUTRAL := Color(1.0, 1.0, 1.0, 0.32)
+const PIP_INTERACT := Color(1.0, 0.85, 0.3, 0.9)
+const PIP_EDGE_OFFSET := 27.0
+
 var camera: Camera2D
+var _pip: Polygon2D
 var _hold_dir := Vector2i.ZERO
 var _hold_time := 0.0
 var _repeating := false
@@ -59,7 +73,13 @@ var _pressed_stack: Array[Vector2i] = []
 
 
 func _ready() -> void:
-	_make_body(Color(0.25, 0.5, 0.95))
+	var hero: CharacterStats = load("res://data/characters/hero.tres")
+	if not USE_SPRITE_BODY or not _make_sprite(hero.sprite_frames, 0.5):
+		_make_body(Color(0.25, 0.5, 0.95))
+	# The facing chevron only accompanies sprite bodies; the placeholder square
+	# already carries its own face marker.
+	if body is AnimatedSprite2D:
+		_make_facing_pip()
 	# Snappier per-step tween than the default so grid movement reads as crisp
 	# steps rather than a laggy glide (playtest feedback 2026-07-05).
 	move_time = WALK_MOVE_TIME
@@ -72,6 +92,9 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	# Keep the facing chevron current every frame: the faced cell's contents
+	# can change without the player acting (a wandering enemy, an opened door).
+	_update_pip()
 	if SceneManager.ui_busy or SceneManager.in_encounter or SceneManager.transitioning:
 		_reset_hold()
 		return
@@ -170,6 +193,29 @@ func _reset_hold() -> void:
 	_buffered_step = false
 
 
+## Small chevron hugging the cell edge in the faced direction, drawn under the
+## sprite (z 1 vs the sprite's 2) so it reads as grid language, not costume.
+func _make_facing_pip() -> void:
+	_pip = Polygon2D.new()
+	_pip.polygon = PackedVector2Array([
+		Vector2(0, -6), Vector2(5, 4), Vector2(0, 1.5), Vector2(-5, 4)])
+	_pip.z_index = 1
+	add_child(_pip)
+	_update_pip()
+
+
+func _update_pip() -> void:
+	if _pip == null:
+		return
+	_pip.position = Vector2(facing) * PIP_EDGE_OFFSET
+	# Vector2i.UP.angle() is -PI/2 and the polygon points up, so +PI/2 aligns
+	# the chevron with the facing direction for all four cardinals.
+	_pip.rotation = Vector2(facing).angle() + PI / 2
+	var target: Node2D = room.get_occupant(cell + facing) if room != null else null
+	var interactable := target != null and target.has_method("interact")
+	_pip.color = PIP_INTERACT if interactable else PIP_NEUTRAL
+
+
 ## Jump exactly one cell over a jumpable gap in the facing direction (T-025,
 ## locked rule: max jump distance is exactly 1 cell - a 1-cell pit is the
 ## definitional jumpable gap; 2+ cells is never jumpable). A jump into a wall,
@@ -216,7 +262,7 @@ func _hop_in_place() -> void:
 func _bob_body(duration: float) -> void:
 	if body == null:
 		return
-	var rest := body.position
+	var rest: Vector2 = body.position
 	var tw := create_tween()
 	tw.tween_property(body, "position:y", rest.y - 20.0, duration * 0.5)
 	tw.tween_property(body, "position:y", rest.y, duration * 0.5)

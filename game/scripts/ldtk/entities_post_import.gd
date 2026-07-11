@@ -16,9 +16,11 @@
 ##   PushableBlock {LinkId: String, Movable: Bool (default true; false = fixed brick)}
 ##   PressurePlate {Id: String, TargetId: String}
 ##   Chest      {Id: String, KeyId: String, RewardId: String}
-##   Lever      (cell only)
+##   Lever      {TargetId: String (empty = reset lever)}
 ##   SaveCrystal (cell only) - save point, writes slot 1 on interact (T-039)
 ##   Doorway    {TargetRoom: String, SpawnX: Int, SpawnY: Int} -> Marker2D
+##   ArenaMetadata {ArenaId, Biome, Tier, Weight, Tags, MirrorSafe} -> Marker2D
+##   PartyDeployment / EnemyDeployment {Slot: Int} -> Marker2D (T-073)
 ## Unknown identifiers get a warning and a bare Marker2D so nothing vanishes
 ## silently. All fields are optional; sensible defaults apply.
 
@@ -51,7 +53,7 @@ func post_import(entity_layer: LDTKEntityLayer) -> LDTKEntityLayer:
 func _spawn(entity: Dictionary) -> Node2D:
 	var fields: Dictionary = entity.fields
 	match entity.identifier:
-		"PlayerSpawn", "Doorway":
+		"PlayerSpawn", "Doorway", "ArenaMetadata", "PartyDeployment", "EnemyDeployment":
 			return Marker2D.new()
 		"Npc":
 			var npc: Node2D = NpcScript.new()
@@ -97,7 +99,9 @@ func _spawn(entity: Dictionary) -> Node2D:
 			chest.reward_item = str(fields.get("RewardId", ""))
 			return chest
 		"Lever":
-			return LeverScript.new()
+			var lever: Node2D = LeverScript.new()
+			lever.target_id = str(fields.get("TargetId", ""))
+			return lever
 		"SaveCrystal":
 			return CrystalScript.new()
 	push_warning("entities_post_import: unknown entity '%s' - spawning a marker"

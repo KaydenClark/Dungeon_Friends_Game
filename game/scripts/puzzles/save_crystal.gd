@@ -12,22 +12,11 @@ var cell := Vector2i.ZERO
 
 
 func _ready() -> void:
-	# Placeholder art: a cyan diamond with a bright core, until Asset Batch D
-	# supplies the real crystal sprite.
-	var gem := ColorRect.new()
-	gem.color = Color(0.35, 0.9, 0.95)
-	gem.position = Vector2(-17, -17)
-	gem.size = Vector2(34, 34)
-	gem.rotation_degrees = 45.0
-	gem.pivot_offset = gem.size * 0.5
-	add_child(gem)
-	var core := ColorRect.new()
-	core.color = Color(0.9, 1.0, 1.0)
-	core.position = Vector2(-7, -7)
-	core.size = Vector2(14, 14)
-	core.rotation_degrees = 45.0
-	core.pivot_offset = core.size * 0.5
-	add_child(core)
+	var sprite := Sprite2D.new()
+	sprite.texture = load("res://assets/art/objects/kenney/save_crystal.png")
+	sprite.scale = Vector2.ONE * 4.0
+	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	add_child(sprite)
 
 
 func interact() -> void:
@@ -37,7 +26,9 @@ func interact() -> void:
 			"(Adventure saved.)",
 		])
 	else:
+		# B-18: player-facing copy - "check the log" means nothing to a player;
+		# the diagnostic detail already lands in push_warning from save_game().
 		SceneManager.show_dialogue([
 			"The crystal flickers... and dims.",
-			"(Saving failed - check the log.)",
+			"(Something is wrong - the adventure was not saved.)",
 		])

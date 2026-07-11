@@ -227,7 +227,10 @@ func show_dialogue(lines: PackedStringArray) -> void:
 
 
 func start_encounter(enemy: OverworldEnemy) -> void:
-	if in_encounter or world_container == null:
+	# B-12: refuse during a room transition - an encounter starting mid-fade
+	# would fight enter_room/exit_rooms over the fade rect and world container,
+	# and could seed its arena from the wrong room.
+	if in_encounter or transitioning or world_container == null:
 		return
 	if skip_combat:
 		# Dev-tools shortcut (T-030): instant victory, no combat scene.
@@ -243,7 +246,7 @@ func start_encounter(enemy: OverworldEnemy) -> void:
 	world_container.process_mode = Node.PROCESS_MODE_DISABLED
 	var combat := CombatScene.new()
 	combat.setup(_build_party_units(), _build_enemy_units(enemy),
-			_arena_from_room(enemy.cell), rng, auto_combat,
+			_select_authored_arena(enemy), rng, auto_combat,
 			inventory.has("shield"))
 	combat_container.add_child(combat)
 	await _fade_to(0.0)
@@ -388,58 +391,58 @@ func _build_enemy_units(enemy: OverworldEnemy) -> Array[CombatUnit]:
 	return out
 
 
-## D-012 (Kayden: "use the local terrain where you were touched"): seed the
-## combat grid from the current room's cells in a window around the contact
-## point. Blocked terrain and pits both read as obstacles. Falls back to an
-## open field when the local area can't fit both parties.
+## D-018: choose a prebuilt LDtk template by encounter context rather than
+## copying a brittle patch of overworld geometry. The fallback is deliberately
+## loud and open only for corrupted/missing authored content; valid production
+## records must pass ArenaValidator before a battle begins.
 const ARENA_W := 17
 const ARENA_H := 7
-func _arena_from_room(contact: Vector2i) -> Dictionary:
-	var open_field := {"w": ARENA_W, "h": ARENA_H, "blocked": []}
-	var room := current_room as RoomGrid
-	if room == null or room.width <= 0:
-		return open_field
-	var w: int = mini(ARENA_W, room.width)
-	var h: int = mini(ARENA_H, room.height)
-	var origin := contact - Vector2i(w / 2, h / 2)
-	origin.x = clampi(origin.x, 0, room.width - w)
-	origin.y = clampi(origin.y, 0, room.height - h)
-	var walkable: Dictionary = {}
-	for y in h:
-		for x in w:
-			var world_cell := origin + Vector2i(x, y)
-			if not (room.blocked.has(world_cell) or room.pits.has(world_cell)):
-				walkable[Vector2i(x, y)] = true
-	# Keep only the connected region around the contact point, so the two
-	# parties can always reach each other (a wall pocket would otherwise
-	# stalemate the battle). Everything else reads as an obstacle.
-	var start := contact - origin
-	if not walkable.has(start):
-		return open_field
-	var component: Dictionary = {start: true}
-	var frontier: Array[Vector2i] = [start]
-	while not frontier.is_empty():
-		var c: Vector2i = frontier.pop_front()
-		for d in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
-			var n: Vector2i = c + d
-			if walkable.has(n) and not component.has(n):
-				component[n] = true
-				frontier.append(n)
-	# Both parties (up to 4 + 4) plus room to maneuver, or fight in a field.
-	if component.size() < 12:
-		return open_field
-	var blocked: Array[Vector2i] = []
-	for y in h:
-		for x in w:
-			var c := Vector2i(x, y)
-			# Keep three clear deployment columns at each edge. The local forest
-			# still shapes the middle of the battlefield, but can never box a
-			# party member in before their first turn.
-			if x < 3 or x >= w - 3:
-				continue
-			if not component.has(c):
-				blocked.append(c)
-	return {"w": w, "h": h, "blocked": blocked}
+func _select_authored_arena(enemy: OverworldEnemy) -> Dictionary:
+	var biome := "forest"
+	var tags := PackedStringArray()
+	var fixed_arena_id := ""
+	if enemy.encounter != null:
+		biome = enemy.encounter.biome
+		tags = enemy.encounter.arena_tags
+		fixed_arena_id = enemy.encounter.fixed_arena_id
+	var selector := ArenaSelector.from_game_state(state, 20260711)
+	var record := selector.select(ArenaLibrary.registry(), biome, tags, fixed_arena_id)
+	if record == null:
+		push_error("Authored arena selection failed: %s" % selector.last_error)
+		return _open_arena_fallback()
+	selector.store_in_game_state(state)
+	var loaded := AuthoredArenaLoader.load_record(record, _party_on_left(enemy))
+	if not bool(loaded.get("ok", false)):
+		push_error("Authored arena load failed: %s" % str(loaded.get("error", "unknown error")))
+		return _open_arena_fallback()
+	var arena: Dictionary = loaded["arena"]
+	var validation_errors := ArenaValidator.validate(arena)
+	if not validation_errors.is_empty():
+		push_error("Authored arena '%s' failed validation: %s"
+				% [record.id, "; ".join(validation_errors)])
+		var visual := arena.get("visual") as Node2D
+		if visual != null:
+			visual.queue_free()
+		return _open_arena_fallback()
+	return arena
+
+
+func _open_arena_fallback() -> Dictionary:
+	return {"w": ARENA_W, "h": ARENA_H, "blocked": []}
+
+
+## The board is landscape, so north/south contact maps to a deterministic
+## horizontal side instead of rotating a 17x7 tactical grid. East/west contact
+## still reads naturally; both vertical directions stay stable across reloads.
+func _party_on_left(enemy: OverworldEnemy) -> bool:
+	var player: Variant = current_room.get("player") if current_room else null
+	var resolved_player := player as Player
+	if resolved_player == null:
+		return true
+	var contact: Vector2i = enemy.cell - resolved_player.cell
+	if absi(contact.x) >= absi(contact.y):
+		return contact.x >= 0
+	return contact.y >= 0
 
 
 ## Restore the whole party to full HP/MP. Shared by the healer NPC and the

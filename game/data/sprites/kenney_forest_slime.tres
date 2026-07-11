@@ -1,0 +1,8 @@
+[gd_resource type="SpriteFrames" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/art/sprites/runtime/kenney/forest_slime.png" id="1"]
+[sub_resource type="AtlasTexture" id="1a"]
+atlas = ExtResource("1")
+region = Rect2(0, 0, 16, 16)
+[resource]
+animations = [{"frames":[{"duration":1.0,"texture":SubResource("1a")},{"duration":1.0,"texture":SubResource("1a")},{"duration":1.0,"texture":SubResource("1a")},{"duration":1.0,"texture":SubResource("1a")}],"loop":true,"name":&"idle","speed":4.0}]

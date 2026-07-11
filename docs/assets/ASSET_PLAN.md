@@ -1,7 +1,7 @@
 # Dungeon Friends - Asset Plan
 
-**Last updated:** 2026-07-08
-**Status:** Batch A/B/D started
+**Last updated:** 2026-07-11
+**Status:** Kenney-first visual skeleton implemented; owner acceptance pending
 
 This file is the asset production checklist for Dungeon Friends. It answers
 what must be made, when it should be made, and where image-generation prompts
@@ -19,6 +19,41 @@ notes in [`IMAGE_PROMPTS.md`](IMAGE_PROMPTS.md).
 - Runtime art path: `game/assets/art/`.
 - Runtime audio path: `game/assets/audio/`.
 - Level source path: `game/assets/levels/`.
+
+## Kenney-First Runtime Direction
+
+**Added:** 2026-07-11 under `game/assets/kenney/`.
+
+Six original Kenney packs are checked in as the source library: Input
+Prompts Pixel, Pixel UI, Roguelike Caves & Dungeons, Roguelike Characters,
+Roguelike Indoors, and Roguelike RPG Pack. Each pack includes its original
+CC0 `License.txt`; the library inventory and promotion rules are documented in
+`game/assets/kenney/README.md`.
+
+The route in [`KENNEY_IMPLEMENTATION_PLAN.md`](KENNEY_IMPLEMENTATION_PLAN.md)
+is implemented through T-083; T-084's automated and windowed QA is green and
+awaits Kayden's acceptance. The deterministic selection contract is
+`game/assets/art/kenney_manifest.json`, generated runtime crops live under the
+`kenney/` folders in `game/assets/art/`, and the review sheet is
+`docs/assets/previews/kenney_contact_sheet.png`. Existing generated/prototype
+batches below remain later custom-art candidates.
+
+### Custom-art swap points
+
+| Surface | Replace here | Mechanics remain behind |
+|---|---|---|
+| Forest/dungeon terrain | `game/assets/art/tilesets/kenney/world_tiles.png` and the LDtk tileset definition | LDtk IntGrid/entity layers and `LdtkRoom` collision adoption |
+| Interactables | `game/assets/art/objects/kenney/*.png` | `Chest`, `LockedDoor`, `PressurePlate`, `PushableBlock`, `Lever`, `SaveCrystal` scripts |
+| Hero/Buddy/slimes | `game/data/sprites/kenney_*.tres` | `CharacterStats` / `EnemyStats` `sprite_frames` slots |
+| NPCs | `game/assets/art/sprites/runtime/kenney/healer.png` and `quest_npc.png` | LDtk `Npc` fields and `NPC` behavior |
+| Combat/UI | `game/assets/art/ui/kenney/*.png` | combat FSM, range sets, turn order, and command input |
+| Input prompts | `game/assets/art/ui/prompts/kenney/*.png` | InputMap actions and `InputPrompts` active-device selection |
+
+Coverage note: every colored actor/interactable stand-in in the playable
+slice is replaced. The main/combat full-screen background `ColorRect`s and
+text labels are deliberately retained as layout/color surfaces rather than
+asset placeholders; prototype/generated character sheets remain checked in
+but are no longer the default resources.
 
 ## Global Art Constraints
 
@@ -228,6 +263,23 @@ Remaining:
 
 **Phase:** Phase 4.
 **Taskboard:** T-055.
+
+**Source intake (2026-07-10):** three generated concept sheets were added under
+`game/assets/art/sprites/` (armored knight, wizard, and red ooze) and logged in
+`docs/assets/IMAGE_PROMPTS.md`. They are source references only: each has a
+baked checkerboard rather than transparency, irregular frame bounds, and
+incomplete original prompt/model provenance. Do not wire them into runtime
+SpriteFrames until those gaps are resolved and character roles are assigned.
+
+**Runtime pass (2026-07-10):** the concepts now have role-assigned derivatives:
+Hero = armored knight, temporary Buddy = wizard, and the current slime family =
+red ooze. Each ships as a four-frame 128px idle strip with real alpha, shared
+scale, and bottom-center anchoring under `game/assets/art/sprites/runtime/`.
+`CharacterStats`/`EnemyStats` carry the SpriteFrames, so the same data-driven
+art renders in overworld and tactical combat without changing grid movement.
+The permanent showcase command is documented in `RUNBOOK.md`. Remaining Batch
+E work is targeting/effect/menu polish and distinct slime variants; this pass
+does not complete the full batch.
 
 Required:
 

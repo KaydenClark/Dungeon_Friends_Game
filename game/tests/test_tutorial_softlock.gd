@@ -7,15 +7,13 @@ extends "res://tests/gd_test.gd"
 ## These build the REAL shipped rooms (TutorialHubRoom / TutorialPitRoom from
 ## tutorial_dungeon.ldtk) and run an exhaustive BFS over every reachable
 ## (movable-block position, player region) state. Fixed bricks (movable=false)
-## are static obstacles; the player's 1-cell jump over a single pit cell is
-## part of reachability (T-025).
+## are static obstacles; manual jumping is deliberately absent (T-078).
 ##  - Hub: from every reachable state, both far-side exits (east gap, north
 ##    door approach) are still reachable OR the reset lever is (the designed
 ##    escape valve for the one movable brick).
-##  - Pit room: every reachable sink lands in the 2-wide chasm (there IS no
-##    wrong pit to feed - the ledges can't be reached by a push), and from
-##    every un-sunk state the south exit stays reachable (leave-and-re-enter
-##    rebuilds the room - the belt-and-braces escape valve).
+##  - Pressure-plate room: one open floor, one block, one momentary plate, one
+##    north gate. Every reachable block state can still reach the plate or the
+##    reset lever, and the south exit stays available.
 
 
 ## Player-walkable predicate for the solver (static geometry + fixed bricks;
@@ -36,8 +34,7 @@ func _walkable(room: LdtkRoom, c: Vector2i, block: Vector2i) -> bool:
 
 
 ## Flood-fill the player-reachable set from `from` given the block position.
-## Includes the 1-cell jump: a single pit cell with walkable ground beyond it
-## can be crossed (T-025 - the pit room's ledges are part of reachability).
+## Pit cells are never crossed: the shipped tutorial no longer binds jump.
 func _reach(room: LdtkRoom, from: Vector2i, block: Vector2i) -> Dictionary:
 	var seen := {from: true}
 	var queue: Array[Vector2i] = [from]
@@ -49,11 +46,6 @@ func _reach(room: LdtkRoom, from: Vector2i, block: Vector2i) -> Dictionary:
 				if not seen.has(n):
 					seen[n] = true
 					queue.append(n)
-			elif room.pits.has(n) and n != block:
-				var land: Vector2i = c + d * 2
-				if _walkable(room, land, block) and not seen.has(land):
-					seen[land] = true
-					queue.append(land)
 	return seen
 
 
@@ -175,51 +167,68 @@ func test_hub_brick_wall_solvable_and_never_soft_locked() -> void:
 	SceneManager.flags = {}
 
 
-func test_pit_room_solvable_and_exit_always_reachable() -> void:
+func test_mechanism_room_solvable_and_exit_always_reachable() -> void:
 	SceneManager.flags = {}
 	var pit := TutorialPitRoom.new()
 	add_child(pit)
 	var movable := _movable_blocks(pit)
-	eq(pit.blocks.size(), 1, "pit room has its one block")
+	eq(pit.blocks.size(), 1, "mechanism room has one teaching block")
 	eq(movable.size(), 1, "and it is movable")
+	eq(pit.plates.size(), 1, "one momentary pressure plate is shipped")
+	eq(pit.levers.size(), 1, "only the recovery/reset lever remains")
+	eq(pit.doors.size(), 1, "one plate-driven north gate is present")
+	eq(pit.pits.size(), 0, "the teaching room has no pits or ambiguous floor")
+	var world: Node = pit.get_child(0)
+	var level: LDTKLevel = pit._pick_level(world)
+	var ground: TileMapLayer = pit._find_tile_layer(level, "Ground")
+	var missing_floor: Array[Vector2i] = []
+	for y in range(1, 12):
+		for x in range(1, 10):
+			var c := Vector2i(x, y)
+			if ground == null or ground.get_cell_source_id(c) == -1:
+				missing_floor.append(c)
+	eq(missing_floor.size(), 0,
+			"every interior cell paints the same continuous floor (missing: %s)"
+			% str(missing_floor))
 	var exit_cell := Vector2i(5, 12)
 	ok(pit.doorways.has(exit_cell), "south exit doorway present")
 	ok(pit.no_block_cells.has(exit_cell), "block can never plug the exit")
-	# Geometry contract: two 1-wide jumpable ledges, then the 2-wide chasm.
-	for x in range(1, 10):
-		ok(pit.is_pit(Vector2i(x, 9)) and not pit.is_pit(Vector2i(x, 8)),
-				"first ledge is exactly 1 wide at column %d" % x)
-		ok(pit.is_pit(Vector2i(x, 7)) and not pit.is_pit(Vector2i(x, 6)),
-				"second ledge is exactly 1 wide at column %d" % x)
-		ok(pit.is_pit(Vector2i(x, 3)) and pit.is_pit(Vector2i(x, 4)),
-				"chasm spans column %d, 2 cells wide" % x)
 	var block_start: Vector2i = movable[0].cell
-	eq(block_start, Vector2i(3, 5), "block starts on the chasm's near bank")
+	eq(block_start, Vector2i(5, 9), "block starts on the plate's teaching row")
+	var plate_cell: Vector2i = pit.plates[0].cell
+	eq(plate_cell, Vector2i(2, 9), "plate is visible on the open lower floor")
+	var reset: Lever = pit.levers[0]
+	eq(reset.target_id, "", "the remaining lever is only the reset escape valve")
+	var plate_door: LockedDoor = pit.doors[0]
+	eq(plate_door.link_id, "pit_plate", "plate targets the north gate")
+	eq(plate_door.cell, Vector2i(5, 1), "gate visibly guards the north exit")
+	# Prove the real shipped actors teach the momentary rule: player weight
+	# opens the gate, stepping off closes it again.
+	pit.teleport(pit.player, Vector2i(2, 10))
+	ok(pit.player.try_step(Vector2i.UP), "player can step onto the floor plate")
+	ok(pit.plates[0].pressed and plate_door.held_open,
+			"standing on the plate opens the north gate")
+	pit.player.moving = false
+	ok(pit.player.try_step(Vector2i.DOWN), "player can step off the plate")
+	not_ok(pit.plates[0].pressed or plate_door.held_open,
+			"stepping off releases the plate and closes the gate")
+	pit.player.moving = false
+	pit.teleport(pit.player, Vector2i(5, 11))
 	var graph := _explore(pit, block_start, pit.player.cell)
 	var states: Dictionary = graph.states
-	var can_sink := _can_reach_set(states, graph.edges,
-			func(st: Dictionary) -> bool: return st.sunk)
+	var can_plate := _can_reach_set(states, graph.edges,
+			func(st: Dictionary) -> bool: return st.block == plate_cell)
 	var start_key := _key(block_start, _reach(pit, pit.player.cell, block_start))
-	ok(can_sink.has(start_key), "block-into-chasm solution reachable from the start")
-	var bad_sinks: Array[String] = []
+	ok(can_plate.has(start_key), "block-to-plate solution reachable from the start")
 	var stuck: Array[String] = []
 	for key: String in states:
 		var st: Dictionary = states[key]
-		if st.sunk:
-			# Every reachable sink must land in the chasm band - the ledges
-			# are unreachable to a push, so there is no wrong pit to feed.
-			if st.block.y > 4:
-				bad_sinks.append(key)
+		if can_plate.has(key):
 			continue
-		if not can_sink.has(key):
+		if not _adjacent_reachable(st.reach, reset.cell):
 			stuck.append(key)
-			continue
-		if not st.reach.has(exit_cell):
-			stuck.append(key)
-	eq(bad_sinks.size(), 0,
-			"no push can sink the block into a ledge (bad: %s)" % str(bad_sinks))
 	eq(stuck.size(), 0,
-			"every state can still sink the block AND leave to reset (stuck: %s)" % str(stuck))
+			"every bad block state can reach the reset lever (stuck: %s)" % str(stuck))
 	pit.queue_free()
 	SceneManager.flags = {}
 

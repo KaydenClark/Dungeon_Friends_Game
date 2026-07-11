@@ -14,7 +14,7 @@ var room: RoomGrid
 var cell := Vector2i.ZERO
 var facing := Vector2i.DOWN
 var moving := false
-var body: ColorRect
+var body
 var face_marker: ColorRect
 
 
@@ -58,6 +58,12 @@ func set_facing(dir: Vector2i) -> void:
 	facing = dir
 	if face_marker:
 		face_marker.position = Vector2(-6, -6) + Vector2(dir) * 18.0
+	# Beta facing readability (B-08 follow-up): idle-only sprites get a
+	# horizontal flip on sideways facing. Front-facing art makes this a no-op;
+	# side-facing art reads correctly. Assumes right-facing native art - if the
+	# Kenney sheet faces left, invert the comparison.
+	if body is AnimatedSprite2D and dir.x != 0:
+		body.flip_h = dir.x < 0
 
 
 ## Called when a step is blocked by another occupant. Subclasses override
@@ -79,3 +85,25 @@ func _make_body(color: Color, side: int = 48) -> void:
 	face_marker.size = Vector2(12, 12)
 	add_child(face_marker)
 	set_facing(facing)
+
+
+## Real-art path shared by the player and roaming enemies. SpriteFrames stay
+## on the data Resources; movement remains the same grid-snapped Node2D tween.
+func _make_sprite(frames: SpriteFrames, sprite_scale := 0.5) -> bool:
+	if frames == null or not frames.has_animation(&"idle"):
+		return false
+	var sprite := AnimatedSprite2D.new()
+	sprite.name = "RuntimeSprite"
+	sprite.sprite_frames = frames
+	sprite.animation = &"idle"
+	sprite.centered = true
+	var first_texture := frames.get_frame_texture(&"idle", 0)
+	var resolved_scale := 4.0 if first_texture != null and first_texture.get_width() <= 16 \
+			else sprite_scale
+	sprite.scale = Vector2.ONE * resolved_scale
+	sprite.position = Vector2(0, 0)
+	sprite.z_index = 2
+	add_child(sprite)
+	sprite.play()
+	body = sprite
+	return true

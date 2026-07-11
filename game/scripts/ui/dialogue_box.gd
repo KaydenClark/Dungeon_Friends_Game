@@ -31,11 +31,23 @@ func _init() -> void:
 	label.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	vbox.add_child(label)
 	hint = Label.new()
-	hint.text = "E / Space / Enter ▸"
+	hint.text = ""
 	hint.add_theme_font_size_override("font_size", 14)
 	hint.modulate = Color(1, 1, 1, 0.5)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	vbox.add_child(hint)
+	var prompt_row := HBoxContainer.new()
+	prompt_row.alignment = BoxContainer.ALIGNMENT_END
+	prompt_row.add_child(InputPrompts.make_glyph("confirm"))
+	prompt_row.add_child(hint)
+	vbox.add_child(prompt_row)
+	var panel_style := StyleBoxTexture.new()
+	panel_style.texture = load("res://assets/art/ui/kenney/panel.png")
+	panel_style.texture_margin_left = 5.0
+	panel_style.texture_margin_top = 5.0
+	panel_style.texture_margin_right = 5.0
+	panel_style.texture_margin_bottom = 5.0
+	panel_style.modulate_color = Color(0.12, 0.16, 0.24, 0.96)
+	add_theme_stylebox_override("panel", panel_style)
 
 
 func open(p_lines: PackedStringArray) -> void:
@@ -58,6 +70,9 @@ func advance() -> void:
 func _show_line() -> void:
 	if idx < lines.size():
 		label.text = lines[idx]
+		# B-19: the hint distinguishes "more text" from "this closes the box",
+		# so the player knows when the next E ends the conversation.
+		hint.text = "E ▸" if idx < lines.size() - 1 else "E ■"
 
 
 func _unhandled_input(event: InputEvent) -> void:

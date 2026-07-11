@@ -1,14 +1,11 @@
 class_name TutorialPitRoom
 extends LdtkRoom
-## Tutorial dungeon Room 3 - the pit room (T-027, reworked per Kayden's
-## 2026-07-07 notes: "just focus on pushing blocks and the jumping over the
-## ledges"). From the south: two 1-cell ledges teach the jump (each exactly
-## the jumpable width), then a 2-cell chasm - beyond the 1-cell jump limit -
-## teaches block-fills-pit: push the block in, cross on the filled cell,
-## jump the last gap. Wedge-proof by construction: the block sits on the
-## chasm's near bank, every column it can be pushed into sinks it usefully,
-## and the ledges can't be reached by a push. Leaving south still resets the
-## room (freed + rebuilt) as a belt-and-braces escape valve.
+## Tutorial dungeon Room 3 - the pressure-plate room (T-078/D-022/D-023).
+## One unambiguous open floor teaches one idea, modeled after A Link to the
+## Past: player weight opens the north gate only while standing on the plate;
+## pushing the heavy block onto it holds the gate open. There are no pits and
+## no second mechanism competing with that lesson. A reset lever and the
+## south exit keep every bad block position recoverable.
 ##
 ## Doorway targets: hub_return (south), fight_room (north, past the chasm).
 
@@ -19,29 +16,40 @@ func _init() -> void:
 
 
 func _room_ready() -> void:
+	var plate: PressurePlate = plates[0] if not plates.is_empty() else null
+	if plate:
+		plate.id = "pit_plate"
+		plate.target_id = "pit_plate"
+		plate.pressed_changed.connect(_on_plate_changed)
+	# The first LdtkRoom wiring pass happened before the tutorial plate target
+	# was assigned. A second pass connects it to the north gate.
+	puzzle.levers = levers
+	puzzle.wire()
 	if not SceneManager.flags.get("pit_room_seen", false):
 		SceneManager.flags["pit_room_seen"] = true
 		SceneManager.show_dialogue([
-			"Narrow ledges split the floor ahead -",
-			"a single square wide. A running leap might do it.",
-			"(Space or C jumps the gap you're facing.)",
+			"The north gate is sealed.",
+			"That brass plate is set into the floor like a switch.",
+			"(Try stepping on it.)",
 		])
-	player.move_finished.connect(_chasm_hint)
 
 
-## One-time hint when the player first reaches the chasm's near bank: the
-## 2-wide gap is deliberately unjumpable and the block is the answer.
-func _chasm_hint() -> void:
-	if SceneManager.flags.get("chasm_hint_seen", false):
+func _on_plate_changed(pressed: bool) -> void:
+	if not pressed or SceneManager.flags.get("plate_hint_seen", false):
 		return
-	if player.cell.y > 6:
-		return
-	SceneManager.flags["chasm_hint_seen"] = true
+	SceneManager.flags["plate_hint_seen"] = true
 	SceneManager.show_dialogue([
-		"This chasm is far too wide to jump...",
-		"but that block looks heavy enough to fall.",
-		"(Walk into the block to push it.)",
+		"The plate sinks under your weight - the north gate opens!",
+		"Step off and it will close again.",
+		"Push the heavy block onto the plate to hold it down.",
 	])
+
+
+func _door_with_link(id: String) -> LockedDoor:
+	for door: LockedDoor in doors:
+		if door.link_id == id:
+			return door
+	return null
 
 
 func _on_doorway(fields: Dictionary) -> void:

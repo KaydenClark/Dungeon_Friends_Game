@@ -8,6 +8,12 @@ extends Node2D
 var hud: Label
 
 
+func _input(event: InputEvent) -> void:
+	if InputPrompts.observe(event):
+		for node in get_tree().get_nodes_in_group("input_prompt_glyphs"):
+			InputPrompts.refresh_glyph(node)
+
+
 func _ready() -> void:
 	SceneManager.register_main(
 		$WorldContainer, $CombatContainer, $UILayer, $TransitionLayer)
@@ -15,11 +21,15 @@ func _ready() -> void:
 	# it resolves through the map registry like every other room build (T-038).
 	SceneManager.boot_factory = func() -> Node2D: return MapRegistry.build("forest")
 	var hint := Label.new()
-	hint.text = "WASD / Arrows: move    E or Space: talk & interact"
+	hint.text = "WASD / Arrows: move        talk & interact"
 	hint.position = Vector2(16, 8)
 	hint.add_theme_font_size_override("font_size", 16)
 	hint.modulate = Color(1, 1, 1, 0.75)
 	$UILayer.add_child(hint)
+	var interact_glyph := InputPrompts.make_glyph("interact")
+	interact_glyph.position = Vector2(168, 2)
+	interact_glyph.size = Vector2(28, 28)
+	$UILayer.add_child(interact_glyph)
 	hud = Label.new()
 	hud.position = Vector2(16, 30)
 	hud.add_theme_font_size_override("font_size", 18)
@@ -36,7 +46,18 @@ func _ready() -> void:
 		add_child(prompt)
 		var continue_game: bool = await prompt.chosen
 		prompt.queue_free()
-		if continue_game and SceneManager.load_game(1):
+		if continue_game:
+			if SceneManager.load_game(1):
+				return
+			# B-14: never fall through to a fresh game silently - the player
+			# chose Continue and needs to know the load failed (the save file
+			# itself is untouched; load_game leaves it on disk).
+			SceneManager.boot_room(SceneManager.boot_factory.call())
+			await SceneManager.show_dialogue([
+				"The saved adventure could not be loaded...",
+				"(The save file was left untouched.)",
+				"Starting a new adventure for now.",
+			])
 			return
 	SceneManager.boot_room(SceneManager.boot_factory.call())
 
@@ -44,8 +65,19 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	# Tiny placeholder HUD (real UI is a later phase): live HP / XP / key
 	# status, so playtesters can see combat and loot actually change state.
+	# B-16: every roster member gets an HP readout - Buddy's post-fight health
+	# was invisible outside combat, so "is my companion down?" was unanswerable.
 	if SceneManager.hero_stats == null:
 		return
-	hud.text = "HP %d/%d    XP %d    Items: %s" % [
-		SceneManager.hero_hp, SceneManager.hero_stats.max_hp,
-		SceneManager.total_xp, SceneManager.inventory_summary()]
+	var rows := PackedStringArray()
+	for id in SceneManager.state.party_roster:
+		var stats := SceneManager.character_stats_for(id)
+		if stats == null:
+			continue
+		var hp: int = SceneManager.state.party_hp.get(id, stats.max_hp)
+		if hp <= 0:
+			rows.append("%s DOWN" % stats.display_name)
+		else:
+			rows.append("%s %d/%d" % [stats.display_name, hp, stats.max_hp])
+	hud.text = "%s    XP %d    Items: %s" % [
+		" | ".join(rows), SceneManager.total_xp, SceneManager.inventory_summary()]

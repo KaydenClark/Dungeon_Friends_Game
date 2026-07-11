@@ -2,7 +2,7 @@
 
 > Generated from LLM Workbench v2.1. See Upgrading The Harness below.
 
-**Last reviewed:** 2026-07-09
+**Last reviewed:** 2026-07-11
 **Runtime owner:** Kayden (solo developer)
 **Environment:** local (macOS development machine; builds also target Windows
 and Android)
@@ -62,14 +62,17 @@ Expected result: a 1280x720 window opens (flexible HD/ultrawide `canvas_items`/
 showing the first-playable forest slice with placeholder-generated tile and
 sprite art. No console errors.
 
-Playing the slice (updated 2026-07-09 for the Phase 4 combat core; controls
-come from the T-009 input map plus the T-025 jump):
+Playing the slice (updated 2026-07-10 after the latest playthrough; on-screen
+prompts show keyboard keys only until T-079 supplies controller glyphs):
 
-- WASD / arrow keys: grid-snapped movement. E: talk & interact;
-  Enter / Space advances dialogue. Space (or C): jump one cell over a pit.
-- Loop: talk to the quest NPC -> bump a slime to enter the local-terrain
-  tactical arena (D-012), controlling Hero + Buddy (D-013). WASD/arrows move
-  the combat cursor or menu; E/Space/Enter confirms; Q/Escape cancels or stays
+- WASD / arrow keys: grid-snapped movement. E: talk, interact, and confirm.
+  Q: cancel/back. The controller equivalents remain D-pad, A, and X.
+- Space/B remains reserved for a future traversal item, but no shipped room
+  requires manual jumping. The tutorial route uses mechanisms instead.
+- Loop: talk to the quest NPC -> bump a slime to enter an authored,
+  biome-consistent tactical arena selected from the editable forest pool
+  (D-018), controlling Hero + Buddy (D-013). WASD/arrows move
+  the combat cursor or menu; E confirms; Q cancels or stays
   put. On each party turn, choose a highlighted destination, then
   Attack/Ability/Item/Defend (Defend appears only after earning the shield) or
   Wait. Beat the leashed Boss Slime by the east
@@ -77,18 +80,18 @@ come from the T-009 input map plus the T-025 jump):
   four-room tutorial dungeon: the entry locks behind you; a wall of 13
   bricks spans the hub and exactly one pushes free (walk into bricks to
   test them; the optional reset lever is only for returning a stuck loose
-  brick to its starting cell); through the east gap, jump
-  the pit room's two 1-wide ledges, then push the block into the 2-wide
-  chasm and jump the remaining gap; beat the Dungeon Slime for the Dungeon
+  brick to its starting cell); through the east gap, step on the brass floor
+  plate to open the north gate, step off to see it close, then push the heavy
+  block left onto that same plate to hold the gate open; beat the Dungeon Slime for the Dungeon
   Key; loop back through the west shortcut; unlock the hub's north door and
   open the side room's chest for the shield - the entry unbolts and you
-  walk back out to the forest. The pressure plate is on hold (B-06) - no
-  shipped room uses one.
+  walk back out to the forest. The room is one continuous floor with no pits;
+  its east-side lever only resets a wedged block.
 - Saving and dying (Phase 3, built 2026-07-10): the cyan **save crystal**
   beside the healer's campfire writes slot 1 on interact; booting with a
-  save shows a minimal Continue (E/Space) / New Game (Q/Esc) prompt
+  save shows a minimal Continue (E) / New Game (Q) prompt
   (D-011). **Walking into a pit** is a Zelda-style fall: 10 HP party-wide and a walk
-  back to the room's last-used entrance; jumping is unchanged (T-047).
+  back to the room's last-used entrance (T-047).
   **Party defeat** is a checkpoint, not a restart (T-041, tuned per D-014/
   D-015): keep inventory, lose 25% of your progress toward the next level,
   come back at 80% HP; in the dungeon you wake at the
@@ -140,13 +143,13 @@ autoload initialized.
 
 End-to-end scripted run of the whole slice (input map, movement/collision,
 NPC dialogue, enemy encounters, seeded d10 combat, key/door, then the full
-Phase 2 tutorial dungeon in its 2026-07-07 layout: hub lock-in, the
+Phase 2 tutorial dungeon in its current layout: hub lock-in, the
 13-brick wall's one loose brick (fixed bricks refuse the push), the north
-door locked without its key, two 1-wide ledge jumps, 2-wide chasm crossing
-via block-fill + jump, key-guardian fight -> dungeon_key, west loop back,
+door locked without its key, step-on/step-off momentary plate demonstration,
+block-held north gate with reset lever and no pits/jump, key-guardian fight -> dungeon_key, west loop back,
 north door unlock, chest room -> shield -> entry unbolts, return to the
 preserved forest, plus the Phase 3 save/load slice: a save-crystal write by
-the campfire, a ledge-pit fall (10 HP party-wide + entrance respawn), forced defeats
+the campfire, forced defeats
 proving the T-041 checkpoint respawns (dungeon -> fresh hub entrance,
 outside -> the healer), and a final load leg rolling back to the crystal
 save):
@@ -156,7 +159,7 @@ cd game
 /Applications/Godot.app/Contents/MacOS/Godot --headless --path . scenes/dev/slice_smoke_test.tscn
 ```
 
-Expected result: exit `0` and a final `SLICE SMOKE TEST: PASS (137/137
+Expected result: exit `0` and a final `SLICE SMOKE TEST: PASS (134/134
 checks)` line (~40-80s; the watchdog fails the run at 180s). A benign `ObjectDB instances leaked` warning
 at exit is known noise from quitting mid-coroutines; any `CHECK FAILED:` line
 or exit `1` is a real failure. Because roaming enemies move on real-time
@@ -185,6 +188,59 @@ cd game
 Expected result: exit `0`, five `wrote .../<room>.png` lines and a final
 `SCREENSHOT TOUR: done`. Omitting `--out=` writes into the project's
 `user://screenshots` directory.
+
+### Kenney visual-skeleton proof (T-080..T-084)
+
+Regenerate the promoted runtime crops after changing the manifest, import
+them, then render the 1280x720 contact sheet and combat showcase:
+
+```bash
+cd game
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path . --script scripts/assets/prepare_kenney_assets.gd
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path . --import
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/kenney_contact_sheet.tscn -- --out=/tmp/kenney-contact.png
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/runtime_sprite_showcase.tscn -- --out=/tmp/kenney-combat.png
+```
+
+The manifest suite checks unique names, source bounds, promoted-file presence,
+and the 16px/4x/nearest contract. Windowed scenes are required for meaningful
+screenshots; the headless renderer produces black visual proof.
+
+For an under-one-second combat-art proof with Hero, Buddy, a normal slime, and
+the boss slime on the tactical grid, run the dedicated runtime-sprite showcase:
+
+```bash
+cd game
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/runtime_sprite_showcase.tscn --resolution 1280x720 -- --out=/tmp/dungeon-runtime-sprites.png
+```
+
+Expected result: exit `0`, `RUNTIME SPRITE SHOWCASE: wrote ...`, and a rendered
+PNG with four animated-resource units. This must be windowed; headless output
+uses the dummy renderer and is not visual proof.
+
+### Authored battle-arena gallery (T-072..T-075)
+
+The first forest pool lives in `game/assets/levels/battle_arenas.ldtk`: seven
+named 17x7 LDtk levels with editable `Wall` IntGrid terrain, `ArenaMetadata`,
+and eight `PartyDeployment`/`EnemyDeployment` marker slots per side. The
+gallery renders the actual imported levels, their metadata, deployment slots,
+and the shared validator result; the showcase proves the same level reaches
+the live `CombatScene` renderer.
+
+From the current Windows checkout:
+
+```powershell
+$godot = 'E:\Godot\godot.cmd'
+& $godot --headless --path game --import
+& $godot --path game scenes/dev/arena_gallery.tscn -- --out="$PWD\docs\screenshots\authored_arena_gallery.png"
+& $godot --path game scenes/dev/authored_arena_showcase.tscn -- --out="$PWD\docs\screenshots\authored_arena_combat.png"
+```
+
+Expected result: both windowed commands exit `0` and print `AUTHORED ARENA
+GALLERY: wrote ...` / `AUTHORED ARENA COMBAT SHOWCASE: wrote ...`. Inspect the
+gallery after any LDtk edit. It must show seven `VALID` cards, the 2/3/2
+empty/mid/hard split, 5/2/1 per-template weights, and green/red deployment
+zones. Run it windowed; headless image output is not visual proof.
 
 ### Display-scaling spike (T-007)
 
@@ -221,7 +277,7 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
-per-suite tally (currently `UNIT TESTS: 27 suites, 171 tests, 626 checks, 0
+ per-suite tally (currently `UNIT TESTS: 32 suites, 200 tests, 958 checks, 0
 failed`). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a
 few seconds (pure logic and controlled clocks, no real-time waits, unlike the
 slice smoke test; the tutorial soft-lock solver adds a second or two). Run
@@ -236,8 +292,14 @@ path calls - thresholds, roll inversion, ability power, heals),
 `test_turn_manager` (T-061: interleaved-by-speed initiative, deterministic
 tie-breaks, mid-round death skips, round refills), `test_combat_scene`
 (T-068 core: the Defend shield gate, item stock gating, move-range flood
-fill vs solids, ability MP/target gating, mend/potion execution, the D-012
-arena connectivity seed, and a seeded 2v2 auto-battle to completion),
+fill vs solids, ability MP/target gating, mend/potion execution, authored
+deployment-zone placement, and a seeded 2v2 auto-battle to completion),
+`test_arena_selector` (T-072 deterministic weighted tickets, biome/tag
+filtering, fixed overrides, no-repeat refills, v1 save compatibility, and
+save/load continuation), `test_authored_arena_loader` (T-073/T-074 all seven
+LDtk levels, imported `TileMapLayer` visuals, contact-side deployment, and
+live CombatScene attachment), `test_arena_validator` (T-075 negative safety
+fixtures and cover budgets),
 `test_progression` (T-045 XP curve shape + the T-041 defeat-penalty floor
 clamp), `test_save_manager` (T-037: JSON round-trip, atomic write, tolerant
 corrupt/missing loads, slot isolation, int re-coercion), `test_map_registry`
@@ -309,28 +371,30 @@ crystal, or flag-restored room state.
 
 ### Phase 4 combat check (T-068/T-069)
 
-Automated proof is the unit command above plus the slice smoke test: at the
-T-068 gate that was 22 suites / 140 tests / 490 checks and **111/111 smoke
-checks on 5/5 consecutive runs** (2026-07-09; counts refreshed same day after
-the dev potion grant and the smoke test's freed-lambda-capture fix); the
-Phase 3 save/load plus the first T-069 playtest recut grew the totals to
-27 suites / 171 tests / 626 checks and 137/137 smoke (2026-07-10), with the
-combat legs unchanged. `test_combat_scene` covers a seeded
-2v2 battle, D-012 local-terrain connectivity, range refusal, MP/item
-bookkeeping, support actions, shield-gated Defend, and the live turn-order HUD
-format. The smoke test proves a regular forest Enemy's LDtk `EncounterId`
-builds the authored two-enemy group, grants both XP rewards, and restores the
-exact overworld position after the zoom transition.
+Automated proof is the unit command above plus the slice smoke test. The
+ authored-arena lane is green at **32 suites / 200 tests / 958 checks** and
+**134/134 smoke checks on 5/5 consecutive runs** (2026-07-11). The selector,
+loader, validator, and CombatScene tests cover the actual seven-record 2/3/2
+forest pool, 5/2/1 weighted tickets, biome/tag filtering, no immediate repeat,
+save/load continuation, fixed overrides, 4v4-safe deployment zones, contact
+side orientation, and imported LDtk rendering. The smoke test proves a regular
+forest Enemy's LDtk `EncounterId` builds the authored two-enemy group, runs
+through the production arena-selection path, grants both XP rewards, and
+restores the exact overworld position after the zoom transition.
 
 For the windowed T-069 acceptance gate:
 
 1. Run `main.tscn` and touch several slimes in different forest positions.
-2. Confirm the combat arena resembles the terrain around each contact point
-   and never traps either party (D-012).
+2. Confirm each battle uses a readable, biome-consistent authored LDtk arena
+   rather than a tiny copied contact patch; observe empty, mid, and hard boards
+   through the gallery if normal draws do not show all three. Confirm neither
+   party spawns trapped (D-018).
 3. Control both Hero and the temporary Buddy companion; confirm initiative is
-   per-unit, move/attack highlights are readable, and blocked cells refuse
-   movement.
-4. Exercise Attack, Strike/Mend, Potion, Defend after obtaining the shield,
+   per-unit, every legal move cell has a filled blue tile with a bright border,
+   and the cursor/prompt and party status stay in their HUD bands rather than
+   clipping over terrain. Confirm blocked cells refuse movement.
+4. Exercise Attack, Strike/Mend, named Potion selection (quantity + acting
+   unit shown before confirmation), Defend after obtaining the shield,
    and Wait. Judge the d10 odds, ranges, healing, damage, and first-read
    difficulty rather than treating the current numbers as final.
 5. After T-065/T-067, judge the zoom transition, exact-position return,

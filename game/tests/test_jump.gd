@@ -104,13 +104,48 @@ func test_filled_pit_is_walkable_and_jumpable_from() -> void:
 	ok(p.try_jump(), "the remaining 1-cell gap is jumpable from the filled cell")
 	eq(p.cell, Vector2i(5, 2), "player lands beyond the pit")
 	g.queue_free()
-func test_space_is_jump_and_q_is_secondary_cancel() -> void:
+func test_keyboard_controller_anchor_mapping() -> void:
 	var jump_keys := InputMap.action_get_events("jump") \
+			.filter(func(e: InputEvent) -> bool: return e is InputEventKey) \
+			.map(func(e: InputEventKey) -> int: return e.physical_keycode)
+	var interact_keys := InputMap.action_get_events("interact") \
+			.filter(func(e: InputEvent) -> bool: return e is InputEventKey) \
+			.map(func(e: InputEventKey) -> int: return e.physical_keycode)
+	var confirm_keys := InputMap.action_get_events("confirm") \
 			.filter(func(e: InputEvent) -> bool: return e is InputEventKey) \
 			.map(func(e: InputEventKey) -> int: return e.physical_keycode)
 	var cancel_keys := InputMap.action_get_events("cancel") \
 			.filter(func(e: InputEvent) -> bool: return e is InputEventKey) \
 			.map(func(e: InputEventKey) -> int: return e.physical_keycode)
-	ok(jump_keys.has(KEY_SPACE), "Space is the primary jump button")
-	ok(cancel_keys.has(KEY_Q), "Q is the keyboard cancel/stay button")
-	not_ok(cancel_keys.has(KEY_X), "X is no longer presented as stay/cancel")
+	var menu_keys := InputMap.action_get_events("menu") \
+			.filter(func(e: InputEvent) -> bool: return e is InputEventKey) \
+			.map(func(e: InputEventKey) -> int: return e.physical_keycode)
+	var character_menu_keys := InputMap.action_get_events("character_menu") \
+			.filter(func(e: InputEvent) -> bool: return e is InputEventKey) \
+			.map(func(e: InputEventKey) -> int: return e.physical_keycode)
+	var interact_buttons := _joy_buttons("interact")
+	var confirm_buttons := _joy_buttons("confirm")
+	var jump_buttons := _joy_buttons("jump")
+	var cancel_buttons := _joy_buttons("cancel")
+	var menu_buttons := _joy_buttons("menu")
+	var character_menu_buttons := _joy_buttons("character_menu")
+	eq(jump_keys, [KEY_SPACE], "Space is the only jump button")
+	eq(interact_keys, [KEY_E], "E is the only interact button")
+	eq(confirm_keys, [KEY_E], "E is also the only confirm button")
+	eq(cancel_keys, [KEY_Q], "Q is the only cancel/back button")
+	eq(menu_keys, [KEY_TAB], "Tab is the only menu button")
+	eq(character_menu_keys, [KEY_F], "F is the character-menu anchor")
+	eq(interact_buttons, [JOY_BUTTON_A], "controller A matches E interact")
+	eq(confirm_buttons, [JOY_BUTTON_A], "controller A matches E confirm")
+	eq(jump_buttons, [JOY_BUTTON_B], "controller B matches Space jump")
+	eq(cancel_buttons, [JOY_BUTTON_X], "controller X matches Q cancel/back")
+	eq(menu_buttons, [JOY_BUTTON_START], "controller Start matches Tab menu")
+	eq(character_menu_buttons, [JOY_BUTTON_Y], "controller Y matches F character menu")
+
+
+func _joy_buttons(action: StringName) -> Array[int]:
+	var result: Array[int] = []
+	for event in InputMap.action_get_events(action):
+		if event is InputEventJoypadButton:
+			result.append(event.button_index)
+	return result

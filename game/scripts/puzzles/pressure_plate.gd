@@ -17,22 +17,16 @@ var cell := Vector2i.ZERO
 ## link id of the LockedDoor this plate drives (wired by PuzzleController).
 @export var target_id := ""
 var pressed := false
-var _face: ColorRect
+var _sprite: Sprite2D
 
 
 func _ready() -> void:
-	# Placeholder art: a recessed steel plate, darker while pressed.
-	z_index = -1  # under whatever stands on it
-	var rim := ColorRect.new()
-	rim.color = Color(0.3, 0.3, 0.34)
-	rim.position = Vector2(-24, -24)
-	rim.size = Vector2(48, 48)
-	add_child(rim)
-	_face = ColorRect.new()
-	_face.color = Color(0.55, 0.57, 0.62)
-	_face.position = Vector2(-19, -19)
-	_face.size = Vector2(38, 38)
-	add_child(_face)
+	z_index = 0
+	_sprite = Sprite2D.new()
+	_sprite.texture = load("res://assets/art/objects/kenney/pressure_plate.png")
+	_sprite.scale = Vector2.ONE * 3.0
+	_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	add_child(_sprite)
 	_refresh()
 
 
@@ -56,6 +50,7 @@ func _refresh() -> void:
 	if now == pressed:
 		return
 	pressed = now
-	if _face:
-		_face.color = Color(0.38, 0.42, 0.4) if pressed else Color(0.55, 0.57, 0.62)
+	if _sprite:
+		_sprite.modulate = Color(0.55, 0.55, 0.55) if pressed else Color.WHITE
+		_sprite.position.y = 4.0 if pressed else 0.0
 	pressed_changed.emit(pressed)

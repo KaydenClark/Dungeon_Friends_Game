@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ArenaData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/arena_data.gd" id="1_arena"]
+
+[resource]
+script = ExtResource("1_arena")
+id = "forest_winding_copse"
+biome = "forest"
+tags = PackedStringArray("cover", "flank")
+tier = "mid"
+weight = 2
+ldtk_path = "res://assets/levels/battle_arenas.ldtk"
+level_id = "ArenaWindingCopse"
+mirror_safe = false

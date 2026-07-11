@@ -12,6 +12,8 @@ const SUITES := [
 	"res://tests/test_combat_math.gd",
 	"res://tests/test_turn_manager.gd",
 	"res://tests/test_combat_scene.gd",
+	"res://tests/test_arena_validator.gd",
+	"res://tests/test_authored_arena_loader.gd",
 	"res://tests/test_room_grid.gd",
 	"res://tests/test_grid_actor.gd",
 	"res://tests/test_data_resources.gd",
@@ -22,6 +24,7 @@ const SUITES := [
 	"res://tests/test_scene_manager.gd",
 	"res://tests/test_game_state.gd",
 	"res://tests/test_save_manager.gd",
+	"res://tests/test_arena_selector.gd",
 	"res://tests/test_map_registry.gd",
 	"res://tests/test_load_flow.gd",
 	"res://tests/test_defeat_respawn.gd",
@@ -36,6 +39,8 @@ const SUITES := [
 	"res://tests/test_ldtk_pipeline.gd",
 	"res://tests/test_tutorial_softlock.gd",
 	"res://tests/test_debug_overlay.gd",
+	"res://tests/test_kenney_manifest.gd",
+	"res://tests/test_input_prompts.gd",
 ]
 
 

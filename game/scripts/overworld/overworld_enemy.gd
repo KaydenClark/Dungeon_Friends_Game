@@ -23,9 +23,11 @@ const STEP_INTERVAL := 0.35
 @export var encounter: EncounterData
 var target_player: Player
 @export var is_boss := false
-## Non-empty for one-off enemies (boss, key guardians): defeat is recorded in
-## SceneManager.flags so a rebuilt room doesn't respawn them (rooms are freed
-## and rebuilt on re-entry - see LdtkRoom).
+## Stable id for one-off enemies (boss, key guardians). NOTE (B-20): under
+## D-009 defeated enemies ALWAYS respawn on a room rebuild, uniques included -
+## loot dedup is what prevents duplicate key drops. This id is kept for
+## authoring/debugging and any future rule that needs to name a specific
+## enemy; it does NOT gate respawn.
 @export var unique_id := ""
 ## Spawn cell; with a leash set, the enemy drifts back here when it strays.
 var home_cell := Vector2i.ZERO
@@ -36,6 +38,12 @@ var _step_accum := 0.0
 
 
 func _ready() -> void:
+	if stats != null and _make_sprite(stats.sprite_frames, 0.68 if is_boss else 0.5):
+		if body is AnimatedSprite2D:
+			body.scale = Vector2.ONE * (5.0 if is_boss else 4.0)
+			body.modulate = Color(0.95, 0.42, 0.5) if is_boss else (Color(0.55, 0.7, 1.0) \
+					if stats.id == "dungeon_slime" else Color.WHITE)
+		return
 	var tri := Polygon2D.new()
 	var s := 30.0 if is_boss else 24.0
 	tri.polygon = PackedVector2Array([Vector2(0, -s), Vector2(s, s), Vector2(-s, s)])
@@ -53,9 +61,11 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	# Autonomous stepping: accumulate real time and take a grid step whenever the
 	# interval elapses, independent of the player. Frozen during combat, dialogue,
-	# or while a previous tween is still running.
+	# room transitions (B-12: an enemy acting mid-fade could start an encounter
+	# on top of a doorway transition), or while a previous tween is still running.
 	if target_player == null or moving or stats == null \
-			or SceneManager.in_encounter or SceneManager.ui_busy:
+			or SceneManager.in_encounter or SceneManager.ui_busy \
+			or SceneManager.transitioning:
 		return
 	_step_accum += delta
 	if _step_accum < STEP_INTERVAL:

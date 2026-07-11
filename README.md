@@ -14,13 +14,19 @@ exploration (Zelda-style block/switch/key puzzles), BG3-style turn-based
 *tactical* party combat (a dedicated battle mode: select a unit, move it within
 its highlighted range, act), and recruitable "Dungeon Friends" party
 members. The world starts in a fantasy forest and later expands into a castle
-city, mountains, and rivers. Current state: a playable slice on placeholder
-art - walk an LDtk-authored forest, talk to NPCs, bump a visible enemy into a
-tactical d10 battle on terrain copied from the contact area, control Hero plus
-a temporary test companion with interleaved initiative and highlighted
+city, mountains, and rivers. Current state: a playable slice with a coherent
+Kenney-first CC0 visual skeleton across LDtk terrain, interactables, Hero,
+Buddy, NPCs, slime variants, combat framing, and input-aware prompts. The
+earlier generated knight, wizard, ooze, and prototype tiles remain available
+as later custom-art candidates. Walk an
+LDtk-authored forest, talk to NPCs, bump a visible enemy into a
+tactical d10 battle on one of seven editable, biome-consistent authored LDtk
+arenas, control Hero plus a temporary test companion with interleaved initiative and highlighted
 movement/attack ranges, win the boss's key, and enter the Phase 2 four-room
-tutorial dungeon: find the one loose brick in the wall, jump the ledges and
-fill the chasm with a block (Space/C jumps), beat the key guardian, loop back,
+tutorial dungeon: find the one loose brick in the wall, step on and off a
+floor pressure plate to see its gate react, push the heavy block onto that
+plate to hold the gate open,
+beat the key guardian, loop back,
 and unlock the side room holding the shield chest. Phase 3's save/load slice
 is built (2026-07-10): save at the crystal by the healer's campfire, a
 Continue/New Game prompt on boot, checkpoint respawns on defeat (keep
@@ -30,18 +36,25 @@ rebuilt. Phase 4 is built through its automated acceptance battery:
 regular forest encounters use LDtk-authored two-enemy parties, contact zooms
 into combat and back, and a readable turn-order/party-status HUD gives live
 feedback. Kayden's windowed balance/feel acceptance remains the final Phase 4
-gate. Real art remains a separate phase-timed pass.
+gate. Final custom animation, portraits, effects, and biome variants remain a
+phase-timed pass.
 
 ## Screenshots
 
-Placeholder-art tour of the current playable slice (captured with
+Current playable-slice tour (captured with
 `scenes/dev/screenshot_tour.tscn` - see `RUNBOOK.md` -> Screenshot tour):
+
+![Runtime tactical character sprites](docs/screenshots/combat-sprites.png)
+
+![Authored battle-arena gallery](docs/screenshots/authored_arena_gallery.png)
+
+![Authored arena in live combat](docs/screenshots/authored_arena_combat.png)
 
 | Forest (overworld) | Dungeon hub |
 |---|---|
 | ![Forest overworld](docs/screenshots/forest.png) | ![Dungeon hub room](docs/screenshots/hub.png) |
 
-| Pit room (jump/block puzzle) | Fight room (guardian) | Chest room |
+| Pressure-plate room (plate/block/gate) | Fight room (guardian) | Chest room |
 |---|---|---|
 | ![Pit room](docs/screenshots/pit.png) | ![Fight room](docs/screenshots/fight.png) | ![Chest room](docs/screenshots/chest.png) |
 
@@ -112,3 +125,7 @@ blockers, and the next milestone.
 
 No license chosen yet - all rights reserved by default. Add a `LICENSE` file
 when Kayden decides on one.
+
+Selected runtime prototype art comes from Kenney CC0 packs. Original pack
+licenses are preserved under `game/assets/kenney/`; courtesy credit: Kenney,
+https://kenney.nl/.
