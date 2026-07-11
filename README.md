@@ -14,10 +14,11 @@ exploration (Zelda-style block/switch/key puzzles), BG3-style turn-based
 *tactical* party combat (a dedicated battle mode: select a unit, move it within
 its highlighted range, act), and recruitable "Dungeon Friends" party
 members. The world starts in a fantasy forest and later expands into a castle
-city, mountains, and rivers. Current state: a playable slice with its first
-runtime character-art pass - an animated armored Hero, wizard companion, and
-red-ooze enemies now replace the player/combat blocks and enemy triangles;
-environment and interaction-object art is still in progress. Walk an
+city, mountains, and rivers. Current state: a playable slice with a coherent
+Kenney-first CC0 visual skeleton across LDtk terrain, interactables, Hero,
+Buddy, NPCs, slime variants, combat framing, and input-aware prompts. The
+earlier generated knight, wizard, ooze, and prototype tiles remain available
+as later custom-art candidates. Walk an
 LDtk-authored forest, talk to NPCs, bump a visible enemy into a
 tactical d10 battle on terrain copied from the contact area, control Hero plus
 a temporary test companion with interleaved initiative and highlighted
@@ -35,7 +36,7 @@ rebuilt. Phase 4 is built through its automated acceptance battery:
 regular forest encounters use LDtk-authored two-enemy parties, contact zooms
 into combat and back, and a readable turn-order/party-status HUD gives live
 feedback. Kayden's windowed balance/feel acceptance remains the final Phase 4
-gate. Broader environment, UI, effects, and character-variant art remains a
+gate. Final custom animation, portraits, effects, and biome variants remain a
 phase-timed pass.
 
 ## Screenshots
@@ -120,3 +121,7 @@ blockers, and the next milestone.
 
 No license chosen yet - all rights reserved by default. Add a `LICENSE` file
 when Kayden decides on one.
+
+Selected runtime prototype art comes from Kenney CC0 packs. Original pack
+licenses are preserved under `game/assets/kenney/`; courtesy credit: Kenney,
+https://kenney.nl/.

@@ -50,11 +50,11 @@ var log_label: Label
 var round_label: Label
 var turn_order_label: Label
 var party_status_label: Label
-var menu_panel: ColorRect
+var menu_panel: TextureRect
 var prompt_label: Label
 var menu_label: Label
 var continue_label: Label
-var cursor_rect: ColorRect
+var cursor_rect: TextureRect
 var highlight_root: Control
 
 
@@ -655,15 +655,18 @@ func _build_view() -> void:
 	for y in arena_h:
 		for x in arena_w:
 			var c := Vector2i(x, y)
-			var t := ColorRect.new()
+			var t := TextureRect.new()
 			if arena_blocked.has(c):
 				# Terrain carried in from the overworld (D-012): read as an
 				# obstacle, same palette family as the forest walls.
-				t.color = Color(0.10, 0.16, 0.10)
+				t.texture = load("res://assets/art/tilesets/kenney/dungeon_wall.png")
 			else:
-				t.color = Color(0.18, 0.24, 0.18) if (x + y) % 2 == 0 else Color(0.16, 0.21, 0.16)
+				t.texture = load("res://assets/art/tilesets/kenney/dungeon_floor.png")
+				t.modulate = Color.WHITE if (x + y) % 2 == 0 else Color(0.88, 0.9, 0.92)
 			t.position = arena_origin + Vector2(c) * TILE + Vector2(1, 1)
 			t.size = Vector2(TILE - 2, TILE - 2)
+			t.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			t.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 			layer.add_child(t)
 	highlight_root = Control.new()
 	layer.add_child(highlight_root)
@@ -675,7 +678,13 @@ func _build_view() -> void:
 			sprite.name = "RuntimeSprite"
 			sprite.sprite_frames = u.sprite_frames
 			sprite.animation = &"idle"
-			sprite.scale = Vector2.ONE * (0.58 if u.is_player else (0.68 if u.is_boss else 0.56))
+			var first_texture := u.sprite_frames.get_frame_texture(&"idle", 0)
+			var kenney_scale := first_texture != null and first_texture.get_width() <= 16
+			sprite.scale = Vector2.ONE * ((5.0 if u.is_boss else 4.0) if kenney_scale \
+					else (0.58 if u.is_player else (0.68 if u.is_boss else 0.56)))
+			if not u.is_player:
+				sprite.modulate = Color(0.95, 0.42, 0.5) if u.is_boss else (Color(0.55, 0.7, 1.0) \
+						if u.unit_id.contains("dungeon") else Color.WHITE)
 			sprite.z_index = 2
 			u.node.add_child(sprite)
 			sprite.play()
@@ -703,8 +712,11 @@ func _build_view() -> void:
 		u.node.add_child(u.info)
 		_update_info(u)
 		layer.add_child(u.node)
-	cursor_rect = ColorRect.new()
-	cursor_rect.color = Color(1, 1, 0.6, 0.35)
+	cursor_rect = TextureRect.new()
+	cursor_rect.texture = load("res://assets/art/ui/kenney/cursor.png")
+	cursor_rect.modulate = Color(1, 1, 0.65, 0.9)
+	cursor_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	cursor_rect.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	cursor_rect.size = Vector2(TILE - 6, TILE - 6)
 	cursor_rect.visible = false
 	layer.add_child(cursor_rect)
@@ -729,8 +741,12 @@ func _build_view() -> void:
 	party_status_label.add_theme_font_size_override("font_size", 17)
 	party_status_label.modulate = Color(0.78, 0.9, 1.0)
 	layer.add_child(party_status_label)
-	menu_panel = ColorRect.new()
-	menu_panel.color = Color(0.05, 0.04, 0.09, 0.82)
+	menu_panel = TextureRect.new()
+	menu_panel.texture = load("res://assets/art/ui/kenney/panel.png")
+	menu_panel.modulate = Color(0.12, 0.14, 0.24, 0.94)
+	menu_panel.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	menu_panel.stretch_mode = TextureRect.STRETCH_TILE
+	menu_panel.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	menu_panel.position = Vector2(56, 480)
 	menu_panel.size = Vector2(420, 210)
 	menu_panel.visible = false
@@ -750,16 +766,24 @@ func _build_view() -> void:
 	continue_label.position = Vector2(432, 466)
 	continue_label.add_theme_font_size_override("font_size", 22)
 	continue_label.modulate = Color(0.75, 1.0, 0.75)
-	continue_label.text = "▶  Press E / Space to continue"
+	continue_label.text = "Continue"
 	continue_label.visible = false
 	layer.add_child(continue_label)
+	var continue_glyph := InputPrompts.make_glyph("confirm")
+	continue_glyph.position = Vector2(392, 460)
+	continue_glyph.size = Vector2(36, 36)
+	layer.add_child(continue_glyph)
 	_refresh_hud()
 
 
 func _show_highlights(cells: Array, color: Color) -> void:
 	for c in cells:
-		var r := ColorRect.new()
-		r.color = color
+		var r := TextureRect.new()
+		r.texture = load("res://assets/art/ui/kenney/attack_highlight.png" \
+				if color.r > color.b else "res://assets/art/ui/kenney/move_highlight.png")
+		r.modulate = color
+		r.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		r.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		r.position = arena_origin + Vector2(c) * TILE + Vector2(3, 3)
 		r.size = Vector2(TILE - 6, TILE - 6)
 		highlight_root.add_child(r)

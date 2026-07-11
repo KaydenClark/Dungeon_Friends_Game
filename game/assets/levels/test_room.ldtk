@@ -129,7 +129,7 @@
     "__cHei": 1,
     "identifier": "TestTiles",
     "uid": 1,
-    "relPath": "../art/tilesets/test_tiles.png",
+    "relPath": "../art/tilesets/kenney/world_tiles.png",
     "embedAtlas": null,
     "pxWid": 80,
     "pxHei": 16,

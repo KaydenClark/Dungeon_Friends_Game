@@ -14,26 +14,14 @@ var cell := Vector2i.ZERO
 @export var required_key := ""
 @export var reward_item := ""
 var opened := false
-var _lid: ColorRect
+var _sprite: Sprite2D
 
 
 func _ready() -> void:
-	# Placeholder art: a wooden chest with a lid band that pops open.
-	var chest_body := ColorRect.new()
-	chest_body.color = Color(0.5, 0.33, 0.16)
-	chest_body.position = Vector2(-22, -14)
-	chest_body.size = Vector2(44, 34)
-	add_child(chest_body)
-	_lid = ColorRect.new()
-	_lid.color = Color(0.62, 0.44, 0.2)
-	_lid.position = Vector2(-22, -26)
-	_lid.size = Vector2(44, 16)
-	add_child(_lid)
-	var clasp := ColorRect.new()
-	clasp.color = Color(0.9, 0.75, 0.2)
-	clasp.position = Vector2(-4, -16)
-	clasp.size = Vector2(8, 10)
-	add_child(clasp)
+	_sprite = Sprite2D.new()
+	_sprite.scale = Vector2.ONE * 4.0
+	_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	add_child(_sprite)
 	_refresh_look()
 
 
@@ -76,5 +64,6 @@ func _flag_name() -> String:
 
 
 func _refresh_look() -> void:
-	if _lid:
-		_lid.color = Color(0.3, 0.2, 0.1) if opened else Color(0.62, 0.44, 0.2)
+	if _sprite:
+		_sprite.texture = load("res://assets/art/objects/kenney/chest_open.png" \
+				if opened else "res://assets/art/objects/kenney/chest_closed.png")

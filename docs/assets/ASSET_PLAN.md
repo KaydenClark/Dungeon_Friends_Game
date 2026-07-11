@@ -1,7 +1,7 @@
 # Dungeon Friends - Asset Plan
 
 **Last updated:** 2026-07-11
-**Status:** Kenney-first visual skeleton planned; prototype batches retained
+**Status:** Kenney-first visual skeleton implemented; owner acceptance pending
 
 This file is the asset production checklist for Dungeon Friends. It answers
 what must be made, when it should be made, and where image-generation prompts
@@ -30,12 +30,30 @@ Roguelike Indoors, and Roguelike RPG Pack. Each pack includes its original
 CC0 `License.txt`; the library inventory and promotion rules are documented in
 `game/assets/kenney/README.md`.
 
-The active implementation route is
-[`KENNEY_IMPLEMENTATION_PLAN.md`](KENNEY_IMPLEMENTATION_PLAN.md): promote a
-coherent Kenney visual skeleton through T-080..T-084, beginning with the full
-playable world's terrain and interactables. Existing generated/prototype
-batches below remain useful as requirements and later swap candidates, but
-they are no longer the immediate production route.
+The route in [`KENNEY_IMPLEMENTATION_PLAN.md`](KENNEY_IMPLEMENTATION_PLAN.md)
+is implemented through T-083; T-084's automated and windowed QA is green and
+awaits Kayden's acceptance. The deterministic selection contract is
+`game/assets/art/kenney_manifest.json`, generated runtime crops live under the
+`kenney/` folders in `game/assets/art/`, and the review sheet is
+`docs/assets/previews/kenney_contact_sheet.png`. Existing generated/prototype
+batches below remain later custom-art candidates.
+
+### Custom-art swap points
+
+| Surface | Replace here | Mechanics remain behind |
+|---|---|---|
+| Forest/dungeon terrain | `game/assets/art/tilesets/kenney/world_tiles.png` and the LDtk tileset definition | LDtk IntGrid/entity layers and `LdtkRoom` collision adoption |
+| Interactables | `game/assets/art/objects/kenney/*.png` | `Chest`, `LockedDoor`, `PressurePlate`, `PushableBlock`, `Lever`, `SaveCrystal` scripts |
+| Hero/Buddy/slimes | `game/data/sprites/kenney_*.tres` | `CharacterStats` / `EnemyStats` `sprite_frames` slots |
+| NPCs | `game/assets/art/sprites/runtime/kenney/healer.png` and `quest_npc.png` | LDtk `Npc` fields and `NPC` behavior |
+| Combat/UI | `game/assets/art/ui/kenney/*.png` | combat FSM, range sets, turn order, and command input |
+| Input prompts | `game/assets/art/ui/prompts/kenney/*.png` | InputMap actions and `InputPrompts` active-device selection |
+
+Coverage note: every colored actor/interactable stand-in in the playable
+slice is replaced. The main/combat full-screen background `ColorRect`s and
+text labels are deliberately retained as layout/color surfaces rather than
+asset placeholders; prototype/generated character sheets remain checked in
+but are no longer the default resources.
 
 ## Global Art Constraints
 

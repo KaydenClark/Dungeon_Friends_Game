@@ -91,7 +91,10 @@ func _make_sprite(frames: SpriteFrames, sprite_scale := 0.5) -> bool:
 	sprite.sprite_frames = frames
 	sprite.animation = &"idle"
 	sprite.centered = true
-	sprite.scale = Vector2.ONE * sprite_scale
+	var first_texture := frames.get_frame_texture(&"idle", 0)
+	var resolved_scale := 4.0 if first_texture != null and first_texture.get_width() <= 16 \
+			else sprite_scale
+	sprite.scale = Vector2.ONE * resolved_scale
 	sprite.position = Vector2(0, 0)
 	sprite.z_index = 2
 	add_child(sprite)

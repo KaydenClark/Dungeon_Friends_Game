@@ -188,6 +188,23 @@ Expected result: exit `0`, five `wrote .../<room>.png` lines and a final
 `SCREENSHOT TOUR: done`. Omitting `--out=` writes into the project's
 `user://screenshots` directory.
 
+### Kenney visual-skeleton proof (T-080..T-084)
+
+Regenerate the promoted runtime crops after changing the manifest, import
+them, then render the 1280x720 contact sheet and combat showcase:
+
+```bash
+cd game
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path . --script scripts/assets/prepare_kenney_assets.gd
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path . --import
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/kenney_contact_sheet.tscn -- --out=/tmp/kenney-contact.png
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/runtime_sprite_showcase.tscn -- --out=/tmp/kenney-combat.png
+```
+
+The manifest suite checks unique names, source bounds, promoted-file presence,
+and the 16px/4x/nearest contract. Windowed scenes are required for meaningful
+screenshots; the headless renderer produces black visual proof.
+
 For an under-one-second combat-art proof with Hero, Buddy, a normal slime, and
 the boss slime on the tactical grid, run the dedicated runtime-sprite showcase:
 

@@ -8,6 +8,12 @@ extends Node2D
 var hud: Label
 
 
+func _input(event: InputEvent) -> void:
+	if InputPrompts.observe(event):
+		for node in get_tree().get_nodes_in_group("input_prompt_glyphs"):
+			InputPrompts.refresh_glyph(node)
+
+
 func _ready() -> void:
 	SceneManager.register_main(
 		$WorldContainer, $CombatContainer, $UILayer, $TransitionLayer)
@@ -15,11 +21,15 @@ func _ready() -> void:
 	# it resolves through the map registry like every other room build (T-038).
 	SceneManager.boot_factory = func() -> Node2D: return MapRegistry.build("forest")
 	var hint := Label.new()
-	hint.text = "WASD / Arrows: move    E: talk & interact"
+	hint.text = "WASD / Arrows: move        talk & interact"
 	hint.position = Vector2(16, 8)
 	hint.add_theme_font_size_override("font_size", 16)
 	hint.modulate = Color(1, 1, 1, 0.75)
 	$UILayer.add_child(hint)
+	var interact_glyph := InputPrompts.make_glyph("interact")
+	interact_glyph.position = Vector2(168, 2)
+	interact_glyph.size = Vector2(28, 28)
+	$UILayer.add_child(interact_glyph)
 	hud = Label.new()
 	hud.position = Vector2(16, 30)
 	hud.add_theme_font_size_override("font_size", 18)

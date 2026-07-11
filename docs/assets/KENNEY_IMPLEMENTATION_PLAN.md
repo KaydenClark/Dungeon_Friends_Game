@@ -1,6 +1,6 @@
 # Kenney-First Visual Skeleton Plan
 
-**Status:** ready to implement  
+**Status:** implemented; Kayden visual acceptance pending
 **Decision date:** 2026-07-11  
 **Owner:** Codex implementation, Kayden windowed acceptance
 

@@ -26,21 +26,14 @@ var held_open := false
 ## Set while waiting for something standing in the doorway to move on before
 ## the released plate can re-lock it (never close a door onto an occupant).
 var _relock_pending := false
-var panel: ColorRect
-
-
-var _keyhole: ColorRect
+var panel: Sprite2D
 
 
 func _ready() -> void:
-	panel = ColorRect.new()
-	panel.position = Vector2(-28, -28)
-	panel.size = Vector2(56, 56)
+	panel = Sprite2D.new()
+	panel.scale = Vector2.ONE * 4.0
+	panel.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	add_child(panel)
-	_keyhole = ColorRect.new()
-	_keyhole.position = Vector2(-5, -8)
-	_keyhole.size = Vector2(10, 16)
-	add_child(_keyhole)
 	refresh_look()
 
 
@@ -49,8 +42,8 @@ func _ready() -> void:
 func refresh_look() -> void:
 	if panel == null:
 		return
-	panel.color = Color(0.4, 0.4, 0.48) if plate_driven else Color(0.45, 0.29, 0.13)
-	_keyhole.color = Color(0.65, 0.68, 0.75) if plate_driven else Color(0.9, 0.75, 0.2)
+	panel.texture = load("res://assets/art/objects/kenney/door_closed.png")
+	panel.modulate = Color(0.72, 0.78, 0.92) if plate_driven else Color.WHITE
 
 
 func interact() -> void:

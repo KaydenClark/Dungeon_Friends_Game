@@ -15,16 +15,13 @@ var cell := Vector2i.ZERO
 
 
 func _ready() -> void:
-	var rect := ColorRect.new()
-	rect.color = color
-	rect.position = Vector2(-24, -24)
-	rect.size = Vector2(48, 48)
-	add_child(rect)
-	var eyes := ColorRect.new()
-	eyes.color = Color(0, 0, 0, 0.55)
-	eyes.position = Vector2(-6, 6)
-	eyes.size = Vector2(12, 12)
-	add_child(eyes)
+	var sprite := Sprite2D.new()
+	sprite.name = "RuntimeSprite"
+	sprite.texture = load("res://assets/art/sprites/runtime/kenney/healer.png" \
+			if heals else "res://assets/art/sprites/runtime/kenney/quest_npc.png")
+	sprite.scale = Vector2.ONE * 4.0
+	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	add_child(sprite)
 
 
 func interact() -> void:
