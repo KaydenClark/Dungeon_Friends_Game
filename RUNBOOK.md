@@ -188,6 +188,18 @@ Expected result: exit `0`, five `wrote .../<room>.png` lines and a final
 `SCREENSHOT TOUR: done`. Omitting `--out=` writes into the project's
 `user://screenshots` directory.
 
+For an under-one-second combat-art proof with Hero, Buddy, a normal slime, and
+the boss slime on the tactical grid, run the dedicated runtime-sprite showcase:
+
+```bash
+cd game
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/runtime_sprite_showcase.tscn --resolution 1280x720 -- --out=/tmp/dungeon-runtime-sprites.png
+```
+
+Expected result: exit `0`, `RUNTIME SPRITE SHOWCASE: wrote ...`, and a rendered
+PNG with four animated-resource units. This must be windowed; headless output
+uses the dummy renderer and is not visual proof.
+
 ### Display-scaling spike (T-007)
 
 Checks the flexible HD/ultrawide stretch settings (revised 2026-07-05, see
@@ -223,7 +235,7 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
-per-suite tally (currently `UNIT TESTS: 27 suites, 174 tests, 633 checks, 0
+per-suite tally (currently `UNIT TESTS: 27 suites, 176 tests, 642 checks, 0
 failed`). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a
 few seconds (pure logic and controlled clocks, no real-time waits, unlike the
 slice smoke test; the tutorial soft-lock solver adds a second or two). Run
@@ -315,9 +327,9 @@ Automated proof is the unit command above plus the slice smoke test: at the
 T-068 gate that was 22 suites / 140 tests / 490 checks and **111/111 smoke
 checks on 5/5 consecutive runs** (2026-07-09; counts refreshed same day after
 the dev potion grant and the smoke test's freed-lambda-capture fix); the
-Phase 3 save/load plus the first T-069 playtest recut grew the totals to
-27 suites / 171 tests / 626 checks and 137/137 smoke (2026-07-10), with the
-combat legs unchanged. `test_combat_scene` covers a seeded
+Phase 3 save/load, T-069 playtest recut, and the first runtime sprite pass grew
+the totals to 27 suites / 173 tests / 644 checks and 138/138 smoke
+(2026-07-10). `test_combat_scene` covers a seeded
 2v2 battle, D-012 local-terrain connectivity, range refusal, MP/item
 bookkeeping, support actions, shield-gated Defend, and the live turn-order HUD
 format. The smoke test proves a regular forest Enemy's LDtk `EncounterId`

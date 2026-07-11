@@ -1,8 +1,9 @@
-[gd_resource type="Resource" script_class="CharacterStats" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="CharacterStats" load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/data/character_stats.gd" id="1_hero"]
 [ext_resource type="Resource" path="res://data/abilities/strike.tres" id="2_strike"]
 [ext_resource type="Resource" path="res://data/abilities/mend.tres" id="3_mend"]
+[ext_resource type="SpriteFrames" path="res://data/sprites/buddy_wizard_idle.tres" id="4_sprite"]
 
 [resource]
 script = ExtResource("1_hero")
@@ -15,4 +16,5 @@ defense = 1
 speed = 4
 move_range = 3
 attack_range = 1
+sprite_frames = ExtResource("4_sprite")
 starting_abilities = [ExtResource("2_strike"), ExtResource("3_mend")]

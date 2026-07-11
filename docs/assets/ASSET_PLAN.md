@@ -250,6 +250,16 @@ baked checkerboard rather than transparency, irregular frame bounds, and
 incomplete original prompt/model provenance. Do not wire them into runtime
 SpriteFrames until those gaps are resolved and character roles are assigned.
 
+**Runtime pass (2026-07-10):** the concepts now have role-assigned derivatives:
+Hero = armored knight, temporary Buddy = wizard, and the current slime family =
+red ooze. Each ships as a four-frame 128px idle strip with real alpha, shared
+scale, and bottom-center anchoring under `game/assets/art/sprites/runtime/`.
+`CharacterStats`/`EnemyStats` carry the SpriteFrames, so the same data-driven
+art renders in overworld and tactical combat without changing grid movement.
+The permanent showcase command is documented in `RUNBOOK.md`. Remaining Batch
+E work is targeting/effect/menu polish and distinct slime variants; this pass
+does not complete the full batch.
+
 Required:
 
 - Combat unit sprites for hero, slime, boss slime, dungeon slime.

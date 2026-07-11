@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="CharacterStats" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="CharacterStats" load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/data/character_stats.gd" id="1_hero"]
 [ext_resource type="Resource" path="res://data/abilities/strike.tres" id="2_strike"]
+[ext_resource type="SpriteFrames" path="res://data/sprites/hero_knight_idle.tres" id="3_sprite"]
 
 [resource]
 script = ExtResource("1_hero")
@@ -14,4 +15,5 @@ defense = 2
 speed = 5
 move_range = 3
 attack_range = 1
+sprite_frames = ExtResource("3_sprite")
 starting_abilities = [ExtResource("2_strike")]

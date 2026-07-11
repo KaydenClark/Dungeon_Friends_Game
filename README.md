@@ -14,8 +14,11 @@ exploration (Zelda-style block/switch/key puzzles), BG3-style turn-based
 *tactical* party combat (a dedicated battle mode: select a unit, move it within
 its highlighted range, act), and recruitable "Dungeon Friends" party
 members. The world starts in a fantasy forest and later expands into a castle
-city, mountains, and rivers. Current state: a playable slice on placeholder
-art - walk an LDtk-authored forest, talk to NPCs, bump a visible enemy into a
+city, mountains, and rivers. Current state: a playable slice with its first
+runtime character-art pass - an animated armored Hero, wizard companion, and
+red-ooze enemies now replace the player/combat blocks and enemy triangles;
+environment and interaction-object art is still in progress. Walk an
+LDtk-authored forest, talk to NPCs, bump a visible enemy into a
 tactical d10 battle on terrain copied from the contact area, control Hero plus
 a temporary test companion with interleaved initiative and highlighted
 movement/attack ranges, win the boss's key, and enter the Phase 2 four-room
@@ -32,12 +35,15 @@ rebuilt. Phase 4 is built through its automated acceptance battery:
 regular forest encounters use LDtk-authored two-enemy parties, contact zooms
 into combat and back, and a readable turn-order/party-status HUD gives live
 feedback. Kayden's windowed balance/feel acceptance remains the final Phase 4
-gate. Real art remains a separate phase-timed pass.
+gate. Broader environment, UI, effects, and character-variant art remains a
+phase-timed pass.
 
 ## Screenshots
 
-Placeholder-art tour of the current playable slice (captured with
+Current playable-slice tour (captured with
 `scenes/dev/screenshot_tour.tscn` - see `RUNBOOK.md` -> Screenshot tour):
+
+![Runtime tactical character sprites](docs/screenshots/combat-sprites.png)
 
 | Forest (overworld) | Dungeon hub |
 |---|---|
