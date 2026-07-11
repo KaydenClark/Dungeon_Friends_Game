@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ArenaData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/arena_data.gd" id="1_arena"]
+
+[resource]
+script = ExtResource("1_arena")
+id = "forest_sunlit_meadow"
+biome = "forest"
+tags = PackedStringArray("open", "meadow")
+tier = "empty"
+weight = 5
+ldtk_path = "res://assets/levels/battle_arenas.ldtk"
+level_id = "ArenaSunlitMeadow"
+mirror_safe = false

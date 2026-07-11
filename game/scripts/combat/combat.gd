@@ -7,9 +7,9 @@ extends Node2D
 ## CalculateInitiative -> UnitTurn loop -> EncounterEnd) drives a
 ## TurnManager that interleaves ALL combatants by speed; each unit runs the
 ## per-entity FSM on CombatUnit (CheckRange -> Moving -> SelectingAction ->
-## ExecutingCommand). The arena is seeded from the local overworld terrain
-## around the contact point (D-012) and the party comes from the GameState
-## roster (D-013's test companion included). Math lives in CombatMath;
+## ExecutingCommand). D-018 supplies an authored, biome-consistent LDtk arena
+## with explicit deployment zones; the party comes from the GameState roster
+## (D-013's test companion included). Math lives in CombatMath;
 ## rendering is screen-space (CanvasLayer) placeholder art.
 
 signal finished(victory: bool, result: Dictionary)
@@ -21,11 +21,28 @@ enum BattleState { INITIALIZE, CALCULATE_INITIATIVE, UNIT_TURN, ENCOUNTER_END }
 enum InputMode { NONE, MENU, CURSOR_MOVE, CURSOR_TARGET, CONTINUE }
 
 const TILE := 64
+const HUD_MARGIN := 18.0
+const HUD_TOP_HEIGHT := 72.0
+const HUD_BOTTOM_HEIGHT := 164.0
+const MOVE_HIGHLIGHT_FILL := Color(0.10, 0.42, 1.0, 0.42)
+const MOVE_HIGHLIGHT_BORDER := Color(0.52, 0.82, 1.0, 0.96)
+const ATTACK_HIGHLIGHT_FILL := Color(0.96, 0.16, 0.16, 0.35)
+const ATTACK_HIGHLIGHT_BORDER := Color(1.0, 0.62, 0.52, 0.9)
 
 var arena_w := 17
 var arena_h := 7
 var arena_blocked: Dictionary = {}   # Vector2i -> true
 var arena_origin := Vector2.ZERO
+## Authored D-018 arena metadata. Legacy/dev callers may omit all of this and
+## retain the old open-board placement/rendering fallback.
+var arena_id := ""
+var arena_tier := ""
+var arena_biome := ""
+var arena_tags: Variant = []
+var arena_mirrored := false
+var party_deployment: Array[Vector2i] = []
+var enemy_deployment: Array[Vector2i] = []
+var arena_visual: Node2D
 
 var units: Array[CombatUnit] = []
 ## Tests flip this off to drive _execute_*/_reachable_cells directly
@@ -54,12 +71,16 @@ var menu_panel: TextureRect
 var prompt_label: Label
 var menu_label: Label
 var continue_label: Label
+var continue_glyph: TextureRect
 var cursor_rect: TextureRect
 var highlight_root: Control
+var bottom_hud_origin := Vector2.ZERO
+var bottom_hud_size := Vector2.ZERO
 
 
 ## party/enemies are prebuilt CombatUnits (SceneManager owns the GameState
-## snapshot); arena is {"w": int, "h": int, "blocked": Array[Vector2i]}.
+## snapshot); authored arenas also carry deployment zones plus an imported
+## LDtk visual node. Old tests/dev callers can provide just w/h/blocked.
 func setup(party: Array[CombatUnit], enemies: Array[CombatUnit],
 		arena: Dictionary, p_rng: RandomNumberGenerator, p_auto: bool,
 		p_defend_unlocked: bool) -> void:
@@ -68,6 +89,14 @@ func setup(party: Array[CombatUnit], enemies: Array[CombatUnit],
 	defend_unlocked = p_defend_unlocked
 	arena_w = arena.get("w", 17)
 	arena_h = arena.get("h", 7)
+	arena_id = str(arena.get("id", ""))
+	arena_tier = str(arena.get("tier", ""))
+	arena_biome = str(arena.get("biome", ""))
+	arena_tags = arena.get("tags", [])
+	arena_mirrored = bool(arena.get("mirrored", false))
+	arena_visual = arena.get("visual") as Node2D
+	party_deployment = _arena_cells(arena.get("party_zone", []))
+	enemy_deployment = _arena_cells(arena.get("enemy_zone", []))
 	for c in arena.get("blocked", []):
 		arena_blocked[c] = true
 	units.append_array(party)
@@ -79,6 +108,12 @@ func setup(party: Array[CombatUnit], enemies: Array[CombatUnit],
 ## edge, centered on the board. Allies never consume the cell directly in
 ## front of Hero, and SceneManager keeps these deployment columns clear.
 func _place_units(party: Array[CombatUnit], enemies: Array[CombatUnit]) -> void:
+	if party_deployment.size() >= party.size() and enemy_deployment.size() >= enemies.size():
+		for i in party.size():
+			party[i].cell = party_deployment[i]
+		for i in enemies.size():
+			enemies[i].cell = enemy_deployment[i]
+		return
 	var taken: Dictionary = {}
 	var free_left: Array[Vector2i] = []
 	var free_right: Array[Vector2i] = []
@@ -115,13 +150,29 @@ func _place_units(party: Array[CombatUnit], enemies: Array[CombatUnit]) -> void:
 			taken[u.cell] = true
 
 
+static func _arena_cells(raw: Variant) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	if raw is Array:
+		for cell in raw:
+			if cell is Vector2i:
+				out.append(cell)
+	return out
+
+
 func _ready() -> void:
 	# B-11: center on the actual viewport, not a hardcoded 1280x720 - with
 	# canvas_items/expand stretch (flexible HD/ultrawide decision) the visible
 	# canvas is only 1280x720 at exactly 16:9.
 	var vs := get_viewport_rect().size
-	arena_origin = Vector2((vs.x - arena_w * TILE) / 2.0,
-			(vs.y - arena_h * TILE) / 2.0 - 20)
+	var board_height := float(arena_h * TILE)
+	var reserved_height := HUD_TOP_HEIGHT + HUD_BOTTOM_HEIGHT
+	var board_y := HUD_TOP_HEIGHT + (vs.y - reserved_height - board_height) / 2.0
+	# Keep the menu outside the 17x7 board at the 1280x720 reference size.
+	# On smaller windows the board remains centered rather than silently
+	# stretching or clipping the tactical grid.
+	if board_y < HUD_TOP_HEIGHT:
+		board_y = maxf(HUD_MARGIN, (vs.y - board_height) / 2.0)
+	arena_origin = Vector2((vs.x - arena_w * TILE) / 2.0, board_y)
 	astar.region = Rect2i(0, 0, arena_w, arena_h)
 	astar.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_NEVER
 	astar.default_compute_heuristic = AStarGrid2D.HEURISTIC_MANHATTAN
@@ -545,6 +596,7 @@ func _pick_cell(start: Vector2i, valid: Dictionary, prompt: String) -> Vector2i:
 	cursor_start = start
 	cursor_valid = valid
 	prompt_label.text = prompt
+	menu_panel.visible = true
 	prompt_label.visible = true
 	cursor_rect.visible = true
 	_move_cursor_to(start)
@@ -552,6 +604,7 @@ func _pick_cell(start: Vector2i, valid: Dictionary, prompt: String) -> Vector2i:
 	var picked: Vector2i = await cursor_confirmed
 	input_mode = InputMode.NONE
 	prompt_label.visible = false
+	menu_panel.visible = false
 	cursor_rect.visible = false
 	return picked
 
@@ -664,22 +717,26 @@ func _build_view() -> void:
 	bg.color = Color(0.09, 0.07, 0.13)
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	layer.add_child(bg)
-	for y in arena_h:
-		for x in arena_w:
-			var c := Vector2i(x, y)
-			var t := TextureRect.new()
-			if arena_blocked.has(c):
-				# Terrain carried in from the overworld (D-012): read as an
-				# obstacle, same palette family as the forest walls.
-				t.texture = load("res://assets/art/tilesets/kenney/dungeon_wall.png")
-			else:
-				t.texture = load("res://assets/art/tilesets/kenney/dungeon_floor.png")
-				t.modulate = Color.WHITE if (x + y) % 2 == 0 else Color(0.88, 0.9, 0.92)
-			t.position = arena_origin + Vector2(c) * TILE + Vector2(1, 1)
-			t.size = Vector2(TILE - 2, TILE - 2)
-			t.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-			t.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-			layer.add_child(t)
+	if arena_visual != null:
+		arena_visual.position = arena_origin
+		layer.add_child(arena_visual)
+	else:
+		# Legacy/dev fallback only. Production D-018 fights attach the imported
+		# LDtk level above so the editable authored terrain is what players see.
+		for y in arena_h:
+			for x in arena_w:
+				var c := Vector2i(x, y)
+				var t := TextureRect.new()
+				if arena_blocked.has(c):
+					t.texture = load("res://assets/art/tilesets/kenney/dungeon_wall.png")
+				else:
+					t.texture = load("res://assets/art/tilesets/kenney/dungeon_floor.png")
+					t.modulate = Color.WHITE if (x + y) % 2 == 0 else Color(0.88, 0.9, 0.92)
+				t.position = arena_origin + Vector2(c) * TILE + Vector2(1, 1)
+				t.size = Vector2(TILE - 2, TILE - 2)
+				t.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+				t.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+				layer.add_child(t)
 	highlight_root = Control.new()
 	layer.add_child(highlight_root)
 	for u in units:
@@ -715,13 +772,9 @@ func _build_view() -> void:
 				Vector2(0, -s), Vector2(s, s), Vector2(-s, s)])
 			tri.color = Color(0.55, 0.08, 0.12) if u.is_boss else Color(0.85, 0.18, 0.18)
 			u.node.add_child(tri)
-		u.info = Label.new()
-		if u.sprite_frames != null:
-			u.info.position = Vector2(38, -30) if u.is_player else Vector2(-145, -30)
-		else:
-			u.info.position = Vector2(-40, -74 if u.is_player else -50)
-		u.info.add_theme_font_size_override("font_size", 15)
-		u.node.add_child(u.info)
+		# Status lives in the dedicated HUD; floating strings over the terrain
+		# made both the map and the selected cell difficult to read.
+		u.info = null
 		_update_info(u)
 		# B-10: a unit that enters the battle already at 0 HP (a companion who
 		# fell last fight) must not stand on the field looking alive.
@@ -737,25 +790,48 @@ func _build_view() -> void:
 	cursor_rect.size = Vector2(TILE - 6, TILE - 6)
 	cursor_rect.visible = false
 	layer.add_child(cursor_rect)
+	var top_hud := _make_hud_panel(Vector2(HUD_MARGIN, HUD_MARGIN),
+			Vector2(vs.x - HUD_MARGIN * 2.0, HUD_TOP_HEIGHT - HUD_MARGIN))
+	layer.add_child(top_hud)
+	bottom_hud_origin = Vector2(HUD_MARGIN, vs.y - HUD_BOTTOM_HEIGHT + HUD_MARGIN * 0.5)
+	bottom_hud_size = Vector2(minf(540.0, vs.x - HUD_MARGIN * 2.0),
+			HUD_BOTTOM_HEIGHT - HUD_MARGIN)
+
 	log_label = Label.new()
-	log_label.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	log_label.offset_top = 40.0
+	log_label.position = Vector2(260, HUD_MARGIN + 7.0)
+	log_label.size = Vector2(maxf(180.0, vs.x - 610.0), HUD_TOP_HEIGHT - HUD_MARGIN - 10.0)
 	log_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	log_label.add_theme_font_size_override("font_size", 24)
+	log_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	log_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	log_label.add_theme_font_size_override("font_size", 18)
 	layer.add_child(log_label)
 	round_label = Label.new()
-	round_label.position = Vector2(40, 40)
-	round_label.add_theme_font_size_override("font_size", 20)
+	round_label.position = Vector2(36, HUD_MARGIN + 7.0)
+	round_label.add_theme_font_size_override("font_size", 17)
 	round_label.modulate = Color(0.8, 0.8, 0.9)
 	layer.add_child(round_label)
+	if arena_id != "":
+		var arena_label := Label.new()
+		arena_label.position = Vector2(36, HUD_MARGIN + 28.0)
+		arena_label.add_theme_font_size_override("font_size", 13)
+		arena_label.modulate = Color(0.72, 0.9, 0.72)
+		var detail := "%s  %s" % [arena_id, arena_tier]
+		if arena_mirrored:
+			detail += "  mirrored"
+		arena_label.text = detail
+		layer.add_child(arena_label)
 	turn_order_label = Label.new()
-	turn_order_label.position = Vector2(40, 68)
-	turn_order_label.add_theme_font_size_override("font_size", 17)
+	turn_order_label.position = Vector2(260, HUD_MARGIN + 45.0)
+	turn_order_label.size = Vector2(maxf(180.0, vs.x - 610.0), 18)
+	turn_order_label.clip_text = true
+	turn_order_label.add_theme_font_size_override("font_size", 14)
 	turn_order_label.modulate = Color(0.95, 0.9, 0.7)
 	layer.add_child(turn_order_label)
 	party_status_label = Label.new()
-	party_status_label.position = Vector2(vs.x - 480, 38)
-	party_status_label.add_theme_font_size_override("font_size", 17)
+	party_status_label.position = Vector2(vs.x - 320, HUD_MARGIN + 9.0)
+	party_status_label.size = Vector2(280, HUD_TOP_HEIGHT - HUD_MARGIN - 12.0)
+	party_status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	party_status_label.add_theme_font_size_override("font_size", 14)
 	party_status_label.modulate = Color(0.78, 0.9, 1.0)
 	layer.add_child(party_status_label)
 	menu_panel = TextureRect.new()
@@ -764,45 +840,50 @@ func _build_view() -> void:
 	menu_panel.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	menu_panel.stretch_mode = TextureRect.STRETCH_TILE
 	menu_panel.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	menu_panel.position = Vector2(56, vs.y - 240)
-	menu_panel.size = Vector2(420, 210)
+	menu_panel.position = bottom_hud_origin
+	menu_panel.size = bottom_hud_size
 	menu_panel.visible = false
 	layer.add_child(menu_panel)
 	prompt_label = Label.new()
-	prompt_label.position = Vector2(76, vs.y - 228)
-	prompt_label.add_theme_font_size_override("font_size", 24)
+	prompt_label.position = bottom_hud_origin + Vector2(20, 14)
+	prompt_label.size = bottom_hud_size - Vector2(40, 18)
+	prompt_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	prompt_label.add_theme_font_size_override("font_size", 20)
 	prompt_label.modulate = Color(1, 0.95, 0.7)
 	prompt_label.visible = false
 	layer.add_child(prompt_label)
 	menu_label = Label.new()
-	menu_label.position = Vector2(92, vs.y - 186)
-	menu_label.add_theme_font_size_override("font_size", 24)
+	menu_label.position = bottom_hud_origin + Vector2(28, 48)
+	menu_label.size = bottom_hud_size - Vector2(56, 58)
+	menu_label.add_theme_font_size_override("font_size", 19)
 	menu_label.visible = false
 	layer.add_child(menu_label)
 	continue_label = Label.new()
-	continue_label.position = Vector2(432, vs.y - 254)
-	continue_label.add_theme_font_size_override("font_size", 22)
+	continue_label.position = bottom_hud_origin + Vector2(bottom_hud_size.x - 122, 20)
+	continue_label.add_theme_font_size_override("font_size", 18)
 	continue_label.modulate = Color(0.75, 1.0, 0.75)
 	# B-09: E only - Space is the benched traversal action (D-022) and was
 	# never accepted by the CONTINUE handler; prompts are keyboard-only (D-019).
 	continue_label.text = "Continue"
 	continue_label.visible = false
 	layer.add_child(continue_label)
-	var continue_glyph := InputPrompts.make_glyph("confirm")
-	continue_glyph.position = Vector2(392, 460)
+	continue_glyph = InputPrompts.make_glyph("confirm")
+	continue_glyph.position = bottom_hud_origin + Vector2(bottom_hud_size.x - 164, 12)
 	continue_glyph.size = Vector2(36, 36)
+	continue_glyph.visible = false
 	layer.add_child(continue_glyph)
 	_refresh_hud()
 
 
 func _show_highlights(cells: Array, color: Color) -> void:
 	for c in cells:
-		var r := TextureRect.new()
-		r.texture = load("res://assets/art/ui/kenney/attack_highlight.png" \
-				if color.r > color.b else "res://assets/art/ui/kenney/move_highlight.png")
-		r.modulate = color
-		r.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		r.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		var is_attack := color.r > color.b
+		var r := Panel.new()
+		var style := StyleBoxFlat.new()
+		style.bg_color = ATTACK_HIGHLIGHT_FILL if is_attack else MOVE_HIGHLIGHT_FILL
+		style.border_color = ATTACK_HIGHLIGHT_BORDER if is_attack else MOVE_HIGHLIGHT_BORDER
+		style.set_border_width_all(2)
+		r.add_theme_stylebox_override("panel", style)
 		r.position = arena_origin + Vector2(c) * TILE + Vector2(3, 3)
 		r.size = Vector2(TILE - 6, TILE - 6)
 		highlight_root.add_child(r)
@@ -834,6 +915,18 @@ func _set_menu_visible(v: bool) -> void:
 	menu_panel.visible = v
 	prompt_label.visible = v
 	menu_label.visible = v
+
+
+func _make_hud_panel(position: Vector2, size: Vector2) -> Panel:
+	var panel := Panel.new()
+	panel.position = position
+	panel.size = size
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.045, 0.06, 0.11, 0.94)
+	style.border_color = Color(0.35, 0.52, 0.76, 0.8)
+	style.set_border_width_all(2)
+	panel.add_theme_stylebox_override("panel", style)
+	return panel
 
 
 func _render_menu() -> void:
@@ -916,7 +1009,11 @@ func _wait_for_continue() -> void:
 	if auto_play:
 		await _wait(0.2)
 		return
+	menu_panel.visible = true
 	continue_label.visible = true
+	continue_glyph.visible = true
 	input_mode = InputMode.CONTINUE
 	await advanced
 	continue_label.visible = false
+	continue_glyph.visible = false
+	menu_panel.visible = false

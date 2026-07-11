@@ -16,6 +16,7 @@ func test_fresh_state_defaults_are_party_shaped() -> void:
 	eq(s.party_xp.get("hero"), 0, "hero starts with 0 XP")
 	eq(s.inventory.size(), 0, "inventory starts empty")
 	eq(s.flags.size(), 0, "flags start empty")
+	eq(s.arena_selector_state, {}, "authored-arena selector state starts empty")
 
 
 func test_two_states_never_share_containers() -> void:
@@ -26,9 +27,12 @@ func test_two_states_never_share_containers() -> void:
 	a.party_xp["hero"] = 99
 	a.flags["door_x_opened"] = true
 	a.inventory["shield"] = 1
+	a.arena_selector_state["last_arena_id"] = "forest_open_glade"
 	eq(b.party_xp.get("hero"), 0, "xp dictionaries are per-instance")
 	not_ok(b.flags.has("door_x_opened"), "flags dictionaries are per-instance")
 	eq(b.inventory.size(), 0, "inventories are per-instance")
+	not_ok(b.arena_selector_state.has("last_arena_id"),
+			"arena selector dictionaries are per-instance")
 
 
 func test_properties_forward_to_state() -> void:

@@ -180,7 +180,7 @@ above (no full dungeon, no boss, no save/load, no full party depth
 required) - treat it as the walking skeleton the fuller Phase 6 slice builds
 on top of, not a replacement for it.
 
-**Status (2026-07-10): Phase 2's puzzle recut is built and the Phase 4
+**Status (2026-07-11): Phase 2's puzzle recut is built and the Phase 4
 tactical-combat core is playable.** The latest playthrough retired
 jumping from the current dungeon: standing still and pressing jump reads as a
 janky hop rather than a believable gap crossing. Jump stays benched until a
@@ -191,20 +191,25 @@ holds it open. There are no pits or latching lever in that room; its remaining
 lever is only the block-reset escape valve.
 
 Touching a visible enemy now starts a near-full-screen 17x7 tactical battle.
-The literal local-terrain generator is being replaced by D-018's authored,
-biome-consistent weighted arena pool after Kayden's second windowed pass proved
-it could still create unfightable boards. Contact context will select and orient
-an eligible arena rather than copying nearby walls. Hero plus the temporary Buddy test
+D-018's authored, biome-consistent weighted arena pool has replaced the
+literal local-terrain generator: seven editable forest LDtk templates (2
+`empty`, 3 `mid`, 2 `hard`) use the initial 5/2/1 per-template weights,
+biome/tags, deterministic no-repeat shuffle bags, save-safe selection state,
+and contact-side deployment orientation. The imported `TileMapLayer` terrain,
+not copied nearby walls, reaches the live combat renderer. Hero plus the temporary Buddy test
 companion (D-013), interleaved initiative, move/attack highlights, and
 Attack/Ability/Item/Defend. LDtk EncounterData now supplies the regular
 forest's two-enemy party and full XP/loot reward total; encounters zoom in
 before their short hand-off fade and zoom back to the unchanged overworld
 position. The combat HUD shows live turn order, party HP/MP, action prompts,
-and damage/heal feedback. The completed headless battery is green at 22 suites
-/ 140 tests / 490 checks, with the slice smoke at 111/111 on 5/5 runs.
+and damage/heal feedback. The combat field is text-free: party status and
+prompts live in dedicated HUD bands, while legal movement is marked by filled
+blue cells with bright blue borders. The completed authored-arena/UI battery is
+green at 32 suites / 200 tests / 958 checks, with the slice smoke at 134/134
+on 5/5 runs.
 Item now opens a named consumable list showing quantity and acting unit before
-confirmation; Back consumes nothing. Phase 4 still needs the authored arena
-lane and final T-069 windowed acceptance. After that pass,
+confirmation; Back consumes nothing. Phase 4 now needs only final T-069
+windowed acceptance. After that pass,
 Phase 5 (party/progression and character menu) is the next development phase.
 The first runtime character/enemy art pass is now wired; broader environment,
 object, UI/effect, directional, and enemy-variant art remains phase-timed.
@@ -464,7 +469,7 @@ Dungeon_Friends_Game/
 |---|---|---|---|
 | `game/scenes/main.tscn` | Root: `SceneManager` wiring, `WorldContainer`/`CombatContainer`/`UILayer`/`TransitionLayer` | working - `scripts/main.gd` registers the containers with `SceneManager` and boots the forest slice into `WorldContainer` | `game/scenes/main.tscn`, `game/scripts/main.gd` |
 | Overworld / Dungeon (LDtk-instanced) | Grid movement, puzzles, visible enemies | working through the LDtk pipeline: `RoomGrid` runtime grid model + `LdtkRoom` base (imports the level, feeds Wall/Pit IntGrids into the grid, adopts post-import-spawned entities) + `ForestRoom` (`forest.ldtk`) | `game/scripts/overworld/`, `game/scripts/ldtk/entities_post_import.gd`, `game/assets/levels/` |
-| Combat | Turn-based tactical party-vs-enemy battle (BG3 turn-based mode) | **Built through T-068 plus the first runtime sprite pass (2026-07-10):** two-layer FSM (Battle FSM in `CombatScene`, per-entity FSM on `CombatUnit`) + `TurnManager` interleaved initiative; party from the GameState roster (Hero knight + D-013 wizard test companion) vs LDtk-authored `EncounterData` enemy parties rendered as animated red oozes; FE-style move/attack presentation; Attack/Ability/Item/Defend; d10 math; AI; zoom transition; turn-order/party-status HUD and feedback. Rendering stays code-built, with SpriteFrames supplied by the character/enemy Resources. | `game/scripts/combat/combat.gd`, `combat_unit.gd`, `turn_manager.gd`, `combat_math.gd`, `game/data/sprites/` |
+| Combat | Turn-based tactical party-vs-enemy battle (BG3 turn-based mode) | **Built through T-075 (2026-07-11):** two-layer FSM (Battle FSM in `CombatScene`, per-entity FSM on `CombatUnit`) + `TurnManager` interleaved initiative; party from the GameState roster (Hero knight + D-013 wizard test companion) vs LDtk-authored `EncounterData` enemy parties. D-018 selects one of seven editable forest `TileMapLayer` arenas through a deterministic, save-safe weighted bag; authored zones orient deployment from contact side and a shared validator protects 4v4 starts. FE-style move/attack presentation; Attack/Ability/Item/Defend; d10 math; AI; zoom transition; turn-order/party-status HUD and feedback. | `game/scripts/combat/`, `game/scripts/data/arena_*.gd`, `game/assets/levels/battle_arenas.ldtk`, `game/data/arenas/` |
 | UI (HUD, dialogue, pause, party menu) | Player-facing menus and status | dialogue box exists (`DialogueBox`, code-built); HUD/pause/party menus missing | `game/scripts/ui/dialogue_box.gd` |
 | `game/scenes/dev/display_scaling_spike.tscn` | Throwaway diagnostic - proves the new flexible HD/ultrawide stretch settings render an undistorted tile grid at 1280x720/1920x1080/3440x1440 | working (placeholder ColorRect tiles, no real art yet) | `game/scenes/dev/display_scaling_spike.tscn`, `game/scripts/dev/display_scaling_spike.gd` |
 | Tutorial dungeon (behind the boss door) | Four LDtk-authored rooms (`tutorial_dungeon.ldtk` levels HubRoom/ChestRoom/PitRoom/FightRoom, scripts `tutorial_*_room.gd`) navigated via `SceneManager.boot_room/enter_room/exit_room(s)`. T-078's second room is one continuous floor with a visible momentary plate, one heavy block, one plate-driven north gate, and a reset lever; no pits or required jump. | playable; automated puzzle acceptance green, windowed readability re-check pending | `game/scripts/overworld/tutorial_*_room.gd`, `game/assets/levels/tutorial_dungeon.ldtk` |
@@ -517,8 +522,9 @@ shown on mobile exports; Godot 4 auto-detects most standard gamepads.
 | `ItemData` | `id, display_name, item_type, stat_modifiers, on_use_ability` | `game/data/items/*.tres` | `item_type`: `KEY_ITEM` / `CONSUMABLE` / `EQUIPMENT` |
 | `AbilityData` | `id, display_name, mp_cost, target_type, power, attack_range, element, overworld_use` | `game/data/abilities/*.tres` | Each ability owns its Manhattan reach; `element`/`overworld_use` remain unused stretch fields |
 | `MapMeta` | `ldtk_level_id, display_name, music_track, encounter_table` | one companion `.tres` per level | LDtk is the source of truth for layout; this covers non-visual metadata |
-| `EncounterData` | `id, enemy_group, background_id` | `game/data/encounters/*.tres` | Referenced directly by overworld enemy instances - no random rolls |
-| `SaveData` | `schema_version, current_map, player_position, party_roster, party_levels/xp/hp/mp, inventory, flags` | `user://saves/slot_N.json` (JSON - D-006, 2026-07-07) | Never saved mid-combat; 3 slots from the start; no `defeated_enemy_ids` - enemies always respawn (D-009) |
+| `EncounterData` | `id, enemy_group, biome, arena_tags, fixed_arena_id, background_id` | `game/data/encounters/*.tres` | Referenced directly by overworld enemy instances; biome/tags filter D-018 arenas and a boss can pin one; no random encounters |
+| `ArenaData` | `id, biome, tags, tier, weight, ldtk_path, level_id, mirror_safe` | `game/data/arenas/*.tres` + `game/assets/levels/battle_arenas.ldtk` | Topology and deployment slots stay in LDtk; data selects the editable template |
+| `SaveData` | `schema_version, current_map, player_position, party_roster, party_levels/xp/hp/mp, inventory, flags, arena_selector_state` | `user://saves/slot_N.json` (JSON - D-006, 2026-07-07) | Never saved mid-combat; 3 slots from the start; selector state is optional for v1 compatibility and prevents reload rerolls; no `defeated_enemy_ids` - enemies always respawn (D-009) |
 
 *Status (2026-07-09):* `CharacterStats`, `EnemyStats`, `ItemData`,
 `AbilityData`, `MapMeta`, and `EncounterData` exist with shipped sample
@@ -527,10 +533,11 @@ basic `attack_range`; each ability owns its own `attack_range`. `ItemLibrary`
 resolves ids, session inventory is `{item_id: qty}`, and
 `SceneManager.add_item()/remove_item()` are the only write paths.
 `EncounterData.enemy_group` is loaded from each regular forest Enemy's LDtk
-`EncounterId`, consumed by combat, and rewarded as a full group. `SaveData`
-is built (2026-07-10, T-037): JSON snapshots via `SaveManager` with atomic
-writes and tolerant loads, exactly the table's shape (no
-`defeated_enemy_ids`). `EnemyStats.loot_table` deliberately
+`EncounterId`, consumed by combat, and rewarded as a full group. T-072..T-075
+add `ArenaData`/registry/selector, the seven-level editable forest pool, and a
+shared loader/validator/gallery; selector state survives JSON save/load without
+breaking existing v1 saves. `SaveData` is built (2026-07-10, T-037): JSON
+snapshots via `SaveManager` with atomic writes and tolerant loads. `EnemyStats.loot_table` deliberately
 remains a `PackedStringArray` of item ids resolved through the library (T-043).
 
 **Enemy archetypes and variants (2026-07-10):** LDtk Enemy instances stay

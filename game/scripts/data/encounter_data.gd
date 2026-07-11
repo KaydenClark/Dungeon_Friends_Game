@@ -8,5 +8,12 @@ extends Resource
 
 @export var id: String = ""
 @export var enemy_group: Array[EnemyStats] = []
-## Post-MVP: picks the combat backdrop once arenas have art.
+## D-018 authored battle context. Biome/tags restrict the editable arena pool;
+## a boss may set fixed_arena_id to pin one deliberate board. Enemy group
+## strength remains independent of the selected terrain tier.
+@export var biome := "forest"
+@export var arena_tags := PackedStringArray()
+@export var fixed_arena_id := ""
+## Retained for future broad backdrop treatment; live terrain is now supplied
+## by the selected authored LDtk arena rather than a copied contact patch.
 @export var background_id: String = ""

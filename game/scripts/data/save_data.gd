@@ -20,6 +20,9 @@ var party_hp: Dictionary = {}
 var party_mp: Dictionary = {}
 var inventory: Dictionary = {}
 var flags: Dictionary = {}
+## Optional since T-072. SCHEMA_VERSION stays at 1 because version-1 saves
+## simply omit this field and resume with a fresh deterministic selector.
+var arena_selector_state: Dictionary = {}
 
 
 func to_dict() -> Dictionary:
@@ -34,6 +37,7 @@ func to_dict() -> Dictionary:
 		"party_mp": party_mp,
 		"inventory": inventory,
 		"flags": flags,
+		"arena_selector_state": arena_selector_state.duplicate(true),
 	}
 
 
@@ -61,6 +65,10 @@ static func from_dict(raw: Variant) -> SaveData:
 	out.inventory = _int_values(d.get("inventory", {}))
 	if d.get("flags", {}) is Dictionary:
 		out.flags = d["flags"]
+	var raw_selector_state: Variant = d.get("arena_selector_state", {})
+	if raw_selector_state is Dictionary:
+		var selector_state: Dictionary = raw_selector_state
+		out.arena_selector_state = selector_state.duplicate(true)
 	return out
 
 
@@ -75,6 +83,7 @@ func to_game_state() -> GameState:
 	s.party_mp = party_mp.duplicate()
 	s.inventory = inventory.duplicate()
 	s.flags = flags.duplicate()
+	s.arena_selector_state = arena_selector_state.duplicate(true)
 	return s
 
 

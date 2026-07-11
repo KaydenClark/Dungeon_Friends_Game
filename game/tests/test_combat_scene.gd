@@ -1,7 +1,7 @@
 extends "res://tests/gd_test.gd"
 ## Scripted combat acceptance coverage (T-068 core): drives the real
-## CombatScene mechanics - command branches, range refusal, the D-012
-## arena seed, and one full seeded auto-battle to completion. Every test
+## CombatScene mechanics - command branches, range refusal, authored D-018
+## deployment zones, and one full seeded auto-battle to completion. Every test
 ## resets shared SceneManager state it touches.
 
 
@@ -115,6 +115,30 @@ func test_reachable_cells_respect_move_range_and_solids() -> void:
 	c.free()
 
 
+func test_authored_deployment_zones_drive_unit_placement() -> void:
+	var hero := CombatUnit.from_character("hero", _character("hero"), 20, 5)
+	var buddy := CombatUnit.from_character("companion_test",
+			_character("companion_test"), 14, 6)
+	var foe_a := CombatUnit.from_enemy(_slime(), 0)
+	var foe_b := CombatUnit.from_enemy(_slime(), 1)
+	var arena := {
+		"w": 17,
+		"h": 7,
+		"blocked": [],
+		"party_zone": [Vector2i(1, 1), Vector2i(1, 2), Vector2i(0, 3), Vector2i(0, 4)],
+		"enemy_zone": [Vector2i(15, 1), Vector2i(15, 2), Vector2i(16, 3), Vector2i(16, 4)],
+	}
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 99
+	var c := CombatScene.new()
+	c.setup([hero, buddy], [foe_a, foe_b], arena, rng, true, false)
+	eq(hero.cell, Vector2i(1, 1), "Hero uses the first authored party slot")
+	eq(buddy.cell, Vector2i(1, 2), "Buddy uses the next authored party slot")
+	eq(foe_a.cell, Vector2i(15, 1), "first enemy uses authored enemy slot")
+	eq(foe_b.cell, Vector2i(15, 2), "second enemy uses authored enemy slot")
+	c.free()
+
+
 func test_ability_targets_and_mp_gate() -> void:
 	var buddy := CombatUnit.from_character("companion_test",
 			_character("companion_test"), 14, 6)
@@ -160,24 +184,70 @@ func test_potion_heals_and_consumes_stock() -> void:
 	SceneManager.reset_session_state()
 
 
-func test_arena_seed_keeps_only_the_contact_connected_region() -> void:
-	# A 12x7 room with a full-height wall at x=8, pocket beyond it. Contact
-	# at (4,3): the pocket columns must come back blocked, the main region open.
-	var room := RoomGrid.new()
-	room.setup_grid(12, 7)
-	for y in 7:
-		room.set_blocked(Vector2i(8, y), true)
-	var saved_room: Node2D = SceneManager.current_room
+func test_authored_arena_never_uses_the_contact_room_topology() -> void:
+	var old_state := SceneManager.state
+	var old_room := SceneManager.current_room
+	SceneManager.state = GameState.new()
+	var room := LdtkRoom.new()
+	room.player = Player.new()
+	room.player.cell = Vector2i(9, 3)
 	SceneManager.current_room = room
-	var arena: Dictionary = SceneManager._arena_from_room(Vector2i(4, 3))
-	SceneManager.current_room = saved_room
-	eq(arena["w"], 12, "small rooms use their full width inside the 17-cell arena cap")
-	var blocked: Array = arena["blocked"]
-	ok(blocked.size() > 0, "the wall and pocket read as obstacles")
-	# The wall column sits at local x = 8 - origin.x; contact side stays open.
-	var origin_x: int = 0
-	ok(blocked.has(Vector2i(8 - origin_x, 3)), "wall cell blocked in arena coords")
-	not_ok(blocked.has(Vector2i(4 - origin_x, 3)), "contact cell open")
+	var enemy := OverworldEnemy.new()
+	enemy.cell = Vector2i(10, 3)
+	enemy.encounter = load("res://data/encounters/forest_pair.tres")
+	var arena := SceneManager._select_authored_arena(enemy)
+	eq(arena.get("w"), 17, "authored boards keep the 17-cell combat width")
+	eq(arena.get("h"), 7, "authored boards keep the 7-cell combat height")
+	eq(arena.get("biome"), "forest", "forest encounter selects forest arena data")
+	not_ok(arena.has("contact_origin"), "no contact-window terrain metadata survives")
+	ok(arena.has("party_zone") and arena.has("enemy_zone"),
+			"authored deployment zones replace copied contact columns")
+	eq(ArenaValidator.validate(arena).size(), 0,
+			"selected production arena passes the shared safety validator")
+	var visual := arena.get("visual") as Node2D
+	if visual != null:
+		visual.free()
+	SceneManager.current_room = old_room
+	SceneManager.state = old_state
+
+
+func test_encounter_context_filters_pins_and_orients_authored_arenas() -> void:
+	var old_state := SceneManager.state
+	var old_room := SceneManager.current_room
+	SceneManager.state = GameState.new()
+	var room := LdtkRoom.new()
+	room.player = Player.new()
+	room.player.cell = Vector2i(9, 3)
+	SceneManager.current_room = room
+	var enemy := OverworldEnemy.new()
+	enemy.cell = Vector2i(10, 3)
+	var encounter := EncounterData.new()
+	encounter.id = "arena_test"
+	encounter.biome = "forest"
+	encounter.arena_tags = PackedStringArray(["glade"])
+	enemy.encounter = encounter
+	var filtered := SceneManager._select_authored_arena(enemy)
+	eq(filtered.get("id"), "forest_open_glade",
+			"encounter tags restrict a forest selection to its matching template")
+	var filtered_visual := filtered.get("visual") as Node2D
+	if filtered_visual != null:
+		filtered_visual.free()
+	SceneManager.state = GameState.new()
+	encounter.arena_tags = PackedStringArray()
+	encounter.fixed_arena_id = "forest_old_growth_maze"
+	room.player.cell = Vector2i(11, 3)
+	var fixed := SceneManager._select_authored_arena(enemy)
+	eq(fixed.get("id"), "forest_old_growth_maze",
+			"fixed boss-style arena override wins over the weighted bag")
+	eq(fixed["party_zone"][0], Vector2i(15, 1),
+			"opposite contact side moves the party onto the authored right deployment")
+	not_ok(fixed.get("mirrored", true),
+			"a non-mirror-safe template keeps its authored topology when sides swap")
+	var fixed_visual := fixed.get("visual") as Node2D
+	if fixed_visual != null:
+		fixed_visual.free()
+	SceneManager.current_room = old_room
+	SceneManager.state = old_state
 	room.free()
 
 
@@ -210,6 +280,24 @@ func test_combat_view_uses_runtime_animated_sprites() -> void:
 		ok(sprite is AnimatedSprite2D,
 				"%s renders as an AnimatedSprite2D" % unit.display_name)
 	c.queue_free()
+	await get_tree().process_frame
+
+
+func test_move_range_uses_a_visible_blue_highlight_panel() -> void:
+	var hero := CombatUnit.from_character("hero", _character("hero"), 20, 5)
+	var foe := CombatUnit.from_enemy(_slime(), 0)
+	var c := _scene([hero], [foe])
+	add_child(c)
+	c._show_highlights([hero.cell], CombatScene.MOVE_HIGHLIGHT_FILL)
+	eq(c.highlight_root.get_child_count(), 1, "one reachable cell gets one range panel")
+	var highlight := c.highlight_root.get_child(0) as Panel
+	var style := highlight.get_theme_stylebox("panel") as StyleBoxFlat
+	ok(style.bg_color.b > style.bg_color.r,
+			"move range fill is visibly blue, not a muted texture tint")
+	ok(style.border_color.b > style.border_color.r,
+			"move range border stays blue against green terrain")
+	c.queue_free()
+	await get_tree().process_frame
 
 
 func test_full_auto_battle_runs_to_victory_with_payload() -> void:

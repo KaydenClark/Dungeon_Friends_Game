@@ -24,3 +24,6 @@ extends Resource
 @export var inventory: Dictionary = {}
 ## Durable world facts: doors opened, chests looted, dialogue beats seen.
 @export var flags: Dictionary = {}
+## T-072's compact deterministic authored-arena selector payload. It remains
+## empty until the first encounter draw, keeping version-1 saves compatible.
+@export var arena_selector_state: Dictionary = {}

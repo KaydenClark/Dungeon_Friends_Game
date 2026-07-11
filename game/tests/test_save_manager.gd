@@ -76,6 +76,29 @@ func test_to_game_state_rebuilds_the_session() -> void:
 	ok(rebuilt.flags.get("hub_seen", false), "rebuilt state carries flags")
 
 
+func test_version_one_save_without_selector_state_stays_compatible() -> void:
+	# T-072 adds an optional field without a schema bump. Existing JSON is still
+	# schema 1 and must load into an empty selector payload rather than fail.
+	var current := SaveData.new()
+	current.current_map = "forest"
+	current.player_position = Vector2i(2, 5)
+	current.party_roster = ["hero"]
+	current.party_levels = {"hero": 1}
+	current.party_xp = {"hero": 0}
+	current.party_hp = {"hero": 20}
+	current.party_mp = {"hero": 5}
+	current.flags = {"legacy": true}
+	var legacy_raw := current.to_dict()
+	legacy_raw.erase("arena_selector_state")
+	var legacy := SaveData.from_dict(legacy_raw)
+	not_null(legacy, "schema-version-1 save without arena state still loads")
+	if legacy == null:
+		return
+	eq(legacy.schema_version, 1, "legacy schema version remains intact")
+	eq(legacy.arena_selector_state, {}, "legacy save starts with no selector state")
+	eq(legacy.to_game_state().arena_selector_state, {}, "rebuilt legacy state stays empty")
+
+
 func test_capture_copies_do_not_alias_the_live_state() -> void:
 	var state := _sample_state()
 	var data := SaveManager.capture(state, "forest", Vector2i.ZERO)

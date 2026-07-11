@@ -20,8 +20,8 @@ Buddy, NPCs, slime variants, combat framing, and input-aware prompts. The
 earlier generated knight, wizard, ooze, and prototype tiles remain available
 as later custom-art candidates. Walk an
 LDtk-authored forest, talk to NPCs, bump a visible enemy into a
-tactical d10 battle on terrain copied from the contact area, control Hero plus
-a temporary test companion with interleaved initiative and highlighted
+tactical d10 battle on one of seven editable, biome-consistent authored LDtk
+arenas, control Hero plus a temporary test companion with interleaved initiative and highlighted
 movement/attack ranges, win the boss's key, and enter the Phase 2 four-room
 tutorial dungeon: find the one loose brick in the wall, step on and off a
 floor pressure plate to see its gate react, push the heavy block onto that
@@ -45,6 +45,10 @@ Current playable-slice tour (captured with
 `scenes/dev/screenshot_tour.tscn` - see `RUNBOOK.md` -> Screenshot tour):
 
 ![Runtime tactical character sprites](docs/screenshots/combat-sprites.png)
+
+![Authored battle-arena gallery](docs/screenshots/authored_arena_gallery.png)
+
+![Authored arena in live combat](docs/screenshots/authored_arena_combat.png)
 
 | Forest (overworld) | Dungeon hub |
 |---|---|

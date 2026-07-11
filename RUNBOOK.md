@@ -2,7 +2,7 @@
 
 > Generated from LLM Workbench v2.1. See Upgrading The Harness below.
 
-**Last reviewed:** 2026-07-09
+**Last reviewed:** 2026-07-11
 **Runtime owner:** Kayden (solo developer)
 **Environment:** local (macOS development machine; builds also target Windows
 and Android)
@@ -69,8 +69,9 @@ prompts show keyboard keys only until T-079 supplies controller glyphs):
   Q: cancel/back. The controller equivalents remain D-pad, A, and X.
 - Space/B remains reserved for a future traversal item, but no shipped room
   requires manual jumping. The tutorial route uses mechanisms instead.
-- Loop: talk to the quest NPC -> bump a slime to enter the local-terrain
-  tactical arena (D-012), controlling Hero + Buddy (D-013). WASD/arrows move
+- Loop: talk to the quest NPC -> bump a slime to enter an authored,
+  biome-consistent tactical arena selected from the editable forest pool
+  (D-018), controlling Hero + Buddy (D-013). WASD/arrows move
   the combat cursor or menu; E confirms; Q cancels or stays
   put. On each party turn, choose a highlighted destination, then
   Attack/Ability/Item/Defend (Defend appears only after earning the shield) or
@@ -217,6 +218,30 @@ Expected result: exit `0`, `RUNTIME SPRITE SHOWCASE: wrote ...`, and a rendered
 PNG with four animated-resource units. This must be windowed; headless output
 uses the dummy renderer and is not visual proof.
 
+### Authored battle-arena gallery (T-072..T-075)
+
+The first forest pool lives in `game/assets/levels/battle_arenas.ldtk`: seven
+named 17x7 LDtk levels with editable `Wall` IntGrid terrain, `ArenaMetadata`,
+and eight `PartyDeployment`/`EnemyDeployment` marker slots per side. The
+gallery renders the actual imported levels, their metadata, deployment slots,
+and the shared validator result; the showcase proves the same level reaches
+the live `CombatScene` renderer.
+
+From the current Windows checkout:
+
+```powershell
+$godot = 'E:\Godot\godot.cmd'
+& $godot --headless --path game --import
+& $godot --path game scenes/dev/arena_gallery.tscn -- --out="$PWD\docs\screenshots\authored_arena_gallery.png"
+& $godot --path game scenes/dev/authored_arena_showcase.tscn -- --out="$PWD\docs\screenshots\authored_arena_combat.png"
+```
+
+Expected result: both windowed commands exit `0` and print `AUTHORED ARENA
+GALLERY: wrote ...` / `AUTHORED ARENA COMBAT SHOWCASE: wrote ...`. Inspect the
+gallery after any LDtk edit. It must show seven `VALID` cards, the 2/3/2
+empty/mid/hard split, 5/2/1 per-template weights, and green/red deployment
+zones. Run it windowed; headless image output is not visual proof.
+
 ### Display-scaling spike (T-007)
 
 Checks the flexible HD/ultrawide stretch settings (revised 2026-07-05, see
@@ -252,7 +277,7 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
-per-suite tally (currently `UNIT TESTS: 27 suites, 176 tests, 642 checks, 0
+ per-suite tally (currently `UNIT TESTS: 32 suites, 200 tests, 958 checks, 0
 failed`). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a
 few seconds (pure logic and controlled clocks, no real-time waits, unlike the
 slice smoke test; the tutorial soft-lock solver adds a second or two). Run
@@ -267,8 +292,14 @@ path calls - thresholds, roll inversion, ability power, heals),
 `test_turn_manager` (T-061: interleaved-by-speed initiative, deterministic
 tie-breaks, mid-round death skips, round refills), `test_combat_scene`
 (T-068 core: the Defend shield gate, item stock gating, move-range flood
-fill vs solids, ability MP/target gating, mend/potion execution, the D-012
-arena connectivity seed, and a seeded 2v2 auto-battle to completion),
+fill vs solids, ability MP/target gating, mend/potion execution, authored
+deployment-zone placement, and a seeded 2v2 auto-battle to completion),
+`test_arena_selector` (T-072 deterministic weighted tickets, biome/tag
+filtering, fixed overrides, no-repeat refills, v1 save compatibility, and
+save/load continuation), `test_authored_arena_loader` (T-073/T-074 all seven
+LDtk levels, imported `TileMapLayer` visuals, contact-side deployment, and
+live CombatScene attachment), `test_arena_validator` (T-075 negative safety
+fixtures and cover budgets),
 `test_progression` (T-045 XP curve shape + the T-041 defeat-penalty floor
 clamp), `test_save_manager` (T-037: JSON round-trip, atomic write, tolerant
 corrupt/missing loads, slot isolation, int re-coercion), `test_map_registry`
@@ -340,27 +371,28 @@ crystal, or flag-restored room state.
 
 ### Phase 4 combat check (T-068/T-069)
 
-Automated proof is the unit command above plus the slice smoke test: at the
-T-068 gate that was 22 suites / 140 tests / 490 checks and **111/111 smoke
-checks on 5/5 consecutive runs** (2026-07-09; counts refreshed same day after
-the dev potion grant and the smoke test's freed-lambda-capture fix); the
-Phase 3 save/load, T-069 playtest recut, and the first runtime sprite pass grew
-the totals to 27 suites / 173 tests / 644 checks and 138/138 smoke
-(2026-07-10). `test_combat_scene` covers a seeded
-2v2 battle, D-012 local-terrain connectivity, range refusal, MP/item
-bookkeeping, support actions, shield-gated Defend, and the live turn-order HUD
-format. The smoke test proves a regular forest Enemy's LDtk `EncounterId`
-builds the authored two-enemy group, grants both XP rewards, and restores the
-exact overworld position after the zoom transition.
+Automated proof is the unit command above plus the slice smoke test. The
+ authored-arena lane is green at **32 suites / 200 tests / 958 checks** and
+**134/134 smoke checks on 5/5 consecutive runs** (2026-07-11). The selector,
+loader, validator, and CombatScene tests cover the actual seven-record 2/3/2
+forest pool, 5/2/1 weighted tickets, biome/tag filtering, no immediate repeat,
+save/load continuation, fixed overrides, 4v4-safe deployment zones, contact
+side orientation, and imported LDtk rendering. The smoke test proves a regular
+forest Enemy's LDtk `EncounterId` builds the authored two-enemy group, runs
+through the production arena-selection path, grants both XP rewards, and
+restores the exact overworld position after the zoom transition.
 
 For the windowed T-069 acceptance gate:
 
 1. Run `main.tscn` and touch several slimes in different forest positions.
-2. Confirm the combat arena resembles the terrain around each contact point
-   and never traps either party (D-012).
+2. Confirm each battle uses a readable, biome-consistent authored LDtk arena
+   rather than a tiny copied contact patch; observe empty, mid, and hard boards
+   through the gallery if normal draws do not show all three. Confirm neither
+   party spawns trapped (D-018).
 3. Control both Hero and the temporary Buddy companion; confirm initiative is
-   per-unit, move/attack highlights are readable, and blocked cells refuse
-   movement.
+   per-unit, every legal move cell has a filled blue tile with a bright border,
+   and the cursor/prompt and party status stay in their HUD bands rather than
+   clipping over terrain. Confirm blocked cells refuse movement.
 4. Exercise Attack, Strike/Mend, named Potion selection (quantity + acting
    unit shown before confirmation), Defend after obtaining the shield,
    and Wait. Judge the d10 odds, ranges, healing, damage, and first-read
