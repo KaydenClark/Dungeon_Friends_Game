@@ -26,3 +26,4 @@ enum AIBehavior { RANDOM_WALK, BIASED_TRACKING, PATTERN }
 ## Art-pass slots (T-043): empty until Asset Batch C/E wire real sprites.
 @export var portrait: Texture2D
 @export var combat_sprite: Texture2D
+@export var sprite_frames: SpriteFrames

@@ -31,6 +31,9 @@ func test_hero_resource_loads_with_expected_stats() -> void:
 	eq(hero.attack, 4, "hero attack")
 	eq(hero.defense, 2, "hero defense")
 	eq(hero.speed, 5, "hero speed")
+	not_null(hero.sprite_frames, "hero carries runtime animation frames")
+	eq(hero.sprite_frames.get_frame_count(&"idle"), 4,
+			"hero idle animation has four normalized frames")
 
 
 func test_forest_slime_resource() -> void:
@@ -40,6 +43,20 @@ func test_forest_slime_resource() -> void:
 	eq(slime.max_hp, 6, "slime max_hp")
 	eq(slime.xp_reward, 5, "slime xp reward")
 	not_ok(slime.loot_table.has("forest_key"), "regular slime carries no key")
+	not_null(slime.sprite_frames, "slime carries runtime animation frames")
+	eq(slime.sprite_frames.get_frame_count(&"idle"), 4,
+			"slime idle animation has four normalized frames")
+
+
+func test_combat_units_keep_resource_animation_frames() -> void:
+	var hero_stats: CharacterStats = load("res://data/characters/hero.tres")
+	var slime_stats: EnemyStats = load("res://data/enemies/forest_slime.tres")
+	var hero := CombatUnit.from_character("hero", hero_stats, 20, 5)
+	var slime := CombatUnit.from_enemy(slime_stats, 0)
+	eq(hero.sprite_frames, hero_stats.sprite_frames,
+			"party CombatUnit keeps its CharacterStats animation")
+	eq(slime.sprite_frames, slime_stats.sprite_frames,
+			"enemy CombatUnit keeps its EnemyStats animation")
 
 
 func test_boss_slime_resource() -> void:

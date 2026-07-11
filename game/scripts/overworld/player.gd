@@ -59,7 +59,9 @@ var _pressed_stack: Array[Vector2i] = []
 
 
 func _ready() -> void:
-	_make_body(Color(0.25, 0.5, 0.95))
+	var hero: CharacterStats = load("res://data/characters/hero.tres")
+	if not _make_sprite(hero.sprite_frames, 0.5):
+		_make_body(Color(0.25, 0.5, 0.95))
 	# Snappier per-step tween than the default so grid movement reads as crisp
 	# steps rather than a laggy glide (playtest feedback 2026-07-05).
 	move_time = WALK_MOVE_TIME
@@ -216,7 +218,7 @@ func _hop_in_place() -> void:
 func _bob_body(duration: float) -> void:
 	if body == null:
 		return
-	var rest := body.position
+	var rest: Vector2 = body.position
 	var tw := create_tween()
 	tw.tween_property(body, "position:y", rest.y - 20.0, duration * 0.5)
 	tw.tween_property(body, "position:y", rest.y, duration * 0.5)

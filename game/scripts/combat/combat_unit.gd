@@ -30,6 +30,7 @@ var is_player := false
 var is_boss := false
 var defending := false
 var state := EntityState.AWAITING_TURN
+var sprite_frames: SpriteFrames
 var node: Node2D
 var info: Label
 
@@ -53,6 +54,7 @@ static func from_character(id: String, stats: CharacterStats,
 	u.move_range = stats.move_range
 	u.attack_range = stats.attack_range
 	u.abilities = stats.starting_abilities
+	u.sprite_frames = stats.sprite_frames
 	u.is_player = true
 	return u
 
@@ -69,5 +71,6 @@ static func from_enemy(stats: EnemyStats, index: int) -> CombatUnit:
 	u.move_range = stats.move_range
 	u.attack_range = stats.attack_range
 	u.abilities = stats.abilities
+	u.sprite_frames = stats.sprite_frames
 	u.is_boss = stats.id == "boss_slime"
 	return u

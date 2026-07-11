@@ -630,7 +630,16 @@ func _build_view() -> void:
 	for u in units:
 		u.node = Node2D.new()
 		u.node.position = _cell_pos(u.cell)
-		if u.is_player:
+		if u.sprite_frames != null:
+			var sprite := AnimatedSprite2D.new()
+			sprite.name = "RuntimeSprite"
+			sprite.sprite_frames = u.sprite_frames
+			sprite.animation = &"idle"
+			sprite.scale = Vector2.ONE * (0.58 if u.is_player else (0.68 if u.is_boss else 0.56))
+			sprite.z_index = 2
+			u.node.add_child(sprite)
+			sprite.play()
+		elif u.is_player:
 			var rect := ColorRect.new()
 			# Hero blue; companions teal so the party reads as two people.
 			rect.color = Color(0.25, 0.5, 0.95) if u.unit_id == "hero" \
@@ -646,7 +655,10 @@ func _build_view() -> void:
 			tri.color = Color(0.55, 0.08, 0.12) if u.is_boss else Color(0.85, 0.18, 0.18)
 			u.node.add_child(tri)
 		u.info = Label.new()
-		u.info.position = Vector2(-40, -74 if u.is_player else -50)
+		if u.sprite_frames != null:
+			u.info.position = Vector2(38, -30) if u.is_player else Vector2(-145, -30)
+		else:
+			u.info.position = Vector2(-40, -74 if u.is_player else -50)
 		u.info.add_theme_font_size_override("font_size", 15)
 		u.node.add_child(u.info)
 		_update_info(u)

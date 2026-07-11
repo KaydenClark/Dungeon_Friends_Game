@@ -164,6 +164,20 @@ func test_party_deploys_vertically_with_forward_space() -> void:
 	c.free()
 
 
+func test_combat_view_uses_runtime_animated_sprites() -> void:
+	var hero := CombatUnit.from_character("hero", _character("hero"), 20, 5)
+	var buddy := CombatUnit.from_character("companion_test",
+			_character("companion_test"), 14, 6)
+	var foe := CombatUnit.from_enemy(_slime(), 0)
+	var c := _scene([hero, buddy], [foe])
+	add_child(c)
+	for unit in [hero, buddy, foe]:
+		var sprite: Node = unit.node.get_node_or_null("RuntimeSprite")
+		ok(sprite is AnimatedSprite2D,
+				"%s renders as an AnimatedSprite2D" % unit.display_name)
+	c.queue_free()
+
+
 func test_full_auto_battle_runs_to_victory_with_payload() -> void:
 	# Seeded 2v2: hero + companion vs two slimes on an open field. Auto-play
 	# drives both sides; the battle must terminate and report party HP/MP.

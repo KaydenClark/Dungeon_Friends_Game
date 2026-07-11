@@ -36,6 +36,8 @@ var _step_accum := 0.0
 
 
 func _ready() -> void:
+	if stats != null and _make_sprite(stats.sprite_frames, 0.68 if is_boss else 0.5):
+		return
 	var tri := Polygon2D.new()
 	var s := 30.0 if is_boss else 24.0
 	tri.polygon = PackedVector2Array([Vector2(0, -s), Vector2(s, s), Vector2(-s, s)])

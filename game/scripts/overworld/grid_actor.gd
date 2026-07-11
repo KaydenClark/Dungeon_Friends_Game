@@ -14,7 +14,7 @@ var room: RoomGrid
 var cell := Vector2i.ZERO
 var facing := Vector2i.DOWN
 var moving := false
-var body: ColorRect
+var body
 var face_marker: ColorRect
 
 
@@ -79,3 +79,22 @@ func _make_body(color: Color, side: int = 48) -> void:
 	face_marker.size = Vector2(12, 12)
 	add_child(face_marker)
 	set_facing(facing)
+
+
+## Real-art path shared by the player and roaming enemies. SpriteFrames stay
+## on the data Resources; movement remains the same grid-snapped Node2D tween.
+func _make_sprite(frames: SpriteFrames, sprite_scale := 0.5) -> bool:
+	if frames == null or not frames.has_animation(&"idle"):
+		return false
+	var sprite := AnimatedSprite2D.new()
+	sprite.name = "RuntimeSprite"
+	sprite.sprite_frames = frames
+	sprite.animation = &"idle"
+	sprite.centered = true
+	sprite.scale = Vector2.ONE * sprite_scale
+	sprite.position = Vector2(0, 0)
+	sprite.z_index = 2
+	add_child(sprite)
+	sprite.play()
+	body = sprite
+	return true
