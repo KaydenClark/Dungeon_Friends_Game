@@ -1,7 +1,7 @@
 # Dungeon Friends - Asset Plan
 
-**Last updated:** 2026-07-08
-**Status:** Batch A/B/D started
+**Last updated:** 2026-07-11
+**Status:** Kenney-first visual skeleton planned; prototype batches retained
 
 This file is the asset production checklist for Dungeon Friends. It answers
 what must be made, when it should be made, and where image-generation prompts
@@ -20,19 +20,22 @@ notes in [`IMAGE_PROMPTS.md`](IMAGE_PROMPTS.md).
 - Runtime audio path: `game/assets/audio/`.
 - Level source path: `game/assets/levels/`.
 
-## Kenney Test Library Intake
+## Kenney-First Runtime Direction
 
 **Added:** 2026-07-11 under `game/assets/kenney/`.
 
-Six original Kenney packs are checked in as an evaluation library: Input
+Six original Kenney packs are checked in as the source library: Input
 Prompts Pixel, Pixel UI, Roguelike Caves & Dungeons, Roguelike Characters,
 Roguelike Indoors, and Roguelike RPG Pack. Each pack includes its original
 CC0 `License.txt`; the library inventory and promotion rules are documented in
 `game/assets/kenney/README.md`.
 
-The intake does not replace the batch requirements below and is not wired into
-runtime scenes yet. Candidate adoption should happen incrementally through the
-matching batch/task, with nearest-filter and windowed readability verification.
+The active implementation route is
+[`KENNEY_IMPLEMENTATION_PLAN.md`](KENNEY_IMPLEMENTATION_PLAN.md): promote a
+coherent Kenney visual skeleton through T-080..T-084, beginning with the full
+playable world's terrain and interactables. Existing generated/prototype
+batches below remain useful as requirements and later swap candidates, but
+they are no longer the immediate production route.
 
 ## Global Art Constraints
 
