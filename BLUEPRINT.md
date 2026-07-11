@@ -188,8 +188,11 @@ two jumpable ledges plus a block-fill chasm, and a key-guardian fight with a
 west loop-back shortcut. Pressure plates remain on hold; party defeat still
 uses the Phase 2 restart flow until the parked Phase 3 checkpoint work lands.
 
-Touching a visible enemy now starts a tactical battle on an arena copied from
-the local contact terrain (D-012), with Hero plus the temporary Buddy test
+Touching a visible enemy now starts a near-full-screen 17x7 tactical battle.
+The literal local-terrain generator is being replaced by D-018's authored,
+biome-consistent weighted arena pool after Kayden's second windowed pass proved
+it could still create unfightable boards. Contact context will select and orient
+an eligible arena rather than copying nearby walls. Hero plus the temporary Buddy test
 companion (D-013), interleaved initiative, move/attack highlights, and
 Attack/Ability/Item/Defend. LDtk EncounterData now supplies the regular
 forest's two-enemy party and full XP/loot reward total; encounters zoom in
@@ -442,7 +445,7 @@ keyboard, controller, and mobile touch - per-device bindings below):
 | `interact` / `confirm` | Interact with objects/NPCs; confirm menu selection | yes |
 | `cancel` / `back` | Cancel or back out of a menu | yes |
 | `menu` | Open pause/party menu | yes |
-| `jump` | Hop one cell over a pit/ledge in the facing direction (Phase 2) - bound to Alt primary, C fallback (2026-07-06) | yes (from Phase 2) |
+| `jump` | Hop one cell over a pit/ledge in the facing direction (Phase 2) - bound to Space primary, C fallback (2026-07-10 playtest correction) | yes (from Phase 2) |
 
 Per-device bindings (Godot Input Map is the single binding source; migrated
 from the retired Gameplan §11):
@@ -450,10 +453,10 @@ from the retired Gameplan §11):
 | Action | Keyboard | Controller | Touch (mobile) |
 |---|---|---|---|
 | `move_*` | Arrow keys / WASD | D-pad / left stick | On-screen virtual D-pad |
-| `interact` / `confirm` | Z / Enter | A (Xbox) / Cross (PS) | On-screen "A" |
-| `cancel` / `back` | X / Escape | B / Circle | On-screen "B" |
+| `interact` / `confirm` | E / Enter (Space remains confirm in menus/dialogue) | A (Xbox) / Cross (PS) | On-screen "A" |
+| `cancel` / `back` | Q / Escape | B / Circle | On-screen "B" |
 | `menu` | Enter / Tab | Start / Options | On-screen menu icon |
-| `jump` | Alt (primary) / C (fallback) | (TBD) | On-screen button |
+| `jump` | Space (primary) / C (fallback) | (TBD) | On-screen button |
 
 `TouchScreenButton` nodes map directly to Input Map actions, so gameplay code
 reads `Input.is_action_pressed(...)` regardless of source; the touch UI is only
@@ -483,6 +486,16 @@ is built (2026-07-10, T-037): JSON snapshots via `SaveManager` with atomic
 writes and tolerant loads, exactly the table's shape (no
 `defeated_enemy_ids`). `EnemyStats.loot_table` deliberately
 remains a `PackedStringArray` of item ids resolved through the library (T-043).
+
+**Enemy archetypes and variants (2026-07-10):** LDtk Enemy instances stay
+lightweight placement records. Their `StatsId` selects one shared
+`EnemyStats` resource under `game/data/enemies/`; changing that `.tres`
+updates every placed enemy with the same id. Instance-only map behavior
+(spawn cell, patrol `LeashRadius`, boss flag, encounter group, unique id)
+stays in LDtk. New tiers/elements are new explicit resources and ids rather
+than copied per-instance numbers (for example `slime_1`, `slime_1_boss`,
+`slime_1_miniboss`, `slime_2_fire`, `slime_2_ice`). Display names remain
+player-facing and may change without changing the stable id.
 
 ## Party And Combat Model
 
@@ -597,6 +610,12 @@ Rules:
   `Wall`/`Water`-`Pit`/`PuzzleTrigger`; entity layers for spawns, NPCs,
   enemies, pushable blocks, locked doors, room-transition triggers. Use
   `TileMapLayer`, never the deprecated `TileMap` node.
+  - Transitional source state (2026-07-10): the four existing 1.5.3 projects
+    under `game/assets/levels/` are repaired as editor-openable sources while
+    the planned `world.ldtk` consolidation remains future work. Saving in
+    LDtk requires a Godot reimport before play. Forest regular slimes use
+    `StatsId=forest_slime` and patrol within `LeashRadius=3`; the boss keeps
+    its authored radius of 2.
 - **Puzzle primitives**: `PushableBlock`, `PressurePlate`, `Switch`/`Lever`,
   `LockedDoor` - LDtk entity custom fields carry linking IDs; a per-room
   `PuzzleController` wires signals at `_ready()` (MVP choice - simpler to
@@ -618,8 +637,9 @@ Rules:
     lethal")**: a 1-cell-wide pit can be jumped (see Jump above); a
     `PushableBlock` pushed into a pit **fills it**, permanently converting
     that cell to walkable floor (classic Zelda). **Walking into a pit is a
-    Zelda-style fall** (T-047): **10% of max HP** in damage (floored at 1 -
-    Kayden's 2026-07-10 D-016 tuning, replacing the flat-1-HP first cut) and
+    Zelda-style fall** (T-047): **10 HP to every party member** (Kayden's
+    2026-07-10 windowed-playtest correction, superseding D-016's 10%-of-max
+    first tuning) and
     respawn at the last entrance the player came through into that room; a
     fall that reaches 0 HP triggers the defeat flow. Enemies and pathfinding
     still treat pits as blocked.
@@ -643,8 +663,8 @@ Rules:
   never feels too harsh"; `DEFEAT_XP_LOSS`, tunable); the party **respawns
   at 80% of max HP** ("like Zelda's three hearts, but 80% - eat a meal to
   get back to full"; MP restores in full, an agent interpretation until an
-  MP/food economy exists); pit falls cost **10% of max HP** (floored at 1;
-  `FALL_DAMAGE_FRACTION`) and respawn at `RoomGrid.entry_cell`.
+  MP/food economy exists); pit falls cost a flat **10 HP party-wide**
+  (`FALL_DAMAGE`) and respawn at `RoomGrid.entry_cell`.
 - **Enemy respawns (added 2026-07-07, D-009)**: **enemies respawn every time
   a room is left and rebuilt** - the same reset that un-wedges puzzles
   applies to enemies, uniques and bosses included (duplicate key drops are
@@ -744,9 +764,10 @@ Rules:
 | Forest fixes from the same playthrough: every Wall cell now draws its tree tile (colliders were rendering as plain grass - the "random places I run into" bug), stray pit under the spawn cell removed, extra tree clusters added in the open stretch between spawn and the dungeon entry | Kayden: "I would like for there to be more things out in the open between me and the entry like there was. Maybe not a maze, but at least trees or something" | 2026-07-07 / playtest-feedback rework |
 | **Phase 3 round (D-006..D-011, all resolved)**: (a) saves are **JSON** at `user://saves/slot_N.json` - Kayden delegated the pick; agent chose JSON per the retired Gameplan's own MVP JSON recommendation plus the `.tres`-from-`user://` script-execution risk; (b) **the shield unlocks Defend** - the command is absent from the combat menu until the shield is in inventory (D-001's answer); (c) **checkpoint respawns + XP-as-punishment** - keep inventory, lose XP never-below-level, dungeon-entrance/healer respawn, and walking into pits = Zelda fall back to the room's last-used entrance (supersedes pits-impassable); (d) **enemies respawn every time a room is left-and-rebuilt**, uniques included - the puzzle escape valve applies to enemies too (supersedes the Lufia-II stay-dead pattern; `defeated_enemy_ids` dropped from SaveData); (e) EncounterData/MapMeta built now as stubs, wired Phase 4; (f) minimal Continue/New Game boot prompt; dev warps expand to every built room via the map registry | Kayden's 2026-07-07 planning answers, verbatim rationale on the TASKBOARD Pending Decisions table; agent interpretations flagged there (full-HP respawn, suspended-room semantics, fall damage + XP penalty amounts as tunables) | 2026-07-07 / Phase 3 planning round |
 | **Phase 4 (Combat MVP) starts ahead of Phase 3's save/load half**; Phase 3's M3.1 data classes move with it as combat prerequisites, and the M3.2/M3.3 save/load work stays planned and ready, resumed after combat | Kayden accepted Phase 2 in windowed play (2026-07-08) and named combat the priority: "my main complaint right now is combat, which is phase 4. So I think that is a good next place to work." A build-order re-sequencing, not a scope change - the D-006..D-011 save/load resolutions all stand; combat has no dependency on saves, but does need the M3.1 data classes (abilities, items, encounters, XP shape), which is why they ride along | 2026-07-08 / this session |
-| **Phase 4 round (D-012/D-013, resolved 2026-07-08; reaffirmed 2026-07-09)**: (a) the battle arena is **seeded from the local overworld terrain** around the contact point - the combat grid copies the room's blocked/pit cells in a window where the encounter began, with an open-field fallback if too cramped; (b) Phase 4 ships with a **temporary test companion** in the party so multi-unit selection and interleaved initiative are real before Phase 5 recruitment replaces it | Kayden's picks ("use the local terrain where you were touched", "give me a test companion for now") - the local-terrain read matches the zoom-in framing (the world reads bigger because you fight *in* it); the companion proves the party machinery the whole phase exists to build | 2026-07-08; reaffirmed 2026-07-09 / Kayden |
+| ~~**Phase 4 D-012: copy local overworld terrain into the combat grid**~~ - **superseded by D-018 after the second 2026-07-10 windowed pass** | The original intent was biome/context fidelity, not literal wall-for-wall copying. Even after widening the board and clearing deployment lanes, copied forest topology produced an unfightable arena and gave Kayden no editable battle-map collection. | 2026-07-08; superseded 2026-07-10 / Kayden |
+| **D-018 authored weighted battle arenas:** battle context filters a pool of editable LDtk templates by biome/tags; contact side orients deployment; a deterministic weighted shuffle bag selects among 2 `empty` templates (weight 5 each), 3 `mid` templates (weight 2 each), and 2 `hard` templates (weight 1 each), with no immediate repeat. Enemy number/strength varies independently. Boss encounters may pin a dedicated arena. Every arena imports to `TileMapLayer` and must pass deployment/connectivity validation. | Preserves the useful meaning of D-012 (a forest fight looks like a forest fight; a dry dungeon does not invent a river) while making every topology visible, editable, testable, and reliably fightable. The 5/2/1 tickets yield an initial approximately 56% empty / 33% mid / 11% hard mix and remain tunable. | 2026-07-10 / Kayden second T-069 pass |
 | **Combat is a tactics-RPG, not a JRPG**: BG3's turn-based mode is the functional model (select a unit, move it within a highlighted range on a zoomed-in grid, act via abilities, strict per-unit initiative); Fire Emblem is the *visual* reference only (range highlighting, a dedicated battle mode). Active party size is **four**. The "quick decisions matter more than tactical depth" pillar is retired - the game leans into strategic, tactical combat | Kayden clarified the founding combat vision: "top down tactical BG3 style... control my party of 4 people around this new mini map." Fire Emblem was his closest GBA touchstone for the *look* (range highlights, separate mode), not the mechanics; the engine isn't as limited as first assumed, so depth is now in-scope. Reframes the JRPG/menu language and the earlier readable-over-deep pillar; the locked grid/d10/per-unit-initiative decisions are unchanged | 2026-07-08 / this session |
-| **Phase 3 tuning round (D-014..D-017, resolved 2026-07-10)**: defeat costs **25% of above-floor XP progress** (not all of it); respawn at **80% of max HP** ("eat a meal to get back to full" - Zelda's three hearts, gentler); pit falls cost **10% of max HP** (floored at 1); **consumables come from every source** - enemy loot as an end-of-battle total collection, chests, and (later) shops, with mini-bosses dropping their key plus potions now and regular-enemy food/potion drops gated on a drop-chance model (T-070); shops/treasure ride the future currency system (T-071) | Kayden's answers ahead of his PC playtest: "some % of how much you have left to lose so it never feels too harsh", "80% health... you just need to eat a meal again", "10% damage and go back to entrance", "consumables should come from all of the places you mentioned... an end battle total collection... mini type bosses... should drop the key... and maybe some potions". All fractions remain single-constant tunables | 2026-07-10 / Kayden |
+| **Phase 3 tuning round (D-014..D-017, resolved 2026-07-10; pit tuning superseded after playtest)**: defeat costs **25% of above-floor XP progress**; respawn at **80% of max HP**; pit falls now cost **10 HP party-wide** because the initial 10%-of-max implementation was too soft and incorrectly left Buddy untouched; **consumables come from every source** - enemy loot, chests, and later shops | Kayden's windowed pass superseded only D-016's first number. Because the overworld avatar represents the party, environmental damage now persists to every member and two early-game falls defeat a full-health Hero. | 2026-07-10 / Kayden |
 
 ## Health Criteria
 

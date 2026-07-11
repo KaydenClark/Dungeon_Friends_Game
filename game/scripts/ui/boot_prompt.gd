@@ -15,7 +15,7 @@ func _ready() -> void:
 	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(panel)
 	var text := Label.new()
-	text.text = "A saved adventure awaits.\n\nE / Space   Continue\nX / Esc     New Game"
+	text.text = "A saved adventure awaits.\n\nE / Space   Continue\nQ / Esc     New Game"
 	text.add_theme_font_size_override("font_size", 30)
 	text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	text.set_anchors_preset(Control.PRESET_CENTER)

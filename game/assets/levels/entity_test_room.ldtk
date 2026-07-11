@@ -11,7 +11,7 @@
  "iid": "00000000-0000-0000-0000-000000000071",
  "jsonVersion": "1.5.3",
  "appBuildId": 473703,
- "nextUid": 1000,
+ "nextUid": 1015,
  "identifierStyle": "Capitalize",
  "toc": [],
  "worldLayout": "GridVania",
@@ -220,7 +220,7 @@
     "lineOpacity": 1,
     "hollow": false,
     "color": "#4FC3F7",
-    "renderMode": "Rect",
+    "renderMode": "Rectangle",
     "showName": true,
     "tilesetId": null,
     "tileRenderMode": "FitInside",
@@ -255,7 +255,7 @@
     "lineOpacity": 1,
     "hollow": false,
     "color": "#EEC643",
-    "renderMode": "Rect",
+    "renderMode": "Rectangle",
     "showName": true,
     "tilesetId": null,
     "tileRenderMode": "FitInside",
@@ -267,7 +267,119 @@
     "limitBehavior": "MoveLastOne",
     "pivotX": 0,
     "pivotY": 0,
-    "fieldDefs": []
+    "fieldDefs": [
+     {
+      "identifier": "Lines",
+      "doc": null,
+      "__type": "Array<String>",
+      "uid": 1000,
+      "type": "F_String",
+      "isArray": true,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     },
+     {
+      "identifier": "Heals",
+      "doc": null,
+      "__type": "Bool",
+      "uid": 1001,
+      "type": "F_Bool",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     },
+     {
+      "identifier": "ColorHex",
+      "doc": null,
+      "__type": "String",
+      "uid": 1002,
+      "type": "F_String",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     }
+    ]
    },
    {
     "identifier": "Enemy",
@@ -290,7 +402,7 @@
     "lineOpacity": 1,
     "hollow": false,
     "color": "#D9312E",
-    "renderMode": "Rect",
+    "renderMode": "Rectangle",
     "showName": true,
     "tilesetId": null,
     "tileRenderMode": "FitInside",
@@ -302,7 +414,119 @@
     "limitBehavior": "MoveLastOne",
     "pivotX": 0,
     "pivotY": 0,
-    "fieldDefs": []
+    "fieldDefs": [
+     {
+      "identifier": "StatsId",
+      "doc": null,
+      "__type": "String",
+      "uid": 1003,
+      "type": "F_String",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     },
+     {
+      "identifier": "EncounterId",
+      "doc": null,
+      "__type": "String",
+      "uid": 1004,
+      "type": "F_String",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     },
+     {
+      "identifier": "LeashRadius",
+      "doc": null,
+      "__type": "Int",
+      "uid": 1005,
+      "type": "F_Int",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     }
+    ]
    },
    {
     "identifier": "LockedDoor",
@@ -325,7 +549,7 @@
     "lineOpacity": 1,
     "hollow": false,
     "color": "#8A5A2B",
-    "renderMode": "Rect",
+    "renderMode": "Rectangle",
     "showName": true,
     "tilesetId": null,
     "tileRenderMode": "FitInside",
@@ -337,7 +561,82 @@
     "limitBehavior": "MoveLastOne",
     "pivotX": 0,
     "pivotY": 0,
-    "fieldDefs": []
+    "fieldDefs": [
+     {
+      "identifier": "KeyId",
+      "doc": null,
+      "__type": "String",
+      "uid": 1006,
+      "type": "F_String",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     },
+     {
+      "identifier": "LinkId",
+      "doc": null,
+      "__type": "String",
+      "uid": 1007,
+      "type": "F_String",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     }
+    ]
    },
    {
     "identifier": "PushableBlock",
@@ -360,7 +659,7 @@
     "lineOpacity": 1,
     "hollow": false,
     "color": "#8E8A84",
-    "renderMode": "Rect",
+    "renderMode": "Rectangle",
     "showName": true,
     "tilesetId": null,
     "tileRenderMode": "FitInside",
@@ -372,7 +671,45 @@
     "limitBehavior": "MoveLastOne",
     "pivotX": 0,
     "pivotY": 0,
-    "fieldDefs": []
+    "fieldDefs": [
+     {
+      "identifier": "LinkId",
+      "doc": null,
+      "__type": "String",
+      "uid": 1008,
+      "type": "F_String",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     }
+    ]
    },
    {
     "identifier": "PressurePlate",
@@ -395,7 +732,7 @@
     "lineOpacity": 1,
     "hollow": false,
     "color": "#9FA8B5",
-    "renderMode": "Rect",
+    "renderMode": "Rectangle",
     "showName": true,
     "tilesetId": null,
     "tileRenderMode": "FitInside",
@@ -407,7 +744,82 @@
     "limitBehavior": "MoveLastOne",
     "pivotX": 0,
     "pivotY": 0,
-    "fieldDefs": []
+    "fieldDefs": [
+     {
+      "identifier": "Id",
+      "doc": null,
+      "__type": "String",
+      "uid": 1009,
+      "type": "F_String",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     },
+     {
+      "identifier": "TargetId",
+      "doc": null,
+      "__type": "String",
+      "uid": 1010,
+      "type": "F_String",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     }
+    ]
    },
    {
     "identifier": "Chest",
@@ -430,7 +842,7 @@
     "lineOpacity": 1,
     "hollow": false,
     "color": "#C08A3E",
-    "renderMode": "Rect",
+    "renderMode": "Rectangle",
     "showName": true,
     "tilesetId": null,
     "tileRenderMode": "FitInside",
@@ -442,7 +854,119 @@
     "limitBehavior": "MoveLastOne",
     "pivotX": 0,
     "pivotY": 0,
-    "fieldDefs": []
+    "fieldDefs": [
+     {
+      "identifier": "Id",
+      "doc": null,
+      "__type": "String",
+      "uid": 1011,
+      "type": "F_String",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     },
+     {
+      "identifier": "KeyId",
+      "doc": null,
+      "__type": "String",
+      "uid": 1012,
+      "type": "F_String",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     },
+     {
+      "identifier": "RewardId",
+      "doc": null,
+      "__type": "String",
+      "uid": 1013,
+      "type": "F_String",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     }
+    ]
    },
    {
     "identifier": "Lever",
@@ -465,7 +989,7 @@
     "lineOpacity": 1,
     "hollow": false,
     "color": "#B8944D",
-    "renderMode": "Rect",
+    "renderMode": "Rectangle",
     "showName": true,
     "tilesetId": null,
     "tileRenderMode": "FitInside",
@@ -500,7 +1024,7 @@
     "lineOpacity": 1,
     "hollow": false,
     "color": "#7E57C2",
-    "renderMode": "Rect",
+    "renderMode": "Rectangle",
     "showName": true,
     "tilesetId": null,
     "tileRenderMode": "FitInside",
@@ -512,7 +1036,45 @@
     "limitBehavior": "MoveLastOne",
     "pivotX": 0,
     "pivotY": 0,
-    "fieldDefs": []
+    "fieldDefs": [
+     {
+      "identifier": "TargetRoom",
+      "doc": null,
+      "__type": "String",
+      "uid": 1014,
+      "type": "F_String",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     }
+    ]
    }
   ],
   "tilesets": [
@@ -531,7 +1093,8 @@
     "tags": [],
     "tagsSourceEnumUid": null,
     "enumTags": [],
-    "customData": []
+    "customData": [],
+    "savedSelections": []
    }
   ],
   "enums": [],
@@ -641,24 +1204,45 @@
           "Hello from LDtk!"
          ],
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1000,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "Hello from LDtk!"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "Heals",
          "__type": "Bool",
          "__value": true,
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1001,
+         "realEditorValues": [
+          {
+           "id": "V_Bool",
+           "params": [
+            true
+           ]
+          }
+         ]
         },
         {
          "__identifier": "ColorHex",
          "__type": "String",
          "__value": "#73D9BF",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1002,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "#73D9BF"
+           ]
+          }
+         ]
         }
        ]
       },
@@ -691,24 +1275,45 @@
          "__type": "String",
          "__value": "forest_slime",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1003,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "forest_slime"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "EncounterId",
          "__type": "String",
          "__value": "forest_pair",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1004,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "forest_pair"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "LeashRadius",
          "__type": "Int",
          "__value": 1,
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1005,
+         "realEditorValues": [
+          {
+           "id": "V_Int",
+           "params": [
+            1
+           ]
+          }
+         ]
         }
        ]
       },
@@ -741,16 +1346,30 @@
          "__type": "String",
          "__value": "test_key",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1006,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "test_key"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "LinkId",
          "__type": "String",
          "__value": "test_door",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1007,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "test_door"
+           ]
+          }
+         ]
         }
        ]
       },
@@ -783,8 +1402,15 @@
          "__type": "String",
          "__value": "test_block",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1008,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "test_block"
+           ]
+          }
+         ]
         }
        ]
       },
@@ -817,16 +1443,30 @@
          "__type": "String",
          "__value": "test_plate",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1009,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "test_plate"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "TargetId",
          "__type": "String",
          "__value": "test_door",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1010,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "test_door"
+           ]
+          }
+         ]
         }
        ]
       },
@@ -859,24 +1499,45 @@
          "__type": "String",
          "__value": "fixture_chest",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1011,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "fixture_chest"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "KeyId",
          "__type": "String",
          "__value": "",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1012,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            ""
+           ]
+          }
+         ]
         },
         {
          "__identifier": "RewardId",
          "__type": "String",
          "__value": "trinket",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1013,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "trinket"
+           ]
+          }
+         ]
         }
        ]
       },
@@ -934,8 +1595,15 @@
          "__type": "String",
          "__value": "nowhere",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1014,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "nowhere"
+           ]
+          }
+         ]
         }
        ]
       }

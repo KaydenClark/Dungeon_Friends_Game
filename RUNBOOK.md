@@ -65,18 +65,19 @@ sprite art. No console errors.
 Playing the slice (updated 2026-07-09 for the Phase 4 combat core; controls
 come from the T-009 input map plus the T-025 jump):
 
-- WASD / arrow keys: grid-snapped movement. E / Space: talk & interact;
-  Enter / Space advances dialogue. Alt (or C): jump one cell over a pit.
+- WASD / arrow keys: grid-snapped movement. E: talk & interact;
+  Enter / Space advances dialogue. Space (or C): jump one cell over a pit.
 - Loop: talk to the quest NPC -> bump a slime to enter the local-terrain
   tactical arena (D-012), controlling Hero + Buddy (D-013). WASD/arrows move
-  the combat cursor or menu; E/Space/Enter confirms; X/Escape cancels or stays
+  the combat cursor or menu; E/Space/Enter confirms; Q/Escape cancels or stays
   put. On each party turn, choose a highlighted destination, then
   Attack/Ability/Item/Defend (Defend appears only after earning the shield) or
   Wait. Beat the leashed Boss Slime by the east
   door for the Forest Key -> open the door and step through into the
   four-room tutorial dungeon: the entry locks behind you; a wall of 13
   bricks spans the hub and exactly one pushes free (walk into bricks to
-  test them; the lever resets the loose brick); through the east gap, jump
+  test them; the optional reset lever is only for returning a stuck loose
+  brick to its starting cell); through the east gap, jump
   the pit room's two 1-wide ledges, then push the block into the 2-wide
   chasm and jump the remaining gap; beat the Dungeon Slime for the Dungeon
   Key; loop back through the west shortcut; unlock the hub's north door and
@@ -85,8 +86,8 @@ come from the T-009 input map plus the T-025 jump):
   shipped room uses one.
 - Saving and dying (Phase 3, built 2026-07-10): the cyan **save crystal**
   beside the healer's campfire writes slot 1 on interact; booting with a
-  save shows a minimal Continue (E/Space) / New Game (X/Esc) prompt
-  (D-011). **Walking into a pit** is a Zelda-style fall: 10% of max HP and a walk
+  save shows a minimal Continue (E/Space) / New Game (Q/Esc) prompt
+  (D-011). **Walking into a pit** is a Zelda-style fall: 10 HP party-wide and a walk
   back to the room's last-used entrance; jumping is unchanged (T-047).
   **Party defeat** is a checkpoint, not a restart (T-041, tuned per D-014/
   D-015): keep inventory, lose 25% of your progress toward the next level,
@@ -145,7 +146,7 @@ door locked without its key, two 1-wide ledge jumps, 2-wide chasm crossing
 via block-fill + jump, key-guardian fight -> dungeon_key, west loop back,
 north door unlock, chest room -> shield -> entry unbolts, return to the
 preserved forest, plus the Phase 3 save/load slice: a save-crystal write by
-the campfire, a ledge-pit fall (10% max HP + entrance respawn), forced defeats
+the campfire, a ledge-pit fall (10 HP party-wide + entrance respawn), forced defeats
 proving the T-041 checkpoint respawns (dungeon -> fresh hub entrance,
 outside -> the healer), and a final load leg rolling back to the crystal
 save):
@@ -155,7 +156,7 @@ cd game
 /Applications/Godot.app/Contents/MacOS/Godot --headless --path . scenes/dev/slice_smoke_test.tscn
 ```
 
-Expected result: exit `0` and a final `SLICE SMOKE TEST: PASS (136/136
+Expected result: exit `0` and a final `SLICE SMOKE TEST: PASS (137/137
 checks)` line (~40-80s; the watchdog fails the run at 180s). A benign `ObjectDB instances leaked` warning
 at exit is known noise from quitting mid-coroutines; any `CHECK FAILED:` line
 or exit `1` is a real failure. Because roaming enemies move on real-time
@@ -220,7 +221,7 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
-per-suite tally (e.g. `UNIT TESTS: 27 suites, 169 tests, 619 checks, 0
+per-suite tally (currently `UNIT TESTS: 27 suites, 171 tests, 626 checks, 0
 failed`). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a
 few seconds (pure logic and controlled clocks, no real-time waits, unlike the
 slice smoke test; the tutorial soft-lock solver adds a second or two). Run
@@ -312,8 +313,9 @@ Automated proof is the unit command above plus the slice smoke test: at the
 T-068 gate that was 22 suites / 140 tests / 490 checks and **111/111 smoke
 checks on 5/5 consecutive runs** (2026-07-09; counts refreshed same day after
 the dev potion grant and the smoke test's freed-lambda-capture fix); the
-Phase 3 save/load lane grew the totals to 27 suites / 169 tests / 619 checks
-and 136/136 smoke on 5/5 runs (2026-07-10) with the combat legs unchanged. `test_combat_scene` covers a seeded
+Phase 3 save/load plus the first T-069 playtest recut grew the totals to
+27 suites / 171 tests / 626 checks and 137/137 smoke (2026-07-10), with the
+combat legs unchanged. `test_combat_scene` covers a seeded
 2v2 battle, D-012 local-terrain connectivity, range refusal, MP/item
 bookkeeping, support actions, shield-gated Defend, and the live turn-order HUD
 format. The smoke test proves a regular forest Enemy's LDtk `EncounterId`

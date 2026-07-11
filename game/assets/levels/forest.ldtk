@@ -11,22 +11,24 @@
  "iid": "00000000-0000-0000-0000-000000000019",
  "jsonVersion": "1.5.3",
  "appBuildId": 473703,
- "nextUid": 1000,
+ "nextUid": 1011,
  "identifierStyle": "Capitalize",
  "toc": [],
  "worldLayout": "GridVania",
  "worldGridWidth": 256,
  "worldGridHeight": 256,
- "defaultLevelWidth": 320,
- "defaultLevelHeight": 192,
+ "defaultLevelWidth": 256,
+ "defaultLevelHeight": 256,
+ "defaultPivotX": 0,
+ "defaultPivotY": 0,
  "defaultGridSize": 16,
  "defaultEntityWidth": 16,
  "defaultEntityHeight": 16,
  "bgColor": "#40465B",
  "defaultLevelBgColor": "#1A1A2E",
- "defaultPivotX": 0,
- "defaultPivotY": 0,
+ "minifyJson": false,
  "externalLevels": false,
+ "exportTiled": false,
  "simplifiedExport": false,
  "imageExportMode": "None",
  "exportLevelBg": false,
@@ -35,81 +37,72 @@
  "backupLimit": 10,
  "backupRelPath": null,
  "levelNamePattern": "Level_%idx",
- "minifyJson": false,
- "exportPng": false,
- "exportTiled": false,
- "flags": [],
- "customCommands": [],
- "worlds": [],
- "dummyWorldIid": "00000000-0000-0000-0000-000000000020",
  "tutorialDesc": "Forest overworld",
+ "customCommands": [],
+ "flags": [],
  "defs": {
   "layers": [
    {
-    "gridSize": 16,
-    "displayOpacity": 1,
-    "pxOffsetX": 0,
-    "pxOffsetY": 0,
-    "parallaxFactorX": 0,
-    "parallaxFactorY": 0,
-    "parallaxScaling": true,
-    "intGridValuesGroups": [],
-    "autoRuleGroups": [],
-    "autoSourceLayerDefUid": null,
-    "tilePivotX": 0,
-    "tilePivotY": 0,
-    "canSelectWhenInactive": true,
-    "doc": null,
-    "hideInList": false,
-    "hideFieldsWhenInactive": true,
-    "inactiveOpacity": 1,
-    "renderInWorldView": true,
-    "requiredTags": [],
-    "excludedTags": [],
-    "uiColor": null,
-    "uiFilterTags": [],
-    "useAsyncRender": false,
-    "guideGridWid": 0,
-    "guideGridHei": 0,
-    "biomeFieldUid": null,
     "__type": "Entities",
     "identifier": "Entities",
     "type": "Entities",
     "uid": 6,
-    "intGridValues": [],
-    "tilesetDefUid": null
-   },
-   {
+    "doc": null,
+    "uiColor": null,
     "gridSize": 16,
+    "guideGridWid": 0,
+    "guideGridHei": 0,
     "displayOpacity": 1,
+    "inactiveOpacity": 1,
+    "hideInList": false,
+    "hideFieldsWhenInactive": true,
+    "canSelectWhenInactive": true,
+    "renderInWorldView": true,
     "pxOffsetX": 0,
     "pxOffsetY": 0,
     "parallaxFactorX": 0,
     "parallaxFactorY": 0,
     "parallaxScaling": true,
+    "requiredTags": [],
+    "excludedTags": [],
+    "autoTilesKilledByOtherLayerUid": null,
+    "uiFilterTags": [],
+    "useAsyncRender": false,
+    "intGridValues": [],
     "intGridValuesGroups": [],
     "autoRuleGroups": [],
     "autoSourceLayerDefUid": null,
+    "tilesetDefUid": null,
     "tilePivotX": 0,
     "tilePivotY": 0,
-    "canSelectWhenInactive": true,
-    "doc": null,
-    "hideInList": false,
-    "hideFieldsWhenInactive": true,
-    "inactiveOpacity": 1,
-    "renderInWorldView": true,
-    "requiredTags": [],
-    "excludedTags": [],
-    "uiColor": null,
-    "uiFilterTags": [],
-    "useAsyncRender": false,
-    "guideGridWid": 0,
-    "guideGridHei": 0,
-    "biomeFieldUid": null,
+    "biomeFieldUid": null
+   },
+   {
     "__type": "IntGrid",
     "identifier": "Wall",
     "type": "IntGrid",
     "uid": 3,
+    "doc": null,
+    "uiColor": null,
+    "gridSize": 16,
+    "guideGridWid": 0,
+    "guideGridHei": 0,
+    "displayOpacity": 1,
+    "inactiveOpacity": 1,
+    "hideInList": false,
+    "hideFieldsWhenInactive": true,
+    "canSelectWhenInactive": true,
+    "renderInWorldView": true,
+    "pxOffsetX": 0,
+    "pxOffsetY": 0,
+    "parallaxFactorX": 0,
+    "parallaxFactorY": 0,
+    "parallaxScaling": true,
+    "requiredTags": [],
+    "excludedTags": [],
+    "autoTilesKilledByOtherLayerUid": null,
+    "uiFilterTags": [],
+    "useAsyncRender": false,
     "intGridValues": [
      {
       "value": 1,
@@ -119,39 +112,40 @@
       "groupUid": 0
      }
     ],
-    "tilesetDefUid": null
+    "intGridValuesGroups": [],
+    "autoRuleGroups": [],
+    "autoSourceLayerDefUid": null,
+    "tilesetDefUid": null,
+    "tilePivotX": 0,
+    "tilePivotY": 0,
+    "biomeFieldUid": null
    },
    {
+    "__type": "IntGrid",
+    "identifier": "Pit",
+    "type": "IntGrid",
+    "uid": 7,
+    "doc": null,
+    "uiColor": null,
     "gridSize": 16,
+    "guideGridWid": 0,
+    "guideGridHei": 0,
     "displayOpacity": 1,
+    "inactiveOpacity": 1,
+    "hideInList": false,
+    "hideFieldsWhenInactive": true,
+    "canSelectWhenInactive": true,
+    "renderInWorldView": true,
     "pxOffsetX": 0,
     "pxOffsetY": 0,
     "parallaxFactorX": 0,
     "parallaxFactorY": 0,
     "parallaxScaling": true,
-    "intGridValuesGroups": [],
-    "autoRuleGroups": [],
-    "autoSourceLayerDefUid": null,
-    "tilePivotX": 0,
-    "tilePivotY": 0,
-    "canSelectWhenInactive": true,
-    "doc": null,
-    "hideInList": false,
-    "hideFieldsWhenInactive": true,
-    "inactiveOpacity": 1,
-    "renderInWorldView": true,
     "requiredTags": [],
     "excludedTags": [],
-    "uiColor": null,
+    "autoTilesKilledByOtherLayerUid": null,
     "uiFilterTags": [],
     "useAsyncRender": false,
-    "guideGridWid": 0,
-    "guideGridHei": 0,
-    "biomeFieldUid": null,
-    "__type": "IntGrid",
-    "identifier": "Pit",
-    "type": "IntGrid",
-    "uid": 7,
     "intGridValues": [
      {
       "value": 1,
@@ -161,41 +155,48 @@
       "groupUid": 0
      }
     ],
-    "tilesetDefUid": null
+    "intGridValuesGroups": [],
+    "autoRuleGroups": [],
+    "autoSourceLayerDefUid": null,
+    "tilesetDefUid": null,
+    "tilePivotX": 0,
+    "tilePivotY": 0,
+    "biomeFieldUid": null
    },
    {
+    "__type": "Tiles",
+    "identifier": "Ground",
+    "type": "Tiles",
+    "uid": 2,
+    "doc": null,
+    "uiColor": null,
     "gridSize": 16,
+    "guideGridWid": 0,
+    "guideGridHei": 0,
     "displayOpacity": 1,
+    "inactiveOpacity": 1,
+    "hideInList": false,
+    "hideFieldsWhenInactive": true,
+    "canSelectWhenInactive": true,
+    "renderInWorldView": true,
     "pxOffsetX": 0,
     "pxOffsetY": 0,
     "parallaxFactorX": 0,
     "parallaxFactorY": 0,
     "parallaxScaling": true,
+    "requiredTags": [],
+    "excludedTags": [],
+    "autoTilesKilledByOtherLayerUid": null,
+    "uiFilterTags": [],
+    "useAsyncRender": false,
+    "intGridValues": [],
     "intGridValuesGroups": [],
     "autoRuleGroups": [],
     "autoSourceLayerDefUid": null,
+    "tilesetDefUid": 1,
     "tilePivotX": 0,
     "tilePivotY": 0,
-    "canSelectWhenInactive": true,
-    "doc": null,
-    "hideInList": false,
-    "hideFieldsWhenInactive": true,
-    "inactiveOpacity": 1,
-    "renderInWorldView": true,
-    "requiredTags": [],
-    "excludedTags": [],
-    "uiColor": null,
-    "uiFilterTags": [],
-    "useAsyncRender": false,
-    "guideGridWid": 0,
-    "guideGridHei": 0,
-    "biomeFieldUid": null,
-    "__type": "Tiles",
-    "identifier": "Ground",
-    "type": "Tiles",
-    "uid": 2,
-    "intGridValues": [],
-    "tilesetDefUid": 1
+    "biomeFieldUid": null
    }
   ],
   "entities": [
@@ -211,8 +212,8 @@
     "resizableX": false,
     "resizableY": false,
     "minWidth": null,
-    "minHeight": null,
     "maxWidth": null,
+    "minHeight": null,
     "maxHeight": null,
     "keepAspectRatio": false,
     "tileOpacity": 1,
@@ -220,7 +221,7 @@
     "lineOpacity": 1,
     "hollow": false,
     "color": "#4FC3F7",
-    "renderMode": "Rect",
+    "renderMode": "Rectangle",
     "showName": true,
     "tilesetId": null,
     "tileRenderMode": "FitInside",
@@ -246,8 +247,8 @@
     "resizableX": false,
     "resizableY": false,
     "minWidth": null,
-    "minHeight": null,
     "maxWidth": null,
+    "minHeight": null,
     "maxHeight": null,
     "keepAspectRatio": false,
     "tileOpacity": 1,
@@ -255,7 +256,7 @@
     "lineOpacity": 1,
     "hollow": false,
     "color": "#EEC643",
-    "renderMode": "Rect",
+    "renderMode": "Rectangle",
     "showName": true,
     "tilesetId": null,
     "tileRenderMode": "FitInside",
@@ -267,7 +268,119 @@
     "limitBehavior": "MoveLastOne",
     "pivotX": 0,
     "pivotY": 0,
-    "fieldDefs": []
+    "fieldDefs": [
+     {
+      "identifier": "Lines",
+      "doc": null,
+      "__type": "Array<String>",
+      "uid": 1000,
+      "type": "F_String",
+      "isArray": true,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     },
+     {
+      "identifier": "Heals",
+      "doc": null,
+      "__type": "Bool",
+      "uid": 1001,
+      "type": "F_Bool",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     },
+     {
+      "identifier": "ColorHex",
+      "doc": null,
+      "__type": "String",
+      "uid": 1002,
+      "type": "F_String",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     }
+    ]
    },
    {
     "identifier": "Enemy",
@@ -281,8 +394,8 @@
     "resizableX": false,
     "resizableY": false,
     "minWidth": null,
-    "minHeight": null,
     "maxWidth": null,
+    "minHeight": null,
     "maxHeight": null,
     "keepAspectRatio": false,
     "tileOpacity": 1,
@@ -290,7 +403,7 @@
     "lineOpacity": 1,
     "hollow": false,
     "color": "#D9312E",
-    "renderMode": "Rect",
+    "renderMode": "Rectangle",
     "showName": true,
     "tilesetId": null,
     "tileRenderMode": "FitInside",
@@ -302,7 +415,198 @@
     "limitBehavior": "MoveLastOne",
     "pivotX": 0,
     "pivotY": 0,
-    "fieldDefs": []
+    "fieldDefs": [
+     {
+      "identifier": "StatsId",
+      "doc": null,
+      "__type": "String",
+      "uid": 1003,
+      "type": "F_String",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     },
+     {
+      "identifier": "EncounterId",
+      "doc": null,
+      "__type": "String",
+      "uid": 1004,
+      "type": "F_String",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     },
+     {
+      "identifier": "IsBoss",
+      "doc": null,
+      "__type": "Bool",
+      "uid": 1005,
+      "type": "F_Bool",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     },
+     {
+      "identifier": "LeashRadius",
+      "doc": null,
+      "__type": "Int",
+      "uid": 1006,
+      "type": "F_Int",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": {
+       "id": "V_Int",
+       "params": [
+        3
+       ]
+      },
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     },
+     {
+      "identifier": "UniqueId",
+      "doc": null,
+      "__type": "String",
+      "uid": 1007,
+      "type": "F_String",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     }
+    ]
    },
    {
     "identifier": "LockedDoor",
@@ -316,8 +620,8 @@
     "resizableX": false,
     "resizableY": false,
     "minWidth": null,
-    "minHeight": null,
     "maxWidth": null,
+    "minHeight": null,
     "maxHeight": null,
     "keepAspectRatio": false,
     "tileOpacity": 1,
@@ -325,7 +629,7 @@
     "lineOpacity": 1,
     "hollow": false,
     "color": "#8A5A2B",
-    "renderMode": "Rect",
+    "renderMode": "Rectangle",
     "showName": true,
     "tilesetId": null,
     "tileRenderMode": "FitInside",
@@ -337,7 +641,82 @@
     "limitBehavior": "MoveLastOne",
     "pivotX": 0,
     "pivotY": 0,
-    "fieldDefs": []
+    "fieldDefs": [
+     {
+      "identifier": "KeyId",
+      "doc": null,
+      "__type": "String",
+      "uid": 1008,
+      "type": "F_String",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     },
+     {
+      "identifier": "LinkId",
+      "doc": null,
+      "__type": "String",
+      "uid": 1009,
+      "type": "F_String",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     }
+    ]
    },
    {
     "identifier": "PushableBlock",
@@ -351,8 +730,8 @@
     "resizableX": false,
     "resizableY": false,
     "minWidth": null,
-    "minHeight": null,
     "maxWidth": null,
+    "minHeight": null,
     "maxHeight": null,
     "keepAspectRatio": false,
     "tileOpacity": 1,
@@ -360,7 +739,7 @@
     "lineOpacity": 1,
     "hollow": false,
     "color": "#8E8A84",
-    "renderMode": "Rect",
+    "renderMode": "Rectangle",
     "showName": true,
     "tilesetId": null,
     "tileRenderMode": "FitInside",
@@ -386,8 +765,8 @@
     "resizableX": false,
     "resizableY": false,
     "minWidth": null,
-    "minHeight": null,
     "maxWidth": null,
+    "minHeight": null,
     "maxHeight": null,
     "keepAspectRatio": false,
     "tileOpacity": 1,
@@ -395,7 +774,7 @@
     "lineOpacity": 1,
     "hollow": false,
     "color": "#9FA8B5",
-    "renderMode": "Rect",
+    "renderMode": "Rectangle",
     "showName": true,
     "tilesetId": null,
     "tileRenderMode": "FitInside",
@@ -421,8 +800,8 @@
     "resizableX": false,
     "resizableY": false,
     "minWidth": null,
-    "minHeight": null,
     "maxWidth": null,
+    "minHeight": null,
     "maxHeight": null,
     "keepAspectRatio": false,
     "tileOpacity": 1,
@@ -430,7 +809,7 @@
     "lineOpacity": 1,
     "hollow": false,
     "color": "#C08A3E",
-    "renderMode": "Rect",
+    "renderMode": "Rectangle",
     "showName": true,
     "tilesetId": null,
     "tileRenderMode": "FitInside",
@@ -456,8 +835,8 @@
     "resizableX": false,
     "resizableY": false,
     "minWidth": null,
-    "minHeight": null,
     "maxWidth": null,
+    "minHeight": null,
     "maxHeight": null,
     "keepAspectRatio": false,
     "tileOpacity": 1,
@@ -465,7 +844,7 @@
     "lineOpacity": 1,
     "hollow": false,
     "color": "#B8944D",
-    "renderMode": "Rect",
+    "renderMode": "Rectangle",
     "showName": true,
     "tilesetId": null,
     "tileRenderMode": "FitInside",
@@ -491,8 +870,8 @@
     "resizableX": false,
     "resizableY": false,
     "minWidth": null,
-    "minHeight": null,
     "maxWidth": null,
+    "minHeight": null,
     "maxHeight": null,
     "keepAspectRatio": false,
     "tileOpacity": 1,
@@ -500,7 +879,7 @@
     "lineOpacity": 1,
     "hollow": false,
     "color": "#7E57C2",
-    "renderMode": "Rect",
+    "renderMode": "Rectangle",
     "showName": true,
     "tilesetId": null,
     "tileRenderMode": "FitInside",
@@ -512,7 +891,45 @@
     "limitBehavior": "MoveLastOne",
     "pivotX": 0,
     "pivotY": 0,
-    "fieldDefs": []
+    "fieldDefs": [
+     {
+      "identifier": "TargetRoom",
+      "doc": null,
+      "__type": "String",
+      "uid": 1010,
+      "type": "F_String",
+      "isArray": false,
+      "canBeNull": false,
+      "arrayMinLength": null,
+      "arrayMaxLength": null,
+      "editorDisplayMode": "NameAndValue",
+      "editorDisplayScale": 1,
+      "editorDisplayPos": "Above",
+      "editorLinkStyle": "CurvedArrow",
+      "editorDisplayColor": null,
+      "editorAlwaysShow": false,
+      "editorShowInWorld": true,
+      "editorCutLongValues": true,
+      "editorTextSuffix": null,
+      "editorTextPrefix": null,
+      "useForSmartColor": false,
+      "exportToToc": false,
+      "searchable": false,
+      "min": null,
+      "max": null,
+      "regex": null,
+      "acceptFileTypes": null,
+      "defaultOverride": null,
+      "textLanguageMode": null,
+      "symmetricalRef": false,
+      "autoChainRef": false,
+      "allowOutOfLevelRef": true,
+      "allowedRefs": "OnlySame",
+      "allowedRefsEntityUid": null,
+      "allowedRefTags": [],
+      "tilesetUid": null
+     }
+    ]
    },
    {
     "identifier": "SaveCrystal",
@@ -526,8 +943,8 @@
     "resizableX": false,
     "resizableY": false,
     "minWidth": null,
-    "minHeight": null,
     "maxWidth": null,
+    "minHeight": null,
     "maxHeight": null,
     "keepAspectRatio": false,
     "tileOpacity": 1,
@@ -535,7 +952,7 @@
     "lineOpacity": 1,
     "hollow": false,
     "color": "#59E6F2",
-    "renderMode": "Rect",
+    "renderMode": "Rectangle",
     "showName": true,
     "tilesetId": null,
     "tileRenderMode": "FitInside",
@@ -566,7 +983,12 @@
     "tags": [],
     "tagsSourceEnumUid": null,
     "enumTags": [],
-    "customData": []
+    "customData": [],
+    "savedSelections": [],
+    "cachedPixelData": {
+     "opaqueTiles": "11111",
+     "averageColors": "f5b4f483fca7f767f334"
+    }
    }
   ],
   "enums": [],
@@ -583,18 +1005,17 @@
    "worldDepth": 0,
    "pxWid": 544,
    "pxHei": 320,
-   "__bgColor": "#12210F",
+   "__bgColor": "#1A1A2E",
    "bgColor": null,
    "useAutoIdentifier": false,
    "bgRelPath": null,
    "bgPos": null,
    "bgPivotX": 0.5,
    "bgPivotY": 0.5,
-   "__smartColor": "#ADADB5",
+   "__smartColor": "#81818C",
    "__bgPos": null,
    "externalRelPath": null,
    "fieldInstances": [],
-   "__neighbours": [],
    "layerInstances": [
     {
      "__identifier": "Entities",
@@ -632,9 +1053,7 @@
        ],
        "__tags": [],
        "__tile": null,
-       "__smartColor": "#FFCC00",
-       "__worldX": null,
-       "__worldY": null,
+       "__smartColor": "#EEC643",
        "iid": "00000000-0000-0000-0000-000000000001",
        "width": 16,
        "height": 16,
@@ -655,10 +1074,59 @@
           "won't budge. If you get hurt, my friend by the fire can help!"
          ],
          "__tile": null,
-         "defUid": null,
+         "defUid": 1000,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "Oh, hello there, friend!"
+           ]
+          },
+          {
+           "id": "V_String",
+           "params": [
+            "Slimes have overrun the whole forest, and their big boss"
+           ]
+          },
+          {
+           "id": "V_String",
+           "params": [
+            "squats by the old east door with the key in its belly."
+           ]
+          },
+          {
+           "id": "V_String",
+           "params": [
+            "Bonk the little ones or slip past them - but that boss"
+           ]
+          },
+          {
+           "id": "V_String",
+           "params": [
+            "won't budge. If you get hurt, my friend by the fire can help!"
+           ]
+          }
+         ]
+        },
+        {
+         "__identifier": "Heals",
+         "__type": "Bool",
+         "__value": false,
+         "__tile": null,
+         "defUid": 1001,
+         "realEditorValues": []
+        },
+        {
+         "__identifier": "ColorHex",
+         "__type": "String",
+         "__value": "",
+         "__tile": null,
+         "defUid": 1002,
          "realEditorValues": []
         }
-       ]
+       ],
+       "__worldX": 48,
+       "__worldY": 32
       },
       {
        "__identifier": "Enemy",
@@ -672,9 +1140,7 @@
        ],
        "__tags": [],
        "__tile": null,
-       "__smartColor": "#FFCC00",
-       "__worldX": null,
-       "__worldY": null,
+       "__smartColor": "#D9312E",
        "iid": "00000000-0000-0000-0000-000000000002",
        "width": 16,
        "height": 16,
@@ -689,18 +1155,65 @@
          "__type": "String",
          "__value": "forest_slime",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1003,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "forest_slime"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "EncounterId",
          "__type": "String",
          "__value": "forest_pair",
          "__tile": null,
-         "defUid": null,
+         "defUid": 1004,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "forest_pair"
+           ]
+          }
+         ]
+        },
+        {
+         "__identifier": "IsBoss",
+         "__type": "Bool",
+         "__value": false,
+         "__tile": null,
+         "defUid": 1005,
+         "realEditorValues": []
+        },
+        {
+         "__identifier": "LeashRadius",
+         "__type": "Int",
+         "__value": 3,
+         "__tile": null,
+         "defUid": 1006,
+         "realEditorValues": [
+          {
+           "id": "V_Int",
+           "params": [
+            3
+           ]
+          }
+         ]
+        },
+        {
+         "__identifier": "UniqueId",
+         "__type": "String",
+         "__value": "",
+         "__tile": null,
+         "defUid": 1007,
          "realEditorValues": []
         }
-       ]
+       ],
+       "__worldX": 304,
+       "__worldY": 32
       },
       {
        "__identifier": "LockedDoor",
@@ -714,9 +1227,7 @@
        ],
        "__tags": [],
        "__tile": null,
-       "__smartColor": "#FFCC00",
-       "__worldX": null,
-       "__worldY": null,
+       "__smartColor": "#8A5A2B",
        "iid": "00000000-0000-0000-0000-000000000003",
        "width": 16,
        "height": 16,
@@ -731,18 +1242,34 @@
          "__type": "String",
          "__value": "forest_key",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1008,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "forest_key"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "LinkId",
          "__type": "String",
          "__value": "forest_door",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1009,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "forest_door"
+           ]
+          }
+         ]
         }
-       ]
+       ],
+       "__worldX": 448,
+       "__worldY": 48
       },
       {
        "__identifier": "Doorway",
@@ -756,9 +1283,7 @@
        ],
        "__tags": [],
        "__tile": null,
-       "__smartColor": "#FFCC00",
-       "__worldX": null,
-       "__worldY": null,
+       "__smartColor": "#7E57C2",
        "iid": "00000000-0000-0000-0000-000000000004",
        "width": 16,
        "height": 16,
@@ -773,15 +1298,24 @@
          "__type": "String",
          "__value": "tutorial_hub",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1010,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "tutorial_hub"
+           ]
+          }
+         ]
         }
-       ]
+       ],
+       "__worldX": 448,
+       "__worldY": 48
       },
       {
        "__identifier": "PlayerSpawn",
        "__grid": [
-        2,
+        3,
         4
        ],
        "__pivot": [
@@ -790,24 +1324,24 @@
        ],
        "__tags": [],
        "__tile": null,
-       "__smartColor": "#FFCC00",
-       "__worldX": null,
-       "__worldY": null,
+       "__smartColor": "#4FC3F7",
        "iid": "00000000-0000-0000-0000-000000000005",
        "width": 16,
        "height": 16,
        "defUid": 10,
        "px": [
-        32,
+        48,
         64
        ],
-       "fieldInstances": []
+       "fieldInstances": [],
+       "__worldX": 48,
+       "__worldY": 64
       },
       {
        "__identifier": "Enemy",
        "__grid": [
-        28,
-        4
+        29,
+        15
        ],
        "__pivot": [
         0,
@@ -815,16 +1349,14 @@
        ],
        "__tags": [],
        "__tile": null,
-       "__smartColor": "#FFCC00",
-       "__worldX": null,
-       "__worldY": null,
+       "__smartColor": "#D9312E",
        "iid": "00000000-0000-0000-0000-000000000006",
        "width": 16,
        "height": 16,
        "defUid": 12,
        "px": [
-        448,
-        64
+        464,
+        240
        ],
        "fieldInstances": [
         {
@@ -832,7 +1364,22 @@
          "__type": "String",
          "__value": "boss_slime",
          "__tile": null,
-         "defUid": null,
+         "defUid": 1003,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "boss_slime"
+           ]
+          }
+         ]
+        },
+        {
+         "__identifier": "EncounterId",
+         "__type": "String",
+         "__value": "",
+         "__tile": null,
+         "defUid": 1004,
          "realEditorValues": []
         },
         {
@@ -840,32 +1387,55 @@
          "__type": "Bool",
          "__value": true,
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1005,
+         "realEditorValues": [
+          {
+           "id": "V_Bool",
+           "params": [
+            true
+           ]
+          }
+         ]
         },
         {
          "__identifier": "LeashRadius",
          "__type": "Int",
          "__value": 2,
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1006,
+         "realEditorValues": [
+          {
+           "id": "V_Int",
+           "params": [
+            2
+           ]
+          }
+         ]
         },
         {
          "__identifier": "UniqueId",
          "__type": "String",
          "__value": "forest_boss",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1007,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "forest_boss"
+           ]
+          }
+         ]
         }
-       ]
+       ],
+       "__worldX": 464,
+       "__worldY": 240
       },
       {
        "__identifier": "Enemy",
        "__grid": [
-        20,
-        6
+        18,
+        8
        ],
        "__pivot": [
         0,
@@ -873,16 +1443,14 @@
        ],
        "__tags": [],
        "__tile": null,
-       "__smartColor": "#FFCC00",
-       "__worldX": null,
-       "__worldY": null,
+       "__smartColor": "#D9312E",
        "iid": "00000000-0000-0000-0000-000000000007",
        "width": 16,
        "height": 16,
        "defUid": 12,
        "px": [
-        320,
-        96
+        288,
+        128
        ],
        "fieldInstances": [
         {
@@ -890,18 +1458,65 @@
          "__type": "String",
          "__value": "forest_slime",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1003,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "forest_slime"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "EncounterId",
          "__type": "String",
          "__value": "forest_pair",
          "__tile": null,
-         "defUid": null,
+         "defUid": 1004,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "forest_pair"
+           ]
+          }
+         ]
+        },
+        {
+         "__identifier": "IsBoss",
+         "__type": "Bool",
+         "__value": false,
+         "__tile": null,
+         "defUid": 1005,
+         "realEditorValues": []
+        },
+        {
+         "__identifier": "LeashRadius",
+         "__type": "Int",
+         "__value": 3,
+         "__tile": null,
+         "defUid": 1006,
+         "realEditorValues": [
+          {
+           "id": "V_Int",
+           "params": [
+            3
+           ]
+          }
+         ]
+        },
+        {
+         "__identifier": "UniqueId",
+         "__type": "String",
+         "__value": "",
+         "__tile": null,
+         "defUid": 1007,
          "realEditorValues": []
         }
-       ]
+       ],
+       "__worldX": 288,
+       "__worldY": 128
       },
       {
        "__identifier": "Enemy",
@@ -915,9 +1530,7 @@
        ],
        "__tags": [],
        "__tile": null,
-       "__smartColor": "#FFCC00",
-       "__worldX": null,
-       "__worldY": null,
+       "__smartColor": "#D9312E",
        "iid": "00000000-0000-0000-0000-000000000008",
        "width": 16,
        "height": 16,
@@ -932,24 +1545,71 @@
          "__type": "String",
          "__value": "forest_slime",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1003,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "forest_slime"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "EncounterId",
          "__type": "String",
          "__value": "forest_pair",
          "__tile": null,
-         "defUid": null,
+         "defUid": 1004,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "forest_pair"
+           ]
+          }
+         ]
+        },
+        {
+         "__identifier": "IsBoss",
+         "__type": "Bool",
+         "__value": false,
+         "__tile": null,
+         "defUid": 1005,
+         "realEditorValues": []
+        },
+        {
+         "__identifier": "LeashRadius",
+         "__type": "Int",
+         "__value": 3,
+         "__tile": null,
+         "defUid": 1006,
+         "realEditorValues": [
+          {
+           "id": "V_Int",
+           "params": [
+            3
+           ]
+          }
+         ]
+        },
+        {
+         "__identifier": "UniqueId",
+         "__type": "String",
+         "__value": "",
+         "__tile": null,
+         "defUid": 1007,
          "realEditorValues": []
         }
-       ]
+       ],
+       "__worldX": 128,
+       "__worldY": 144
       },
       {
        "__identifier": "Enemy",
        "__grid": [
-        26,
-        9
+        31,
+        5
        ],
        "__pivot": [
         0,
@@ -957,16 +1617,14 @@
        ],
        "__tags": [],
        "__tile": null,
-       "__smartColor": "#FFCC00",
-       "__worldX": null,
-       "__worldY": null,
+       "__smartColor": "#D9312E",
        "iid": "00000000-0000-0000-0000-000000000009",
        "width": 16,
        "height": 16,
        "defUid": 12,
        "px": [
-        416,
-        144
+        496,
+        80
        ],
        "fieldInstances": [
         {
@@ -974,24 +1632,71 @@
          "__type": "String",
          "__value": "forest_slime",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1003,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "forest_slime"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "EncounterId",
          "__type": "String",
          "__value": "forest_pair",
          "__tile": null,
-         "defUid": null,
+         "defUid": 1004,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "forest_pair"
+           ]
+          }
+         ]
+        },
+        {
+         "__identifier": "IsBoss",
+         "__type": "Bool",
+         "__value": false,
+         "__tile": null,
+         "defUid": 1005,
+         "realEditorValues": []
+        },
+        {
+         "__identifier": "LeashRadius",
+         "__type": "Int",
+         "__value": 3,
+         "__tile": null,
+         "defUid": 1006,
+         "realEditorValues": [
+          {
+           "id": "V_Int",
+           "params": [
+            3
+           ]
+          }
+         ]
+        },
+        {
+         "__identifier": "UniqueId",
+         "__type": "String",
+         "__value": "",
+         "__tile": null,
+         "defUid": 1007,
          "realEditorValues": []
         }
-       ]
+       ],
+       "__worldX": 496,
+       "__worldY": 80
       },
       {
        "__identifier": "Enemy",
        "__grid": [
         13,
-        12
+        13
        ],
        "__pivot": [
         0,
@@ -999,16 +1704,14 @@
        ],
        "__tags": [],
        "__tile": null,
-       "__smartColor": "#FFCC00",
-       "__worldX": null,
-       "__worldY": null,
+       "__smartColor": "#D9312E",
        "iid": "00000000-0000-0000-0000-000000000010",
        "width": 16,
        "height": 16,
        "defUid": 12,
        "px": [
         208,
-        192
+        208
        ],
        "fieldInstances": [
         {
@@ -1016,18 +1719,65 @@
          "__type": "String",
          "__value": "forest_slime",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1003,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "forest_slime"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "EncounterId",
          "__type": "String",
          "__value": "forest_pair",
          "__tile": null,
-         "defUid": null,
+         "defUid": 1004,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "forest_pair"
+           ]
+          }
+         ]
+        },
+        {
+         "__identifier": "IsBoss",
+         "__type": "Bool",
+         "__value": false,
+         "__tile": null,
+         "defUid": 1005,
+         "realEditorValues": []
+        },
+        {
+         "__identifier": "LeashRadius",
+         "__type": "Int",
+         "__value": 3,
+         "__tile": null,
+         "defUid": 1006,
+         "realEditorValues": [
+          {
+           "id": "V_Int",
+           "params": [
+            3
+           ]
+          }
+         ]
+        },
+        {
+         "__identifier": "UniqueId",
+         "__type": "String",
+         "__value": "",
+         "__tile": null,
+         "defUid": 1007,
          "realEditorValues": []
         }
-       ]
+       ],
+       "__worldX": 208,
+       "__worldY": 208
       },
       {
        "__identifier": "Npc",
@@ -1041,9 +1791,7 @@
        ],
        "__tags": [],
        "__tile": null,
-       "__smartColor": "#FFCC00",
-       "__worldX": null,
-       "__worldY": null,
+       "__smartColor": "#EEC643",
        "iid": "00000000-0000-0000-0000-000000000011",
        "width": 16,
        "height": 16,
@@ -1062,31 +1810,153 @@
           "(HP fully restored.)"
          ],
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1000,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "You look roughed up, adventurer."
+           ]
+          },
+          {
+           "id": "V_String",
+           "params": [
+            "Sit by my fire a moment... there. Right as rain!"
+           ]
+          },
+          {
+           "id": "V_String",
+           "params": [
+            "(HP fully restored.)"
+           ]
+          }
+         ]
         },
         {
          "__identifier": "Heals",
          "__type": "Bool",
          "__value": true,
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1001,
+         "realEditorValues": [
+          {
+           "id": "V_Bool",
+           "params": [
+            true
+           ]
+          }
+         ]
         },
         {
          "__identifier": "ColorHex",
          "__type": "String",
          "__value": "#73D9BF",
          "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
+         "defUid": 1002,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "#73D9BF"
+           ]
+          }
+         ]
         }
-       ]
+       ],
+       "__worldX": 368,
+       "__worldY": 224
       },
       {
        "__identifier": "Enemy",
        "__grid": [
-        9,
+        7,
+        15
+       ],
+       "__pivot": [
+        0,
+        0
+       ],
+       "__tags": [],
+       "__tile": null,
+       "__smartColor": "#D9312E",
+       "iid": "00000000-0000-0000-0000-000000000012",
+       "width": 16,
+       "height": 16,
+       "defUid": 12,
+       "px": [
+        112,
+        240
+       ],
+       "fieldInstances": [
+        {
+         "__identifier": "StatsId",
+         "__type": "String",
+         "__value": "forest_slime",
+         "__tile": null,
+         "defUid": 1003,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "forest_slime"
+           ]
+          }
+         ]
+        },
+        {
+         "__identifier": "EncounterId",
+         "__type": "String",
+         "__value": "forest_pair",
+         "__tile": null,
+         "defUid": 1004,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "forest_pair"
+           ]
+          }
+         ]
+        },
+        {
+         "__identifier": "IsBoss",
+         "__type": "Bool",
+         "__value": false,
+         "__tile": null,
+         "defUid": 1005,
+         "realEditorValues": []
+        },
+        {
+         "__identifier": "LeashRadius",
+         "__type": "Int",
+         "__value": 3,
+         "__tile": null,
+         "defUid": 1006,
+         "realEditorValues": [
+          {
+           "id": "V_Int",
+           "params": [
+            3
+           ]
+          }
+         ]
+        },
+        {
+         "__identifier": "UniqueId",
+         "__type": "String",
+         "__value": "",
+         "__tile": null,
+         "defUid": 1007,
+         "realEditorValues": []
+        }
+       ],
+       "__worldX": 112,
+       "__worldY": 240
+      },
+      {
+       "__identifier": "SaveCrystal",
+       "__grid": [
+        23,
         16
        ],
        "__pivot": [
@@ -1095,102 +1965,105 @@
        ],
        "__tags": [],
        "__tile": null,
-       "__smartColor": "#FFCC00",
-       "__worldX": null,
-       "__worldY": null,
-       "iid": "00000000-0000-0000-0000-000000000012",
-       "width": 16,
-       "height": 16,
-       "defUid": 12,
-       "px": [
-        144,
-        256
-       ],
-       "fieldInstances": [
-        {
-         "__identifier": "StatsId",
-         "__type": "String",
-         "__value": "forest_slime",
-         "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
-        },
-        {
-         "__identifier": "EncounterId",
-         "__type": "String",
-         "__value": "forest_pair",
-         "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
-        }
-       ]
-      },
-      {
-       "__identifier": "Enemy",
-       "__grid": [
-        20,
-        18
-       ],
-       "__pivot": [
-        0,
-        0
-       ],
-       "__tags": [],
-       "__tile": null,
-       "__smartColor": "#FFCC00",
-       "__worldX": null,
-       "__worldY": null,
-       "iid": "00000000-0000-0000-0000-000000000013",
-       "width": 16,
-       "height": 16,
-       "defUid": 12,
-       "px": [
-        320,
-        288
-       ],
-       "fieldInstances": [
-        {
-         "__identifier": "StatsId",
-         "__type": "String",
-         "__value": "forest_slime",
-         "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
-        },
-        {
-         "__identifier": "EncounterId",
-         "__type": "String",
-         "__value": "forest_pair",
-         "__tile": null,
-         "defUid": null,
-         "realEditorValues": []
-        }
-       ]
-      },
-      {
-       "__identifier": "SaveCrystal",
-       "__grid": [
-        21,
-        14
-       ],
-       "__pivot": [
-        0,
-        0
-       ],
-       "__tags": [],
-       "__tile": null,
        "__smartColor": "#59E6F2",
-       "__worldX": null,
-       "__worldY": null,
        "iid": "00000000-0000-0000-0000-000000000039",
        "width": 16,
        "height": 16,
        "defUid": 101,
        "px": [
-        336,
-        224
+        368,
+        256
        ],
-       "fieldInstances": []
+       "fieldInstances": [],
+       "__worldX": 368,
+       "__worldY": 256
+      },
+      {
+       "__identifier": "Enemy",
+       "__grid": [
+        14,
+        5
+       ],
+       "__pivot": [
+        0,
+        0
+       ],
+       "__tags": [],
+       "__tile": null,
+       "__smartColor": "#D9312E",
+       "iid": "4d28b030-6fc0-11f1-a5fb-494d77234f83",
+       "width": 16,
+       "height": 16,
+       "defUid": 12,
+       "px": [
+        224,
+        80
+       ],
+       "fieldInstances": [
+        {
+         "__identifier": "StatsId",
+         "__type": "String",
+         "__value": "forest_slime",
+         "__tile": null,
+         "defUid": 1003,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "forest_slime"
+           ]
+          }
+         ]
+        },
+        {
+         "__identifier": "EncounterId",
+         "__type": "String",
+         "__value": "forest_pair",
+         "__tile": null,
+         "defUid": 1004,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "forest_pair"
+           ]
+          }
+         ]
+        },
+        {
+         "__identifier": "IsBoss",
+         "__type": "Bool",
+         "__value": false,
+         "__tile": null,
+         "defUid": 1005,
+         "realEditorValues": []
+        },
+        {
+         "__identifier": "LeashRadius",
+         "__type": "Int",
+         "__value": 3,
+         "__tile": null,
+         "defUid": 1006,
+         "realEditorValues": [
+          {
+           "id": "V_Int",
+           "params": [
+            3
+           ]
+          }
+         ]
+        },
+        {
+         "__identifier": "UniqueId",
+         "__type": "String",
+         "__value": "",
+         "__tile": null,
+         "defUid": 1007,
+         "realEditorValues": []
+        }
+       ],
+       "__worldX": 224,
+       "__worldY": 80
       }
      ]
     },
@@ -1210,7 +2083,7 @@
      "layerDefUid": 3,
      "pxOffsetX": 0,
      "pxOffsetY": 0,
-     "visible": true,
+     "visible": false,
      "optionalRules": [],
      "intGridCsv": [
       1,
@@ -1359,7 +2232,7 @@
       0,
       0,
       0,
-      1,
+      0,
       1,
       0,
       0,
@@ -1399,7 +2272,7 @@
       0,
       0,
       0,
-      1,
+      0,
       1,
       0,
       0,
@@ -1419,8 +2292,8 @@
       1,
       1,
       1,
-      0,
       1,
+      0,
       1,
       1,
       1,
@@ -1452,17 +2325,17 @@
       0,
       1,
       1,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
+      1,
+      1,
       0,
+      1,
+      1,
+      1,
+      1,
       0,
       0,
       1,
-      1,
+      0,
       0,
       0,
       1,
@@ -1488,8 +2361,8 @@
       1,
       0,
       0,
-      1,
-      1,
+      0,
+      0,
       0,
       0,
       0,
@@ -1504,7 +2377,7 @@
       0,
       0,
       0,
-      1,
+      0,
       1,
       1,
       0,
@@ -1517,14 +2390,14 @@
       0,
       0,
       0,
-      0,
+      1,
       1,
       1,
       0,
       0,
+      0,
       1,
       1,
-      0,
       0,
       0,
       0,
@@ -1537,11 +2410,11 @@
       1,
       0,
       0,
-      0,
-      1,
       0,
       0,
       0,
+      1,
+      1,
       0,
       0,
       0,
@@ -1554,9 +2427,7 @@
       1,
       1,
       1,
-      0,
-      0,
-      0,
+      1,
       0,
       0,
       0,
@@ -1566,18 +2437,18 @@
       0,
       0,
       0,
+      1,
+      1,
       0,
       0,
       0,
       1,
-      1,
-      1,
-      1,
       0,
       0,
       0,
       0,
       0,
+      1,
       0,
       0,
       0,
@@ -1592,15 +2463,16 @@
       1,
       1,
       0,
-      0,
-      0,
       1,
       1,
-      0,
-      0,
       0,
+      1,
+      1,
       0,
       0,
+      1,
+      1,
+      1,
       0,
       0,
       0,
@@ -1608,14 +2480,15 @@
       0,
       0,
       1,
-      0,
-      0,
-      0,
+      1,
       0,
       0,
       0,
       0,
+      1,
       0,
+      1,
+      1,
       1,
       1,
       1,
@@ -1629,8 +2502,6 @@
       0,
       0,
       1,
-      1,
-      0,
       0,
       0,
       0,
@@ -1638,16 +2509,17 @@
       0,
       0,
       0,
+      1,
       0,
       0,
       0,
       1,
+      1,
       0,
       0,
       0,
       1,
       1,
-      0,
       0,
       0,
       0,
@@ -1656,12 +2528,12 @@
       1,
       1,
       1,
+      1,
       0,
       0,
       0,
       1,
-      0,
-      0,
+      1,
       0,
       0,
       0,
@@ -1673,28 +2545,29 @@
       0,
       1,
       1,
-      1,
       0,
-      1,
       0,
       0,
       0,
-      1,
-      1,
       0,
       0,
       0,
+      1,
+      1,
       0,
       0,
       0,
       0,
+      0,
+      1,
       1,
       1,
+      1,
       0,
       0,
       0,
-      1,
       0,
+      1,
       0,
       0,
       0,
@@ -1706,7 +2579,6 @@
       0,
       0,
       1,
-      0,
       0,
       0,
       0,
@@ -1714,8 +2586,8 @@
       0,
       0,
       0,
-      0,
-      0,
+      1,
+      1,
       0,
       0,
       0,
@@ -1724,41 +2596,43 @@
       0,
       1,
       1,
-      0,
       1,
+      0,
       1,
       1,
       0,
       0,
       0,
       0,
-      1,
-      1,
       0,
       0,
       0,
       0,
       0,
-      1,
       0,
       0,
       0,
       0,
-      1,
-      1,
-      1,
-      1,
+      0,
+      0,
+      0,
       0,
       0,
+      0,
+      0,
       1,
       1,
       0,
       0,
-      1,
+      0,
+      0,
+      0,
+      0,
       1,
       1,
       1,
       0,
+      1,
       0,
       0,
       0,
@@ -1767,28 +2641,27 @@
       0,
       0,
       0,
+      1,
+      1,
       0,
       0,
       0,
+      1,
       0,
       0,
       0,
-      1,
       0,
       0,
       0,
       0,
       1,
       1,
-      1,
-      1,
       0,
       0,
-      1,
-      1,
       0,
       0,
-      1,
+      0,
+      0,
       1,
       1,
       1,
@@ -1798,17 +2671,16 @@
       0,
       1,
       1,
-      0,
       0,
       0,
       0,
       0,
-      0,
+      1,
+      1,
       0,
       0,
       1,
       1,
-      0,
       0,
       0,
       0,
@@ -1816,6 +2688,8 @@
       0,
       0,
       0,
+      1,
+      1,
       0,
       0,
       0,
@@ -1826,12 +2700,11 @@
       1,
       1,
       1,
-      0,
-      0,
       0,
       0,
       0,
       1,
+      1,
       0,
       0,
       0,
@@ -1852,10 +2725,10 @@
       0,
       0,
       0,
-      1,
-      1,
       0,
       0,
+      1,
+      1,
       1,
       1,
       1,
@@ -4971,11 +5844,11 @@
         64
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         146
        ],
@@ -5611,11 +6484,11 @@
         80
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         186
        ],
@@ -5931,11 +6804,11 @@
         96
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         206
        ],
@@ -5947,11 +6820,11 @@
         96
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         207
        ],
@@ -6459,11 +7332,11 @@
         112
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         239
        ],
@@ -6475,11 +7348,11 @@
         112
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         240
        ],
@@ -6507,11 +7380,11 @@
         112
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         242
        ],
@@ -6523,11 +7396,11 @@
         112
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         243
        ],
@@ -6539,11 +7412,11 @@
         112
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         244
        ],
@@ -6555,11 +7428,11 @@
         112
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         245
        ],
@@ -6619,11 +7492,11 @@
         112
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         249
        ],
@@ -7035,11 +7908,11 @@
         128
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         275
        ],
@@ -7051,11 +7924,11 @@
         128
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         276
        ],
@@ -7291,11 +8164,11 @@
         128
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         291
        ],
@@ -7499,11 +8372,11 @@
         128
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         304
        ],
@@ -7579,11 +8452,11 @@
         144
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         309
        ],
@@ -7611,11 +8484,11 @@
         144
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         311
        ],
@@ -7835,11 +8708,11 @@
         144
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         325
        ],
@@ -7867,11 +8740,11 @@
         144
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         327
        ],
@@ -7883,11 +8756,11 @@
         144
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         328
        ],
@@ -8091,11 +8964,11 @@
         160
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         341
        ],
@@ -8251,11 +9124,11 @@
         160
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         351
        ],
@@ -8267,11 +9140,11 @@
         160
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         352
        ],
@@ -8347,11 +9220,11 @@
         160
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         357
        ],
@@ -8363,11 +9236,11 @@
         160
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         358
        ],
@@ -8379,11 +9252,11 @@
         160
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         359
        ],
@@ -8427,11 +9300,11 @@
         160
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         362
        ],
@@ -8507,11 +9380,11 @@
         160
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         367
        ],
@@ -8523,11 +9396,11 @@
         160
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         368
        ],
@@ -8603,11 +9476,11 @@
         160
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         373
        ],
@@ -8651,11 +9524,11 @@
         176
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         376
        ],
@@ -8683,11 +9556,11 @@
         176
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         378
        ],
@@ -8715,11 +9588,11 @@
         176
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         380
        ],
@@ -8747,11 +9620,11 @@
         176
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         382
        ],
@@ -8779,11 +9652,11 @@
         176
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         384
        ],
@@ -8795,11 +9668,11 @@
         176
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         385
        ],
@@ -8811,11 +9684,11 @@
         176
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         386
        ],
@@ -8923,11 +9796,11 @@
         176
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         393
        ],
@@ -9019,11 +9892,11 @@
         176
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         399
        ],
@@ -9051,11 +9924,11 @@
         176
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         401
        ],
@@ -9067,11 +9940,11 @@
         176
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         402
        ],
@@ -9291,11 +10164,11 @@
         192
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         416
        ],
@@ -9403,11 +10276,11 @@
         192
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         423
        ],
@@ -9467,11 +10340,11 @@
         192
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         427
        ],
@@ -9643,11 +10516,11 @@
         192
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         438
        ],
@@ -9787,11 +10660,11 @@
         208
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         447
        ],
@@ -9947,11 +10820,11 @@
         208
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         457
        ],
@@ -9979,11 +10852,11 @@
         208
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         459
        ],
@@ -9995,11 +10868,11 @@
         208
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         460
        ],
@@ -10027,11 +10900,11 @@
         208
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         462
        ],
@@ -10203,11 +11076,11 @@
         208
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         473
        ],
@@ -10219,11 +11092,11 @@
         208
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         474
        ],
@@ -10315,11 +11188,11 @@
         224
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         480
        ],
@@ -10331,11 +11204,11 @@
         224
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         481
        ],
@@ -10635,11 +11508,11 @@
         224
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         500
        ],
@@ -10651,11 +11524,11 @@
         224
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         501
        ],
@@ -10763,11 +11636,11 @@
         224
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         508
        ],
@@ -10859,11 +11732,11 @@
         240
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         514
        ],
@@ -10939,11 +11812,11 @@
         240
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         519
        ],
@@ -10955,11 +11828,11 @@
         240
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         520
        ],
@@ -11051,11 +11924,11 @@
         240
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         526
        ],
@@ -11131,11 +12004,11 @@
         240
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         531
        ],
@@ -11147,11 +12020,11 @@
         240
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         532
        ],
@@ -11163,11 +12036,11 @@
         240
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         533
        ],
@@ -11195,11 +12068,11 @@
         240
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         535
        ],
@@ -11227,11 +12100,11 @@
         240
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         537
        ],
@@ -11243,11 +12116,11 @@
         240
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         538
        ],
@@ -11291,11 +12164,11 @@
         240
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         541
        ],
@@ -11371,11 +12244,11 @@
         256
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         546
        ],
@@ -11515,11 +12388,11 @@
         256
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         555
        ],
@@ -11531,11 +12404,11 @@
         256
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         556
        ],
@@ -11675,11 +12548,11 @@
         256
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         565
        ],
@@ -11691,11 +12564,11 @@
         256
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         566
        ],
@@ -11707,11 +12580,11 @@
         256
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         567
        ],
@@ -11739,11 +12612,11 @@
         256
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         569
        ],
@@ -11771,11 +12644,11 @@
         256
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         571
        ],
@@ -11787,11 +12660,11 @@
         256
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         572
        ],
@@ -11835,11 +12708,11 @@
         256
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         575
        ],
@@ -12059,11 +12932,11 @@
         272
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         589
        ],
@@ -12075,11 +12948,11 @@
         272
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         590
        ],
@@ -12267,11 +13140,11 @@
         272
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         602
        ],
@@ -12283,11 +13156,11 @@
         272
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         603
        ],
@@ -12379,11 +13252,11 @@
         272
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         609
        ],
@@ -12443,11 +13316,11 @@
         288
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         613
        ],
@@ -12507,11 +13380,11 @@
         288
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         617
        ],
@@ -12859,11 +13732,11 @@
         288
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         639
        ],
@@ -12875,11 +13748,11 @@
         288
        ],
        "src": [
-        16,
+        0,
         0
        ],
        "f": 0,
-       "t": 1,
+       "t": 0,
        "d": [
         640
        ],
@@ -12891,11 +13764,11 @@
         288
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         641
        ],
@@ -12907,11 +13780,11 @@
         288
        ],
        "src": [
-        0,
+        16,
         0
        ],
        "f": 0,
-       "t": 0,
+       "t": 1,
        "d": [
         642
        ],
@@ -13512,7 +14385,10 @@
      ],
      "entityInstances": []
     }
-   ]
+   ],
+   "__neighbours": []
   }
- ]
+ ],
+ "worlds": [],
+ "dummyWorldIid": "00000000-0000-0000-0000-000000000020"
 }
