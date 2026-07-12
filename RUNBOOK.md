@@ -10,6 +10,15 @@ and Android)
 This file explains how to operate, verify, recover, and evaluate the project.
 It should be boring, exact, and executable.
 
+> **Pivot note (2026-07-11):** the project's design rebooted to v2 (see
+> `BLUEPRINT.md` -> V2 Systems and D-024..D-035). Every procedure below still
+> applies - it operates the v1 code on disk, which stays in place until the
+> pivot sequence (`TASKBOARD.md` T-089..T-095) replaces each piece. Update
+> the relevant procedure rows as v1 systems (d10 combat, arena selection,
+> zoom transition, enemy respawns, single avatar) are retired. Android export
+> material remains valid but is deprioritized (D-032: Steam-first, mobile
+> postponed).
+
 ## Prerequisites
 
 Required tools:
@@ -220,8 +229,8 @@ uses the dummy renderer and is not visual proof.
 
 ### Authored battle-arena gallery (T-072..T-075)
 
-The first forest pool lives in `game/assets/levels/battle_arenas.ldtk`: seven
-named 17x7 LDtk levels with editable `Wall` IntGrid terrain, `ArenaMetadata`,
+The arena pool lives in `game/assets/levels/battle_arenas.ldtk`: seven forest
+levels plus `DungeonStoneHall`, all named 17x7 LDtk levels with editable `Wall` IntGrid terrain, `ArenaMetadata`,
 and eight `PartyDeployment`/`EnemyDeployment` marker slots per side. The
 gallery renders the actual imported levels, their metadata, deployment slots,
 and the shared validator result; the showcase proves the same level reaches
@@ -238,9 +247,23 @@ $godot = 'E:\Godot\godot.cmd'
 
 Expected result: both windowed commands exit `0` and print `AUTHORED ARENA
 GALLERY: wrote ...` / `AUTHORED ARENA COMBAT SHOWCASE: wrote ...`. Inspect the
-gallery after any LDtk edit. It must show seven `VALID` cards, the 2/3/2
-empty/mid/hard split, 5/2/1 per-template weights, and green/red deployment
-zones. Run it windowed; headless image output is not visual proof.
+gallery after any LDtk edit. It must show eight `VALID` cards: the forest cards
+retain the 2/3/2 empty/mid/hard split and 5/2/1 per-template weights, and the
+dungeon stone hall remains biome-isolated. Green/red overlays are the authored
+party/enemy deployment zones. Run it windowed; headless image output is not
+visual proof.
+
+For the T-085 readability matrix, capture every deterministic combat state at
+both supported review sizes:
+
+```powershell
+$godot = 'E:\Godot\godot.cmd'
+& $godot --path game scenes/dev/combat_readability_tour.tscn --resolution 1280x720 -- --out="$PWD\docs\screenshots\combat-readability-1280"
+& $godot --path game scenes/dev/combat_readability_tour.tscn --resolution 1920x1080 -- --out="$PWD\docs\screenshots\combat-readability-1920"
+```
+
+Each run writes seven captures covering turn start, root menu, Item submenu,
+movement destination, attack result, forest battle, and dungeon battle.
 
 ### Display-scaling spike (T-007)
 
@@ -296,7 +319,7 @@ fill vs solids, ability MP/target gating, mend/potion execution, authored
 deployment-zone placement, and a seeded 2v2 auto-battle to completion),
 `test_arena_selector` (T-072 deterministic weighted tickets, biome/tag
 filtering, fixed overrides, no-repeat refills, v1 save compatibility, and
-save/load continuation), `test_authored_arena_loader` (T-073/T-074 all seven
+save/load continuation), `test_authored_arena_loader` (T-073/T-074/T-087 all eight
 LDtk levels, imported `TileMapLayer` visuals, contact-side deployment, and
 live CombatScene attachment), `test_arena_validator` (T-075 negative safety
 fixtures and cover budgets),

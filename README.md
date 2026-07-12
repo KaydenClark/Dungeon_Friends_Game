@@ -3,18 +3,25 @@
 > Generated from LLM Workbench v2.1. See `RUNBOOK.md` -> Upgrading The
 > Harness.
 
-A 2D top-down adventure RPG - **Zelda meets BG3**. Explore a hand-built fantasy
-world Zelda-style (dungeons, puzzles, key items), recruit a party of "Dungeon
-Friends," and fight BG3-style turn-based tactical battles on a zoomed-in grid.
-Retro-pixel-art inspired, rendered natively at flexible HD/ultrawide resolutions
-rather than a locked handheld-style canvas.
+A party-based 2D adventure RPG where the goddess Selena sends you to recruit
+Dungeon Friends and prepare an expedition against the dragon looming over the
+city. Explore a three-quarter-view world, combine your friends' abilities to
+manipulate its terrain, and resolve deterministic tactical encounters directly
+where they begin. Retro-pixel-art inspired, rendered natively at flexible
+HD/ultrawide resolutions. Steam-first.
 
-A solo, AI-assisted Godot 4.7 project: grid-based overworld and dungeon
-exploration (Zelda-style block/switch/key puzzles), BG3-style turn-based
-*tactical* party combat (a dedicated battle mode: select a unit, move it within
-its highlighted range, act), and recruitable "Dungeon Friends" party
-members. The world starts in a fantasy forest and later expands into a castle
-city, mountains, and rivers. Current state: a playable slice with a coherent
+> **Vision pivot (2026-07-11):** the design rebooted from the original "Zelda
+> meets BG3" split-mode concept to a unified model - one persistent world,
+> one shared environmental vocabulary, a visible party, deterministic
+> telegraphed encounters that permanently resolve problems. See
+> `BLUEPRINT.md` -> V2 Systems. **The playable build described below is still
+> the v1 slice** (separate d10 battle mode, single avatar, respawning
+> enemies); the pivot sequence in `TASKBOARD.md` (T-089..T-095) replaces it
+> piece by piece.
+
+A solo, AI-assisted Godot 4.7 project. The world starts in a fantasy forest
+and later expands through a river valley, mountains, and the city beneath the
+dragon's mountain. Current state: a playable v1 slice with a coherent
 Kenney-first CC0 visual skeleton across LDtk terrain, interactables, Hero,
 Buddy, NPCs, slime variants, combat framing, and input-aware prompts. The
 earlier generated knight, wizard, ooze, and prototype tiles remain available
@@ -35,9 +42,9 @@ outside), Zelda-style pit falls, and enemies that respawn whenever a room is
 rebuilt. Phase 4 is built through its automated acceptance battery:
 regular forest encounters use LDtk-authored two-enemy parties, contact zooms
 into combat and back, and a readable turn-order/party-status HUD gives live
-feedback. Kayden's windowed balance/feel acceptance remains the final Phase 4
-gate. Final custom animation, portraits, effects, and biome variants remain a
-phase-timed pass.
+feedback. (The old final Phase 4 acceptance gate, T-069, is superseded by the
+pivot.) Final custom animation, portraits, effects, and biome variants remain
+a phase-timed pass.
 
 ## Screenshots
 

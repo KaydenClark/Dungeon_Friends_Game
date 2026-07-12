@@ -75,22 +75,38 @@ ripple effects across the data model, scene structure, and milestones. Full
 list and rationale: `BLUEPRINT.md` -> Core Logic And Invariants and Design
 Decisions.
 
-Quick reference: Godot 4.7.x / GDScript / Mobile renderer (revised 2026-07-07,
-Kayden's explicit upgrade from the original 4.6.x - the local toolchain moved
-to 4.7.stable and the project was verified clean on it; supersedes the 4.6.x
-lock); flexible HD/
-ultrawide base resolution (1280x720 design reference, `canvas_items`/`expand`
-scaling - revised 2026-07-05, supersedes the old 240x160-locked decision),
-nearest filter, unrestricted palette; `TileMapLayer`
-only, never the deprecated `TileMap` node; grid-snapped `Tween` movement only
-(never velocity-based free movement); `AStarGrid2D` pathfinding (no diagonals);
-all game data as `Resource` (`.tres`) subclasses; single Autoload
-(`SceneManager`); two-layer combat FSM + `TurnManager`; Phase 4 battles seed
-their arena from the local terrain at the contact point (D-012) and use a
-temporary test companion until Phase 5 supplies the first real recruit
-(D-013); enemies visible on the map, no random encounters; levels authored in
-one LDtk project; Furnace Tracker audio with no literal
-hardware-channel-emulation engine.
+Quick reference (revised 2026-07-11 for the v2 vision pivot, D-024..D-035 in
+`BLUEPRINT.md` - the pivot superseded several old locks; do not rebuild the
+superseded ones):
+
+Surviving locks: Godot 4.7.x / GDScript / Mobile renderer (revised 2026-07-07);
+flexible HD/ultrawide base resolution (1280x720 design reference,
+`canvas_items`/`expand` scaling - revised 2026-07-05), nearest filter,
+unrestricted palette; `TileMapLayer` only, never the deprecated `TileMap`
+node; grid-snapped `Tween` movement only (never velocity-based free movement);
+`AStarGrid2D` pathfinding (no diagonals) on an **orthogonal square logic
+grid** (three-quarter perspective is art + integer cell elevation, never true
+diamond-isometric - D-030); all game data as `Resource` (`.tres`) subclasses;
+single Autoload (`SceneManager`); enemies visible on the map, no random or
+invisible encounters; levels authored in one LDtk project; Furnace Tracker
+audio with no literal hardware-channel-emulation engine.
+
+New v2 locks: **deterministic combat - no random hit rolls anywhere, previews
+always match results (D-026)**; **encounters happen in the current room - no
+separate combat scene, arena selection, or zoom transition (D-025)**;
+**resolved encounters stay resolved - no routine enemy respawning (D-028)**;
+**whole active party visible in exploration, leader + non-blocking followers
+(D-029)**; **all friend/world interactions route through the shared
+material/effect vocabulary - never bespoke pairwise code (D-031)**;
+Steam-first commercial target, mobile postponed (D-032). The combat turn
+structure (intent rounds vs. alternating initiative) is **provisional pending
+the T-092 prototype (D-027)** - do not lock combat architecture to either
+model before that verdict.
+
+Superseded and must not be rebuilt: the d10 percentage system; D-012/D-018
+arena seeding/selection as the production combat path; the D-013 temporary
+test companion contract; D-009 always-respawn; the single-overworld-avatar
+contract (old D-005); the purely top-down art contract.
 
 ## Work Selection
 

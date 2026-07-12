@@ -3,8 +3,12 @@
 > Generated from LLM Workbench v2.1. See `RUNBOOK.md` -> Upgrading The
 > Harness.
 
-**Last reviewed:** 2026-07-10
-**Status:** active - Phase 4/puzzle acceptance gap closure; Phase 5 is next
+**Last reviewed:** 2026-07-11
+**Status:** active - **v2 vision pivot (controlled reboot), canon reset 2026-07-11.**
+Docs now describe the v2 canon; the code on disk is still the v1 build. The
+pivot sequence in `TASKBOARD.md` (T-089..T-095) is the active plan. Superseded
+v1 decisions are recorded in Design Decisions (D-024..D-035), never silently
+contradicted.
 **Source root:** `/Users/kayden/GPT_OS/Projects/Dungeon_Friends_Game`
 
 This is the stable reference for what the project is. This file is the
@@ -16,79 +20,110 @@ absorbed here, in `RUNBOOK.md`, and in `TASKBOARD.md`.)
 
 ## What This Project Is
 
-A 2D top-down adventure RPG: **Zelda meets BG3**. Exploration is in the
-structural tradition of classic Zelda games (grid-based overworld and dungeons,
-block-pushing puzzles, switches, locked doors, key items that unlock new areas).
-Combat is **tactics-RPG**: touching a visible enemy drops the game into a
-dedicated turn-based battle mode (BG3's turn-based mode is the direct model) -
-you command a party of up to four "Dungeon Friends" on a zoomed-in tactical
-grid, selecting a unit, seeing its movement and attack range highlighted (Fire
-Emblem is the *visual* reference for that presentation, not a separate combat
-model), and spending ability-driven turns in strict initiative order. This is
-**not a JRPG**: positioning, range, and ability choice carry real weight; the
-party is not a menu-driven line-up. The player explores a hand-authored world -
-beginning in a fantasy forest with a Kokiri-Forest-from-Ocarina-of-Time mood,
-then opening through a River Valley, a Mountain region, a City region, and a
-final Dragon Lair arc - while recruiting the party members who fight alongside
-them.
+> **Controlled reboot (2026-07-11, D-024).** Kayden's research pass (Horizon's
+> Gate, Into the Breach, and the deterministic-tactics lineage) replaced the
+> original "Zelda meets BG3" split-mode design. The organizing principle is
+> now: **one persistent world, one shared environmental vocabulary, a visible
+> party of Dungeon Friends, and encounters that permanently resolve problems.**
+
+The pitch:
+
+> A party-based 2D adventure RPG where the goddess Selena sends you to recruit
+> Dungeon Friends and prepare an expedition against the dragon looming over
+> the city. Explore a three-quarter-view world, combine your friends'
+> abilities to manipulate its terrain, and resolve deterministic tactical
+> encounters directly where they begin.
+
+The core loop:
+
+1. **Adventure:** explore, discover routes, meet people, identify problems.
+2. **Party progression:** recruit friends, choose an active team of four,
+   improve their abilities.
+3. **Encounters:** resolve combat, environmental problems, deliveries, and
+   NPC requests.
+4. **World change:** the resolved problem stays resolved and opens a new
+   route, relationship, or resource.
+
+Step 4 is essential: combat accomplishes something - it is never only XP.
+
+What fundamentally changed at the pivot (quick reference for agents; each row
+has a superseding decision in Design Decisions):
+
+| v1 direction | v2 direction |
+|---|---|
+| Single overworld avatar | Entire active party visible (D-029) |
+| Separate combat scene and arena | Combat happens in the current room (D-025) |
+| Top-down presentation | Orthogonal grid rendered in three-quarter perspective with integer elevation (D-030) |
+| d10 hit rolls | Deterministic damage and effects (D-026) |
+| Enemies respawn on room rebuild | Resolved encounters stay resolved (D-028) |
+| Enemy action chosen on its turn | Enemy intentions telegraphed beforehand (D-027) |
+| Combat abilities separate from puzzles | One shared material/effect vocabulary everywhere (D-031) |
+| Personal/friends-and-family audience | Steam-first commercial project (D-032) |
+| Android as an early platform | Mobile reconsidered after the PC game proves itself (D-032) |
 
 Visually it's retro-pixel-art *inspired*, not any specific handheld-accurate:
 a flexible HD/ultrawide base resolution (1280x720 design reference, scaling
 cleanly up through 1920x1080 and 3440x1440), nearest-neighbor filtering,
-unrestricted palette - retro sprite silhouette (chunky pixel art, grid
-movement, tile-based dungeons), not a hardware recreation and not locked to
-any one fixed low-res canvas. See Visual Language below for the specific
-GBA-fantasy-adventure look (bright/readable, toy-like overworlds, chunky
-silhouettes, 8x8/16x16 tile logic) this project targets.
+unrestricted palette. The world is an **orthogonal square logic grid rendered
+in three-quarter perspective** (vertical wall faces, stronger ground-plane
+depth, small integer cell elevation with ramps/stairs) - not true
+diamond-isometric rendering (D-030). See Visual Language below.
 
-On the D&D question: BG3 is itself a D&D-shaped RPG, and that *shape* (classes,
-roles, abilities, a small stat block, party builds) is the target. What this
-project is **not** is a literal D&D implementation - no pulling 5e
-rules-as-written or SRD/OGL content into the game. A D&D-shaped RPG that isn't
-Wizards-of-the-Coast's ruleset. Combat resolution uses a d10 percentage system
-(see Core Logic And Invariants), not literal D&D dice.
+On the D&D question: the D&D *shape* (roles, abilities, a small stat block,
+party builds) remains the target; this is **not** a literal D&D
+implementation - no 5e rules-as-written or SRD/OGL content. Combat resolution
+is fully deterministic (see Deterministic Combat Contract below), not dice.
 
 Core promise:
 
-> Walk a hand-built overworld, get pulled into a readable turn-based tactical
-> battle without a jarring scene change (the camera zooms into where you were
-> standing, early-Final-Fantasy style, so the world reads as bigger than its
-> actual grid), command your party of Dungeon Friends on the zoomed-in grid,
-> solve a block/switch/key puzzle, and grow that party across a forest, a
-> river valley, a mountain region, a city, and the final dragon arc.
+> Walk a hand-built three-quarter-view world with your whole party visible,
+> combine your friends' verbs to reshape the terrain - the same verbs inside
+> and outside combat - get pulled into a deterministic, telegraphed tactical
+> encounter right where you stand, resolve it permanently, and watch the world
+> open in response, all the way up the mountain to the dragon.
 
 Primary users:
 
-- Kayden - solo player and primary tester.
-- Friends/family Kayden shares built exports with (macOS/Windows/Android).
+- Steam players on PC (keyboard and controller) - the commercial audience
+  this project now targets (D-032).
+- Kayden - designer, solo developer, and first tester.
+- External playtesters before roster/world scale-up (pivot step T-095).
 - A future AI agent (Claude, Codex, or other) picking this repo up cold.
+
+Mobile (Google Play) is postponed until the PC interface and market fit are
+proven - postponed, not abandoned; keep the Android export knowledge.
 
 ## Design Pillars
 
-The five product pillars, in priority order (confirmed 2026-07-08, Kayden -
-these replace the four dev-discipline pillars from the retired Gameplan
-(movement precision, combat-simple-to-build, party-collection, scope-discipline);
-pillar 1 survives as the quality-bar note below):
+The five v2 product pillars, in priority order (revised 2026-07-11 at the
+pivot, D-024 - these supersede the 2026-07-08 pillar set; "Adventure First"
+and the compact-authored-world idea survive, the separate-battle-mode pillar
+does not):
 
-1. **Adventure First.** The player should always feel like they are on a clear
-   fantasy adventure: walk the overworld, find secrets, enter dungeons, solve
-   puzzles, earn key items, open new paths.
-2. **Party-Based Progression.** Companions are not just story flavor. Each
-   Dungeon Friend should change how the player fights, explores, or solves
-   problems.
-3. **Readable, Tactical Combat.** BG3-style turn-based tactics on a zoomed-in
-   grid: positioning, range, and ability choice carry real weight, and depth is
-   the point (the earlier "quick decisions over tactical depth" framing is
-   retired - see Design Decisions, 2026-07-08). "Readable" is the constraint,
-   not a cap on depth: small parties, clear stats, distinct abilities, visible
-   outcomes, and a legible board keep the tactics from becoming bloated.
-4. **Compact Open World.** The world should feel open and interconnected but
-   not endless. Regions are dense, authored, and full of meaningful gates,
-   shortcuts, secrets, and dungeon entrances - hand-built, never procedurally
-   generated.
-5. **Retro Feel, Modern Flexibility.** The game looks and feels like a chunky
-   pixel-art adventure RPG, but it is not a strict hardware recreation. Use
-   retro visual logic where it helps readability, not where it limits the game.
+1. **One Grid, One Vocabulary.** Exploration, puzzles, and combat share the
+   same environment, rules, and material/effect system. A verb that burns a
+   vine in exploration burns it in combat; there is no separate battlefield
+   and no separate ruleset. This is the pivot's load-bearing pillar - the
+   riskiest assumption lives here, and the pivot sequence prototypes it first.
+2. **Adventure First.** The player should always feel like they are on a clear
+   fantasy adventure: walk the world, find secrets, enter dungeons, solve
+   problems, open new paths. Regions are dense, authored, and interconnected -
+   hand-built, never procedurally generated.
+3. **Party of Dungeon Friends.** The whole active party is visible in the
+   world. Each friend changes how the player fights, explores, and solves
+   problems through their world verb and combat kit. Choosing four from a
+   roster of approximately 10-12 excellent friends is the collection fantasy -
+   discovery and anticipation, not hundreds of characters.
+4. **Deterministic, Telegraphed Tactics.** The preview and the result always
+   agree. Enemies declare their intentions before they act; the player's
+   answer is positioning, verbs, and combinations - never dice. Readability
+   (small parties, clear stats, visible outcomes, a legible board) remains the
+   constraint that keeps depth honest.
+5. **Encounters Resolve The World.** A resolved problem stays resolved and
+   changes the world - a new route, relationship, or resource. Encounters are
+   broader than combat (deliver, escort, persuade, manipulate the
+   environment), combat is avoidable, and grinding is neither required nor
+   expected.
 
 The most important quality bar underneath these: movement and puzzle feel
 (precise, grid-snapped, no floaty physics) over feature breadth.
@@ -105,7 +140,7 @@ natively at 1280x720+, but the *art* is built from small GBA-style tile units.
 
 | Category | What it means for Dungeon Friends |
 |---|---|
-| Camera | Top-down / slight 3/4 overhead - the player reads space like a board, not a painting |
+| Camera | Three-quarter perspective on an orthogonal grid (revised 2026-07-11, D-030): vertical wall faces, visible height, integer cell elevation with ramps/stairs - the player still reads space like a board, now with readable depth. Not true diamond-isometric |
 | World scale | Compressed, symbolic maps - towns, forests, rivers, mountains simplified into clear, readable chunks |
 | Tiles | Strong grid logic, built from reusable 16x16 tile pieces rendered at 4x (decided at M1.1, 2026-07-06 - resolves the former "TBD" within the 8x8/16x16 range this table set) |
 | Palette | Bright greens, tans, blues, soft shadows - friendly adventure tone even where danger exists |
@@ -124,21 +159,221 @@ impact beyond what Architecture below already decides.
 This project is not trying to:
 
 - Be a literal Dungeons & Dragons implementation or licensed product - no
-  SRD/OGL content. Combat resolution is a d10 percentage system (see Core
-  Logic And Invariants), not D&D's d20/dice-pool mechanics. Inspiration, not
-  rules-as-written.
+  SRD/OGL content. Combat resolution is deterministic (D-026), not dice of
+  any kind. Inspiration, not rules-as-written.
 - Support multiplayer or any online/networked play.
-- Be a commercial or monetized product unless Kayden explicitly decides
-  otherwise.
-- Use 3D or photorealistic visuals - committed to a retro pixel-art aesthetic,
-  rendered flexibly across HD/ultrawide displays rather than locked to one
-  fixed low resolution.
-- Use random or invisible encounters - enemies are always visible on the map.
+- Use 3D or photorealistic visuals - committed to a retro pixel-art aesthetic.
+  The three-quarter perspective (D-030) is drawn perspective on a 2D
+  orthogonal grid, not a 3D engine and not true diamond-isometric rendering.
+- Use random or invisible encounters - enemies are always visible on the map,
+  threats are readable, and combat is avoidable.
+- Use random hit rolls anywhere - no d10, no percent-to-hit, no crit RNG
+  (D-026). Critical effects come from positioning and combinations.
+- Respawn routinely defeated enemies or build a grind-based progression
+  economy (D-028) - XP comes from finite authored encounters, quests, and
+  discoveries.
+- Implement bespoke pairwise code for friend-ability interactions - every
+  interaction routes through the shared material/effect vocabulary (D-031).
+  That vocabulary is the scope-explosion guardrail.
 - Hardware-accurately emulate any specific handheld console - no forced
   palette limit, no fixed low-res canvas, no literal 4-channel hardware audio
   engine (see Design Decisions).
 
+Superseded non-goal (2026-07-11, D-032): "not a commercial or monetized
+product" is retired. The project is now **Steam-first commercial**; mobile
+(Google Play) is postponed until the PC release proves itself. Practical
+near-term effects are limited: controller-glyph prompts and UI coherence
+become launch requirements rather than optional polish, and the art identity
+must survive a store page. Keystore/signing safety rules stand unchanged.
+
+## V2 Systems (2026-07-11 Canon)
+
+These sections define the v2 design. Where they conflict with older sections
+below (kept for history and because they describe the code still on disk),
+these win - see the Authority Order in `AGENTS.md` and the superseding
+decisions D-024..D-035.
+
+### Shared World Vocabulary (D-031)
+
+Do not implement bespoke code for every pair of Dungeon Friends - that is
+exactly the scope explosion Kayden flagged. Instead, build a small
+material-and-effect vocabulary: friends apply effects; objects, surfaces, and
+units react according to tags. The same rules operate during exploration and
+combat - that is the Horizon's Gate lesson the game is built around.
+
+| World state | Useful reactions |
+|---|---|
+| Flammable vegetation | Ignites from fire; extinguished by water |
+| Grown vines | Climbable, usable as a bridge or restraint; burnable |
+| Water | Fills channels, extinguishes fire, can be frozen, conducts electricity |
+| Ice | Walkable or usable as cover; melts from fire; breaks from force |
+| Fire | Damages, lights, melts, and creates smoke |
+| Smoke/gas | Obscures vision; cleared by air; possibly ignited |
+| Heavy object | Carried or pushed by strength; holds plates; breaks weak floors or walls |
+| Plate/switch | Activated by people, weight, projectiles, or elemental states |
+| Fragile/blocked route | Broken, burned, flooded, frozen, grown over, or bypassed |
+| Delivery target | Resolved through inventory, escorting, or the appropriate friend |
+
+Reusable interactions this yields (each is a test case for the reaction
+prototype, T-093): grow vines then burn them; flood a channel then freeze it;
+wet enemies then conduct electricity through them; spread fire with air or
+clear its smoke; lift a heavy object onto a plate; freeze water into
+battlefield cover, then melt it to remove that cover.
+
+The existing puzzle primitives (`PushableBlock`, `PressurePlate`, `Lever`,
+`LockedDoor`, `Chest`) survive as vocabulary entries, not as a separate
+system.
+
+### Party Movement Outside Combat (D-029)
+
+Everyone is visible without exploration becoming four-character
+micromanagement:
+
+- The player directly controls a selected leader.
+- Other active friends follow a recorded breadcrumb path or loose formation.
+- Followers do not block the leader or puzzle objects during normal
+  exploration.
+- The player can switch the leader for dialogue or field abilities.
+- When an encounter begins, followers snap to nearby valid cells and become
+  real occupying tactical units.
+- During combat, every unit obeys normal collision and positioning rules
+  (D-020's intentional ally-blocking survives inside encounters).
+
+Outside combat, friend actions come from a quick ability wheel or compact
+party bar - never by individually marching every friend onto every switch.
+
+### Deterministic Combat Contract (D-026, D-027)
+
+Core rules:
+
+- Attacks hit if their target remains in the affected cells.
+- Damage is shown before the action is committed; **the preview and the
+  result always agree** - that is the tested contract.
+- Status durations and forced movement are exact.
+- Critical effects come from positioning or combinations, never random
+  chance.
+- High ground, cover, and hazards have explicit visible effects (elevation
+  bonuses land only after basic elevation feels good - see Perspective).
+- Enemies show their intended movement, target area, damage, and status
+  effect. Moving, blocking, stunning, freezing, pushing, or obscuring the
+  enemy can change or cancel that intention.
+
+First-cut damage formula (tunable; the contract is preview=result, not the
+numbers): `damage = max(1, ability_power + attacker_stat - target_defense)`.
+
+**Turn structure (provisional, D-027 - prototype before committing, T-092):**
+the recommended model is **intent rounds**:
+
+1. Enemies move or declare their plans.
+2. The player sees every enemy target and effect.
+3. Party members act in any order.
+4. Enemy actions resolve.
+5. Environmental reactions resolve.
+
+The alternative (alternating per-unit initiative with intentions shown a turn
+early - closer to the existing `TurnManager`) stays on the table if the
+prototype shows intent rounds don't hold up. Do not lock either model until
+T-092's verdict.
+
+### Perspective And Elevation (D-030)
+
+Three-quarter perspective without an engine restart - no true
+diamond-isometric rendering:
+
+- Keep the orthogonal square logic grid, `TileMapLayer`, `AStarGrid2D`, and
+  grid-snapped Tween movement exactly as built.
+- Render characters, props, cliffs, and walls in three-quarter perspective;
+  add vertical wall faces and stronger ground-plane depth.
+- Give cells a small integer elevation; connect elevations with ramps,
+  stairs, and climbable transitions.
+- Preserve Manhattan grid movement initially.
+- Add high-ground bonuses and line-of-sight only after basic elevation feels
+  good in play - they are explicitly out of the first visual spike (T-089).
+
+### Roster And Recruitment (D-033)
+
+Scope targets:
+
+- **Thesis prototype:** Hero plus 2 real Dungeon Friends.
+- **Steam demo / vertical slice:** 5-6 recruitable friends, active party of 4.
+- **Full game:** approximately 10-12 excellent friends before considering
+  more.
+
+Each friend needs only: one primary world verb; a small deterministic combat
+kit; one passive or reaction; one personality hook and recruitment story; and
+one meaningful interaction with another friend's verb. Friends may share a
+verb without feeling identical (ranged flame projector vs. self-igniting
+melee).
+
+The critical path must never require predicting the correct roster hours in
+advance. Safeguards (use one or more): party swapping at Goddess shrines,
+camps, or save points; multiple solutions for major puzzles; roster-specific
+puzzles reserved for optional secrets; a limited baseline toolset on the
+hero; clear telegraphing of upcoming requirements before the player commits
+to a dungeon.
+
+### Progression Economy And Persistence (D-028)
+
+A resolved enemy remains defeated. Therefore:
+
+- XP comes from finite authored encounters, quests, and discoveries.
+- Major abilities unlock through recruitment and story milestones.
+- Equipment comes from treasure, crafting, shops, and resolved problems.
+- Grinding is neither required nor expected.
+- Save data records resolved encounter IDs and persistent environmental
+  changes (this reverses D-009's `no defeated_enemy_ids` schema rule).
+
+An `Encounter` is broader than combat. Its resolution might be: defeat the
+threat; deliver an object; escort someone; manipulate the environment;
+satisfy an NPC; intimidate, persuade, or assist; or discover an alternate
+route. This gives the adventure variety without a separate dialogue-RPG
+ruleset.
+
+Auto-resolve is a later feature (D-034): because encounters are finite, it
+should unlock only when the party clearly outclasses an optional encounter or
+has already mastered that enemy family.
+
+### Story Spine (D-035)
+
+The dragon is visible or repeatedly foreshadowed from very early in the game.
+The structure is assembling the expedition capable of reaching and defeating
+it - party-building IS the story, not its progression menu:
+
+- The dragon's arrival disrupts the region's natural systems.
+- Selena chooses the protagonist because they can unite incompatible people
+  and powers.
+- Each region contains a local consequence of the dragon's presence.
+- Solving that regional problem reveals or recruits a Dungeon Friend.
+- Friends who initially distrust one another learn to combine their
+  abilities.
+- The mountain route is the final examination of the same environmental
+  vocabulary learned throughout the game.
+
+This supersedes the four-legendary-item errand structure (2026-07-09 row);
+the regional geography (forest, river valley, mountain, city, dragon lair)
+survives, with the city leaning toward hub status. `docs/WORLD_LORE.md` needs
+a follow-up pass to align (flagged, not yet done).
+
+### Reuse, Rework, Retire
+
+| Fate | What |
+|---|---|
+| **Keep** | Godot 4.7/GDScript; LDtk import + entity placement; `RoomGrid` + `AStarGrid2D`; grid-snapped Tween movement; Resource-backed characters/abilities/items/encounters; pushable blocks, plates, levers, doors, chests; save/load infrastructure + `MapRegistry`; input-mode prompts, dialogue, debug tooling; the first-party test harness; Kenney assets as temporary scaffolding |
+| **Rework** | `Player` into party-leader + follower control; `RoomGrid` to understand elevation, material tags, and environmental states; `AbilityData` around deterministic effects and world verbs; `OverworldEnemy` into a persistent, avoidable encounter actor; `TurnManager` into the selected deterministic round model; `SaveData` to store resolved encounters and altered environmental states; character resources around field ability, combat role, and reactions |
+| **Retire** | The separate `CombatScene` battlefield model; arena generation/selection and the combat zoom transition; d10 hit thresholds and random attack rolls; the always-respawn rule; the single-overworld-avatar contract; the purely top-down art contract; tests that exist only to prove those superseded rules |
+
+Retirement is staged through the pivot sequence (`TASKBOARD.md`
+T-089..T-095) - do not delete working v1 code before its v2 replacement
+exists and is verified.
+
 ## Current Product Shape
+
+> **Pivot note (2026-07-11):** this section describes the v1 build - which is
+> still what the code on disk does - and its Phase 0-6 targets. It remains
+> accurate as a description of the working software and stays until the pivot
+> sequence replaces each piece. Where it conflicts with V2 Systems above
+> (separate battle mode, d10, single avatar, zoom transition, respawns), V2
+> is canon.
 
 **Moment-to-moment loop (confirmed 2026-07-05):** explore -> interact with an
 object/NPC/enemy -> take an action -> see the consequence of that action ->
@@ -195,16 +430,22 @@ D-018's authored, biome-consistent weighted arena pool has replaced the
 literal local-terrain generator: seven editable forest LDtk templates (2
 `empty`, 3 `mid`, 2 `hard`) use the initial 5/2/1 per-template weights,
 biome/tags, deterministic no-repeat shuffle bags, save-safe selection state,
-and contact-side deployment orientation. The imported `TileMapLayer` terrain,
+and contact-side deployment orientation. T-087 adds the first dungeon-biome
+template, `dungeon_stone_hall`, and wires FightRoom's guardian through a
+`dungeon_guardian` encounter so dungeon combat cannot silently use forest
+terrain. The imported `TileMapLayer` terrain,
 not copied nearby walls, reaches the live combat renderer. Hero plus the temporary Buddy test
 companion (D-013), interleaved initiative, move/attack highlights, and
 Attack/Ability/Item/Defend. LDtk EncounterData now supplies the regular
 forest's two-enemy party and full XP/loot reward total; encounters zoom in
 before their short hand-off fade and zoom back to the unchanged overworld
 position. The combat HUD shows live turn order, party HP/MP, action prompts,
-and damage/heal feedback. The combat field is text-free: party status and
-prompts live in dedicated HUD bands, while legal movement is marked by filled
-blue cells with bright blue borders. The completed authored-arena/UI battery is
+and damage/heal feedback. T-085 gives round/arena, current event, party status,
+turn order, prompt, and command rows separate bounded regions; result text
+replaces setup text instead of stacking, and short field popups clamp below
+the header. The combat field is text-free: legal movement is marked by filled
+blue cells with bright blue borders, while a four-sided yellow outline marks
+the exact destination cell. The completed authored-arena/UI battery is
 green at 32 suites / 200 tests / 958 checks, with the slice smoke at 134/134
 on 5/5 runs.
 Item now opens a named consumable list showing quantity and acting unit before
@@ -221,6 +462,14 @@ The most important quality bar is:
   which replace the retired Gameplan's four dev-discipline pillars.
 
 ## Direction And Build Order
+
+> **Pivot note (2026-07-11):** Phases 0-4 below are history (built and mostly
+> accepted). The old "Phase 5 - Party System & Progression" and "Phase 6 -
+> First Playable Slice" are **superseded by the pivot sequence** in
+> `TASKBOARD.md` (T-089..T-095): canon reset, three-quarter visual spike,
+> unified encounter spike, deterministic intent prototype, reaction
+> prototype, persistence proof, thesis slice, external playtest. T-069's
+> windowed acceptance no longer gates anything.
 
 Current phase:
 
@@ -463,13 +712,19 @@ Dungeon_Friends_Game/
 
 ## Main Contracts
 
+> **Pivot note (2026-07-11):** these contracts describe the v1 code on disk
+> and stay authoritative for it until the pivot sequence reworks each piece.
+> The Combat row's scene, arena selection, zoom transition, and d10 math are
+> retired by D-025/D-026 once their v2 replacements exist (see V2 Systems ->
+> Reuse, Rework, Retire).
+
 ### Scenes
 
 | Scene | Purpose | Status | Source |
 |---|---|---|---|
 | `game/scenes/main.tscn` | Root: `SceneManager` wiring, `WorldContainer`/`CombatContainer`/`UILayer`/`TransitionLayer` | working - `scripts/main.gd` registers the containers with `SceneManager` and boots the forest slice into `WorldContainer` | `game/scenes/main.tscn`, `game/scripts/main.gd` |
 | Overworld / Dungeon (LDtk-instanced) | Grid movement, puzzles, visible enemies | working through the LDtk pipeline: `RoomGrid` runtime grid model + `LdtkRoom` base (imports the level, feeds Wall/Pit IntGrids into the grid, adopts post-import-spawned entities) + `ForestRoom` (`forest.ldtk`) | `game/scripts/overworld/`, `game/scripts/ldtk/entities_post_import.gd`, `game/assets/levels/` |
-| Combat | Turn-based tactical party-vs-enemy battle (BG3 turn-based mode) | **Built through T-075 (2026-07-11):** two-layer FSM (Battle FSM in `CombatScene`, per-entity FSM on `CombatUnit`) + `TurnManager` interleaved initiative; party from the GameState roster (Hero knight + D-013 wizard test companion) vs LDtk-authored `EncounterData` enemy parties. D-018 selects one of seven editable forest `TileMapLayer` arenas through a deterministic, save-safe weighted bag; authored zones orient deployment from contact side and a shared validator protects 4v4 starts. FE-style move/attack presentation; Attack/Ability/Item/Defend; d10 math; AI; zoom transition; turn-order/party-status HUD and feedback. | `game/scripts/combat/`, `game/scripts/data/arena_*.gd`, `game/assets/levels/battle_arenas.ldtk`, `game/data/arenas/` |
+| Combat | Turn-based tactical party-vs-enemy battle (BG3 turn-based mode) | **Built through T-087 (2026-07-11):** two-layer FSM (Battle FSM in `CombatScene`, per-entity FSM on `CombatUnit`) + `TurnManager` interleaved initiative; party from the GameState roster (Hero knight + D-013 wizard test companion) vs LDtk-authored `EncounterData` enemy parties. D-018 selects seven editable forest arenas plus one dungeon stone hall through deterministic biome/tag-filtered bags; authored zones orient deployment from contact side and a shared validator protects 4v4 starts. FE-style move/attack presentation; Attack/Ability/Item/Defend; d10 math; AI; zoom transition; bounded turn-order/party-status/event HUD, full-cell destination cursor, and clamped feedback. | `game/scripts/combat/`, `game/scripts/data/arena_*.gd`, `game/assets/levels/battle_arenas.ldtk`, `game/data/arenas/` |
 | UI (HUD, dialogue, pause, party menu) | Player-facing menus and status | dialogue box exists (`DialogueBox`, code-built); HUD/pause/party menus missing | `game/scripts/ui/dialogue_box.gd` |
 | `game/scenes/dev/display_scaling_spike.tscn` | Throwaway diagnostic - proves the new flexible HD/ultrawide stretch settings render an undistorted tile grid at 1280x720/1920x1080/3440x1440 | working (placeholder ColorRect tiles, no real art yet) | `game/scenes/dev/display_scaling_spike.tscn`, `game/scripts/dev/display_scaling_spike.gd` |
 | Tutorial dungeon (behind the boss door) | Four LDtk-authored rooms (`tutorial_dungeon.ldtk` levels HubRoom/ChestRoom/PitRoom/FightRoom, scripts `tutorial_*_room.gd`) navigated via `SceneManager.boot_room/enter_room/exit_room(s)`. T-078's second room is one continuous floor with a visible momentary plate, one heavy block, one plate-driven north gate, and a reset lever; no pits or required jump. | playable; automated puzzle acceptance green, windowed readability re-check pending | `game/scripts/overworld/tutorial_*_room.gd`, `game/assets/levels/tutorial_dungeon.ldtk` |
@@ -552,6 +807,13 @@ player-facing and may change without changing the stable id.
 
 ## Party And Combat Model
 
+> **SUPERSEDED (2026-07-11, D-025/D-026/D-027/D-029):** this entire section
+> describes the v1 model (single overworld avatar, separate zoomed battle
+> mode, d10, per-unit interleaved initiative). It is kept because it
+> documents the code still on disk. The v2 model - whole party visible,
+> encounters in the current room, deterministic effects, telegraphed intents -
+> lives in V2 Systems above.
+
 Clarified 2026-07-06, combat model sharpened 2026-07-08 (Kayden) - this shapes
 the overworld, combat, and Phase 5, and **supersedes the old "snake-follow
 formation" party idea** (from the retired Gameplan §10, never built):
@@ -588,6 +850,14 @@ formation" party idea** (from the retired Gameplan §10, never built):
 
 ## Core Logic And Invariants
 
+> **Pivot note (2026-07-11):** the movement, pathfinding, data, architecture,
+> level, puzzle, and save rules below survive the v2 pivot unchanged. The
+> **Combat**, **Combat transition**, and **Enemy respawns** rules are
+> superseded (D-025/D-026/D-027/D-028) and are marked inline; they describe
+> the v1 code still on disk. The **Enemies** rule survives with one revision:
+> contact still begins the encounter, but the encounter happens in place with
+> readable detection/avoidance, not in a separate scene.
+
 The combat/movement/data rules below are locked technical decisions (resolved
 2026-06-11 per the research audit; the Combat rule below was extended
 2026-07-05 with grid/range/d10 specifics directly from Kayden, 2026-07-06 with
@@ -617,7 +887,9 @@ Rules:
   one-cell hop.
 - **Pathfinding**: `AStarGrid2D`, `diagonal_mode = DIAGONAL_MODE_NEVER`,
   Manhattan heuristic.
-- **Combat**: a **tactics-RPG battle** (BG3 turn-based mode as the model, Fire
+- **Combat (SUPERSEDED 2026-07-11 by D-025/D-026/D-027 - v1 description of
+  the code on disk; v2 contract is in V2 Systems -> Deterministic Combat
+  Contract)**: a **tactics-RPG battle** (BG3 turn-based mode as the model, Fire
   Emblem-style range highlighting as presentation - **not a JRPG**), grid-based
   and turn-based, with a party of up to four units the player selects and moves
   within a highlighted move range. Resolved with a **d10 percentage system** -
@@ -647,7 +919,8 @@ Rules:
   toward them. Movement is still grid-snapped Tween stepping (the locked
   movement invariant is unchanged - only the *trigger* moved from player-steps
   to a timer). No random or invisible encounters.
-- **Combat transition**: touching an enemy pauses the overworld, instances
+- **Combat transition (SUPERSEDED 2026-07-11 by D-025 - v2 has no separate
+  combat scene and no zoom transition; encounters begin in place)**: touching an enemy pauses the overworld, instances
   Combat with party/enemy refs plus the return position, and on victory/defeat
   frees Combat and restores the overworld at the exact pre-combat position.
   This transition should read as a camera zoom into the contact point
@@ -719,7 +992,10 @@ Rules:
   get back to full"; MP restores in full, an agent interpretation until an
   MP/food economy exists); pit falls cost a flat **10 HP party-wide**
   (`FALL_DAMAGE`) and respawn at `RoomGrid.entry_cell`.
-- **Enemy respawns (added 2026-07-07, D-009)**: **enemies respawn every time
+- **Enemy respawns (SUPERSEDED 2026-07-11 by D-028 - v2: resolved encounters
+  stay resolved; SaveData will record resolved encounter IDs and persistent
+  environmental changes. The v1 rule below describes the code on disk)**:
+  **enemies respawn every time
   a room is left and rebuilt** - the same reset that un-wedges puzzles
   applies to enemies, uniques and bosses included (duplicate key drops are
   prevented by loot dedup; opened doors/chests stay open via flags).
@@ -786,9 +1062,9 @@ Rules:
 | Aseprite primary art tool (Lua/CLI-scriptable), Pixelorama fallback | Scriptable batch export lets an agent drive the art pipeline without manual GUI steps | 2026-06-11 / audited_research.md section 8.1 |
 | Furnace Tracker for audio *sound*, not a literal hardware-channel-emulation engine | Authenticity of sound, not of engine architecture - the hardware-emulation idea was dropped entirely, not deferred | 2026-06-11 / audited_research.md section 8 decision #4 |
 | `game/` subfolder holds the entire Godot project; docs/config live at repo root | Keeps `.godot/` cache and Godot-specific concerns cleanly separated from `docs/`/agent config | repo-structure decision (audit) |
-| Combat framed as a camera zoom into the encounter point, not a hard scene cut | Founding vision calls for an early-Final-Fantasy-style transition so the overworld reads as bigger than its grid; layers onto the existing SceneManager context-passing pattern rather than replacing it | 2026-07-05 / this session's founding prompt |
+| ~~Combat framed as a camera zoom into the encounter point, not a hard scene cut~~ - **superseded 2026-07-11 by D-025 (no separate combat scene at all)** | Founding vision calls for an early-Final-Fantasy-style transition so the overworld reads as bigger than its grid; layers onto the existing SceneManager context-passing pattern rather than replacing it | 2026-07-05 / this session's founding prompt |
 | ~~World authored in this order: forest (Kokiri-Forest mood) -> castle city -> mountains -> rivers -> surrounding wilderness~~ - **superseded 2026-07-09, see the world/story spine row below** | Founding vision's explicit world-progression arc; tied a creative goal to the concrete post-MVP content milestones | 2026-07-05 / this session's founding prompt |
-| World/story spine: Forest Village -> Forest Dungeon -> River Valley village/dungeon -> Mountain village/dungeon -> City region -> final Dragon Lair; the party gathers four working-name legendary items (Sword of Slaying, Shield of Protecting, Ring of Magic, Circlet of Strength) before fighting the dragon | Kayden's story pass clarified the regional loop: each main region has a village hub, a local problem, a dungeon, and a legendary item or clue that points to the next region. The four-item count matches the four-hero/player party shape. Details and open lore questions live in `docs/WORLD_LORE.md` | 2026-07-09 / Kayden story pass |
+| ~~World/story spine: Forest Village -> Forest Dungeon -> River Valley village/dungeon -> Mountain village/dungeon -> City region -> final Dragon Lair; the party gathers four working-name legendary items (Sword of Slaying, Shield of Protecting, Ring of Magic, Circlet of Strength) before fighting the dragon~~ - **superseded 2026-07-11 by D-035 (dragon-expedition spine; geography survives, legendary-item errands do not)** | Kayden's story pass clarified the regional loop: each main region has a village hub, a local problem, a dungeon, and a legendary item or clue that points to the next region. The four-item count matches the four-hero/player party shape. Details and open lore questions live in `docs/WORLD_LORE.md` | 2026-07-09 / Kayden story pass |
 | Equipment (weapon variety) and elemental/magic systems are the highest-priority Stretch Goals after MVP | Founding vision emphasizes magic and weapon variety; the plan already licensed building these "once the base loop is fun" - this reprioritizes within the existing Stretch sequencing rather than reopening MVP scope | 2026-07-05 / this session's founding prompt (Stretch sequencing; see `TASKBOARD.md` Deferred) |
 ~~No separate integration branch; branch-per-milestone -> PR directly into `main`~~ - **superseded 2026-07-05 (second session), see the `integration` staging-branch row below** | Solo hobby project - matches how Kayden's other personal-scale projects (e.g. DigitalTome) actually run day to day; the workbench's own 3-tier convention is calibrated for the shared harness repo, not every downstream product | 2026-07-05 / this Adoption run |
 | `integration` branch as staging before `main` - work accumulates on `integration`; Kayden explicitly syncs `integration` -> `main` when ready, rather than every task PRing straight to `main` | Kayden's call once the first-playable slice was working and felt worth protecting - gives a reviewable, shippable line separate from in-progress work, at the cost of one extra branch for a solo project | 2026-07-05 (second session) / this session |
@@ -796,7 +1072,7 @@ Rules:
 | GBA-fantasy-adventure visual language: bright, readable, toy-like overworlds with chunky silhouettes, dense environmental texture, clean top-down camera; tiles built from 8x8/16x16 units | Kayden's explicit visual-reference table (GBA-era fantasy-adventure art direction as the touchstone, not any one licensed title); narrows rather than contradicts the flexible-HD/ultrawide rendering decision above - the canvas renders natively at 1280x720+, the art itself is built from small GBA-style tile units | 2026-07-05 / this session, see Visual Language section |
 | General moment-to-moment loop confirmed as explore -> interact with an object/NPC/enemy -> take an action -> see the consequence -> continue exploring | Kayden's explicit framing for what "first playable" should feel like at every scale; confirms rather than changes the existing concrete first-playable scenario (row above) | 2026-07-05 / this session |
 | Combat is grid-based (units occupy cells, check move/attack range, can move each turn); turn order is strict per-character initiative (speed), never a whole-team phase | Kayden's explicit combat-loop framing: check ranges -> move -> attack phase -> results, repeated per unit in initiative order, not team-by-team; the `TurnManager` design already sorted all combatants together by speed - only the Battle FSM's stale `PlayerPhase`/`EnemyPhase` state names implied team-phasing, and those are retired | 2026-07-05 / this session |
-| Combat resolution uses a d10 percentage system (roll 1-10 against a stat-derived success threshold) instead of flat deterministic damage-only math | Kayden's explicit request for a system where success chances read as clean percentages. T-060 resolved the concrete first-cut formula under red/green; see Core Logic above. Numbers remain tunable at T-069 without changing the d10/clamp/minimum-damage contract | 2026-07-05; resolved 2026-07-08 / T-060 |
+| ~~Combat resolution uses a d10 percentage system (roll 1-10 against a stat-derived success threshold) instead of flat deterministic damage-only math~~ - **superseded 2026-07-11 by D-026 (fully deterministic)** | Kayden's explicit request for a system where success chances read as clean percentages. T-060 resolved the concrete first-cut formula under red/green; see Core Logic above. Numbers remain tunable at T-069 without changing the d10/clamp/minimum-damage contract | 2026-07-05; resolved 2026-07-08 / T-060 |
 | Movement-state roadmap locked: (1) walk/face/act lock-in, (2) door transitions/ledges/stairs, (3) push/pull, (4) dash/roll, (5) swim - rows 1-3 MVP, rows 4-5 Deferred (S-009/S-010) | Kayden's explicit priority table; sequences movement investment by feel-impact and keeps dash/swim from being built early | 2026-07-06 / this session, see Movement-State Roadmap |
 | Grid movement must *feel* continuous (Zelda/Pokemon bar): held steps chain with no hitch, tap turns-in-place before stepping, no "clicking into place" read - the grid-snap invariant itself is unchanged | Kayden: "In zelda and pokemon games I am locked into a grid but it never feels like I am clicking into place" - a feel requirement layered on the locked invariant, not a relitigation of it | 2026-07-06 / this session (T-021) |
 | Jump added to MVP: contextual grid-snapped hop at ledge/pit edges, max exactly 1 cell, Tween-arc implementation (never physics) | Kayden: "not whenever but like when there are ledges and pits I want to be able to jump over them with my party"; the 1-cell limit is load-bearing for Room 2 of the tutorial dungeon (the pit is exactly at the jump limit) | 2026-07-06 / this session |
@@ -827,6 +1103,18 @@ Rules:
 | **D-021 Item command must identify the item before use.** Phase 4 needs a minimal named item selection/confirmation surface; the full inventory/character-menu system remains Phase 5. | Pressing a generic Item command and consuming an unidentified item violates the Readable Tactical Combat pillar even if only one potion exists. | 2026-07-10 / Kayden latest playthrough |
 | **D-022 manual jumping benched until a traversal item.** Current dungeon progression cannot require the standing facing-hop or a forward+jump timing chord. | The old implementation was mechanically understandable but visually and physically incoherent. A future Zelda-style item can reintroduce traversal under a clearer contract. | 2026-07-10 / Kayden latest playthrough |
 | **D-023 first puzzle vocabulary:** latching on/off lever, momentary pressure plate, and pushable blocks. **Playtest clarification:** do not teach them all in one room. T-078's second room isolates the plate/block lesson on a pit-free continuous floor; latching levers can appear in a later dedicated room. | The first recut mixed two mechanisms with pit-like visual bands and obscured the lesson. The ALTTP reference works because stepping on/off the floor switch produces one immediately visible gate response before the block becomes the lasting weight. | 2026-07-10 / Kayden screenshot playtest |
+| **D-024 v2 vision pivot (controlled reboot).** New organizing principle: one persistent world, one shared environmental vocabulary, a visible party of Dungeon Friends, and encounters that permanently resolve problems. New pillar set (see Design Pillars); docs-only canon reset first, then the T-089..T-095 pivot sequence; no v1 code deleted before its v2 replacement is verified | Kayden's research pass (Horizon's Gate, Into the Breach, deterministic tactics) plus a ChatGPT design review he endorsed. The unified model is more distinctive than "Zelda exploration + separate BG3 battle" and merges combat with the puzzle system instead of maintaining two rulesets | 2026-07-11 / Kayden pivot notes + review |
+| **D-025 unified in-room encounters.** Combat happens in the current room using the same grid, camera vocabulary, and environmental state - no separate `CombatScene`, no arena selection, no zoom transition. Followers snap to valid cells and become tactical units when an encounter begins. **Supersedes D-012 and D-018 as the production combat path** (the seven authored arenas + stone hall are salvage: their layouts can become in-world authored encounter spaces), and retires the 2026-07-05 camera-zoom-transition decision | The Horizon's Gate lesson: one environment and one vocabulary make the world feel continuous and let terrain manipulation matter everywhere. The just-built arena lane was the thinnest layer of Phase 4; the math/data/turn infrastructure carries over | 2026-07-11 / Kayden pivot |
+| **D-026 deterministic combat - no random hit rolls.** Attacks hit if the target remains in the affected cells; damage previews always match results; status durations and forced movement are exact; crits come from positioning/combinations. First-cut formula `damage = max(1, ability_power + attacker_stat - target_defense)` (numbers tunable; preview=result is the contract). **Supersedes the 2026-07-05 d10 percentage decision and the T-060 formula** | Elemental combinations and telegraphed intentions are only satisfying when results are dependable; none of the reference games use hit RNG. Removes a whole class of feel complaints ("the 70% missed twice") before a commercial audience sees it | 2026-07-11 / Kayden pivot |
+| **D-027 telegraphed enemy intent; turn structure PROVISIONAL.** Enemies show intended movement, target area, damage, and status before acting; moving/blocking/stunning/freezing/pushing/obscuring can change or cancel the intention. Recommended model is **intent rounds** (enemies declare -> player sees everything -> party acts in any order -> enemy actions resolve -> environmental reactions resolve); alternating per-unit initiative with early-shown intents remains the fallback. **T-092 prototypes before either is locked** - do not commit combat architecture to intent rounds ahead of that verdict | Determinism without telegraphs is spreadsheet combat; telegraphs without determinism are noise. Intent rounds better support party combinations and battlefield manipulation, but they are the biggest departure from the working `TurnManager`, so they earn a prototype, not a lock | 2026-07-11 / Kayden pivot + review recommendation |
+| **D-028 persistent encounter resolution.** Resolved encounters stay resolved; defeated enemies do not return; the world change (route, relationship, resource) persists. `SaveData` gains resolved-encounter IDs and persistent environmental state. Progression economy: finite authored XP, ability unlocks via recruitment/story, equipment via treasure/craft/shops; no grind. **Supersedes D-009** (always-respawn) and reverses its `no defeated_enemy_ids` schema rule; D-008's defeat/XP-penalty flow needs a follow-up review against finite XP (flagged, not yet redesigned) | "Combat should resolve the issue" is a founding note of the pivot; respawning enemies made combat a toll, not a resolution. The soft-lock escape valve D-009 provided must be re-provided by puzzle-state reset alone, which T-091 (persistence proof) must prove | 2026-07-11 / Kayden pivot |
+| **D-029 whole active party visible in exploration.** Leader directly controlled; others follow breadcrumb/loose formation; followers never block the leader or puzzle objects outside encounters; leader switchable for dialogue/field verbs; field abilities via a quick wheel/party bar. **Supersedes D-005** (single avatar) and un-retires the party-visible idea the old Gameplan §10 snake-follow gestured at, with better collision rules | The party fantasy is core to the collection appeal; one avatar representing four friends undercut it. Non-blocking followers avoid the corridor-wedging that killed snake-follow | 2026-07-11 / Kayden pivot |
+| **D-030 three-quarter perspective on the orthogonal grid.** Keep the square logic grid, `TileMapLayer`, `AStarGrid2D`, and grid-snapped Tween movement; render in 3/4 with vertical wall faces; add small integer cell elevation with ramps/stairs; Manhattan movement preserved; high-ground/LoS bonuses deferred until basic elevation feels good. **No true diamond-isometric rendering.** Narrows, does not break, the flexible HD/ultrawide rendering decision; supersedes the "clean top-down camera" visual-language row | Horizon's Gate itself fakes height this way. True isometric would rework level authoring, movement, art, collision, and pathfinding for little near-term gameplay return; elevation-as-integer gets the height readability at art-pass cost | 2026-07-11 / Kayden pivot (perspective fork: "Faked 3/4, flat grid") |
+| **D-031 shared material/effect vocabulary.** One tag-driven material-and-effect system (see V2 Systems table) powers exploration, puzzles, and combat; friends apply effects, world reacts by tags; **never bespoke pairwise friend-interaction code**. Promotes the old S-002 (elemental) and S-004 (overworld abilities) stretch goals into the core loop | The scope-explosion guardrail for "lots of friends": a new friend is a sprite + stat block + verb reference, not a new mechanic. Also the riskiest assumption of the pivot - T-093 proves it is fun before roster/world scale-up | 2026-07-11 / Kayden pivot |
+| **D-032 Steam-first commercial; mobile postponed.** Publishing on Steam is the goal; Google Play is reconsidered after the PC game proves itself. Supersedes the "not commercial" non-goal and the Android-early platform stance (M0.3/T-002 export work and B-21 touch input stay deferred; keystore rules unchanged). Near-term effect: controller glyphs (T-079 shipped) and UI coherence are launch requirements, not polish | Kayden: the audience is no longer "me and my friends" - "this is gonna be published on Steam or maybe Google Play one day." PC-first keeps the input/UI surface small while the design is still moving | 2026-07-11 / Kayden pivot |
+| **D-033 roster targets and friend template.** Thesis prototype: Hero + 2 real friends. Steam demo/vertical slice: 5-6 recruitable, active party of 4. Full game: ~10-12 excellent friends before considering more. Each friend = one primary world verb + small deterministic combat kit + one passive/reaction + one personality hook/recruitment story + one meaningful verb interaction with another friend. Critical path never requires predicting the roster hours ahead (shrine/camp swapping, multi-solution puzzles, roster-specific puzzles optional-only, hero baseline toolset, telegraphed requirements). **Supersedes D-013's temporary-companion contract** - the first real recruit arrives with the thesis slice (T-094) | The Pokemon feel comes from discovery, anticipation, and choosing 4 from a roster - not from hundreds of characters. Kayden himself flagged the many-friends scope creep; the verb system plus this cap is the answer | 2026-07-11 / Kayden pivot (roster fork: "10-12 friends") |
+| **D-034 encounters beyond combat; auto-resolve later.** An `Encounter`'s resolution may be defeat, delivery, escort, environmental manipulation, satisfying/persuading/intimidating/assisting an NPC, or discovering an alternate route - one resolution framework, no separate dialogue-RPG ruleset. Combat is avoidable by design. Auto-resolve unlocks only when the party clearly outclasses an optional encounter or has mastered that enemy family | "Encounters are mainly combat but not only combat" is Kayden's founding pivot note; finite encounters make indiscriminate auto-resolve an economy leak, so it is gated, not general | 2026-07-11 / Kayden pivot |
+| **D-035 story spine: the dragon expedition.** A dragon lands on the mountain overlooking the city; the goddess Selena chooses the protagonist to unite incompatible people and powers; each region carries a local consequence of the dragon's presence whose solution reveals or recruits a Dungeon Friend; distrustful friends learn to combine verbs; the mountain route is the final exam of the environmental vocabulary. Dragon visible/foreshadowed from very early; the city leans toward hub status. **Supersedes the 2026-07-09 four-legendary-items spine**; regional geography survives. `docs/WORLD_LORE.md` realignment is follow-up work | Assembling the expedition is a stronger structure than four item errands, and it makes party-building the story itself. The existing forest -> river valley -> mountain -> city -> lair region plan needed almost no change | 2026-07-11 / Kayden pivot |
 
 ## Health Criteria
 
