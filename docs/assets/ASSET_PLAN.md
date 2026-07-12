@@ -1,7 +1,8 @@
 # Dungeon Friends - Asset Plan
 
-**Last updated:** 2026-07-11
-**Status:** Kenney-first visual skeleton implemented; owner acceptance pending
+**Last updated:** 2026-07-11 (unified-world pivot)
+**Status:** Kenney skeleton preserved as migration baseline; T-086 height and
+T-087 visible-party placeholder proofs complete; T-088 material spike next
 
 This file is the asset production checklist for Dungeon Friends. It answers
 what must be made, when it should be made, and where image-generation prompts
@@ -13,14 +14,14 @@ notes in [`IMAGE_PROMPTS.md`](IMAGE_PROMPTS.md).
 
 ## Source Of Truth
 
-- Visual direction: `BLUEPRINT.md` -> Visual Language.
-- Build order: `BLUEPRINT.md` -> Direction And Build Order.
+- Visual direction: `BLUEPRINT.md` -> Visual And Spatial Direction.
+- Build order: `BLUEPRINT.md` -> Migration Roadmap.
 - Live work queue: `TASKBOARD.md`.
 - Runtime art path: `game/assets/art/`.
 - Runtime audio path: `game/assets/audio/`.
 - Level source path: `game/assets/levels/`.
 
-## Kenney-First Runtime Direction
+## Migration Baseline
 
 **Added:** 2026-07-11 under `game/assets/kenney/`.
 
@@ -31,8 +32,9 @@ CC0 `License.txt`; the library inventory and promotion rules are documented in
 `game/assets/kenney/README.md`.
 
 The route in [`KENNEY_IMPLEMENTATION_PLAN.md`](KENNEY_IMPLEMENTATION_PLAN.md)
-is implemented through T-083; T-084's automated and windowed QA is green and
-awaits Kayden's acceptance. The deterministic selection contract is
+was implemented through T-084 and is now preserved as the pre-pivot visual
+baseline. Its top-down tiles and separate-combat UI are not the final visual
+contract. The deterministic selection contract is
 `game/assets/art/kenney_manifest.json`, generated runtime crops live under the
 `kenney/` folders in `game/assets/art/`, and the review sheet is
 `docs/assets/previews/kenney_contact_sheet.png`. Existing generated/prototype
@@ -55,11 +57,22 @@ text labels are deliberately retained as layout/color surfaces rather than
 asset placeholders; prototype/generated character sheets remain checked in
 but are no longer the default resources.
 
+T-086 reuses the promoted Hero, Buddy, healer, and quest-NPC Kenney crops as
+four static party placeholders in its isolated height/readability scene. It
+adds no new source art or image-generation provenance.
+
+T-087 reuses those same four promoted crops as moving prototype party members
+and adds no new source art or image-generation provenance. Final friend art
+remains intentionally deferred until the thesis slice.
+
 ## Global Art Constraints
 
 - Retro pixel-art-inspired, not hardware-accurate.
-- Bright, readable, GBA-era fantasy-adventure feel.
-- Top-down / slight 3/4 overhead camera.
+- Bright, readable fantasy-adventure feel.
+- Three-quarter overhead presentation on an orthogonal square logic grid.
+- Vertical wall/cliff faces, clear elevation, foreground/background overlap,
+  and four visible party silhouettes must read at game scale.
+- Do not convert to true diamond-isometric or 3D assets during the migration.
 - 16x16 art pixels rendered at 4x as the current runtime cell size.
 - Nearest filtering; avoid anti-aliased edges.
 - Unrestricted palette, but keep silhouettes clear.
@@ -67,18 +80,18 @@ but are no longer the default resources.
 - Asset prompts must avoid naming living artists or copyrighted game assets as
   direct style targets. Use project-owned language from `BLUEPRINT.md` instead.
 
-## Phase Timing
+## Pivot Timing
 
-| Phase | Asset policy |
+| Stage | Asset policy |
 |---|---|
-| Phase 1 | Test art and export pipeline only. Already has generated placeholder tiles and hero sprite. |
-| Phase 2 | Placeholder art is acceptable; mechanics and room readability come first. |
-| Post-Phase-2 art pass | First real overworld/dungeon art batch. This is the next meaningful visual-production window after Kayden accepts the reworked tutorial dungeon. |
-| Phase 3 | Only make assets that unblock data/save work: item icons, save crystal, placeholder portraits/sprite slots, and UI affordances needed for save/load clarity. |
-| Phase 4 | Combat sprites, battle UI, action/effect animation, targeting/readability assets. |
-| Phase 5 | Party member portraits/sprites, recruitment presentation, party menu assets, ability icons. |
-| Phase 6 | First-playable polish: final forest-dungeon art, boss presentation, transition polish, music, and SFX. |
-| Post-MVP | Castle city, mountain, river, extra dungeon, traversal, equipment, magic, and optional cosmetic assets. |
+| T-086 | Reuse or make only enough placeholder art to prove three-quarter height and overlap in one dev room. |
+| T-087 | Four clearly distinct placeholder party actors; no final friend art. |
+| T-088/T-089 | Minimal material state, effect, intent, and exact-preview visuals. |
+| T-091 | First authored art target for Hero plus two real Dungeon Friends and the thesis-slice environment. |
+| After T-092 | Scope production batches from external-test findings; do not resume the old phase table automatically. |
+
+The legacy batches below remain inventory and provenance evidence. Re-scope
+them before selection; old phase/task references are historical.
 
 ## Asset Batches
 
