@@ -2,27 +2,22 @@
 
 > Generated from LLM Workbench v2.1. See Upgrading The Harness below.
 
-**Last reviewed:** 2026-07-11 (T-087 visible-party exploration proof)
+**Last reviewed:** 2026-07-11
 **Runtime owner:** Kayden (solo developer)
-**Environment:** local macOS development; Steam-first PC target
+**Environment:** local (macOS development machine; builds also target Windows
+and Android)
 
 This file explains how to operate, verify, recover, and evaluate the project.
 It should be boring, exact, and executable.
 
-## Migration Status
-
-The executable currently implements the pre-pivot forest/tutorial slice and
-separate d10 combat arenas. It remains the regression baseline while the
-unified-world design in `BLUEPRINT.md` is built through isolated prototype
-scenes. T-086 proves three-quarter height presentation and T-087 adds a
-bootable four-member exploration party in isolated dev rooms. They do not add
-production-room elevation, pathfinding, or party movement. Do not claim the
-target material reaction, same-room encounter, deterministic intent, or
-persistent-resolution systems exist until their TASKBOARD proof is recorded.
-
-Active setup branch: `codex/unified-world-pivot`. T-087 is complete; the next
-implementation task is T-088. Each prototype task must document its own
-scene/command here before being marked done.
+> **Pivot note (2026-07-11):** the project's design rebooted to v2 (see
+> `BLUEPRINT.md` -> V2 Systems and D-024..D-035). Every procedure below still
+> applies - it operates the v1 code on disk, which stays in place until the
+> pivot sequence (`TASKBOARD.md` T-089..T-095) replaces each piece. Update
+> the relevant procedure rows as v1 systems (d10 combat, arena selection,
+> zoom transition, enemy respawns, single avatar) are retired. Android export
+> material remains valid but is deprioritized (D-032: Steam-first, mobile
+> postponed).
 
 ## Prerequisites
 
@@ -37,10 +32,8 @@ Required tools:
 Required accounts/services:
 
 - GitHub (`KaydenClark/Dungeon_Friends_Game`) for push/PR.
-- Steamworks tooling is not required until the thesis slice validates the PC
-  game and a Steam page/build workflow is explicitly scheduled.
-- Android tooling is deferred; it is not required for the unified-world
-  migration.
+- Later, for Android export only: OpenJDK 17, Android SDK Platform-Tools
+  >=35.0.0, NDK - not required for current desktop gameplay work.
 
 Required local files:
 
@@ -73,11 +66,13 @@ Or run the main scene directly without opening the editor UI:
 /Applications/Godot.app/Contents/MacOS/Godot --path game scenes/main.tscn
 ```
 
-Expected result: a 1280x720 window opens with the Kenney-skinned pre-pivot
-forest migration baseline. No console errors. This run proves current health,
-not the new product direction.
+Expected result: a 1280x720 window opens (flexible HD/ultrawide `canvas_items`/
+`expand` scaling, revised 2026-07-05 - see `BLUEPRINT.md` -> Design Decisions)
+showing the first-playable forest slice with placeholder-generated tile and
+sprite art. No console errors.
 
-Playing the **pre-pivot migration baseline**:
+Playing the slice (updated 2026-07-10 after the latest playthrough; on-screen
+prompts show keyboard keys only until T-079 supplies controller glyphs):
 
 - WASD / arrow keys: grid-snapped movement. E: talk, interact, and confirm.
   Q: cancel/back. The controller equivalents remain D-pad, A, and X.
@@ -203,83 +198,6 @@ Expected result: exit `0`, five `wrote .../<room>.png` lines and a final
 `SCREENSHOT TOUR: done`. Omitting `--out=` writes into the project's
 `user://screenshots` directory.
 
-### Three-quarter height/readability spike (T-086)
-
-The first unified-world prototype is an isolated, presentation-only dev room.
-It uses a 13x8 orthogonal grid, exactly two integer elevations, one authored
-stair transition, a tall occluding wall, and four static placeholder party
-actors. It does not route through production rooms, LDtk imports, pathfinding,
-or the legacy combat scene.
-
-Open the under-one-minute review scene at the required resolution:
-
-```bash
-cd game
-/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/three_quarter_height_spike.tscn --resolution 1280x720
-```
-
-Capture the durable proof image (windowed; headless output is not visual
-proof):
-
-```bash
-cd game
-/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/three_quarter_height_spike.tscn --resolution 1280x720 -- --out="$PWD/../docs/screenshots/three_quarter_height_spike.png"
-```
-
-Expected result: the scene prints `THREE-QUARTER HEIGHT SPIKE: ready`; capture
-mode exits `0`, prints a `wrote ... (1280x720)` line, and produces the image at
-`docs/screenshots/three_quarter_height_spike.png`. In under one minute, verify:
-
-- blue-outlined rectangular cells are the walkable orthogonal grid;
-- the green platform is elevation `1` above lower elevation `0`;
-- the gold stairs visibly connect `0 -> 1` without diagonal/isometric skew;
-- Friend C is partially hidden behind the tall wall while Hero/Buddy draw in front;
-- all four labelled placeholder actors occupy distinct readable cells.
-
-`test_three_quarter_height_layout` pins the same scene metadata: integer
-levels, stair endpoints, orthogonal projection, fail-closed bounds, four actor
-cells, and the wall's depth-order contract.
-
-### Visible-party exploration spike (T-087)
-
-This bootable, isolated scene extends the T-086 presentation proof with one
-selected leader and three visible breadcrumb followers. Followers are
-render-only: only the leader owns gameplay occupancy or interaction authority.
-No production room, LDtk import, pathfinding, puzzle script, or combat path is
-called or changed.
-
-Launch the interactive prototype:
-
-```bash
-cd game
-/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/visible_party_exploration_spike.tscn --resolution 1280x720
-```
-
-Controls and acceptance route:
-
-- WASD, arrow keys, or D-pad: move the selected leader one grid cell.
-- F or controller Y: cycle which visible party member is the leader.
-- R, Q, or controller X: reset the prototype.
-- From reset, move right five, up two through the open one-cell door and gold
-  stairs, then right four. All four members must remain visible, move only by
-  legal cardinal breadcrumbs, and finish in the `RECOVERED` upper formation.
-- Step right once onto the plate, then right again: a visible follower may
-  stand on it, but the `PLATE PROOF` remains off because followers have no
-  puzzle occupancy. Backtracking through a follower visual cell remains legal.
-
-Capture the GitHub-ready choke and recovered states (windowed; run serially):
-
-```bash
-cd game
-/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/visible_party_exploration_spike.tscn --resolution 1280x720 -- --out="$PWD/../docs/screenshots/visible_party_exploration.png"
-/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/visible_party_exploration_spike.tscn --resolution 1280x720 -- --state=recovered --out="$PWD/../docs/screenshots/visible_party_recovered.png"
-```
-
-Expected result: launch prints `VISIBLE PARTY PROTOTYPE: ready`. Each capture
-exits `0` with a 1280x720 `wrote` line; the second also prints `RECOVERED (4/4
-upstairs)`. Capture validation rejects black, wrong-sized, and background-only
-frames before a proof image can be written.
-
 ### Kenney visual-skeleton proof (T-080..T-084)
 
 Regenerate the promoted runtime crops after changing the manifest, import
@@ -311,8 +229,8 @@ uses the dummy renderer and is not visual proof.
 
 ### Authored battle-arena gallery (T-072..T-075)
 
-The first forest pool lives in `game/assets/levels/battle_arenas.ldtk`: seven
-named 17x7 LDtk levels with editable `Wall` IntGrid terrain, `ArenaMetadata`,
+The arena pool lives in `game/assets/levels/battle_arenas.ldtk`: seven forest
+levels plus `DungeonStoneHall`, all named 17x7 LDtk levels with editable `Wall` IntGrid terrain, `ArenaMetadata`,
 and eight `PartyDeployment`/`EnemyDeployment` marker slots per side. The
 gallery renders the actual imported levels, their metadata, deployment slots,
 and the shared validator result; the showcase proves the same level reaches
@@ -329,9 +247,112 @@ $godot = 'E:\Godot\godot.cmd'
 
 Expected result: both windowed commands exit `0` and print `AUTHORED ARENA
 GALLERY: wrote ...` / `AUTHORED ARENA COMBAT SHOWCASE: wrote ...`. Inspect the
-gallery after any LDtk edit. It must show seven `VALID` cards, the 2/3/2
-empty/mid/hard split, 5/2/1 per-template weights, and green/red deployment
-zones. Run it windowed; headless image output is not visual proof.
+gallery after any LDtk edit. It must show eight `VALID` cards: the forest cards
+retain the 2/3/2 empty/mid/hard split and 5/2/1 per-template weights, and the
+dungeon stone hall remains biome-isolated. Green/red overlays are the authored
+party/enemy deployment zones. Run it windowed; headless image output is not
+visual proof.
+
+For the T-085 readability matrix, capture every deterministic combat state at
+both supported review sizes:
+
+```powershell
+$godot = 'E:\Godot\godot.cmd'
+& $godot --path game scenes/dev/combat_readability_tour.tscn --resolution 1280x720 -- --out="$PWD\docs\screenshots\combat-readability-1280"
+& $godot --path game scenes/dev/combat_readability_tour.tscn --resolution 1920x1080 -- --out="$PWD\docs\screenshots\combat-readability-1920"
+```
+
+Each run writes seven captures covering turn start, root menu, Item submenu,
+movement destination, attack result, forest battle, and dungeon battle.
+
+### Three-quarter perspective spike (T-089)
+
+Pivot step 2's readability proof (see `TASKBOARD.md` -> Pivot Sequence):
+one dev room with two integer elevation levels, a stair ramp, a tall north
+wall face, and a four-member party (controlled leader + three non-blocking
+breadcrumb followers). Interactive check: run the scene windowed and walk
+the party up and down the stairs with WASD/arrows. Scripted proof shots:
+
+```powershell
+$godot = 'E:\Godot\godot.cmd'
+& $godot --path game scenes/dev/three_quarter_spike.tscn --resolution 1280x720 -- --out="$PWD\docs\screenshots\t089-three-quarter-spike\1280"
+& $godot --path game scenes/dev/three_quarter_spike.tscn --resolution 1920x1080 -- --out="$PWD\docs\screenshots\t089-three-quarter-spike\1920"
+```
+
+Each run prints `THREE-QUARTER SPIKE: ready ...`, writes four captures
+(lower floor, ascending ramp, party spanning both elevations, plateau at
+the chest), then `THREE-QUARTER SPIKE: done`. Run windowed; headless image
+output renders black. This is throwaway spike code (`game/scenes/dev/`,
+`game/scripts/dev/`) - graduating it into production is its own decision.
+
+### Unified in-room encounter spike (T-090)
+
+Pivot step 3's proof: an encounter that starts, plays, and resolves inside
+the T-089 room with no scene change or zoom. Interactive: run
+`scenes/dev/unified_encounter_spike.tscn` windowed, push the block, walk
+onto the plateau near the slime (detection range 2 or direct bump starts
+the fight), bump the slime to attack; the friend fights alongside and the
+other two followers stand as blockers. Scripted proof:
+
+```powershell
+$godot = 'E:\Godot\godot.cmd'
+& $godot --path game scenes/dev/unified_encounter_spike.tscn --resolution 1280x720 -- --out="$PWD\docs\screenshots\t090-unified-encounter\1280"
+& $godot --path game scenes/dev/unified_encounter_spike.tscn --resolution 1920x1080 -- --out="$PWD\docs\screenshots\t090-unified-encounter\1920"
+```
+
+Each run writes four captures (block pushed, encounter start, attack
+exchange, victory with the world continuous), prints eight `PASS:`
+continuity assertions (encounter in-room, followers snap into/out of the
+occupancy map, no scene change, pushed block and chest state preserved),
+and exits `0`; any `FAIL:` line exits `1`. The turn model inside is a
+throwaway step-tick - D-027's real turn structure is decided by T-092, not
+this spike.
+
+### Deterministic intent prototype (T-092)
+
+Pivot step 4: intent rounds on the same spike room, built to Kayden's
+2026-07-11 spec. The slime keeps a rolling 3-verb plan - future steps show
+the verb only, the current action telegraphs its locked cells, exact
+damage, and exact status, and resolves against whoever remains in those
+cells. Interactive: run `scenes/dev/intent_prototype_spike.tscn` windowed;
+in an encounter WASD/arrows step the active unit, `1` Strike / `2` Bash
+(stun-cancels the intention) / `3` Shove (push-cancels), `E` confirms with
+the exact damage shown first, `Tab` switches units, `Q` ends the turn.
+Scripted proof:
+
+```powershell
+$godot = 'E:\Godot\godot.cmd'
+& $godot --path game scenes/dev/intent_prototype_spike.tscn --resolution 1280x720 -- --out="$PWD\docs\screenshots\t092-intent-prototype\1280"
+& $godot --path game scenes/dev/intent_prototype_spike.tscn --resolution 1920x1080 -- --out="$PWD\docs\screenshots\t092-intent-prototype\1920"
+```
+
+Each run writes six captures and prints 23 `PASS:` assertions (preview =
+result, dodge, body-block, stun/push cancellation, exact burn/stun
+durations, world continuity), exiting `0`; any `FAIL:` exits `1`. The pure
+rules live in `game/scripts/dev/intent_logic.gd` with red/green coverage
+in `tests/test_intent_logic.gd`. **D-027 stays open until Kayden's played
+verdict** - this scene is the intent-rounds candidate; the v1 initiative
+combat remains on disk for comparison.
+
+### Alternative isolated pivot proofs (Sol branch)
+
+The consolidation branch also retains two narrower, presentation-first dev
+proofs from `codex/unified-world-pivot`:
+
+```powershell
+$godot = 'E:\Godot\godot.cmd'
+& $godot --path game scenes/dev/three_quarter_height_spike.tscn
+& $godot --path game scenes/dev/visible_party_exploration_spike.tscn
+```
+
+The height scene is an annotated orthogonal-grid/elevation/occlusion diagram.
+The party scene exercises a leader plus three render-only followers through a
+one-cell choke, including regrouping, leader switching, and proof that
+followers do not occupy plates or push blocks. Their pure models are covered
+by `test_three_quarter_height_layout.gd` and
+`test_visible_party_exploration_model.gd`. Treat these as focused comparison
+harnesses, not production architecture; T-089/T-090/T-092 remain the playable
+combined-room candidate.
 
 ### Display-scaling spike (T-007)
 
@@ -368,7 +389,7 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
- per-suite tally (currently `UNIT TESTS: 34 suites, 214 tests, 1211 checks, 0
+ per-suite tally (currently `UNIT TESTS: 35 suites, 235 tests, 1331 checks, 0
 failed`). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a
 few seconds (pure logic and controlled clocks, no real-time waits, unlike the
 slice smoke test; the tutorial soft-lock solver adds a second or two). Run
@@ -387,7 +408,7 @@ fill vs solids, ability MP/target gating, mend/potion execution, authored
 deployment-zone placement, and a seeded 2v2 auto-battle to completion),
 `test_arena_selector` (T-072 deterministic weighted tickets, biome/tag
 filtering, fixed overrides, no-repeat refills, v1 save compatibility, and
-save/load continuation), `test_authored_arena_loader` (T-073/T-074 all seven
+save/load continuation), `test_authored_arena_loader` (T-073/T-074/T-087 all eight
 LDtk levels, imported `TileMapLayer` visuals, contact-side deployment, and
 live CombatScene attachment), `test_arena_validator` (T-075 negative safety
 fixtures and cover budgets),
@@ -431,14 +452,7 @@ state of the REAL shipped hub and pit rooms: solvable from the start, and
 every wedged state can still reach the reset lever / the exit - the
 can-the-player-wedge-it proof the Known Risks row demands), and
 `test_debug_overlay` (T-030 hooks: hidden by default, grant dedup, reset
-delegation), and `test_three_quarter_height_layout` (T-086: exactly two integer
-levels, stair metadata, orthogonal screen projection, bounds, four static
-actors, foreground/background wall ordering, and fail-closed capture
-validation), and `test_visible_party_exploration_model` (T-087: four distinct
-members, legal breadcrumb and leader-switch transitions, door/stair recovery,
-leader-only occupancy/interaction, inert follower plate presence, and
-fail-closed invalid movement). Add a suite path to the
-`SUITES` list in `run_tests.gd` to
+delegation). Add a suite path to the `SUITES` list in `run_tests.gd` to
 register new tests.
 
 The runner `await`s each test, so a suite method may be a coroutine when a test
@@ -467,7 +481,7 @@ inventory, and rebuilt-room door/chest state. Saves are confined to
 any change to SaveData/SaveManager, MapRegistry, the load/boot flow, the
 crystal, or flag-restored room state.
 
-### Historical Phase 4 combat check (migration baseline only)
+### Phase 4 combat check (T-068/T-069)
 
 Automated proof is the unit command above plus the slice smoke test. The
  authored-arena lane is green at **32 suites / 200 tests / 958 checks** and
@@ -480,9 +494,7 @@ forest Enemy's LDtk `EncounterId` builds the authored two-enemy group, runs
 through the production arena-selection path, grants both XP rewards, and
 restores the exact overworld position after the zoom transition.
 
-The T-069 acceptance gate is superseded by the unified-world pivot. The steps
-below are retained only when diagnosing a baseline regression; they are not an
-active product milestone:
+For the windowed T-069 acceptance gate:
 
 1. Run `main.tscn` and touch several slimes in different forest positions.
 2. Confirm each battle uses a readable, biome-consistent authored LDtk arena
@@ -522,32 +534,11 @@ expected reason, then implement the smallest fix. The eventual move to GUT (or
 an equivalent) remains a Stretch-adjacent decision; this first-party harness is
 deliberately minimal until that call is made.
 
-### Unified-world prototype policy (T-086 onward)
-
-Each pivot spike adds an isolated `scenes/dev/` entry point and documents the
-exact launch command here. Until that scene exists, the task is not ready to
-claim visual or gameplay proof.
-
-Every spike must:
-
-1. keep baseline import, unit tests, and `main.tscn` boot green;
-2. add focused red/green tests for any new pure logic;
-3. avoid deleting or routing production gameplay through the prototype unless
-   the task explicitly includes an accepted migration;
-4. produce a windowed screenshot or under-one-minute interaction for visual
-   and feel claims;
-5. append actual commands/results to the TASKBOARD proof log.
-
-T-086 and T-087 establish the presentation and moving-party pattern. Add
-T-088's exact entry point only after its scene exists; do not guess future
-filenames.
-
 ## Build/Export
 
 Godot exports are configured via the editor's Export dialog (Project ->
 Export), not a CLI build script, at this stage of the project. Export presets
-are not part of the pivot prototype. Steam-first PC export work begins only
-after T-091/T-092 validate the thesis slice.
+are set up in Milestone M0.3 (see `TASKBOARD.md`).
 
 ### macOS
 
@@ -565,14 +556,18 @@ after T-091/T-092 validate the thesis slice.
 
 ### Android
 
-- Deferred until the Steam-first PC experience and UI are proven.
-- Do not add touch controls or Android-specific UI during T-086..T-092.
-- If mobile is later approved, it will require OpenJDK 17, the Android SDK/NDK,
-  real-device input testing, and a separately scoped release plan.
-- Never commit a release keystore or signing password.
+- Requires OpenJDK 17 + Android SDK (Platform-Tools >=35.0.0) + NDK, configured
+  in Godot Editor Settings -> Export -> Android.
+- Generate a debug build first (uses Godot's debug keystore automatically) to
+  validate the pipeline end to end.
+- Release builds require a release keystore via `keytool` - never commit this
+  file (see `.gitignore`); configure it per-export in the Android export
+  preset, not pasted into `export_presets.cfg`.
+- Test on a real Android device early (Milestone M0.3/M2.x) to validate touch
+  input and Mobile-renderer performance.
 
-Expected migration health is currently the editor/headless baseline. No
-cross-platform release claim is active yet.
+Expected healthy state: one trivial exported build per platform runs and shows
+the same placeholder scene as the editor.
 
 ## Version Control
 

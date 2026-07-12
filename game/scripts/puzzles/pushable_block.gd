@@ -25,11 +25,18 @@ var sunk := false
 func _ready() -> void:
 	# Blocks must cover floor switches when used as their persistent weight.
 	z_index = 1
-	body = Sprite2D.new()
-	body.texture = load("res://assets/art/objects/kenney/pushable_block.png")
-	body.scale = Vector2.ONE * 4.0
-	body.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	# Kayden's 2026-07-11 playtest preferred the original compact stone slab;
+	# the promoted crate crop read as a fence from one side.
+	body = ColorRect.new()
+	body.color = Color(0.44, 0.42, 0.4)
+	body.position = Vector2(-26, -26)
+	body.size = Vector2(52, 52)
 	add_child(body)
+	var top := ColorRect.new()
+	top.color = Color(0.58, 0.56, 0.52)
+	top.position = Vector2(-26, -26)
+	top.size = Vector2(52, 14)
+	add_child(top)
 
 
 func attach(p_room: RoomGrid, p_cell: Vector2i) -> void:
@@ -74,7 +81,10 @@ func _sink_into(pit_cell: Vector2i) -> void:
 	sunk = true
 	moving = false
 	# Flatten the colors so the filled cell reads as floor, not obstacle.
-	body.modulate = Color(0.55, 0.55, 0.55)
+	body.color = Color(0.35, 0.33, 0.31)
+	for child in get_children():
+		if child is ColorRect and child != body:
+			child.visible = false
 	move_finished.emit()
 
 

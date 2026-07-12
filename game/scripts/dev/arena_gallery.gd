@@ -1,7 +1,7 @@
 extends Node
 ## T-075's under-one-minute authoring artifact. It renders the same imported
 ## LDtk levels, loader, and validator production combat uses, with deployment
-## zones overlaid so an author can inspect all seven boards at once.
+## zones overlaid so an author can inspect every shipped board at once.
 ##
 ## Run: Godot --path . scenes/dev/arena_gallery.tscn -- --out=/tmp/arenas.png
 
@@ -22,7 +22,7 @@ func _ready() -> void:
 	background.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(background)
 	var title := Label.new()
-	title.text = "AUTHORED FOREST BATTLE ARENAS  •  D-018  •  green=party / red=enemy"
+	title.text = "AUTHORED BATTLE ARENAS  •  forest + dungeon  •  green=party / red=enemy"
 	title.position = Vector2(18, 18)
 	title.add_theme_font_size_override("font_size", 20)
 	title.modulate = Color(0.9, 0.96, 0.82)

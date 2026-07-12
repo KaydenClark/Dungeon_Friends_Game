@@ -42,7 +42,7 @@
   "customCommands": [],
   "worlds": [],
   "dummyWorldIid": "00000000-0000-0000-0000-000000000002",
-  "tutorialDesc": "T-073 forest battle-arena pool. Every level is a 17x7 tactical board. PartyDeployment and EnemyDeployment are explicit 8-cell zones; Slot 0 through 7 gives stable deployment order. ArenaMetadata carries the stable selector record values.",
+  "tutorialDesc": "T-073/T-087 biome-consistent battle arenas: seven forest boards and one dungeon stone hall, all 17x7 with explicit deployment zones.",
   "defs": {
     "layers": [
       {
@@ -192,10 +192,10 @@
         "pivotY": 0,
         "fieldDefs": [
           {
-          "identifier": "ArenaId",
-          "doc": null,
-          "__type": "String",
-          "uid": 1001,
+            "identifier": "ArenaId",
+            "doc": null,
+            "__type": "String",
+            "uid": 1001,
             "type": "F_String",
             "isArray": false,
             "canBeNull": false,
@@ -229,10 +229,10 @@
             "tilesetUid": null
           },
           {
-          "identifier": "Biome",
-          "doc": null,
-          "__type": "String",
-          "uid": 1002,
+            "identifier": "Biome",
+            "doc": null,
+            "__type": "String",
+            "uid": 1002,
             "type": "F_String",
             "isArray": false,
             "canBeNull": false,
@@ -266,10 +266,10 @@
             "tilesetUid": null
           },
           {
-          "identifier": "Tier",
-          "doc": null,
-          "__type": "String",
-          "uid": 1003,
+            "identifier": "Tier",
+            "doc": null,
+            "__type": "String",
+            "uid": 1003,
             "type": "F_String",
             "isArray": false,
             "canBeNull": false,
@@ -303,10 +303,10 @@
             "tilesetUid": null
           },
           {
-          "identifier": "Weight",
-          "doc": null,
-          "__type": "Int",
-          "uid": 1004,
+            "identifier": "Weight",
+            "doc": null,
+            "__type": "Int",
+            "uid": 1004,
             "type": "F_Int",
             "isArray": false,
             "canBeNull": false,
@@ -345,10 +345,10 @@
             "tilesetUid": null
           },
           {
-          "identifier": "Tags",
-          "doc": null,
-          "__type": "String",
-          "uid": 1005,
+            "identifier": "Tags",
+            "doc": null,
+            "__type": "String",
+            "uid": 1005,
             "type": "F_String",
             "isArray": false,
             "canBeNull": false,
@@ -382,10 +382,10 @@
             "tilesetUid": null
           },
           {
-          "identifier": "MirrorSafe",
-          "doc": null,
-          "__type": "Bool",
-          "uid": 1006,
+            "identifier": "MirrorSafe",
+            "doc": null,
+            "__type": "Bool",
+            "uid": 1006,
             "type": "F_Bool",
             "isArray": false,
             "canBeNull": false,
@@ -460,10 +460,10 @@
         "pivotY": 0,
         "fieldDefs": [
           {
-          "identifier": "Slot",
-          "doc": null,
-          "__type": "Int",
-          "uid": 1007,
+            "identifier": "Slot",
+            "doc": null,
+            "__type": "Int",
+            "uid": 1007,
             "type": "F_Int",
             "isArray": false,
             "canBeNull": false,
@@ -538,10 +538,10 @@
         "pivotY": 0,
         "fieldDefs": [
           {
-          "identifier": "Slot",
-          "doc": null,
-          "__type": "Int",
-          "uid": 1008,
+            "identifier": "Slot",
+            "doc": null,
+            "__type": "Int",
+            "uid": 1008,
             "type": "F_Int",
             "isArray": false,
             "canBeNull": false,
@@ -20871,6 +20871,2903 @@
               ],
               "src": [
                 0,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                118
+              ],
+              "a": 1
+            }
+          ],
+          "entityInstances": []
+        }
+      ]
+    },
+    {
+      "identifier": "DungeonStoneHall",
+      "iid": "bf1ef32a-1e04-571d-b537-876245269fd7",
+      "uid": 207,
+      "worldX": 2016,
+      "worldY": 0,
+      "worldDepth": 0,
+      "pxWid": 272,
+      "pxHei": 112,
+      "__bgColor": "#183822",
+      "bgColor": null,
+      "useAutoIdentifier": false,
+      "bgRelPath": null,
+      "bgPos": null,
+      "bgPivotX": 0.5,
+      "bgPivotY": 0.5,
+      "__smartColor": "#777381",
+      "__bgPos": null,
+      "externalRelPath": null,
+      "fieldInstances": [],
+      "__neighbours": [],
+      "layerInstances": [
+        {
+          "__identifier": "Entities",
+          "__type": "Entities",
+          "__cWid": 17,
+          "__cHei": 7,
+          "__gridSize": 16,
+          "__opacity": 1,
+          "__pxTotalOffsetX": 0,
+          "__pxTotalOffsetY": 0,
+          "__tilesetDefUid": null,
+          "__tilesetRelPath": null,
+          "iid": "f6edf3b4-0274-5158-b206-ec5c8b5345c2",
+          "levelId": 207,
+          "layerDefUid": 6,
+          "pxOffsetX": 0,
+          "pxOffsetY": 0,
+          "visible": true,
+          "optionalRules": [],
+          "intGridCsv": [],
+          "autoLayerTiles": [],
+          "seed": 1,
+          "overrideTilesetUid": null,
+          "gridTiles": [],
+          "entityInstances": [
+            {
+              "__identifier": "ArenaMetadata",
+              "__grid": [
+                8,
+                0
+              ],
+              "__pivot": [
+                0,
+                0
+              ],
+              "__tags": [],
+              "__tile": null,
+              "__smartColor": "#FFCC00",
+              "__worldX": null,
+              "__worldY": null,
+              "iid": "48de2be2-2dac-5a6f-bcc3-93ff3992088f",
+              "width": 16,
+              "height": 16,
+              "defUid": 10,
+              "px": [
+                128,
+                0
+              ],
+              "fieldInstances": [
+                {
+                  "__identifier": "ArenaId",
+                  "__type": "String",
+                  "__value": "dungeon_stone_hall",
+                  "__tile": null,
+                  "defUid": 1001,
+                  "realEditorValues": [
+                    {
+                      "id": "V_String",
+                      "params": [
+                        "dungeon_stone_hall"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "__identifier": "Biome",
+                  "__type": "String",
+                  "__value": "dungeon",
+                  "__tile": null,
+                  "defUid": 1002,
+                  "realEditorValues": [
+                    {
+                      "id": "V_String",
+                      "params": [
+                        "dungeon"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "__identifier": "Tier",
+                  "__type": "String",
+                  "__value": "mid",
+                  "__tile": null,
+                  "defUid": 1003,
+                  "realEditorValues": [
+                    {
+                      "id": "V_String",
+                      "params": [
+                        "mid"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "__identifier": "Weight",
+                  "__type": "Int",
+                  "__value": 1,
+                  "__tile": null,
+                  "defUid": 1004,
+                  "realEditorValues": [
+                    {
+                      "id": "V_Int",
+                      "params": [
+                        1
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "__identifier": "Tags",
+                  "__type": "String",
+                  "__value": "stone,hall",
+                  "__tile": null,
+                  "defUid": 1005,
+                  "realEditorValues": [
+                    {
+                      "id": "V_String",
+                      "params": [
+                        "stone,hall"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "__identifier": "MirrorSafe",
+                  "__type": "Bool",
+                  "__value": true,
+                  "__tile": null,
+                  "defUid": 1006,
+                  "realEditorValues": [
+                    {
+                      "id": "V_Bool",
+                      "params": [
+                        true
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "__identifier": "PartyDeployment",
+              "__grid": [
+                1,
+                1
+              ],
+              "__pivot": [
+                0,
+                0
+              ],
+              "__tags": [],
+              "__tile": null,
+              "__smartColor": "#FFCC00",
+              "__worldX": null,
+              "__worldY": null,
+              "iid": "4aa2ce79-417b-5d69-88eb-7df949ea3a68",
+              "width": 16,
+              "height": 16,
+              "defUid": 11,
+              "px": [
+                16,
+                16
+              ],
+              "fieldInstances": [
+                {
+                  "__identifier": "Slot",
+                  "__type": "Int",
+                  "__value": 0,
+                  "__tile": null,
+                  "defUid": 1007,
+                  "realEditorValues": [
+                    {
+                      "id": "V_Int",
+                      "params": [
+                        0
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "__identifier": "PartyDeployment",
+              "__grid": [
+                1,
+                2
+              ],
+              "__pivot": [
+                0,
+                0
+              ],
+              "__tags": [],
+              "__tile": null,
+              "__smartColor": "#FFCC00",
+              "__worldX": null,
+              "__worldY": null,
+              "iid": "35ab6c1a-3457-5f1b-a6c6-710ff1abbfb2",
+              "width": 16,
+              "height": 16,
+              "defUid": 11,
+              "px": [
+                16,
+                32
+              ],
+              "fieldInstances": [
+                {
+                  "__identifier": "Slot",
+                  "__type": "Int",
+                  "__value": 1,
+                  "__tile": null,
+                  "defUid": 1007,
+                  "realEditorValues": [
+                    {
+                      "id": "V_Int",
+                      "params": [
+                        1
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "__identifier": "PartyDeployment",
+              "__grid": [
+                1,
+                3
+              ],
+              "__pivot": [
+                0,
+                0
+              ],
+              "__tags": [],
+              "__tile": null,
+              "__smartColor": "#FFCC00",
+              "__worldX": null,
+              "__worldY": null,
+              "iid": "7e7c5ce0-a3ed-5c79-9a7d-ace77640f0c0",
+              "width": 16,
+              "height": 16,
+              "defUid": 11,
+              "px": [
+                16,
+                48
+              ],
+              "fieldInstances": [
+                {
+                  "__identifier": "Slot",
+                  "__type": "Int",
+                  "__value": 2,
+                  "__tile": null,
+                  "defUid": 1007,
+                  "realEditorValues": [
+                    {
+                      "id": "V_Int",
+                      "params": [
+                        2
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "__identifier": "PartyDeployment",
+              "__grid": [
+                1,
+                4
+              ],
+              "__pivot": [
+                0,
+                0
+              ],
+              "__tags": [],
+              "__tile": null,
+              "__smartColor": "#FFCC00",
+              "__worldX": null,
+              "__worldY": null,
+              "iid": "c945d35e-179a-525e-921f-8ced6e587fc9",
+              "width": 16,
+              "height": 16,
+              "defUid": 11,
+              "px": [
+                16,
+                64
+              ],
+              "fieldInstances": [
+                {
+                  "__identifier": "Slot",
+                  "__type": "Int",
+                  "__value": 3,
+                  "__tile": null,
+                  "defUid": 1007,
+                  "realEditorValues": [
+                    {
+                      "id": "V_Int",
+                      "params": [
+                        3
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "__identifier": "PartyDeployment",
+              "__grid": [
+                2,
+                1
+              ],
+              "__pivot": [
+                0,
+                0
+              ],
+              "__tags": [],
+              "__tile": null,
+              "__smartColor": "#FFCC00",
+              "__worldX": null,
+              "__worldY": null,
+              "iid": "3a11ace4-6b07-5560-8d6d-f967c0115bf4",
+              "width": 16,
+              "height": 16,
+              "defUid": 11,
+              "px": [
+                32,
+                16
+              ],
+              "fieldInstances": [
+                {
+                  "__identifier": "Slot",
+                  "__type": "Int",
+                  "__value": 4,
+                  "__tile": null,
+                  "defUid": 1007,
+                  "realEditorValues": [
+                    {
+                      "id": "V_Int",
+                      "params": [
+                        4
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "__identifier": "PartyDeployment",
+              "__grid": [
+                2,
+                2
+              ],
+              "__pivot": [
+                0,
+                0
+              ],
+              "__tags": [],
+              "__tile": null,
+              "__smartColor": "#FFCC00",
+              "__worldX": null,
+              "__worldY": null,
+              "iid": "51626e02-3c25-525b-898a-049bd73315e6",
+              "width": 16,
+              "height": 16,
+              "defUid": 11,
+              "px": [
+                32,
+                32
+              ],
+              "fieldInstances": [
+                {
+                  "__identifier": "Slot",
+                  "__type": "Int",
+                  "__value": 5,
+                  "__tile": null,
+                  "defUid": 1007,
+                  "realEditorValues": [
+                    {
+                      "id": "V_Int",
+                      "params": [
+                        5
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "__identifier": "PartyDeployment",
+              "__grid": [
+                2,
+                3
+              ],
+              "__pivot": [
+                0,
+                0
+              ],
+              "__tags": [],
+              "__tile": null,
+              "__smartColor": "#FFCC00",
+              "__worldX": null,
+              "__worldY": null,
+              "iid": "271932c2-d574-59ca-aa3f-8b0941b75122",
+              "width": 16,
+              "height": 16,
+              "defUid": 11,
+              "px": [
+                32,
+                48
+              ],
+              "fieldInstances": [
+                {
+                  "__identifier": "Slot",
+                  "__type": "Int",
+                  "__value": 6,
+                  "__tile": null,
+                  "defUid": 1007,
+                  "realEditorValues": [
+                    {
+                      "id": "V_Int",
+                      "params": [
+                        6
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "__identifier": "PartyDeployment",
+              "__grid": [
+                2,
+                4
+              ],
+              "__pivot": [
+                0,
+                0
+              ],
+              "__tags": [],
+              "__tile": null,
+              "__smartColor": "#FFCC00",
+              "__worldX": null,
+              "__worldY": null,
+              "iid": "7735e61a-75ab-516b-85ce-63c2dd40ca3f",
+              "width": 16,
+              "height": 16,
+              "defUid": 11,
+              "px": [
+                32,
+                64
+              ],
+              "fieldInstances": [
+                {
+                  "__identifier": "Slot",
+                  "__type": "Int",
+                  "__value": 7,
+                  "__tile": null,
+                  "defUid": 1007,
+                  "realEditorValues": [
+                    {
+                      "id": "V_Int",
+                      "params": [
+                        7
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "__identifier": "EnemyDeployment",
+              "__grid": [
+                15,
+                1
+              ],
+              "__pivot": [
+                0,
+                0
+              ],
+              "__tags": [],
+              "__tile": null,
+              "__smartColor": "#FFCC00",
+              "__worldX": null,
+              "__worldY": null,
+              "iid": "199e738e-c637-5675-bd5a-35c07efa0e0c",
+              "width": 16,
+              "height": 16,
+              "defUid": 12,
+              "px": [
+                240,
+                16
+              ],
+              "fieldInstances": [
+                {
+                  "__identifier": "Slot",
+                  "__type": "Int",
+                  "__value": 0,
+                  "__tile": null,
+                  "defUid": 1008,
+                  "realEditorValues": [
+                    {
+                      "id": "V_Int",
+                      "params": [
+                        0
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "__identifier": "EnemyDeployment",
+              "__grid": [
+                15,
+                2
+              ],
+              "__pivot": [
+                0,
+                0
+              ],
+              "__tags": [],
+              "__tile": null,
+              "__smartColor": "#FFCC00",
+              "__worldX": null,
+              "__worldY": null,
+              "iid": "f74a2c14-a727-57a7-9f42-a3df63595921",
+              "width": 16,
+              "height": 16,
+              "defUid": 12,
+              "px": [
+                240,
+                32
+              ],
+              "fieldInstances": [
+                {
+                  "__identifier": "Slot",
+                  "__type": "Int",
+                  "__value": 1,
+                  "__tile": null,
+                  "defUid": 1008,
+                  "realEditorValues": [
+                    {
+                      "id": "V_Int",
+                      "params": [
+                        1
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "__identifier": "EnemyDeployment",
+              "__grid": [
+                15,
+                3
+              ],
+              "__pivot": [
+                0,
+                0
+              ],
+              "__tags": [],
+              "__tile": null,
+              "__smartColor": "#FFCC00",
+              "__worldX": null,
+              "__worldY": null,
+              "iid": "21f6ac63-87f8-5b51-bde3-89a4a680bdda",
+              "width": 16,
+              "height": 16,
+              "defUid": 12,
+              "px": [
+                240,
+                48
+              ],
+              "fieldInstances": [
+                {
+                  "__identifier": "Slot",
+                  "__type": "Int",
+                  "__value": 2,
+                  "__tile": null,
+                  "defUid": 1008,
+                  "realEditorValues": [
+                    {
+                      "id": "V_Int",
+                      "params": [
+                        2
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "__identifier": "EnemyDeployment",
+              "__grid": [
+                15,
+                4
+              ],
+              "__pivot": [
+                0,
+                0
+              ],
+              "__tags": [],
+              "__tile": null,
+              "__smartColor": "#FFCC00",
+              "__worldX": null,
+              "__worldY": null,
+              "iid": "047c2788-27a5-5880-b6b4-b753526b6852",
+              "width": 16,
+              "height": 16,
+              "defUid": 12,
+              "px": [
+                240,
+                64
+              ],
+              "fieldInstances": [
+                {
+                  "__identifier": "Slot",
+                  "__type": "Int",
+                  "__value": 3,
+                  "__tile": null,
+                  "defUid": 1008,
+                  "realEditorValues": [
+                    {
+                      "id": "V_Int",
+                      "params": [
+                        3
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "__identifier": "EnemyDeployment",
+              "__grid": [
+                14,
+                1
+              ],
+              "__pivot": [
+                0,
+                0
+              ],
+              "__tags": [],
+              "__tile": null,
+              "__smartColor": "#FFCC00",
+              "__worldX": null,
+              "__worldY": null,
+              "iid": "cb938399-a37e-5c44-90d4-092d074d6220",
+              "width": 16,
+              "height": 16,
+              "defUid": 12,
+              "px": [
+                224,
+                16
+              ],
+              "fieldInstances": [
+                {
+                  "__identifier": "Slot",
+                  "__type": "Int",
+                  "__value": 4,
+                  "__tile": null,
+                  "defUid": 1008,
+                  "realEditorValues": [
+                    {
+                      "id": "V_Int",
+                      "params": [
+                        4
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "__identifier": "EnemyDeployment",
+              "__grid": [
+                14,
+                2
+              ],
+              "__pivot": [
+                0,
+                0
+              ],
+              "__tags": [],
+              "__tile": null,
+              "__smartColor": "#FFCC00",
+              "__worldX": null,
+              "__worldY": null,
+              "iid": "dd7f5127-492a-52b1-803f-928c9596bcb5",
+              "width": 16,
+              "height": 16,
+              "defUid": 12,
+              "px": [
+                224,
+                32
+              ],
+              "fieldInstances": [
+                {
+                  "__identifier": "Slot",
+                  "__type": "Int",
+                  "__value": 5,
+                  "__tile": null,
+                  "defUid": 1008,
+                  "realEditorValues": [
+                    {
+                      "id": "V_Int",
+                      "params": [
+                        5
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "__identifier": "EnemyDeployment",
+              "__grid": [
+                14,
+                3
+              ],
+              "__pivot": [
+                0,
+                0
+              ],
+              "__tags": [],
+              "__tile": null,
+              "__smartColor": "#FFCC00",
+              "__worldX": null,
+              "__worldY": null,
+              "iid": "ebd1ff96-1fc9-5db3-81be-10ffb3539fa9",
+              "width": 16,
+              "height": 16,
+              "defUid": 12,
+              "px": [
+                224,
+                48
+              ],
+              "fieldInstances": [
+                {
+                  "__identifier": "Slot",
+                  "__type": "Int",
+                  "__value": 6,
+                  "__tile": null,
+                  "defUid": 1008,
+                  "realEditorValues": [
+                    {
+                      "id": "V_Int",
+                      "params": [
+                        6
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "__identifier": "EnemyDeployment",
+              "__grid": [
+                14,
+                4
+              ],
+              "__pivot": [
+                0,
+                0
+              ],
+              "__tags": [],
+              "__tile": null,
+              "__smartColor": "#FFCC00",
+              "__worldX": null,
+              "__worldY": null,
+              "iid": "b402c57d-62ff-5484-a5e6-d90b069a3299",
+              "width": 16,
+              "height": 16,
+              "defUid": 12,
+              "px": [
+                224,
+                64
+              ],
+              "fieldInstances": [
+                {
+                  "__identifier": "Slot",
+                  "__type": "Int",
+                  "__value": 7,
+                  "__tile": null,
+                  "defUid": 1008,
+                  "realEditorValues": [
+                    {
+                      "id": "V_Int",
+                      "params": [
+                        7
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "__identifier": "Wall",
+          "__type": "IntGrid",
+          "__cWid": 17,
+          "__cHei": 7,
+          "__gridSize": 16,
+          "__opacity": 1,
+          "__pxTotalOffsetX": 0,
+          "__pxTotalOffsetY": 0,
+          "__tilesetDefUid": null,
+          "__tilesetRelPath": null,
+          "iid": "8b8fbac9-38c9-51a7-b4d3-0a416ca58306",
+          "levelId": 207,
+          "layerDefUid": 3,
+          "pxOffsetX": 0,
+          "pxOffsetY": 0,
+          "visible": true,
+          "optionalRules": [],
+          "intGridCsv": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "autoLayerTiles": [],
+          "seed": 1,
+          "overrideTilesetUid": null,
+          "gridTiles": [],
+          "entityInstances": []
+        },
+        {
+          "__identifier": "Ground",
+          "__type": "Tiles",
+          "__cWid": 17,
+          "__cHei": 7,
+          "__gridSize": 16,
+          "__opacity": 1,
+          "__pxTotalOffsetX": 0,
+          "__pxTotalOffsetY": 0,
+          "__tilesetDefUid": 1,
+          "__tilesetRelPath": "../art/tilesets/kenney/world_tiles.png",
+          "iid": "46a863ea-0774-52c5-8c44-7f7b456685e0",
+          "levelId": 207,
+          "layerDefUid": 2,
+          "pxOffsetX": 0,
+          "pxOffsetY": 0,
+          "visible": true,
+          "optionalRules": [],
+          "intGridCsv": [],
+          "autoLayerTiles": [],
+          "seed": 1,
+          "overrideTilesetUid": null,
+          "gridTiles": [
+            {
+              "px": [
+                0,
+                0
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                0
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                16,
+                0
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                1
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                32,
+                0
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                2
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                48,
+                0
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                3
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                64,
+                0
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                4
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                80,
+                0
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                5
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                96,
+                0
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                6
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                112,
+                0
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                7
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                128,
+                0
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                8
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                144,
+                0
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                9
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                160,
+                0
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                10
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                176,
+                0
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                11
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                192,
+                0
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                12
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                208,
+                0
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                13
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                224,
+                0
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                14
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                240,
+                0
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                15
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                256,
+                0
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                16
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                0,
+                16
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                17
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                16,
+                16
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                18
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                32,
+                16
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                19
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                48,
+                16
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                20
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                64,
+                16
+              ],
+              "src": [
+                64,
+                0
+              ],
+              "f": 0,
+              "t": 1,
+              "d": [
+                21
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                80,
+                16
+              ],
+              "src": [
+                64,
+                0
+              ],
+              "f": 0,
+              "t": 1,
+              "d": [
+                22
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                96,
+                16
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                23
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                112,
+                16
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                24
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                128,
+                16
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                25
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                144,
+                16
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                26
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                160,
+                16
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                27
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                176,
+                16
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                28
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                192,
+                16
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                29
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                208,
+                16
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                30
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                224,
+                16
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                31
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                240,
+                16
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                32
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                256,
+                16
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                33
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                0,
+                32
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                34
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                16,
+                32
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                35
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                32,
+                32
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                36
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                48,
+                32
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                37
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                64,
+                32
+              ],
+              "src": [
+                64,
+                0
+              ],
+              "f": 0,
+              "t": 1,
+              "d": [
+                38
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                80,
+                32
+              ],
+              "src": [
+                64,
+                0
+              ],
+              "f": 0,
+              "t": 1,
+              "d": [
+                39
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                96,
+                32
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                40
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                112,
+                32
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                41
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                128,
+                32
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                42
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                144,
+                32
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                43
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                160,
+                32
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                44
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                176,
+                32
+              ],
+              "src": [
+                64,
+                0
+              ],
+              "f": 0,
+              "t": 1,
+              "d": [
+                45
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                192,
+                32
+              ],
+              "src": [
+                64,
+                0
+              ],
+              "f": 0,
+              "t": 1,
+              "d": [
+                46
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                208,
+                32
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                47
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                224,
+                32
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                48
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                240,
+                32
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                49
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                256,
+                32
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                50
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                0,
+                48
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                51
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                16,
+                48
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                52
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                32,
+                48
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                53
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                48,
+                48
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                54
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                64,
+                48
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                55
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                80,
+                48
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                56
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                96,
+                48
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                57
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                112,
+                48
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                58
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                128,
+                48
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                59
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                144,
+                48
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                60
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                160,
+                48
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                61
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                176,
+                48
+              ],
+              "src": [
+                64,
+                0
+              ],
+              "f": 0,
+              "t": 1,
+              "d": [
+                62
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                192,
+                48
+              ],
+              "src": [
+                64,
+                0
+              ],
+              "f": 0,
+              "t": 1,
+              "d": [
+                63
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                208,
+                48
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                64
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                224,
+                48
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                65
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                240,
+                48
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                66
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                256,
+                48
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                67
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                0,
+                64
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                68
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                16,
+                64
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                69
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                32,
+                64
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                70
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                48,
+                64
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                71
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                64,
+                64
+              ],
+              "src": [
+                64,
+                0
+              ],
+              "f": 0,
+              "t": 1,
+              "d": [
+                72
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                80,
+                64
+              ],
+              "src": [
+                64,
+                0
+              ],
+              "f": 0,
+              "t": 1,
+              "d": [
+                73
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                96,
+                64
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                74
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                112,
+                64
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                75
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                128,
+                64
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                76
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                144,
+                64
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                77
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                160,
+                64
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                78
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                176,
+                64
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                79
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                192,
+                64
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                80
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                208,
+                64
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                81
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                224,
+                64
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                82
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                240,
+                64
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                83
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                256,
+                64
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                84
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                0,
+                80
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                85
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                16,
+                80
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                86
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                32,
+                80
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                87
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                48,
+                80
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                88
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                64,
+                80
+              ],
+              "src": [
+                64,
+                0
+              ],
+              "f": 0,
+              "t": 1,
+              "d": [
+                89
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                80,
+                80
+              ],
+              "src": [
+                64,
+                0
+              ],
+              "f": 0,
+              "t": 1,
+              "d": [
+                90
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                96,
+                80
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                91
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                112,
+                80
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                92
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                128,
+                80
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                93
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                144,
+                80
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                94
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                160,
+                80
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                95
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                176,
+                80
+              ],
+              "src": [
+                64,
+                0
+              ],
+              "f": 0,
+              "t": 1,
+              "d": [
+                96
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                192,
+                80
+              ],
+              "src": [
+                64,
+                0
+              ],
+              "f": 0,
+              "t": 1,
+              "d": [
+                97
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                208,
+                80
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                98
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                224,
+                80
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                99
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                240,
+                80
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                100
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                256,
+                80
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                101
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                0,
+                96
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                102
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                16,
+                96
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                103
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                32,
+                96
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                104
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                48,
+                96
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                105
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                64,
+                96
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                106
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                80,
+                96
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                107
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                96,
+                96
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                108
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                112,
+                96
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                109
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                128,
+                96
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                110
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                144,
+                96
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                111
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                160,
+                96
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                112
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                176,
+                96
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                113
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                192,
+                96
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                114
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                208,
+                96
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                115
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                224,
+                96
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                116
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                240,
+                96
+              ],
+              "src": [
+                48,
+                0
+              ],
+              "f": 0,
+              "t": 0,
+              "d": [
+                117
+              ],
+              "a": 1
+            },
+            {
+              "px": [
+                256,
+                96
+              ],
+              "src": [
+                48,
                 0
               ],
               "f": 0,

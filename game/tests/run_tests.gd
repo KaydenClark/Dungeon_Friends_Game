@@ -43,6 +43,7 @@ const SUITES := [
 	"res://tests/test_input_prompts.gd",
 	"res://tests/test_three_quarter_height_layout.gd",
 	"res://tests/test_visible_party_exploration_model.gd",
+	"res://tests/test_intent_logic.gd",
 ]
 
 

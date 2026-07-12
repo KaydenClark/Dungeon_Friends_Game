@@ -52,6 +52,21 @@ func _lever(g: RoomGrid, c: Vector2i, target := "door_a") -> Lever:
 	return lever
 
 
+func test_closed_door_restores_a_full_cell_silhouette_and_keyhole() -> void:
+	var g := _make_grid()
+	var d := _door(g, Vector2i(3, 2))
+	not_null(d.panel, "closed door builds its visible panel")
+	if d.panel != null:
+		eq(d.panel.size, Vector2(56, 56), "closed door covers the entrance cell")
+		eq(d.panel.position, Vector2(-28, -28), "door panel stays centered")
+	var keyhole_count := 0
+	for child in d.get_children():
+		if child is ColorRect and child != d.panel:
+			keyhole_count += 1
+	eq(keyhole_count, 1, "key door retains one visible keyhole")
+	g.queue_free()
+
+
 func test_player_press_and_release() -> void:
 	var g := _make_grid()
 	var plate := _plate(g, Vector2i(3, 3))

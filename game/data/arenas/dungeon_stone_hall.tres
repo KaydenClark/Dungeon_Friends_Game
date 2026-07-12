@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ArenaData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/arena_data.gd" id="1_arena"]
+
+[resource]
+script = ExtResource("1_arena")
+id = "dungeon_stone_hall"
+biome = "dungeon"
+tags = PackedStringArray("stone", "hall")
+tier = "mid"
+weight = 1
+ldtk_path = "res://assets/levels/battle_arenas.ldtk"
+level_id = "DungeonStoneHall"
+mirror_safe = true

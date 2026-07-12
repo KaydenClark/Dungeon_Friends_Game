@@ -341,3 +341,78 @@ func test_turn_order_hud_uses_live_turn_manager_order() -> void:
 	eq(c._turn_order_text(), "Turn order: Hero -> Buddy (Test)",
 			"HUD drops defeated units from the live order")
 	c.free()
+
+
+func test_hud_regions_are_bounded_and_non_overlapping_at_supported_sizes() -> void:
+	var c := CombatScene.new()
+	ok(c.has_method("_layout_for_viewport"),
+			"combat exposes one pure layout contract for tests and rendering")
+	if not c.has_method("_layout_for_viewport"):
+		c.free()
+		return
+	for viewport_size in [Vector2(1280, 720), Vector2(1920, 1080)]:
+		var layout: Dictionary = c.call("_layout_for_viewport", viewport_size)
+		var bounds := Rect2(Vector2.ZERO, viewport_size)
+		for key in ["top_panel", "round", "event", "party", "turn_order",
+				"bottom_panel", "prompt", "options"]:
+			ok(bounds.encloses(layout[key]), "%s stays inside %s" % [key, viewport_size])
+		for pair in [["round", "event"], ["event", "party"],
+				["round", "turn_order"], ["event", "turn_order"],
+				["party", "turn_order"], ["prompt", "options"]]:
+			not_ok(layout[pair[0]].intersects(layout[pair[1]]),
+					"%s and %s do not overlap at %s" % [pair[0], pair[1], viewport_size])
+	c.free()
+
+
+func test_root_menu_uses_five_bounded_option_rows() -> void:
+	var hero := CombatUnit.from_character("hero", _character("hero"), 20, 5)
+	var foe := CombatUnit.from_enemy(_slime(), 0)
+	var c := _scene([hero], [foe], true)
+	add_child(c)
+	c.menu_options = c._build_root_options(hero)
+	c._render_menu()
+	var rows: Variant = c.get("menu_option_rows")
+	ok(rows is Array, "combat menu exposes bounded option rows")
+	if rows is Array:
+		eq(rows.size(), 5, "all five root commands have their own row")
+		for row: Control in rows:
+			ok(c.menu_panel.get_rect().encloses(row.get_rect()),
+					"every command row fits inside the bottom panel")
+	c.queue_free()
+	await get_tree().process_frame
+
+
+func test_destination_cursor_is_a_full_four_sided_cell_outline() -> void:
+	var hero := CombatUnit.from_character("hero", _character("hero"), 20, 5)
+	var foe := CombatUnit.from_enemy(_slime(), 0)
+	var c := _scene([hero], [foe])
+	add_child(c)
+	var cursor: Control = c.cursor_rect
+	ok(cursor is Panel, "destination cursor is a full cell panel, not a side-bracket texture")
+	if cursor is Panel:
+		var style := cursor.get_theme_stylebox("panel") as StyleBoxFlat
+		eq(style.border_width_left, 4, "left destination edge is visible")
+		eq(style.border_width_top, 4, "top destination edge is visible")
+		eq(style.border_width_right, 4, "right destination edge is visible")
+		eq(style.border_width_bottom, 4, "bottom destination edge is visible")
+		eq(cursor.size, Vector2(CombatScene.TILE - 6, CombatScene.TILE - 6),
+				"cursor occupies exactly one inset combat cell")
+	c.queue_free()
+	await get_tree().process_frame
+
+
+func test_damage_popup_is_clamped_below_the_top_hud() -> void:
+	var hero := CombatUnit.from_character("hero", _character("hero"), 20, 5)
+	var foe := CombatUnit.from_enemy(_slime(), 0)
+	var c := _scene([hero], [foe])
+	add_child(c)
+	hero.cell = Vector2i(1, 0)
+	hero.node.position = c._cell_pos(hero.cell)
+	c._show_popup(hero, "-4", Color.WHITE)
+	var popup := c.layer.get_child(c.layer.get_child_count() - 1) as Label
+	not_null(popup, "damage popup is created")
+	if popup != null:
+		ok(popup.position.y >= c.arena_origin.y + 4.0,
+				"top-row popup never rises into the header")
+	c.queue_free()
+	await get_tree().process_frame

@@ -8167,6 +8167,21 @@
            ]
           }
          ]
+        },
+        {
+         "__identifier": "EncounterId",
+         "__type": "String",
+         "__value": "dungeon_guardian",
+         "__tile": null,
+         "defUid": 1009,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "dungeon_guardian"
+           ]
+          }
+         ]
         }
        ]
       },

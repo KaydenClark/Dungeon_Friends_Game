@@ -63,7 +63,8 @@ func test_seven_forest_records_have_the_locked_weighted_ticket_mix() -> void:
 func test_shipped_forest_records_resolve_as_the_locked_pool() -> void:
 	ArenaLibrary.clear_cache()
 	var registry := ArenaLibrary.registry()
-	var records := registry.all()
+	var records := registry.eligible("forest", PackedStringArray())
+	eq(registry.all().size(), 8, "the shipped library also contains one dungeon arena")
 	eq(records.size(), 7, "the shipped library contains seven authored forest arenas")
 	eq(ArenaSelector.ticket_count(records), 18, "the shipped pool has 18 weighted tickets")
 	var expected_ids := [
@@ -77,6 +78,10 @@ func test_shipped_forest_records_resolve_as_the_locked_pool() -> void:
 		eq(arena.biome, "forest", "%s stays in the forest pool" % arena.id)
 		not_ok(arena.level_id.is_empty(), "%s has a stable LDtk level id" % arena.id)
 	eq(ids, expected_ids, "library preserves its stable authored record order")
+	var dungeon_records := registry.eligible("dungeon", PackedStringArray(["stone"]))
+	eq(dungeon_records.size(), 1, "dungeon context has one isolated authored arena")
+	if dungeon_records.size() == 1:
+		eq(dungeon_records[0].id, "dungeon_stone_hall", "dungeon selects the stone hall")
 
 
 func test_biome_and_required_tags_narrow_eligible_records() -> void:

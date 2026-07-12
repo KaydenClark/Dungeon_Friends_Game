@@ -10,6 +10,7 @@ const IDS := [
 	"forest_crossroads",
 	"forest_thorn_choke",
 	"forest_old_growth_maze",
+	"dungeon_stone_hall",
 ]
 
 
@@ -30,12 +31,12 @@ func _free_visual(arena: Dictionary) -> void:
 		visual.free()
 
 
-func test_all_seven_shipped_ldtk_arenas_load_and_validate() -> void:
+func test_all_shipped_ldtk_arenas_load_and_validate() -> void:
 	ArenaLibrary.clear_cache()
 	var registry := ArenaLibrary.registry()
-	eq(registry.all().size(), 7, "library registers exactly the first forest pool")
-	eq(ArenaSelector.ticket_count(registry.all()), 18,
-			"production records retain the 5/2/1 weighted ticket total")
+	eq(registry.all().size(), 8, "library registers seven forest arenas plus one dungeon arena")
+	eq(ArenaSelector.ticket_count(registry.eligible("forest", PackedStringArray())), 18,
+			"forest records retain the 5/2/1 weighted ticket total")
 	for arena_id in IDS:
 		var record := registry.resolve(arena_id)
 		not_null(record, "%s record resolves" % arena_id)
