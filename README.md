@@ -33,15 +33,25 @@ scaffolding, and a separate d10 tactical-combat arena. That build is preserved
 as a tested migration baseline while the unified-world replacement is proven
 incrementally.
 
-The old executable behavior is **not** the current product target. The next
-work is a sequence of reversible spikes:
+The old executable behavior is **not** the current product target. The first
+reversible proof now exists as an isolated three-quarter height/readability
+scene; it does not modify or replace the playable production rooms. Migration
+continues through the remaining spikes:
 
-1. three-quarter height readability;
-2. visible-party exploration without follower softlocks;
-3. shared material reactions;
-4. same-room deterministic encounters with enemy intents;
-5. persistent encounter/world resolution;
-6. a short Hero-plus-two-friends thesis slice.
+1. visible-party exploration without follower softlocks;
+2. shared material reactions;
+3. same-room deterministic encounters with enemy intents;
+4. persistent encounter/world resolution;
+5. a short Hero-plus-two-friends thesis slice.
+
+## Unified-World Prototype
+
+![T-086 three-quarter height/readability spike](docs/screenshots/three_quarter_height_spike.png)
+
+This 1280x720 dev-room proof keeps rectangular square-grid logic while adding
+two presentation elevations, authored stairs, a tall occluding wall, and four
+static party placeholders. The exact review and capture commands are in
+[`RUNBOOK.md`](RUNBOOK.md#three-quarter-heightreadability-spike-t-086).
 
 ## Baseline Screenshots
 
@@ -73,7 +83,7 @@ cd game
 /Applications/Godot.app/Contents/MacOS/Godot --headless --path . tests/run_tests.tscn
 ```
 
-Exact commands, baseline controls, and future prototype entry points live in
+Exact commands, baseline controls, and prototype entry points live in
 [`RUNBOOK.md`](RUNBOOK.md).
 
 ## Project Control

@@ -1,7 +1,8 @@
 # Dungeon Friends - Asset Plan
 
 **Last updated:** 2026-07-11 (unified-world pivot)
-**Status:** Kenney skeleton preserved as migration baseline; three-quarter spike next
+**Status:** Kenney skeleton preserved as migration baseline; T-086 placeholder
+height proof complete; T-087 visible-party spike next
 
 This file is the asset production checklist for Dungeon Friends. It answers
 what must be made, when it should be made, and where image-generation prompts
@@ -55,6 +56,10 @@ slice is replaced. The main/combat full-screen background `ColorRect`s and
 text labels are deliberately retained as layout/color surfaces rather than
 asset placeholders; prototype/generated character sheets remain checked in
 but are no longer the default resources.
+
+T-086 reuses the promoted Hero, Buddy, healer, and quest-NPC Kenney crops as
+four static party placeholders in its isolated height/readability scene. It
+adds no new source art or image-generation provenance.
 
 ## Global Art Constraints
 

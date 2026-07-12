@@ -2,7 +2,7 @@
 
 > Generated from LLM Workbench v2.1. See Upgrading The Harness below.
 
-**Last reviewed:** 2026-07-11 (unified-world pivot setup)
+**Last reviewed:** 2026-07-11 (T-086 height/readability proof)
 **Runtime owner:** Kayden (solo developer)
 **Environment:** local macOS development; Steam-first PC target
 
@@ -14,13 +14,15 @@ It should be boring, exact, and executable.
 The executable currently implements the pre-pivot forest/tutorial slice and
 separate d10 combat arenas. It remains the regression baseline while the
 unified-world design in `BLUEPRINT.md` is built through isolated prototype
-scenes. Do not claim the target party, three-quarter height, material reaction,
-same-room encounter, deterministic intent, or persistent-resolution systems
-exist until their TASKBOARD proof is recorded.
+scenes. T-086 now proves three-quarter height presentation in one isolated dev
+room; it does not add production-room elevation or pathfinding. Do not claim
+the target moving party, material reaction, same-room encounter, deterministic
+intent, or persistent-resolution systems exist until their TASKBOARD proof is
+recorded.
 
-Active setup branch: `codex/unified-world-pivot`. The next implementation task
-is T-086. Each prototype task must document its own scene/command here before
-being marked done.
+Active setup branch: `codex/unified-world-pivot`. T-086 is complete; the next
+implementation task is T-087. Each prototype task must document its own
+scene/command here before being marked done.
 
 ## Prerequisites
 
@@ -201,6 +203,43 @@ Expected result: exit `0`, five `wrote .../<room>.png` lines and a final
 `SCREENSHOT TOUR: done`. Omitting `--out=` writes into the project's
 `user://screenshots` directory.
 
+### Three-quarter height/readability spike (T-086)
+
+The first unified-world prototype is an isolated, presentation-only dev room.
+It uses a 13x8 orthogonal grid, exactly two integer elevations, one authored
+stair transition, a tall occluding wall, and four static placeholder party
+actors. It does not route through production rooms, LDtk imports, pathfinding,
+or the legacy combat scene.
+
+Open the under-one-minute review scene at the required resolution:
+
+```bash
+cd game
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/three_quarter_height_spike.tscn --resolution 1280x720
+```
+
+Capture the durable proof image (windowed; headless output is not visual
+proof):
+
+```bash
+cd game
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/three_quarter_height_spike.tscn --resolution 1280x720 -- --out="$PWD/../docs/screenshots/three_quarter_height_spike.png"
+```
+
+Expected result: the scene prints `THREE-QUARTER HEIGHT SPIKE: ready`; capture
+mode exits `0`, prints a `wrote ... (1280x720)` line, and produces the image at
+`docs/screenshots/three_quarter_height_spike.png`. In under one minute, verify:
+
+- blue-outlined rectangular cells are the walkable orthogonal grid;
+- the green platform is elevation `1` above lower elevation `0`;
+- the gold stairs visibly connect `0 -> 1` without diagonal/isometric skew;
+- Friend C is partially hidden behind the tall wall while Hero/Buddy draw in front;
+- all four labelled placeholder actors occupy distinct readable cells.
+
+`test_three_quarter_height_layout` pins the same scene metadata: integer
+levels, stair endpoints, orthogonal projection, fail-closed bounds, four actor
+cells, and the wall's depth-order contract.
+
 ### Kenney visual-skeleton proof (T-080..T-084)
 
 Regenerate the promoted runtime crops after changing the manifest, import
@@ -289,7 +328,7 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
- per-suite tally (currently `UNIT TESTS: 32 suites, 200 tests, 958 checks, 0
+ per-suite tally (currently `UNIT TESTS: 33 suites, 205 tests, 997 checks, 0
 failed`). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a
 few seconds (pure logic and controlled clocks, no real-time waits, unlike the
 slice smoke test; the tutorial soft-lock solver adds a second or two). Run
@@ -352,7 +391,10 @@ state of the REAL shipped hub and pit rooms: solvable from the start, and
 every wedged state can still reach the reset lever / the exit - the
 can-the-player-wedge-it proof the Known Risks row demands), and
 `test_debug_overlay` (T-030 hooks: hidden by default, grant dedup, reset
-delegation). Add a suite path to the `SUITES` list in `run_tests.gd` to
+delegation), and `test_three_quarter_height_layout` (T-086: exactly two integer
+levels, stair metadata, orthogonal screen projection, bounds, four static
+actors, and foreground/background wall ordering). Add a suite path to the
+`SUITES` list in `run_tests.gd` to
 register new tests.
 
 The runner `await`s each test, so a suite method may be a coroutine when a test
@@ -452,8 +494,8 @@ Every spike must:
    and feel claims;
 5. append actual commands/results to the TASKBOARD proof log.
 
-The first commands to add will belong to T-086's three-quarter height scene.
-Do not guess their filenames in advance.
+T-086's three-quarter-height commands above establish the pattern. Add T-087's
+exact entry point only after its scene exists; do not guess future filenames.
 
 ## Build/Export
 
