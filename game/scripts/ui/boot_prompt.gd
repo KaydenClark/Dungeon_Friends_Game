@@ -7,6 +7,10 @@ extends CanvasLayer
 
 signal chosen(continue_game: bool)
 
+var message := "A saved adventure awaits."
+var confirm_text := "Continue"
+var cancel_text := "New Game"
+
 
 func _ready() -> void:
 	layer = 95   # above gameplay UI, below the fade layer (100)
@@ -15,7 +19,7 @@ func _ready() -> void:
 	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(panel)
 	var text := Label.new()
-	text.text = "A saved adventure awaits.\n\nContinue                  New Game"
+	text.text = "%s\n\n%s                  %s" % [message, confirm_text, cancel_text]
 	text.add_theme_font_size_override("font_size", 30)
 	text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	text.set_anchors_preset(Control.PRESET_CENTER)

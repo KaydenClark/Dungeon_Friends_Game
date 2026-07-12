@@ -73,13 +73,24 @@ var boot_factory := Callable()
 ## Where save files live (T-037/T-039). Tests point this at a scratch dir so
 ## automated runs can never clobber a real save in user://saves.
 var save_dir: String = SaveManager.DEFAULT_DIR
+## Slot backing the current session. Zero means this run started fresh; if a
+## file already occupies the target slot, the crystal must ask before the
+## first overwrite (B-15).
+var loaded_slot := 0
 
 
 ## Snapshot the live session into a save slot (T-039; the SaveCrystal calls
 ## this). The map id comes from the registry, the position from the live
 ## player. Refuses (false + warning) rather than writing a save it could
 ## never load back.
-func save_game(slot: int = 1) -> bool:
+func save_needs_overwrite_confirmation(slot: int = 1) -> bool:
+	return loaded_slot != slot and SaveManager.slot_exists(slot, save_dir)
+
+
+func save_game(slot: int = 1, overwrite_confirmed := false) -> bool:
+	if save_needs_overwrite_confirmation(slot) and not overwrite_confirmed:
+		push_warning("save_game: slot %d exists and overwrite was not confirmed" % slot)
+		return false
 	var map_id := MapRegistry.id_for(current_room)
 	if map_id == "":
 		push_warning("save_game: current room is not a registered map - not saving")
@@ -89,7 +100,10 @@ func save_game(slot: int = 1) -> bool:
 		push_warning("save_game: current room has no player - not saving")
 		return false
 	var data := SaveManager.capture(state, map_id, player.cell)
-	return SaveManager.write(slot, data, save_dir)
+	var wrote := SaveManager.write(slot, data, save_dir)
+	if wrote:
+		loaded_slot = slot
+	return wrote
 
 
 ## Restore a saved session (T-040, D-011): swap in the saved GameState, tear
@@ -118,6 +132,7 @@ func load_game(slot: int = 1) -> bool:
 	if room is LdtkRoom:
 		room.spawn_override = data.player_position
 	boot_room(room)
+	loaded_slot = slot
 	return true
 
 
@@ -586,6 +601,7 @@ func restart_game() -> void:
 ## return to a fresh game's values in one move.
 func reset_session_state() -> void:
 	state = GameState.new()
+	loaded_slot = 0
 	heal_hero_to_full()
 
 

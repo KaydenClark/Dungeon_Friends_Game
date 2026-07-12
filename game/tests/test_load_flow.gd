@@ -100,3 +100,32 @@ func test_load_with_an_unknown_map_fails_softly() -> void:
 	not_ok(SceneManager.load_game(2), "unregistered map id -> false")
 	eq(SceneManager.total_xp, 5, "failed load leaves the live session alone")
 	_teardown()
+
+
+## B-15: starting New Game while slot 1 exists must never let the first
+## crystal touch silently replace that save. The low-level guard is the final
+## safety boundary; UI confirmation only opts into the explicit overwrite.
+func test_new_session_cannot_silently_overwrite_existing_slot() -> void:
+	_setup_containers()
+	var old_state := GameState.new()
+	old_state.party_xp["hero"] = 222
+	var old_data := SaveManager.capture(old_state, "forest", Vector2i(3, 4))
+	ok(SaveManager.write(1, old_data, TEST_DIR), "existing slot fixture written")
+	var room: LdtkRoom = MapRegistry.build("forest")
+	SceneManager.boot_room(room)
+	SceneManager.total_xp = 17
+	ok(SceneManager.save_needs_overwrite_confirmation(1),
+			"a fresh session detects the existing slot")
+	not_ok(SceneManager.save_game(1),
+			"save refuses to overwrite without explicit confirmation")
+	var preserved := SaveManager.load_slot(1, TEST_DIR)
+	eq(preserved.party_xp["hero"], 222,
+			"the refused save leaves the old slot byte-semantically intact")
+	ok(SceneManager.save_game(1, true),
+			"explicit overwrite confirmation allows the save")
+	var replaced := SaveManager.load_slot(1, TEST_DIR)
+	eq(replaced.party_xp["hero"], 17,
+			"the confirmed save stores the current session")
+	not_ok(SceneManager.save_needs_overwrite_confirmation(1),
+			"later crystal saves in the same slot do not reprompt")
+	_teardown()

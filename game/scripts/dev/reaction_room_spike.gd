@@ -69,6 +69,7 @@ var casting_verb := ""
 var cast_cursor := Vector2i.ZERO
 var cast_preview := {}
 var reaction_ui: CanvasLayer
+var preview_panel: ColorRect
 var preview_label: Label
 var legend_label: Label
 
@@ -138,13 +139,33 @@ func _build_reaction_state() -> void:
 
 func _build_reaction_ui() -> void:
 	reaction_ui = CanvasLayer.new()
-	preview_label = _make_ui_label(Vector2(700, 64), 14)
-	preview_label.visible = false
-	reaction_ui.add_child(preview_label)
+	preview_panel = ColorRect.new()
+	preview_panel.color = Color(0.02, 0.03, 0.05, 0.90)
+	preview_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	preview_panel.visible = false
+	reaction_ui.add_child(preview_panel)
+	preview_label = _make_ui_label(Vector2(12, 12), 13)
+	preview_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	preview_label.clip_text = true
+	preview_panel.add_child(preview_label)
 	legend_label = _make_ui_label(Vector2(700, 8), 13)
 	legend_label.text = "Materials: channel=navy  soil=brown  brush=olive  smoke=gray\nvine=green  wet=blue  ice=pale  fire=orange  zap=yellow edge"
 	reaction_ui.add_child(legend_label)
 	add_child(reaction_ui)
+	_layout_preview_panel()
+	get_viewport().size_changed.connect(_layout_preview_panel)
+
+
+func _layout_preview_panel() -> void:
+	var rect := RoomLogic.preview_panel_rect(get_viewport_rect().size)
+	preview_panel.position = rect.position
+	preview_panel.size = rect.size
+	preview_label.size = rect.size - Vector2(24, 24)
+
+
+func _set_preview_visible(value: bool) -> void:
+	preview_panel.visible = value
+	preview_label.visible = value
 
 
 ## --- casting input ---------------------------------------------------------------
@@ -222,7 +243,7 @@ func _move_cast_cursor(dir: Vector2i) -> void:
 func _cancel_cast() -> void:
 	casting_verb = ""
 	cast_preview = {}
-	preview_label.visible = false
+	_set_preview_visible(false)
 	queue_redraw()
 
 
@@ -267,7 +288,7 @@ func _commit_cast() -> void:
 		acted[active_id] = true
 		casting_verb = ""
 		cast_preview = {}
-		preview_label.visible = false
+		_set_preview_visible(false)
 		queue_redraw()
 		if hits.size() > 0:
 			await _frames(12)
@@ -283,7 +304,7 @@ func _commit_cast() -> void:
 	else:
 		casting_verb = ""
 		cast_preview = {}
-		preview_label.visible = false
+		_set_preview_visible(false)
 		queue_redraw()
 	busy = false
 
@@ -292,9 +313,9 @@ func _commit_cast() -> void:
 
 func _update_preview_label() -> void:
 	if casting_verb == "":
-		preview_label.visible = false
+		_set_preview_visible(false)
 		return
-	preview_label.visible = true
+	_set_preview_visible(true)
 	var lines: Array[String] = []
 	lines.append("CAST %s at %s (%s) - WASD aim, E commit, Q cancel"
 			% [casting_verb.to_upper(), str(cast_cursor), _cast_context()])
@@ -480,11 +501,77 @@ func _draw_cell_materials(cell: Vector2i, data: Dictionary) -> void:
 
 
 ## The parent's cue capture is hardcoded as 02-encounter-cue; remap it into
-## this tour's chronological numbering.
+## this tour's chronological numbering. Unlike the original spike capture,
+## validate broad frame coverage: Metal can expose a half-populated viewport
+## after frame_post_draw, which is not valid demo evidence.
 func _shot(shot_name: String, settle_frames := 4) -> void:
 	if shot_name == "02-encounter-cue":
 		shot_name = "08-encounter-cue"
-	await super._shot(shot_name, settle_frames)
+	var image: Image
+	for attempt in 6:
+		queue_redraw()
+		await _frames(settle_frames if attempt == 0 else 45)
+		RenderingServer.force_draw()
+		RenderingServer.force_sync()
+		await RenderingServer.frame_post_draw
+		await get_tree().process_frame
+		RenderingServer.force_draw()
+		RenderingServer.force_sync()
+		await RenderingServer.frame_post_draw
+		image = get_viewport().get_texture().get_image()
+		if _capture_image_is_complete(image):
+			break
+		print("REACTION ROOM: incomplete frame; redraw retry ", attempt + 1)
+		# Dirty every inherited CanvasItem, not only this script's custom draw.
+		# Metal's stale readback can otherwise preserve the same missing tiles
+		# across retries even though the live window is complete.
+		modulate = Color(1.0, 1.0, 1.0, 0.999)
+		await get_tree().process_frame
+		modulate = Color.WHITE
+		visible = false
+		await _frames(2)
+		visible = true
+		queue_redraw()
+		if casting_verb != "":
+			var verb := casting_verb
+			casting_verb = ""
+			cast_preview = {}
+			_set_preview_visible(false)
+			queue_redraw()
+			await _frames(2)
+			casting_verb = verb
+			_refresh_cast_preview()
+	if not _capture_image_is_complete(image):
+		_assert(false, "capture %s populated the complete viewport" % shot_name)
+		return
+	var path := "%s/%s.png" % [out_dir, shot_name]
+	var error := image.save_png(path)
+	if error != OK:
+		_assert(false, "capture %s wrote successfully" % shot_name)
+		return
+	print("  wrote ", path)
+
+
+func _capture_image_is_complete(image: Image) -> bool:
+	if image == null or image.is_empty():
+		return false
+	if image.get_width() < 640 or image.get_height() < 360:
+		return false
+	var samples: Array = []
+	var logical_size := get_viewport_rect().size
+	var image_scale := Vector2(float(image.get_width()) / logical_size.x,
+			float(image.get_height()) / logical_size.y)
+	var panel_rect := Rect2(preview_panel.position * image_scale,
+			preview_panel.size * image_scale)
+	for y in range(27):
+		for x in range(48):
+			var point := Vector2i(
+					int((float(x) + 0.5) * image.get_width() / 48.0),
+					int((float(y) + 0.5) * image.get_height() / 27.0))
+			if preview_panel.visible and panel_rect.has_point(point):
+				continue
+			samples.append(image.get_pixelv(point).get_luminance())
+	return RoomLogic.capture_samples_are_complete(samples, 0.02)
 
 
 ## --- proof tour ---------------------------------------------------------------------
@@ -559,6 +646,12 @@ func _scripted_tour() -> void:
 			"exploration casts carry the exploration context")
 	_assert(preview_label.visible and preview_label.text.contains("Forced movement"),
 			"the pre-commit panel names every consequence class")
+	_assert(preview_panel.visible and preview_panel.color.a >= 0.85,
+			"the consequence panel has a readable dark backing")
+	_assert(get_viewport_rect().has_point(preview_panel.position)
+			and get_viewport_rect().has_point(preview_panel.position
+					+ preview_panel.size - Vector2.ONE),
+			"the consequence panel stays inside the live viewport")
 	await _shot("02-grow-preview")
 	await _commit_cast()
 	_assert(_tags_at(SOIL_CELL).has("vine"), "grow created a vine on the soil")

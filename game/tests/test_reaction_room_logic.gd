@@ -33,6 +33,37 @@ func _unit(id: String, cell: Vector2i, hp: int, side := "enemy") -> Dictionary:
 			"side": side, "statuses": {}}
 
 
+## The consequence panel must stay inside the live viewport at every supported
+## review size. This prevents preview copy from spilling over the window edge
+## or relying on one hard-coded desktop resolution.
+func test_preview_panel_layout_is_viewport_contained() -> void:
+	for viewport_size: Vector2 in [Vector2(1280, 720), Vector2(1920, 1080),
+			Vector2(960, 540)]:
+		var rect: Rect2 = ReactionRoomLogic.preview_panel_rect(viewport_size)
+		ok(rect.position.x >= 0.0 and rect.position.y >= 0.0,
+				"panel starts inside %s" % str(viewport_size))
+		ok(rect.end.x <= viewport_size.x and rect.end.y <= viewport_size.y,
+				"panel ends inside %s" % str(viewport_size))
+		eq(rect.end.x, viewport_size.x - 12.0,
+				"panel keeps the right safe margin at %s" % str(viewport_size))
+		ok(rect.size.x >= 420.0 and rect.size.y >= 240.0,
+				"panel remains readable at %s" % str(viewport_size))
+
+
+## Metal may expose a partially populated frame even after frame_post_draw.
+## The proof tour must reject broad black holes while accepting the intentionally
+## near-black preview panel.
+func test_capture_coverage_rejects_partial_metal_frames() -> void:
+	var complete := [0.22, 0.31, 0.04, 0.18, 0.27, 0.12, 0.03, 0.45]
+	var partial := [0.22, 0.0, 0.0, 0.18, 0.0, 0.0, 0.03, 0.45]
+	ok(ReactionRoomLogic.capture_samples_are_complete(complete, 0.02),
+			"dark UI remains valid when the frame has real coverage")
+	not_ok(ReactionRoomLogic.capture_samples_are_complete(partial, 0.02),
+			"broad pure-black holes reject a partial Metal frame")
+	not_ok(ReactionRoomLogic.capture_samples_are_complete([], 0.02),
+			"missing capture samples fail closed")
+
+
 ## The acceptance seam: the exploration caller and the encounter caller invoke
 ## the SAME cast() path and identical state produces identical reaction data -
 ## context is presentation metadata only.

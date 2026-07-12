@@ -100,7 +100,9 @@ prompts show keyboard keys only until T-079 supplies controller glyphs):
 - Saving and dying (Phase 3, built 2026-07-10): the cyan **save crystal**
   beside the healer's campfire writes slot 1 on interact; booting with a
   save shows a minimal Continue (E) / New Game (Q) prompt
-  (D-011). **Walking into a pit** is a Zelda-style fall: 10 HP party-wide and a walk
+  (D-011). If New Game was chosen while slot 1 already exists, the first
+  crystal interaction asks before overwriting it; Q keeps the existing save.
+  **Walking into a pit** is a Zelda-style fall: 10 HP party-wide and a walk
   back to the room's last-used entrance (T-047).
   **Party defeat** is a checkpoint, not a restart (T-041, tuned per D-014/
   D-015): keep inventory, lose 25% of your progress toward the next level,
@@ -438,6 +440,8 @@ turn. Casting opens a WASD-aimed cursor (range 3) and shows the complete
 neutral result (affected cells in order, damage, hazards, cell tag/status
 changes, consumed effects, forced movement, and exactly which units would be
 hit, including a promised intention cancel) BEFORE `E` commits; `Q` cancels.
+The dense preview is contained in a dark, viewport-aware panel so its text
+does not collide with unit/HP labels at 1280x720 or 1920x1080.
 Both contexts route through `ReactionRoomLogic.cast` ->
 `ReactionCore.calculate`; the caller-side seams (unit mapping, intention
 disruption, shove's forced-movement preview) are red/green in
@@ -452,10 +456,12 @@ $godot = 'E:\Godot\godot.cmd'
 ```
 
 The scripted tour must print `REACTION ROOM: done` with zero `FAIL` lines
-(88 assertions per run): grow-then-burn, air-fed fire spreading down the
+(90 assertions per run): grow-then-burn, air-fed fire spreading down the
 brush chain, flood-then-freeze, spark conduction stopped by the ice, smoke
 clearing, exploration/encounter context parity from identical state, and the
 round-2 spark that cancels the slime's declared spit before it resolves.
+The capture path rejects partially populated Metal readbacks, forces a full
+CanvasItem refresh, and retries instead of silently writing black-hole proof.
 Run it interactively (no `--out=`) for Kayden's fun/not-fun verdict.
 
 ### Display-scaling spike (T-007)

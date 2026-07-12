@@ -21,6 +21,38 @@ extends RefCounted
 
 const ReactionCore := preload("res://scripts/dev/reaction_core.gd")
 
+const PREVIEW_PANEL_MARGIN := 12.0
+const PREVIEW_PANEL_TOP := 52.0
+const PREVIEW_PANEL_WIDTH := 500.0
+const PREVIEW_PANEL_HEIGHT := 260.0
+
+
+## Keep the dense neutral consequence preview inside the current viewport.
+## The room supports flexible HD/ultrawide windows, so the UI cannot assume
+## that the 1280x720 proof size is the only live layout.
+static func preview_panel_rect(viewport_size: Vector2) -> Rect2:
+	var width := minf(PREVIEW_PANEL_WIDTH,
+			maxf(0.0, viewport_size.x - PREVIEW_PANEL_MARGIN * 2.0))
+	var available_height := maxf(0.0,
+			viewport_size.y - PREVIEW_PANEL_TOP - PREVIEW_PANEL_MARGIN)
+	var height := minf(PREVIEW_PANEL_HEIGHT, available_height)
+	return Rect2(Vector2(viewport_size.x - width - PREVIEW_PANEL_MARGIN,
+			PREVIEW_PANEL_TOP), Vector2(width, height))
+
+
+## A complete frame may contain very dark UI, but broad exactly-black samples
+## indicate Metal exposed an incompletely populated viewport. Keep this pure so
+## the capture guard's threshold is pinned without depending on a renderer.
+static func capture_samples_are_complete(luminances: Array,
+		max_black_fraction := 0.02) -> bool:
+	if luminances.is_empty():
+		return false
+	var black_samples := 0
+	for value: Variant in luminances:
+		if float(value) <= 0.01:
+			black_samples += 1
+	return float(black_samples) / float(luminances.size()) <= max_black_fraction
+
 
 ## Build the room's reaction world-state: exactly the targetable cells exist,
 ## seeded with their authored material tags. Anything not listed here fails
