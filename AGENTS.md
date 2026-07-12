@@ -213,6 +213,29 @@ command you did not execute is not proof.
   merge into `main` without explicit approval. Never force-push or rewrite
   published history without explicit approval.
 
+## Saving And Committing Work
+
+Saving work is part of finishing, not an optional extra step. A task is not
+done until its changes are committed and pushed to the current task branch.
+
+On completion of any change to code or docs:
+
+1. `git add -A`.
+2. Commit with a clear, specific message (what changed and why).
+3. `git push` to the current task branch (the branch you are working on -
+   never `main`, never `integration` directly unless that is explicitly the
+   working branch).
+4. Run `git status` and confirm the working tree is clean and the branch is
+   up to date with its remote.
+5. Report that clean, pushed status in the final response.
+
+Never leave a dirty working tree for the next agent or for Kayden to inherit -
+uncommitted work can be lost when someone else picks up the branch. Never
+commit to or push `main`, never force-push or rewrite published history, and
+never merge into `main` (only Kayden does that). If something genuinely should
+not be committed yet, say so explicitly in the final response instead of
+silently leaving it uncommitted.
+
 ## Output Format
 
 For all task completions, report:
