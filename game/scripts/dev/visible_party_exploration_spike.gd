@@ -1,6 +1,7 @@
 extends "res://scripts/dev/three_quarter_height_spike.gd"
-## T-087 bootable visible-party prototype. The selected leader moves on the
-## tested orthogonal layout; three render-only followers replay breadcrumbs.
+## T-087/T-096 bootable visible-party prototype. The selected leader moves on
+## the tested orthogonal layout; three render-only followers replay breadcrumbs
+## and recover toward the selected line, square, or spaced formation.
 ##
 ## Interactive:
 ##   Godot --path . scenes/dev/visible_party_exploration_spike.tscn --resolution 1280x720
@@ -62,7 +63,8 @@ var _previous_cells: Dictionary = {}
 var _moving := false
 var _move_tween: Tween
 var _blocked_flash := ""
-var _capture_state: StringName = &"choke"
+var _capture_state: StringName = &"recovered"
+var _capture_formation: StringName = &"line"
 var _move_progress := 1.0:
 	set(value):
 		_move_progress = value
@@ -80,11 +82,19 @@ func _ready() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--out="):
 			_out_path = arg.trim_prefix("--out=")
+		elif arg.begins_with("--formation="):
+			_capture_formation = StringName(arg.trim_prefix("--formation="))
+		elif arg == "--state=choke":
+			_capture_state = &"choke"
 		elif arg == "--state=recovered":
 			_capture_state = &"recovered"
+	if not _party.select_formation(_capture_formation):
+		push_error("VISIBLE PARTY PROTOTYPE: invalid formation '%s'" % _capture_formation)
+		get_tree().quit(1)
+		return
 	queue_redraw()
-	print("VISIBLE PARTY PROTOTYPE: ready")
-	print("  move=WASD/arrows/D-pad  switch=F/Y  reset=R/Q")
+	print("VISIBLE PARTY PROTOTYPE: ready (formation=%s)" % _party.selected_formation())
+	print("  move=WASD/arrows/D-pad  formation=1/2/3  switch=F/Y  reset=R/Q")
 	if not _out_path.is_empty():
 		_auto_capture_state.call_deferred()
 
@@ -114,6 +124,20 @@ func _unhandled_input(event: InputEvent) -> void:
 		_cycle_leader()
 		get_viewport().set_input_as_handled()
 		return
+	if event is InputEventKey:
+		match event.physical_keycode:
+			KEY_1:
+				_select_formation(&"line")
+				get_viewport().set_input_as_handled()
+				return
+			KEY_2:
+				_select_formation(&"square")
+				get_viewport().set_input_as_handled()
+				return
+			KEY_3:
+				_select_formation(&"spaced")
+				get_viewport().set_input_as_handled()
+				return
 	var is_reset_key: bool = event is InputEventKey and event.physical_keycode == KEY_R
 	if is_reset_key or event.is_action_pressed("cancel"):
 		_reset_party()
@@ -156,6 +180,17 @@ func _cycle_leader() -> void:
 	var selected := _party.cycle_leader()
 	_move_progress = 1.0
 	print("VISIBLE PARTY PROTOTYPE: leader -> ", selected)
+	queue_redraw()
+
+
+func _select_formation(formation_id: StringName) -> void:
+	if _moving:
+		return
+	_previous_cells = _party.member_cells()
+	if not _party.select_formation(formation_id):
+		return
+	_move_progress = 1.0
+	print("VISIBLE PARTY PROTOTYPE: formation -> ", formation_id)
 	queue_redraw()
 
 
@@ -207,9 +242,11 @@ func _auto_capture_state() -> void:
 			push_error("VISIBLE PARTY PROTOTYPE: party did not reform at the goal")
 			get_tree().quit(1)
 			return
-		print("VISIBLE PARTY PROTOTYPE: capture state = RECOVERED formation")
+		print("VISIBLE PARTY PROTOTYPE: capture state = RECOVERED %s formation"
+				% _party.selected_formation())
 	else:
-		print("VISIBLE PARTY PROTOTYPE: capture state = SINGLE FILE through door/stairs")
+		print("VISIBLE PARTY PROTOTYPE: capture state = SINGLE FILE (%s selected)"
+				% _party.selected_formation())
 	await _capture_when_ready()
 
 
@@ -223,11 +260,11 @@ func _draw() -> void:
 
 
 func _draw_header() -> void:
-	_text(Vector2(34, 45), "T-087  /  LIVE PARTY EXPLORATION", 26, Color("f2f6ff"))
+	_text(Vector2(34, 45), "T-096  /  SELECTABLE PARTY FORMATIONS", 26, Color("f2f6ff"))
 	_text(Vector2(34, 76),
-			"Lead four friends through a one-cell door and watch them regroup on the upper path",
+			"Choose line, square, or spaced; chokes compress temporarily, then restore the choice",
 			15, Color("9dabc2"))
-	_badge(Rect2(802, 30, 136, 30), "LIVE PARTY ×4", Color("397d70"))
+	_badge(Rect2(802, 30, 136, 30), str(_party.selected_formation()).to_upper(), Color("397d70"))
 	_badge(Rect2(950, 30, 142, 30), "1-CELL CHOKE", Color("3a77a5"))
 	_badge(Rect2(1098, 30, 146, 30), "FOLLOWER EFFECTS 0", Color("73588f"))
 
@@ -402,9 +439,10 @@ func _draw_callouts() -> void:
 	draw_line(Vector2(200, 245), door_target, ROUTE_COLOR, 2.0)
 	draw_circle(door_target, 4.0, ROUTE_COLOR)
 
-	var formation := str(_party.formation_state()).to_upper().replace("_", " ")
-	_callout(Rect2(1076, 166, 178, 112), "FORMATION",
-			"%s\n4 / 4 visible" % formation, SAFE_COLOR)
+	var selected := str(_party.selected_formation()).to_upper()
+	var movement_state := str(_party.formation_state()).to_upper().replace("_", " ")
+	_callout(Rect2(1076, 166, 178, 112), "SELECTED / STATE",
+			"%s\n%s" % [selected, movement_state], SAFE_COLOR)
 	var plate_state := "ON — LEADER" if _party.plate_active() else "OFF"
 	if _party.follower_on_plate() and not _party.plate_active():
 		plate_state = "OFF — FOLLOWER INERT"
@@ -416,10 +454,11 @@ func _draw_legend() -> void:
 	var selected_visual: Dictionary = MEMBER_VISUALS[_party.leader_id()]
 	var selected_name := str(selected_visual.get("name", _party.leader_id()))
 	_info_card(Rect2(34, 574, 376, 112), "CONTROLS",
-			"WASD / arrows / D-pad move\nF / pad Y: switch  •  R or Q / pad X: reset", ROUTE_COLOR)
+			"WASD / arrows move  •  1 line / 2 square / 3 spaced\nF / pad Y: switch  •  R or Q / pad X: reset", ROUTE_COLOR)
 	_info_card(Rect2(452, 574, 376, 112), "LIVE PARTY",
-			"Leader: %s  •  formation: %s\nGold ring = controlled; H / B / C / D = identity" % [
-				selected_name, str(_party.formation_state()).replace("_", " ")], SAFE_COLOR)
+			"Leader: %s  •  selected: %s\nTransient state: %s  •  H / B / C / D = identity" % [
+				selected_name, str(_party.selected_formation()),
+				str(_party.formation_state()).replace("_", " ")], SAFE_COLOR)
 	_info_card(Rect2(870, 574, 376, 112), "FOLLOWER SAFETY",
 			"Render-only: no pushing or puzzle occupancy\nLeader-only interaction  •  followers never block", Color("d79bd9"))
 	if not _blocked_flash.is_empty():

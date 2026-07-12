@@ -357,6 +357,40 @@ by `test_three_quarter_height_layout.gd` and
 harnesses, not production architecture; T-089/T-090/T-092 remain the playable
 combined-room candidate.
 
+### Selectable formation/deployment proof (T-096)
+
+T-096 revises Sol's isolated party proof without promoting it to production
+architecture. Run `visible_party_exploration_spike.tscn` windowed; WASD/arrows
+move, `1` selects line, `2` square, `3` spaced, `F`/controller Y switches the
+leader, and R/Q resets. The visible `selected` label is intentionally separate
+from transient `spread` / `single file` / `recovered` movement state. No new
+InputMap action was added.
+
+From `game/`, reproduce the 1280x720 proof set:
+
+```bash
+mkdir -p ../docs/screenshots/t096-party-formations
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/visible_party_exploration_spike.tscn --resolution 1280x720 -- --out="$PWD/../docs/screenshots/t096-party-formations/line.png" --formation=line --state=recovered
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/visible_party_exploration_spike.tscn --resolution 1280x720 -- --out="$PWD/../docs/screenshots/t096-party-formations/square.png" --formation=square --state=recovered
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/visible_party_exploration_spike.tscn --resolution 1280x720 -- --out="$PWD/../docs/screenshots/t096-party-formations/spaced.png" --formation=spaced --state=recovered
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/visible_party_exploration_spike.tscn --resolution 1280x720 -- --out="$PWD/../docs/screenshots/t096-party-formations/choke.png" --formation=spaced --state=choke
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/visible_party_exploration_spike.tscn --resolution 1280x720 -- --out="$PWD/../docs/screenshots/t096-party-formations/recovered.png" --formation=square --state=recovered
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/three_quarter_height_spike.tscn --resolution 1280x720 -- --out="$PWD/../docs/screenshots/t096-party-formations/height-palette.png"
+```
+
+Each command must exit `0`. The three formation images must show distinct
+party cells; `choke.png` must show `SPACED / SINGLE FILE`; `recovered.png`
+must show `SQUARE / RECOVERED`. The capture guard rejects incomplete Metal
+frames by sampling the board, header badges, side callouts, and all three
+bottom proof cards before writing.
+
+The neutral pure seam is `PartyFormationLayout.plan_deployment()`, returning
+`formation_id`, `leader_id`, `facing`, `member_cells`, and
+`deployment_cells`. `test_party_formation_layout.gd` proves four-facing
+rotation, deterministic nearest-valid fallback, unique reachable placement,
+and wall/enemy/prop/elevation-transition exclusions. It does not claim combat
+occupancy or production save/menu/LDtk integration.
+
 ### Display-scaling spike (T-007)
 
 Checks the flexible HD/ultrawide stretch settings (revised 2026-07-05, see
@@ -392,7 +426,7 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
- per-suite tally (currently `UNIT TESTS: 35 suites, 235 tests, 1331 checks, 0
+per-suite tally (currently `UNIT TESTS: 36 suites, 244 tests, 1609 checks, 0
 failed`). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a
 few seconds (pure logic and controlled clocks, no real-time waits, unlike the
 slice smoke test; the tutorial soft-lock solver adds a second or two). Run
@@ -455,7 +489,11 @@ state of the REAL shipped hub and pit rooms: solvable from the start, and
 every wedged state can still reach the reset lever / the exit - the
 can-the-player-wedge-it proof the Known Risks row demands), and
 `test_debug_overlay` (T-030 hooks: hidden by default, grant dedup, reset
-delegation). Add a suite path to the `SUITES` list in `run_tests.gd` to
+delegation), `test_party_formation_layout` (T-096 exact choices, four-facing
+offsets, deterministic legal deployment/fallback, and authored elevation
+transition edges), and `test_visible_party_exploration_model` (T-087/T-096
+leader-only occupancy, selectable formation persistence, choke compression,
+and recovery). Add a suite path to the `SUITES` list in `run_tests.gd` to
 register new tests.
 
 The runner `await`s each test, so a suite method may be a coroutine when a test

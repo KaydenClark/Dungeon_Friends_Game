@@ -1,12 +1,13 @@
 class_name VisiblePartyExplorationModel
 extends RefCounted
-## Pure T-087 party-following state for the isolated exploration prototype.
+## Pure T-087/T-096 party-following state for the isolated exploration prototype.
 ##
 ## Only the selected leader contributes gameplay occupancy or interactions.
 ## Followers replay valid leader breadcrumbs as render-only positions, so they
 ## cannot block, push puzzle objects, or hold plates by construction.
 
 const HeightLayout = preload("res://scripts/dev/three_quarter_height_layout.gd")
+const FormationLayout = preload("res://scripts/dev/party_formation_layout.gd")
 
 const MEMBER_IDS := [&"hero", &"buddy", &"friend_c", &"friend_d"]
 const START_CELLS := {
@@ -40,13 +41,11 @@ const CHOKE_CELLS := [
 	Vector2i(6, 4),
 	Vector2i(6, 3),
 ]
-const GOAL_FOLLOWER_OFFSETS := [
-	Vector2i(-2, -1),
-	Vector2i(-3, -1),
-	Vector2i(-4, -1),
-]
+const DEFAULT_FORMATION: StringName = &"line"
+const DEFAULT_FACING := Vector2i.RIGHT
 
 var layout = HeightLayout.new()
+var formation_layout = FormationLayout.new()
 var successful_steps := 0
 
 var _leader_id: StringName = &"hero"
@@ -54,6 +53,8 @@ var _follower_order: Array[StringName] = []
 var _cells: Dictionary = {}
 var _trail: Array[Vector2i] = []
 var _formation_state: StringName = &"spread"
+var _selected_formation: StringName = DEFAULT_FORMATION
+var _facing: Vector2i = DEFAULT_FACING
 
 
 func _init() -> void:
@@ -68,6 +69,8 @@ func reset() -> void:
 		_cells[member_id] = START_CELLS[member_id]
 	successful_steps = 0
 	_formation_state = &"spread"
+	_selected_formation = DEFAULT_FORMATION
+	_facing = DEFAULT_FACING
 	_seed_trail()
 
 
@@ -105,6 +108,36 @@ func formation_state() -> StringName:
 	return _formation_state
 
 
+func formation_ids() -> Array[StringName]:
+	return formation_layout.formation_ids()
+
+
+func selected_formation() -> StringName:
+	return _selected_formation
+
+
+func facing() -> Vector2i:
+	return _facing
+
+
+func select_formation(formation_id: StringName) -> bool:
+	if not formation_layout.is_valid_formation(formation_id):
+		return false
+	_selected_formation = formation_id
+	if _formation_state == &"recovered":
+		_apply_selected_formation()
+	return true
+
+
+func cycle_formation() -> StringName:
+	var ids := formation_ids()
+	var index := ids.find(_selected_formation)
+	if index < 0:
+		return _selected_formation
+	select_formation(ids[(index + 1) % ids.size()])
+	return _selected_formation
+
+
 func is_walkable(cell: Vector2i) -> bool:
 	return (
 		layout.is_walkable(cell)
@@ -137,16 +170,16 @@ func try_step_leader(direction: Vector2i) -> bool:
 	var target := from_cell + direction
 	if not can_step(from_cell, target):
 		return false
-	var previous_cells := member_cells()
 	_trail.push_front(target)
 	if _trail.size() > MAX_TRAIL:
 		_trail.resize(MAX_TRAIL)
 	_cells[_leader_id] = target
+	_facing = direction
 	_place_followers_from_trail()
 	successful_steps += 1
 	_formation_state = _derive_formation_state()
 	if target == GOAL_CELL and _all_members_on_elevation(1):
-		_form_up_at_goal(previous_cells)
+		_form_up_at_goal()
 	return true
 
 
@@ -188,6 +221,35 @@ func follower_plate_holds() -> int:
 
 func follower_block_pushes() -> int:
 	return 0
+
+
+func deployment_snapshot(
+		blocked_cells: Array = [],
+		enemy_cells: Array = [],
+		prop_cells: Array = []) -> Dictionary:
+	var walkable_cells: Array[Vector2i] = []
+	var elevations := {}
+	for cell in layout.all_cells():
+		if is_walkable(cell):
+			walkable_cells.append(cell)
+			elevations[cell] = layout.elevation_at(cell)
+	var stair := layout.transition_at(layout.STAIR_CELL)
+	var elevation_transitions := [{
+		"from": layout.STAIR_CELL,
+		"to": stair.get("upper_cell", INVALID_CELL),
+	}]
+	return formation_layout.plan_deployment(
+			_selected_formation,
+			_leader_id,
+			_facing,
+			member_ids(),
+			member_cells(),
+			walkable_cells,
+			blocked_cells,
+			enemy_cells,
+			prop_cells,
+			elevations,
+			elevation_transitions)
 
 
 func _seed_trail() -> void:
@@ -251,19 +313,19 @@ func _all_members_on_elevation(level: int) -> bool:
 	return true
 
 
-func _form_up_at_goal(previous_cells: Dictionary) -> void:
-	var targets: Array[Vector2i] = []
-	for offset in GOAL_FOLLOWER_OFFSETS:
-		var target: Vector2i = GOAL_CELL + offset
-		if not is_walkable(target) or targets.has(target):
-			return
-		targets.append(target)
-	for index in range(_follower_order.size()):
-		var member_id: StringName = _follower_order[index]
-		var visible_from: Vector2i = previous_cells.get(member_id, INVALID_CELL)
-		if not can_step(visible_from, targets[index]):
-			return
-	for index in range(_follower_order.size()):
-		_cells[_follower_order[index]] = targets[index]
+func _form_up_at_goal() -> void:
+	if not _apply_selected_formation():
+		return
 	_formation_state = &"recovered"
 	_seed_trail()
+
+
+func _apply_selected_formation() -> bool:
+	var snapshot := deployment_snapshot()
+	var targets: Dictionary = snapshot.get("deployment_cells", {})
+	if targets.size() != MEMBER_IDS.size():
+		return false
+	for member_id in MEMBER_IDS:
+		_cells[member_id] = targets[member_id]
+	_seed_trail()
+	return true
