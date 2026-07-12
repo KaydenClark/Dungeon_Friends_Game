@@ -7,7 +7,7 @@
 **Status:** active - **v2 vision pivot (controlled reboot), canon reset 2026-07-11.**
 Docs now describe the v2 canon; the code on disk is still the v1 build. The
 pivot sequence in `TASKBOARD.md` (T-089..T-095) is the active plan. Superseded
-v1 decisions are recorded in Design Decisions (D-024..D-035), never silently
+v1 decisions are recorded in Design Decisions (D-024..D-037), never silently
 contradicted.
 **Source root:** `/Users/kayden/GPT_OS/Projects/Dungeon_Friends_Game`
 
@@ -191,7 +191,7 @@ must survive a store page. Keystore/signing safety rules stand unchanged.
 These sections define the v2 design. Where they conflict with older sections
 below (kept for history and because they describe the code still on disk),
 these win - see the Authority Order in `AGENTS.md` and the superseding
-decisions D-024..D-035.
+decisions D-024..D-037.
 
 ### Shared World Vocabulary (D-031)
 
@@ -232,10 +232,16 @@ micromanagement:
 - The player directly controls a selected leader.
 - Other active friends follow a recorded breadcrumb path or loose formation.
 - Followers do not block the leader or puzzle objects during normal
-  exploration.
+  exploration; the leader can move through their rendered positions.
+- The player can choose a grouping/deployment posture. The first prototype
+  exposes **line, square, and spaced** formations; names and final UI are
+  tunable, but selectable spacing is part of the party contract.
+- A one-cell choke temporarily compresses any selected formation into
+  breadcrumb single-file movement; the party reforms afterward.
 - The player can switch the leader for dialogue or field abilities.
-- When an encounter begins, followers snap to nearby valid cells and become
-  real occupying tactical units.
+- When an encounter begins, followers use the selected formation as their
+  preferred deterministic deployment, fall back to the nearest legal reachable
+  cells when terrain requires it, and become real occupying tactical units.
 - During combat, every unit obeys normal collision and positioning rules
   (D-020's intentional ally-blocking survives inside encounters).
 
@@ -261,8 +267,8 @@ Core rules:
 First-cut damage formula (tunable; the contract is preview=result, not the
 numbers): `damage = max(1, ability_power + attacker_stat - target_defense)`.
 
-**Turn structure (provisional, D-027 - prototype before committing, T-092):**
-the recommended model is **intent rounds**:
+**Turn structure (resolved, D-027; Kayden's T-092 verdict 2026-07-11):**
+combat uses **intent rounds**:
 
 1. Enemies move or declare their plans.
 2. The player sees every enemy target and effect.
@@ -270,10 +276,29 @@ the recommended model is **intent rounds**:
 4. Enemy actions resolve.
 5. Environmental reactions resolve.
 
-The alternative (alternating per-unit initiative with intentions shown a turn
-early - closer to the existing `TurnManager`) stays on the table if the
-prototype shows intent rounds don't hold up. Do not lock either model until
-T-092's verdict.
+Each enemy maintains a rolling forecast of upcoming verbs. The prototype
+default horizon is three, but the exact count remains tunable. Previously shown
+future verbs stay stable during an ordinary refill; if the plan becomes invalid
+(for example, its internal target is defeated or the current verb is no longer
+legal), the enemy replans the full horizon from the new state. Future steps
+expose the **verb only** - move, attack, fire, guard, and so on - never the
+hidden target or destination. Only the current action reveals exact movement,
+affected cells, damage, and status. The party then acts in any order before the
+enemy action and environmental reactions resolve.
+
+Same-room continuity does not mean an invisible mode change (D-036). When an
+encounter begins, exploration input freezes briefly, an original audio/visual
+stinger announces the encounter, and the turn-based controls/intent surface
+appear before the first player action. The camera, room, positions, puzzle
+state, and shared rules remain continuous - no separate arena or scene swap.
+
+Body blocking is a tactical promise, not incidental congestion (D-037).
+Formation/deployment gives the player deliberate starting spacing, and combat
+abilities may create exact protected cells. The first gray-box acceptance case
+is a directional guard field covering the cell in front plus the adjacent left
+and right cells for an exact duration, capable of intercepting a line-shaped
+breath attack. This proves the spatial contract without locking a specific
+friend or dragon ability before T-093's shared vocabulary exists.
 
 ### Perspective And Elevation (D-030)
 
@@ -289,6 +314,9 @@ diamond-isometric rendering:
 - Preserve Manhattan grid movement initially.
 - Add high-ground bonuses and line-of-sight only after basic elevation feels
   good in play - they are explicitly out of the first visual spike (T-089).
+- Kayden accepted the T-089 elevation read without explanatory labels on
+  2026-07-11. The remaining issue is palette/color separation, not projection,
+  grid logic, or elevation architecture.
 
 ### Roster And Recruitment (D-033)
 
@@ -1106,7 +1134,7 @@ Rules:
 | **D-024 v2 vision pivot (controlled reboot).** New organizing principle: one persistent world, one shared environmental vocabulary, a visible party of Dungeon Friends, and encounters that permanently resolve problems. New pillar set (see Design Pillars); docs-only canon reset first, then the T-089..T-095 pivot sequence; no v1 code deleted before its v2 replacement is verified | Kayden's research pass (Horizon's Gate, Into the Breach, deterministic tactics) plus a ChatGPT design review he endorsed. The unified model is more distinctive than "Zelda exploration + separate BG3 battle" and merges combat with the puzzle system instead of maintaining two rulesets | 2026-07-11 / Kayden pivot notes + review |
 | **D-025 unified in-room encounters.** Combat happens in the current room using the same grid, camera vocabulary, and environmental state - no separate `CombatScene`, no arena selection, no zoom transition. Followers snap to valid cells and become tactical units when an encounter begins. **Supersedes D-012 and D-018 as the production combat path** (the seven authored arenas + stone hall are salvage: their layouts can become in-world authored encounter spaces), and retires the 2026-07-05 camera-zoom-transition decision | The Horizon's Gate lesson: one environment and one vocabulary make the world feel continuous and let terrain manipulation matter everywhere. The just-built arena lane was the thinnest layer of Phase 4; the math/data/turn infrastructure carries over | 2026-07-11 / Kayden pivot |
 | **D-026 deterministic combat - no random hit rolls.** Attacks hit if the target remains in the affected cells; damage previews always match results; status durations and forced movement are exact; crits come from positioning/combinations. First-cut formula `damage = max(1, ability_power + attacker_stat - target_defense)` (numbers tunable; preview=result is the contract). **Supersedes the 2026-07-05 d10 percentage decision and the T-060 formula** | Elemental combinations and telegraphed intentions are only satisfying when results are dependable; none of the reference games use hit RNG. Removes a whole class of feel complaints ("the 70% missed twice") before a commercial audience sees it | 2026-07-11 / Kayden pivot |
-| **D-027 telegraphed enemy intent; turn structure PROVISIONAL.** Enemies show intended movement, target area, damage, and status before acting; moving/blocking/stunning/freezing/pushing/obscuring can change or cancel the intention. Recommended model is **intent rounds** (enemies declare -> player sees everything -> party acts in any order -> enemy actions resolve -> environmental reactions resolve); alternating per-unit initiative with early-shown intents remains the fallback. **T-092 prototypes before either is locked** - do not commit combat architecture to intent rounds ahead of that verdict | Determinism without telegraphs is spreadsheet combat; telegraphs without determinism are noise. Intent rounds better support party combinations and battlefield manipulation, but they are the biggest departure from the working `TurnManager`, so they earn a prototype, not a lock | 2026-07-11 / Kayden pivot + review recommendation |
+| **D-027 telegraphed intent rounds - RESOLVED.** Enemies move or declare; the player sees every current target/effect; party members act in any order; enemy actions resolve; environmental reactions resolve. Enemies keep a trustworthy rolling verb forecast (prototype default: 3): ordinary refills preserve already-shown verbs, invalid plans rebuild from the new state, future steps reveal verb only, and the current action reveals exact cells/damage/status. Moving/blocking/stunning/freezing/pushing/obscuring can change or cancel it. Alternating per-unit initiative is retired as the v2 production direction | Kayden's played T-092 verdict confirmed the intended structure and restated the exact deterministic/telegraph contract. Stable future verbs reward planning while invalidation-driven replans keep enemies responsive without leaking targets | 2026-07-11 / Kayden T-092 verdict |
 | **D-028 persistent encounter resolution.** Resolved encounters stay resolved; defeated enemies do not return; the world change (route, relationship, resource) persists. `SaveData` gains resolved-encounter IDs and persistent environmental state. Progression economy: finite authored XP, ability unlocks via recruitment/story, equipment via treasure/craft/shops; no grind. **Supersedes D-009** (always-respawn) and reverses its `no defeated_enemy_ids` schema rule; D-008's defeat/XP-penalty flow needs a follow-up review against finite XP (flagged, not yet redesigned) | "Combat should resolve the issue" is a founding note of the pivot; respawning enemies made combat a toll, not a resolution. The soft-lock escape valve D-009 provided must be re-provided by puzzle-state reset alone, which T-091 (persistence proof) must prove | 2026-07-11 / Kayden pivot |
 | **D-029 whole active party visible in exploration.** Leader directly controlled; others follow breadcrumb/loose formation; followers never block the leader or puzzle objects outside encounters; leader switchable for dialogue/field verbs; field abilities via a quick wheel/party bar. **Supersedes D-005** (single avatar) and un-retires the party-visible idea the old Gameplan §10 snake-follow gestured at, with better collision rules | The party fantasy is core to the collection appeal; one avatar representing four friends undercut it. Non-blocking followers avoid the corridor-wedging that killed snake-follow | 2026-07-11 / Kayden pivot |
 | **D-030 three-quarter perspective on the orthogonal grid.** Keep the square logic grid, `TileMapLayer`, `AStarGrid2D`, and grid-snapped Tween movement; render in 3/4 with vertical wall faces; add small integer cell elevation with ramps/stairs; Manhattan movement preserved; high-ground/LoS bonuses deferred until basic elevation feels good. **No true diamond-isometric rendering.** Narrows, does not break, the flexible HD/ultrawide rendering decision; supersedes the "clean top-down camera" visual-language row | Horizon's Gate itself fakes height this way. True isometric would rework level authoring, movement, art, collision, and pathfinding for little near-term gameplay return; elevation-as-integer gets the height readability at art-pass cost | 2026-07-11 / Kayden pivot (perspective fork: "Faked 3/4, flat grid") |
@@ -1115,6 +1143,8 @@ Rules:
 | **D-033 roster targets and friend template.** Thesis prototype: Hero + 2 real friends. Steam demo/vertical slice: 5-6 recruitable, active party of 4. Full game: ~10-12 excellent friends before considering more. Each friend = one primary world verb + small deterministic combat kit + one passive/reaction + one personality hook/recruitment story + one meaningful verb interaction with another friend. Critical path never requires predicting the roster hours ahead (shrine/camp swapping, multi-solution puzzles, roster-specific puzzles optional-only, hero baseline toolset, telegraphed requirements). **Supersedes D-013's temporary-companion contract** - the first real recruit arrives with the thesis slice (T-094) | The Pokemon feel comes from discovery, anticipation, and choosing 4 from a roster - not from hundreds of characters. Kayden himself flagged the many-friends scope creep; the verb system plus this cap is the answer | 2026-07-11 / Kayden pivot (roster fork: "10-12 friends") |
 | **D-034 encounters beyond combat; auto-resolve later.** An `Encounter`'s resolution may be defeat, delivery, escort, environmental manipulation, satisfying/persuading/intimidating/assisting an NPC, or discovering an alternate route - one resolution framework, no separate dialogue-RPG ruleset. Combat is avoidable by design. Auto-resolve unlocks only when the party clearly outclasses an optional encounter or has mastered that enemy family | "Encounters are mainly combat but not only combat" is Kayden's founding pivot note; finite encounters make indiscriminate auto-resolve an economy leak, so it is gated, not general | 2026-07-11 / Kayden pivot |
 | **D-035 story spine: the dragon expedition.** A dragon lands on the mountain overlooking the city; the goddess Selena chooses the protagonist to unite incompatible people and powers; each region carries a local consequence of the dragon's presence whose solution reveals or recruits a Dungeon Friend; distrustful friends learn to combine verbs; the mountain route is the final exam of the environmental vocabulary. Dragon visible/foreshadowed from very early; the city leans toward hub status. **Supersedes the 2026-07-09 four-legendary-items spine**; regional geography survives. `docs/WORLD_LORE.md` realignment is follow-up work | Assembling the expedition is a stronger structure than four item errands, and it makes party-building the story itself. The existing forest -> river valley -> mountain -> city -> lair region plan needed almost no change | 2026-07-11 / Kayden pivot |
+| **D-036 encounter-mode cue inside the continuous room.** Detection/contact immediately gates exploration input, then a short original audio/visual stinger and turn-based UI announce the encounter before the first player action. The room, camera, positions, puzzle state, and rules do not swap. **Clarifies D-025:** continuous means one world/ruleset, not an imperceptible transition | Fable's spike felt too seamless: combat appeared without the BG3-like “you entered turn-based mode” beat Kayden expected. A local cue gives the state change weight without rebuilding the retired arena/scene split | 2026-07-11 / Kayden consolidation playtest |
+| **D-037 selectable party formation plus tactical combat occupancy.** Exploration followers remain visible but pass-through/non-interacting. The player selects a preferred line, square, or spaced posture; chokes compress temporarily and the party reforms afterward. Encounter start deterministically deploys toward that posture on legal reachable cells, then all allies occupy cells and body-block normally. Directional protection/guarded cells are a valid combat tactic; exact friend kits remain future content | Both four-follower demos felt good, especially Fable's pass-through leader movement. Kayden wants spacing to be chosen deliberately so ally collision creates positioning tactics rather than accidental congestion; the shield-vs-breath example is the first acceptance case, not a locked roster ability | 2026-07-11 / Kayden consolidation playtest |
 
 ## Health Criteria
 

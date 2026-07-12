@@ -11,9 +11,10 @@ This file explains how to operate, verify, recover, and evaluate the project.
 It should be boring, exact, and executable.
 
 > **Pivot note (2026-07-11):** the project's design rebooted to v2 (see
-> `BLUEPRINT.md` -> V2 Systems and D-024..D-035). Every procedure below still
+> `BLUEPRINT.md` -> V2 Systems and D-024..D-037). Every procedure below still
 > applies - it operates the v1 code on disk, which stays in place until the
-> pivot sequence (`TASKBOARD.md` T-089..T-095) replaces each piece. Update
+> pivot sequence (`TASKBOARD.md` T-089..T-097; follow the board's dependency
+> order) replaces each piece. Update
 > the relevant procedure rows as v1 systems (d10 combat, arena selection,
 > zoom transition, enemy respawns, single avatar) are retired. Android export
 > material remains valid but is deprioritized (D-032: Steam-first, mobile
@@ -330,9 +331,11 @@ Each run writes six captures and prints 23 `PASS:` assertions (preview =
 result, dodge, body-block, stun/push cancellation, exact burn/stun
 durations, world continuity), exiting `0`; any `FAIL:` exits `1`. The pure
 rules live in `game/scripts/dev/intent_logic.gd` with red/green coverage
-in `tests/test_intent_logic.gd`. **D-027 stays open until Kayden's played
-verdict** - this scene is the intent-rounds candidate; the v1 initiative
-combat remains on disk for comparison.
+in `tests/test_intent_logic.gd`. **D-027 is resolved in favor of intent
+rounds.** T-097 owns the remaining revision: a clear local encounter-entry
+cue, four active party members, stable rolling-forecast semantics with full
+replan on invalidation, and a generic directional guard-field acceptance case.
+The v1 initiative combat remains on disk as historical comparison only.
 
 ### Alternative isolated pivot proofs (Sol branch)
 

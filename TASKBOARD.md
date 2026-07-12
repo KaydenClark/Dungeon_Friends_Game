@@ -3,27 +3,25 @@
 > Generated from LLM Workbench v2.1. See `RUNBOOK.md` -> Upgrading The
 > Harness.
 
-**Current focus: THE V2 VISION PIVOT (2026-07-11, D-024..D-035 in
+**Current focus: THE V2 VISION PIVOT (2026-07-11, D-024..D-037 in
 `BLUEPRINT.md`).** Kayden's research pass triggered a controlled reboot of
 the design: one persistent world, one shared environmental vocabulary, a
 visible party of Dungeon Friends, and encounters that permanently resolve
 problems - deterministic, telegraphed, in-room combat replacing the separate
-d10 arena mode; Steam-first commercial target. **T-088 (docs-only canon
-reset) is done; T-089 (three-quarter visual spike), T-090 (unified in-room
-encounter spike), and T-092 (deterministic intent prototype) are built and
-awaiting Kayden's verdicts - D-027 hangs on his played read of T-092.** The pivot sequence T-089..T-095 replaces the old "Phase 5 - Party
-System & Progression" plan, and T-069's windowed acceptance no longer gates
-anything (superseded - the arena/transition layer it was accepting is
-retired by D-025).
+d10 arena mode; Steam-first commercial target. **Kayden accepted T-089's
+elevation read and resolved D-027 in favor of intent rounds. T-096 (Sol:
+selectable formations/deployment) and T-097 (Fable: encounter cue, four-unit
+intent recut, rolling-plan invalidation, guard-field proof) are the immediate
+revision gates before T-093.** T-069 and the old Phase 5 sequence remain
+superseded.
 
 **Do not delete working v1 code before its v2 replacement exists and is
 verified** - retirement is staged through the pivot sequence (see
 `BLUEPRINT.md` -> V2 Systems -> Reuse, Rework, Retire).
 
 **Owner:** Kayden
-**Last updated:** 2026-07-11 (v2 canon reset: `BLUEPRINT.md`, `AGENTS.md`,
-and this board rewritten to the pivot; pivot sequence added as
-T-089..T-095)
+**Last updated:** 2026-07-11 (consolidation playtest verdicts recorded;
+D-027 resolved; T-096/T-097 handoffs added)
 
 This is the live work queue and proof ledger. Agents use it to decide what to
 work on next. Keep strategy and long-term direction in `BLUEPRINT.md`; keep
@@ -51,11 +49,16 @@ commands and verification procedures in `RUNBOOK.md`.
 - **Health:** green on Godot 4.7. Fresh 2026-07-11 consolidation checks:
   `--import` clean, `main.tscn` boots (`SceneManager ready.`), unit tests PASS
   (35 suites / 235 tests / 1,331 checks), slice smoke PASS 134/134, and windowed
-  arena-gallery/combat-showcase screenshots render at 1280x720. The
-  the new two-process saveload battery PASS (save 10/10, load 11/11). The
+  arena-gallery/combat-showcase screenshots render at 1280x720. The new
+  two-process saveload battery PASS (save 10/10, load 11/11). The
   intentional bad-wiring pressure-plate test emits one warning; no test
   failures.
-- **Latest decisions:** teammate collision stays as combat balance (D-020);
+- **Latest decisions:** intent rounds are locked (D-027); encounter entry gets
+  a clear local freeze/stinger/turn-based UI cue without a scene swap (D-036);
+  exploration followers stay pass-through while line/square/spaced formation
+  choices govern grouping and preferred encounter deployment, after which
+  tactical occupancy/body-blocking applies (D-037). Teammate collision stays
+  as combat balance (D-020);
   Item must name/select its consumable (D-021); manual jumping is benched
   behind a future traversal item (D-022); the first pressure-plate room now
   isolates plate + block + gate on one floor (D-023 clarification); prompts
@@ -69,19 +72,13 @@ commands and verification procedures in `RUNBOOK.md`.
   the two-process acceptance battery. Phase 4's data, math, TurnManager/FSM,
   multi-unit arena, range selection, command set, LDtk/reward wiring,
   transition, HUD, acceptance battery, and authored-arena lane are built.
-- **Next work:** T-089, T-090, and T-092 are consolidated on
-  `codex/unified-world-consolidation` and awaiting Kayden's verdicts
-  (2026-07-11):
-  the three-quarter spike room (`docs/screenshots/t089-three-quarter-spike/`),
-  the unified in-room encounter inside it (8 continuity assertions green;
-  `docs/screenshots/t090-unified-encounter/`), and the deterministic
-  intent-rounds prototype built to Kayden's same-day spec (rolling 3-verb
-  plan, verb-only future telegraphs, 23 live assertions green;
-  `docs/screenshots/t092-intent-prototype/`). **The key pending input is
-  Kayden's played D-027 verdict on the intent prototype.** T-093 (reaction
-  prototype - the pivot's riskiest assumption) is next after that. T-069's
-  acceptance pass is superseded by the pivot; the old Phase 5 plan is
-  retired.
+- **Next work:** execute the two isolated handoffs in
+  `docs/planning/SOL_FABLE_PIVOT_FIX_HANDOFF.md`. Sol owns T-096's pure
+  formation/deployment contract and palette-only height recut. Fable owns
+  T-097's encounter-entry phase, all-four-party any-order turns, stable
+  rolling forecast with full invalidation replan, and generic three-cell guard
+  field. Merge and replay both revisions before starting T-093, the reaction
+  prototype and riskiest remaining pivot assumption.
 - **Alternative evidence retained:** Sol's isolated height/readability and
   visible-party exploration spikes remain on the consolidation branch as
   focused test harnesses. They are useful for evaluating elevation metadata,
@@ -99,14 +96,14 @@ commands and verification procedures in `RUNBOOK.md`.
 
 ## Pending Decisions
 
-### V2 pivot round (2026-07-11) - one OPEN decision, one flagged review
+### V2 pivot round (2026-07-11) - combat structure resolved, one flagged review
 
 | ID | Decision | Resolution | Owner |
 |---|---|---|---|
-| D-027 | **Combat turn structure:** intent rounds (enemies declare -> player sees all -> party acts in any order -> enemies resolve -> environment resolves) vs. alternating per-unit initiative with intents shown a turn early? | **OPEN - provisional lean: intent rounds.** Resolved by the T-092 prototype's played verdict; do not commit combat architecture to either model before then. Full framing in `BLUEPRINT.md` D-027 | Kayden (via T-092) |
+| D-027 | **Combat turn structure:** intent rounds vs. alternating per-unit initiative? | **RESOLVED - intent rounds.** Rolling future forecast exposes verbs only; current intent exposes exact cells/damage/status; party acts in any order; invalid plans replan from current state. Prototype horizon 3 is tunable. | Kayden (T-092 verdict, 2026-07-11) |
 | (D-008 review) | Does the defeat XP-penalty flow still make sense under D-028's finite XP economy (no respawn grind to earn it back)? | **Flagged, not yet designed.** Revisit during T-094 progression work; candidates: smaller penalty, money-loss once currency exists, or time-loss only | Kayden |
 
-All other pivot decisions (D-024..D-035) were resolved 2026-07-11 and live in
+All pivot decisions D-024..D-037 are resolved and live in
 `BLUEPRINT.md` -> Design Decisions.
 
 The architecture/toolchain decisions were resolved in the original research
@@ -204,10 +201,11 @@ Session Control.
 
 ## Ready
 
-**The v2 pivot sequence is the active plan** (2026-07-11, D-024..D-035;
-`BLUEPRINT.md` -> V2 Systems). Execution order: T-089 -> T-090 -> T-092 ->
-T-093 -> T-091 -> T-094 -> T-095 (IDs are not chronological - T-091's number
-was assigned before the sequence order settled; follow the Depends column).
+**The v2 pivot sequence is the active plan** (2026-07-11, D-024..D-037;
+`BLUEPRINT.md` -> V2 Systems). Current execution order: T-096 + T-097 ->
+owner replay -> T-093 -> T-091 -> T-094 -> T-095. T-089/T-090/T-092 produced
+the accepted direction and the two bounded revision handoffs; follow the
+Depends column rather than numeric order.
 Spike tasks may live in `scenes/dev`/`scripts/dev` as throwaway code -
 graduating a spike into production architecture is its own explicit decision.
 **Do not delete working v1 code before its v2 replacement exists and is
@@ -224,10 +222,12 @@ preview-equals-result contract is itself a test.
 | ID | Priority | Task | Why | Depends | Proof required | Owner | Status | Last update |
 |---|---:|---|---|---|---|---|---|---|
 | T-088 | 1 | **Pivot step 1 - canon reset (docs only).** Rewrite `BLUEPRINT.md` (v2 identity, pillars, non-goals, V2 Systems, D-024..D-035 superseding log), update `AGENTS.md` locked decisions, reset this board around the pivot sequence. No code changes. | Explicit supersession before any code is removed or rewritten - the review's recommended first step | - | The three docs read consistently v2; superseded decisions recorded by ID, not deleted | Claude | **done** (2026-07-11) | 2026-07-11 |
-| T-089 | 1 | **Pivot step 2 - three-quarter visual spike.** One dev room on the orthogonal grid: two elevation levels via a small integer cell elevation, one ramp/stair transition, one tall vertical wall face, and four party members visible (directly controlled leader + 3 breadcrumb/formation followers). Kenney or recolored art is fine. **Explicitly out of scope:** high-ground bonuses, line-of-sight, combat. | Proves D-029/D-030 readability before any art, roster, or combat investment | T-088 | Windowed screenshots at 1280x720 + 1920x1080; Kayden's readability verdict (does height read? does the party read as a party?) | Claude | **needs-review** - spike built (`scenes/dev/three_quarter_spike.tscn`), both screenshot sets captured; Kayden's readability verdict remains | 2026-07-11 |
-| T-090 | 1 | **Pivot step 3 - unified encounter spike.** Hero + one friend + one enemy fight directly inside the T-089 room: contact/detection starts the encounter in place, followers snap to nearby valid cells and become blocking tactical units (D-020 survives in-encounter), no scene change or zoom, and the overworld is simply continuous after victory. Reuse `TurnManager`/combat math where convenient - this spike does not decide the turn structure. | D-025's core claim - the same room is the battlefield | T-089 | Encounter starts, plays, and resolves in-room; world state (positions, puzzle state) continuous before/after; screenshot or short capture | Claude | **needs-review** - built (`scenes/dev/unified_encounter_spike.tscn`); scripted tour passes all 8 continuity assertions; Kayden play-check remains | 2026-07-11 |
-| T-092 | 1 | **Pivot step 4 - deterministic intent prototype.** One enemy telegraphs its next action (intended movement, target cells, exact damage/status); the player can move out, block, stun, push, or obscure to change or cancel it; the shown preview always equals the result. Build the intent-rounds model (declare -> see -> party acts any order -> enemy resolves -> environment resolves) and compare in play against alternating initiative with early-shown intents. **This task decides D-027's turn structure - record the verdict as a Pending Decision resolution.** | D-026/D-027 are the combat identity; the turn-structure fork is the biggest architecture decision of the pivot and must be earned by play, not argued | T-090 | Red/green on preview=result and intent cancellation; a played comparison note (which model felt better and why); D-027 verdict recorded | Claude | **needs-review** - intent-rounds prototype built to Kayden's 2026-07-11 spec (rolling 3-verb plan, verb-only future telegraphs, full-detail current action); red/green + live assertions green; **Kayden's played verdict on D-027 remains the deliverable** | 2026-07-11 |
-| T-093 | 1 | **Pivot step 5 - reaction prototype.** Material tags + effect propagation on the grid cells: grow a vine then burn it; flood a tile then freeze it; wet + spark conducts; air spreads fire or clears smoke - through **one code path used identically inside and outside the encounter**. | **The riskiest assumption of the whole pivot (D-031).** If this gray-box room is not fun, stop and rethink before scaling roster or world | T-092 | Red/green on the reaction matrix (each vocabulary row); the same verb function invoked from exploration and combat contexts; Kayden plays the room and records a fun/not-fun verdict | - | ready (after T-092) | 2026-07-11 |
+| T-089 | 1 | **Pivot step 2 - three-quarter visual spike.** One dev room on the orthogonal grid: two elevation levels, one ramp/stair transition, one tall vertical wall face, and four visible party members. | Proves D-029/D-030 readability before production migration | T-088 | Kayden can read height and legal movement without explanatory labels | Claude/Sol | **accepted** - elevation reads; T-096 may change palette/colors only, not geometry/projection/elevation logic | 2026-07-11 |
+| T-090 | 1 | **Pivot step 3 - unified encounter spike.** Combat starts, plays, and resolves in the current room with world state continuous before/after. | D-025's core claim - one room and ruleset | T-089 | Same scene/camera/positions/puzzle state; explicit encounter-mode entry cue before player control | Fable | **revision-needed via T-097** - continuity accepted; current transition is too imperceptible | 2026-07-11 |
+| T-092 | 1 | **Pivot step 4 - deterministic intent prototype.** Rolling verb forecast, exact current intent, all party members acting in any order, deterministic counterplay and resolution. | D-026/D-027 are the combat identity | T-090 | Preview=result; stable future verbs; full replan on invalidation; four active units; played verdict | Fable | **design accepted; implementation revision T-097** - D-027 resolved to intent rounds | 2026-07-11 |
+| T-096 | 1 | **Sol handoff - selectable formation/deployment contract.** Preserve exploration pass-through. Add pure line/square/spaced layouts, choke compression/recovery, deterministic legal encounter-start cells, and a palette-only height recut. | Makes body-blocking intentional by letting the player choose starting spacing; gives Fable one neutral deployment seam | T-089 | Strict red/green formation rotation/fallback/pass-through/leader-switch/choke tests; three formation captures + recovery; no production architecture | Sol | **ready - handoff prepared** (`docs/planning/SOL_FABLE_PIVOT_FIX_HANDOFF.md`) | 2026-07-11 |
+| T-097 | 1 | **Fable handoff - encounter cue + intent-round revision.** Add a local freeze/stinger/turn-based UI entry phase; activate all four party units in any order; preserve already-shown forecast verbs on normal refill and rebuild all 3 on invalidation; add a generic exact-duration three-cell guard field against a line attack. | Gives same-room combat the missing “encounter started” beat and proves tactical spacing/body protection without rebuilding a second game | T-096 contract (neutral member/deployment snapshot; implementation may proceed in parallel) | Red/green cue gating/continuity, four-unit order, forecast trust/replan, illegal-move, target-leak, guard preview=result/duration tests; scripted windowed tour | Fable | **ready - handoff prepared** (`docs/planning/SOL_FABLE_PIVOT_FIX_HANDOFF.md`) | 2026-07-11 |
+| T-093 | 1 | **Pivot step 5 - reaction prototype.** Material tags + effect propagation on the grid cells: grow a vine then burn it; flood a tile then freeze it; wet + spark conducts; air spreads fire or clears smoke - through **one code path used identically inside and outside the encounter**. | **The riskiest assumption of the whole pivot (D-031).** If this gray-box room is not fun, stop and rethink before scaling roster or world | T-096, T-097 | Red/green on the reaction matrix (each vocabulary row); the same verb function invoked from exploration and combat contexts; Kayden plays the room and records a fun/not-fun verdict | - | ready after T-096/T-097 merge + replay | 2026-07-11 |
 | T-091 | 2 | **Pivot step 6 - persistence proof.** Defeat the enemy, alter the environment, leave the room, save, quit, relaunch, reload: the resolved encounter stays resolved and the environmental changes persist. `SaveData` gains resolved-encounter IDs and persistent environmental state (reverses D-009's schema rule per D-028). Also re-prove the soft-lock escape valve: leaving and re-entering still resets wedged puzzle blocks WITHOUT resurrecting resolved encounters. | D-028's contract, and the replacement for the protection D-009 used to provide | T-090, T-093 | Two-process battery in the T-042 style: resolve -> save -> quit -> relaunch -> assert resolved + environment persisted + block reset still works | - | ready (after T-093) | 2026-07-11 |
 | T-094 | 2 | **Pivot step 7 - thesis slice.** One recruitable friend with a real verb, personality hook, and recruitment story (replaces D-013's Buddy placeholder contract per D-033); one NPC encounter with a non-combat resolution (D-034); one environmental puzzle using the shared vocabulary; one meaningful tactical fight. The v2 loop (adventure -> party progression -> encounter -> world change) end to end. | First integrated proof of the v2 game as a game | T-091 | Playable slice; each loop step demonstrable in under a minute each; Kayden acceptance | - | ready (after T-091) | 2026-07-11 |
 | T-095 | 2 | **Pivot step 8 - external playtest.** Put the thesis slice in front of players who did not help design it, before scaling the roster or world. Capture first-session confusion, fun verdicts, and whether the verb system is discovered without prompting. | The Steam-first decision (D-032) makes external eyes a requirement, not a luxury | T-094 | Notes from 2+ external testers; re-cut tasks filed from findings | Kayden | ready (after T-094) | 2026-07-11 |
@@ -552,3 +552,4 @@ dated heading.
 | 2026-07-11 | T-090 | Claude (Cowork session) | **Pivot step 3 - unified in-room encounter spike** on `claude/unified-world-pivot`, started ahead of the T-089 verdict (same room; logic survives a visual recut). New `unified_encounter_spike.{tscn,gd}` extending the T-089 spike: slime GridActor on the plateau; detection (Manhattan <= 2) or direct bump starts the encounter IN PLACE - no scene change, zoom, or camera move; followers snap onto their breadcrumb cells and enter the occupancy map (D-020 ally blocking in-encounter), friend fights via simple AI, deterministic damage max(1, atk-def) per D-026's first-cut formula (no rolls); victory fades the slime, vacates the followers (D-029 non-blocking restored), and exploration simply continues. Turn model is a throwaway step-tick; D-027 stays open for T-092. A PushableBlock is pushed pre-fight for the puzzle-state continuity proof. Verified: import clean; headless boot marker; unit suite PASS (32/206/1024); scripted windowed tours at 1280x720 + 1920x1080 pass all 8 continuity assertions (exit 0) and shots visually inspected. | `docs/screenshots/t090-unified-encounter/{1280,1920}/` (4 PNGs each); one command re-runs the 8-assertion tour (see RUNBOOK -> Unified in-room encounter spike) | pass (agent-side); Kayden play-check pending | RUNBOOK T-090 section added; taskboard rows updated | Kayden's played verdict; the step-tick turn model is deliberately NOT the D-027 answer |
 | 2026-07-11 | T-092 | Claude (Cowork session) | **Pivot step 4 - deterministic intent prototype**, built to Kayden's same-day spec: the enemy keeps a rolling 3-verb plan (pure function of state, zero RNG anywhere), replanned when the current verb is impossible; FUTURE plan steps telegraph the verb only (not where/who), the CURRENT action declares full detail (locked cells, exact damage, exact status); player-side previews always show exact damage before commit. Round loop: enemy moves-or-declares -> player sees every target/effect (live re-previewed as units move) -> party acts in any order (Tab switch, move budget + one ability) -> enemy resolves against whoever REMAINS in the locked cells -> environment ticks (burn: exactly 1 dmg for exactly its duration; stun consumed at declare so "stun N" skips exactly N declares). Counterplay proven: dodge out, body-block the line, Bash stun-cancels, Shove push-cancels. Pure core in `scripts/dev/intent_logic.gd` + `tests/test_intent_logic.gd` (54 checks; red verified by a deliberate resolve mutation the suite caught, then restored); scene `scenes/dev/intent_prototype_spike.{tscn,gd}` on the T-089/T-090 room. Verified: import clean, headless boot, unit suite PASS (33 suites / 221 tests / 1078 checks), windowed tours at 1280x720 + 1920x1080 pass all 23 live assertions (exit 0), shots inspected. | `docs/screenshots/t092-intent-prototype/{1280,1920}/` (6 PNGs each); one command re-runs the 23-assertion tour (RUNBOOK -> Intent prototype) | pass (agent-side); **D-027 verdict is Kayden's after playing** | RUNBOOK T-092 section added; taskboard rows updated | Kayden's played D-027 verdict (intent rounds vs alternating initiative - the v1 combat path is still on disk if an A/B is wanted); obscure/freeze counterplay verbs and environmental reactions beyond burn wait for T-093 |
 | 2026-07-11 | Unified-world branch consolidation | Codex | Fetched the live `codex/unified-world-pivot` (Sol) and `claude/unified-world-pivot` (Fable) branches, created `codex/unified-world-consolidation` from current `origin/integration`, and merged both histories. Resolved the shared-doc and unit-runner conflicts by keeping Fable's D-024..D-035 canon/T-088..T-095 queue, retaining Sol's isolated height and follower models as comparison harnesses, and registering all three new pure suites together. Added a critical keep/defer/owner-review record rather than prematurely generalizing either spike into production architecture. | `docs/UNIFIED_WORLD_CONSOLIDATION_REVIEW.md`; run the five dev scenes in `RUNBOOK.md` and compare the retained screenshots | pass - Godot 4.7 `--import` exit 0; unit **35 suites / 235 tests / 1,331 checks**; main boot exit 0 with `SceneManager ready.`; full slice smoke **134/134**; Sol height/party and Fable height/encounter/intent scenes all boot headless; existing screenshots visually inspected | updated (`TASKBOARD.md`, `RUNBOOK.md`, consolidation review); `AGENTS.md`, `BLUEPRINT.md`, and `README.md` resolved to the approved Fable canon; Sol's `WORLD_LORE.md` realignment retained; verification-only LDtk reimports restored | Kayden must decide perspective readability, party-motion density/leader switching, same-room combat feel, D-027 turn structure, and four-unit body-blocking before T-093 or production migration proceeds |
+| 2026-07-11 | Consolidation owner verdicts + Sol/Fable fix handoff | Kayden + Codex | Recorded Kayden's played verdicts: Sol's elevation is accepted pending palette only; four visible pass-through followers are accepted; selectable line/square/spaced formations should govern grouping and preferred encounter deployment; same-room combat needs a clear local freeze/stinger/turn-based UI entry beat; D-027 is resolved to intent rounds with a stable rolling verb forecast and full replan on invalidation; tactical occupancy must support deliberate protection patterns such as a generic three-cell guard field against a breath-like line. Added D-036/D-037 and split the next work into non-overlapping T-096 (Sol formation/deployment contract) and T-097 (Fable encounter/intent recut). | `docs/planning/SOL_FABLE_PIVOT_FIX_HANDOFF.md` plus the updated verdict section in `docs/UNIFIED_WORLD_CONSOLIDATION_REVIEW.md` | pass - docs-only consistency scan and `git diff --check`; no gameplay verification claimed; previous green consolidation battery remains the implementation baseline | updated (`AGENTS.md`, `BLUEPRINT.md`, `TASKBOARD.md`, `RUNBOOK.md`, consolidation review, new handoff); `README.md`, `docs/WORLD_LORE.md`, and asset docs checked, no update needed because this pass changes internal prototype contracts/work order, not public pitch, lore, or asset provenance | Sol and Fable implement only their scoped prototype branches; merge/replay both on consolidation before T-093; Godot-regenerated arena imports present before this docs pass remain untouched |

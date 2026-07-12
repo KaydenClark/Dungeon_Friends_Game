@@ -8,7 +8,8 @@
 
 ## Consolidation decision
 
-Fable's D-024..D-035 canon and T-088..T-095 sequence remain authoritative.
+Fable's D-024..D-035 canon remains authoritative, with Kayden's D-036/D-037
+playtest refinements and T-096/T-097 revision gates now added.
 They are the more complete expression of the approved reboot and match the
 repository's current agent rules. Sol's competing task numbering is not
 promoted into the active queue.
@@ -39,27 +40,33 @@ Both implementations are retained because they answer different questions:
   into a generalized party system before the owner verdicts below. That would
   turn two reversible spikes into premature infrastructure.
 
-## Owner review gates
+## Owner verdicts (2026-07-11)
 
-1. **Perspective:** does Fable's playable room make height and legal movement
-   readable without Sol's explanatory callouts? If not, recut the visual
-   language before production LDtk/elevation work.
-2. **Party movement:** does a four-member breadcrumb party feel charming or
-   noisy in motion, especially through doors and stairs? Confirm switching the
-   leader is worth keeping.
-3. **Encounter continuity:** does entering combat in place feel like the same
-   adventure room becoming tactical, or merely like combat UI appearing on an
-   overworld mockup?
-4. **D-027 turn structure:** play the intent-round prototype and compare it
-   with the retained v1 alternating initiative. Choose intent rounds or
-   alternating initiative before production combat architecture begins.
-5. **Scope and readability:** decide whether body-blocking by all four party
-   members adds useful tactics or makes the narrow board visually and spatially
-   congested.
+1. **Perspective accepted:** Sol's elevation reads without explanatory labels.
+   Preserve the logic and geometry; recut colors/palette only.
+2. **Four visible followers accepted:** both demos felt good; Fable felt better
+   because the controlled leader could move through follower positions.
+   Exploration followers remain pass-through.
+3. **Selectable formations required:** line, square, and spaced postures should
+   let the player choose grouping and preferred encounter deployment. Chokes
+   compress temporarily; combat occupancy/body-blocking then becomes tactical.
+4. **Continuity clarified:** keep the room/camera/rules/world state, but add a
+   strong BG3-like encounter-entry beat - brief input freeze, original stinger,
+   and turn-based UI/menu reveal before player control.
+5. **D-027 resolved:** intent rounds are the production direction. Enemy plans
+   keep a rolling future-verb forecast (prototype horizon 3), hide future
+   target/location details, expose exact current intent, and rebuild when the
+   current state invalidates the plan.
+6. **Body protection is a real tactic:** spacing must support abilities such as
+   a directional shield/guard field that protects the front and adjacent cells
+   from a line-shaped breath. The prototype proves generic guarded cells; it
+   does not lock a specific friend or dragon implementation.
 
 ## Recommended next step
 
-Do not begin the thesis slice or production migration yet. After the five
-owner verdicts, build T-093 as one gray-box reaction room using a single shared
-effect entry point in exploration and encounter contexts. If that room is not
-fun, revisit D-031 before adding persistence, roster content, or production art.
+Execute T-096 and T-097 from
+`docs/planning/SOL_FABLE_PIVOT_FIX_HANDOFF.md`, merge them back into this
+consolidation branch, and replay the owner gates. Then build T-093 as one
+gray-box reaction room using a single shared effect entry point in exploration
+and encounter contexts. If that room is not fun, revisit D-031 before adding
+persistence, roster content, or production art.

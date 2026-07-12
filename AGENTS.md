@@ -75,7 +75,7 @@ ripple effects across the data model, scene structure, and milestones. Full
 list and rationale: `BLUEPRINT.md` -> Core Logic And Invariants and Design
 Decisions.
 
-Quick reference (revised 2026-07-11 for the v2 vision pivot, D-024..D-035 in
+Quick reference (revised 2026-07-11 for the v2 vision pivot, D-024..D-037 in
 `BLUEPRINT.md` - the pivot superseded several old locks; do not rebuild the
 superseded ones):
 
@@ -98,10 +98,12 @@ separate combat scene, arena selection, or zoom transition (D-025)**;
 **whole active party visible in exploration, leader + non-blocking followers
 (D-029)**; **all friend/world interactions route through the shared
 material/effect vocabulary - never bespoke pairwise code (D-031)**;
-Steam-first commercial target, mobile postponed (D-032). The combat turn
-structure (intent rounds vs. alternating initiative) is **provisional pending
-the T-092 prototype (D-027)** - do not lock combat architecture to either
-model before that verdict.
+Steam-first commercial target, mobile postponed (D-032); **intent rounds are
+the combat turn structure, with a trustworthy rolling verb forecast and exact
+current intent (D-027)**; **same-room combat still requires a clear local
+encounter-mode cue before player control opens (D-036)**; **followers are
+pass-through outside combat, selectable formations govern grouping/deployment,
+and normal tactical occupancy/body-blocking begins in combat (D-037)**.
 
 Superseded and must not be rebuilt: the d10 percentage system; D-012/D-018
 arena seeding/selection as the production combat path; the D-013 temporary
