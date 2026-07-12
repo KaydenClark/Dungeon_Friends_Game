@@ -1,10 +1,16 @@
 # Kenney-First Visual Skeleton Plan
 
-**Status:** implemented; Kayden visual acceptance pending
+**Status:** implemented migration baseline; superseded as final direction by the
+2026-07-11 unified-world pivot
 **Decision date:** 2026-07-11  
 **Owner:** Codex implementation, Kayden windowed acceptance
 
 ## Goal
+
+Historical scope note: this plan successfully skinned the pre-pivot playable
+framework. Keep it for asset provenance and swap seams. Do not use its
+top-down, separate-combat, or "preserve all gameplay" constraints to block the
+three-quarter unified-world migration in `BLUEPRINT.md`.
 
 Use the checked-in Kenney CC0 packs to give the entire playable slice a
 coherent visual skeleton now. The skeleton should make rooms, actors,

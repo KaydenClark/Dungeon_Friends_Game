@@ -1,7 +1,7 @@
 # Dungeon Friends - Image Prompt Log
 
-**Last updated:** 2026-07-10
-**Status:** active prompt ledger; three supplied source sheets need provenance completion
+**Last updated:** 2026-07-11 (unified-world pivot)
+**Status:** active provenance ledger; new prompts follow the three-quarter direction
 
 This file records prompts used to generate image assets for Dungeon Friends.
 Do not treat a generated image as usable project source unless the prompt that
@@ -17,8 +17,11 @@ regenerated, append a new entry instead of replacing history.
 - Do not request a direct copy of copyrighted game art, characters, logos, or
   named franchise assets.
 - Do not name living artists as style targets.
-- Prefer precise asset specs: top-down pixel art, 16x16 tile units, transparent
-  background, readable silhouette, nearest-neighbor-friendly edges.
+- Prefer precise asset specs: three-quarter overhead pixel art on an orthogonal
+  square-grid world, transparent background, readable height and silhouette,
+  visible party roles, and nearest-neighbor-friendly edges. Do not request
+  true diamond-isometric or 3D output unless Kayden explicitly changes the
+  Blueprint.
 - Record negative prompts and exclusions when they matter.
 - Record the generated output path once the image is accepted into
   `game/assets/art/`.

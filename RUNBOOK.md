@@ -2,13 +2,25 @@
 
 > Generated from LLM Workbench v2.1. See Upgrading The Harness below.
 
-**Last reviewed:** 2026-07-11
+**Last reviewed:** 2026-07-11 (unified-world pivot setup)
 **Runtime owner:** Kayden (solo developer)
-**Environment:** local (macOS development machine; builds also target Windows
-and Android)
+**Environment:** local macOS development; Steam-first PC target
 
 This file explains how to operate, verify, recover, and evaluate the project.
 It should be boring, exact, and executable.
+
+## Migration Status
+
+The executable currently implements the pre-pivot forest/tutorial slice and
+separate d10 combat arenas. It remains the regression baseline while the
+unified-world design in `BLUEPRINT.md` is built through isolated prototype
+scenes. Do not claim the target party, three-quarter height, material reaction,
+same-room encounter, deterministic intent, or persistent-resolution systems
+exist until their TASKBOARD proof is recorded.
+
+Active setup branch: `codex/unified-world-pivot`. The next implementation task
+is T-086. Each prototype task must document its own scene/command here before
+being marked done.
 
 ## Prerequisites
 
@@ -23,8 +35,10 @@ Required tools:
 Required accounts/services:
 
 - GitHub (`KaydenClark/Dungeon_Friends_Game`) for push/PR.
-- Later, for Android export only: OpenJDK 17, Android SDK Platform-Tools
-  >=35.0.0, NDK - not required for current desktop gameplay work.
+- Steamworks tooling is not required until the thesis slice validates the PC
+  game and a Steam page/build workflow is explicitly scheduled.
+- Android tooling is deferred; it is not required for the unified-world
+  migration.
 
 Required local files:
 
@@ -57,13 +71,11 @@ Or run the main scene directly without opening the editor UI:
 /Applications/Godot.app/Contents/MacOS/Godot --path game scenes/main.tscn
 ```
 
-Expected result: a 1280x720 window opens (flexible HD/ultrawide `canvas_items`/
-`expand` scaling, revised 2026-07-05 - see `BLUEPRINT.md` -> Design Decisions)
-showing the first-playable forest slice with placeholder-generated tile and
-sprite art. No console errors.
+Expected result: a 1280x720 window opens with the Kenney-skinned pre-pivot
+forest migration baseline. No console errors. This run proves current health,
+not the new product direction.
 
-Playing the slice (updated 2026-07-10 after the latest playthrough; on-screen
-prompts show keyboard keys only until T-079 supplies controller glyphs):
+Playing the **pre-pivot migration baseline**:
 
 - WASD / arrow keys: grid-snapped movement. E: talk, interact, and confirm.
   Q: cancel/back. The controller equivalents remain D-pad, A, and X.
@@ -369,7 +381,7 @@ inventory, and rebuilt-room door/chest state. Saves are confined to
 any change to SaveData/SaveManager, MapRegistry, the load/boot flow, the
 crystal, or flag-restored room state.
 
-### Phase 4 combat check (T-068/T-069)
+### Historical Phase 4 combat check (migration baseline only)
 
 Automated proof is the unit command above plus the slice smoke test. The
  authored-arena lane is green at **32 suites / 200 tests / 958 checks** and
@@ -382,7 +394,9 @@ forest Enemy's LDtk `EncounterId` builds the authored two-enemy group, runs
 through the production arena-selection path, grants both XP rewards, and
 restores the exact overworld position after the zoom transition.
 
-For the windowed T-069 acceptance gate:
+The T-069 acceptance gate is superseded by the unified-world pivot. The steps
+below are retained only when diagnosing a baseline regression; they are not an
+active product milestone:
 
 1. Run `main.tscn` and touch several slimes in different forest positions.
 2. Confirm each battle uses a readable, biome-consistent authored LDtk arena
@@ -422,11 +436,31 @@ expected reason, then implement the smallest fix. The eventual move to GUT (or
 an equivalent) remains a Stretch-adjacent decision; this first-party harness is
 deliberately minimal until that call is made.
 
+### Unified-world prototype policy (T-086 onward)
+
+Each pivot spike adds an isolated `scenes/dev/` entry point and documents the
+exact launch command here. Until that scene exists, the task is not ready to
+claim visual or gameplay proof.
+
+Every spike must:
+
+1. keep baseline import, unit tests, and `main.tscn` boot green;
+2. add focused red/green tests for any new pure logic;
+3. avoid deleting or routing production gameplay through the prototype unless
+   the task explicitly includes an accepted migration;
+4. produce a windowed screenshot or under-one-minute interaction for visual
+   and feel claims;
+5. append actual commands/results to the TASKBOARD proof log.
+
+The first commands to add will belong to T-086's three-quarter height scene.
+Do not guess their filenames in advance.
+
 ## Build/Export
 
 Godot exports are configured via the editor's Export dialog (Project ->
 Export), not a CLI build script, at this stage of the project. Export presets
-are set up in Milestone M0.3 (see `TASKBOARD.md`).
+are not part of the pivot prototype. Steam-first PC export work begins only
+after T-091/T-092 validate the thesis slice.
 
 ### macOS
 
@@ -444,18 +478,14 @@ are set up in Milestone M0.3 (see `TASKBOARD.md`).
 
 ### Android
 
-- Requires OpenJDK 17 + Android SDK (Platform-Tools >=35.0.0) + NDK, configured
-  in Godot Editor Settings -> Export -> Android.
-- Generate a debug build first (uses Godot's debug keystore automatically) to
-  validate the pipeline end to end.
-- Release builds require a release keystore via `keytool` - never commit this
-  file (see `.gitignore`); configure it per-export in the Android export
-  preset, not pasted into `export_presets.cfg`.
-- Test on a real Android device early (Milestone M0.3/M2.x) to validate touch
-  input and Mobile-renderer performance.
+- Deferred until the Steam-first PC experience and UI are proven.
+- Do not add touch controls or Android-specific UI during T-086..T-092.
+- If mobile is later approved, it will require OpenJDK 17, the Android SDK/NDK,
+  real-device input testing, and a separately scoped release plan.
+- Never commit a release keystore or signing password.
 
-Expected healthy state: one trivial exported build per platform runs and shows
-the same placeholder scene as the editor.
+Expected migration health is currently the editor/headless baseline. No
+cross-platform release claim is active yet.
 
 ## Version Control
 

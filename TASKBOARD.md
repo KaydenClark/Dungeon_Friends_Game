@@ -3,23 +3,17 @@
 > Generated from LLM Workbench v2.1. See `RUNBOOK.md` -> Upgrading The
 > Harness.
 
-**Current focus:** run the combined **T-069 windowed acceptance**, then begin
-Phase 5. The combat/data/save-load
-cores are built. T-077 now names and confirms consumables before use; T-078's
-playtest recut is one continuous pit-free floor where stepping on/off a brass
-plate visibly opens/closes the north gate, and the block holds it open. T-072..
-T-075 now replace the unfightable literal-terrain generator with seven editable
-authored LDtk battle arenas. Combat now keeps the field text-free with blue
-movement tiles and dedicated HUD bands. Keyboard/controller
-bindings remain 1:1, but current prompts show keyboard keys only; controller
-glyphs are a later coherent UI pass (T-079).
+**Current focus:** begin the approved **Unified-World Pivot**. The first
+implementation task is T-086, a reversible three-quarter height/readability
+spike. Do not resume the old T-069/Phase 5 sequence: the single-avatar,
+separate-arena, d10, automatic-respawn design it was validating is superseded.
 
-**Phase transition:** T-069 is the final windowed gate. Once that pass accepts
-combat and the revised tutorial,
-**Phase 5 - Party System & Progression** becomes the active development phase.
+**Migration rule:** the current playable build stays green and available until
+each replacement prototype has proof. New work must not deepen dependencies on
+the superseded combat path.
+
 **Owner:** Kayden
-**Last updated:** 2026-07-11 (T-069 readability recut: dedicated combat HUD
-bands and high-contrast blue movement range; Kayden remains the Phase 4 gate)
+**Last updated:** 2026-07-11 (unified-world pivot canon and new-chat handoff)
 
 This is the live work queue and proof ledger. Agents use it to decide what to
 work on next. Keep strategy and long-term direction in `BLUEPRINT.md`; keep
@@ -27,58 +21,58 @@ commands and verification procedures in `RUNBOOK.md`.
 
 ## Executive Brief
 
-- **Playable now:** the forest/tutorial-dungeon slice plus the Phase 4
-  tactical-combat core, now with an animated armored Hero, wizard Buddy, and
-  red-ooze enemies replacing the player/combat blocks and enemy triangles:
-  touch a visible enemy to fight, controlling Hero plus the temporary Buddy
-  test companion (D-013) with
-  interleaved initiative, movement/attack highlights, and
-  Attack/Ability/Item/Defend. LDtk EncounterData drives regular two-enemy
-  fights into D-018's seven authored forest arena templates; contact zooms into
-  combat and the HUD exposes turn order and HP/MP without covering the board.
-- **Health:** green on Godot 4.7. Fresh 2026-07-11 checks: `--import` clean,
-  `main.tscn` boots (`SceneManager ready.`), unit tests PASS (32 suites / 200
- tests / 958 checks), slice smoke PASS 134/134 on 5/5 runs, and windowed
-  arena-gallery/combat-showcase screenshots render at 1280x720. The
-  the new two-process saveload battery PASS (save 10/10, load 11/11). The
-  intentional bad-wiring pressure-plate test emits one warning; no test
-  failures.
-- **Latest decisions:** teammate collision stays as combat balance (D-020);
-  Item must name/select its consumable (D-021); manual jumping is benched
-  behind a future traversal item (D-022); the first pressure-plate room now
-  isolates plate + block + gate on one floor (D-023 clarification); prompts
-  show keyboard keys until controller glyphs exist.
-- **Phase status:** Phase 1 is accepted. Phase 2's T-078 implementation is
-  complete; its final visual/readability judgment rides T-069. **Phase 3 is
-  now fully built** (2026-07-10): the M3.1 data foundation plus the resumed
-  M3.2/M3.3 save/load half - SaveData/SaveManager, MapRegistry, the forest
-  save crystal, Continue/New Game boot prompt, checkpoint respawns + XP-floor
-  penalty, pit falls, always-respawn enemies (D-009), registry warps, and
-  the two-process acceptance battery. Phase 4's data, math, TurnManager/FSM,
-  multi-unit arena, range selection, command set, LDtk/reward wiring,
-  transition, HUD, acceptance battery, and authored-arena lane are built.
-- **Next work:** T-069 final windowed acceptance of authored-arena variety,
-  combat, named Item use, and the revised tutorial. Then Phase 5.
-- **Branch state:** All previously unmerged remote work is consolidated on
-  local `integration` as of 2026-07-11. The comprehensive QA branch brought in
-  the nested Kenney/playtest/asset lanes; the independent T-072 authored-arena
-  branch was merged with its load-test isolation fix; superseded PR #9 and
-  code-audit tips were recorded as ancestry-only merges to avoid regressions.
-  `main` remains Kayden-only; syncing `integration` -> `main` is his call,
-  normally after T-069.
-- **Assets:** production batches remain tracked in
-  `docs/assets/ASSET_PLAN.md`, with generated-image provenance in
-  `docs/assets/IMAGE_PROMPTS.md`. T-053/T-055 are in progress: runtime
-  character/enemy animation is wired; NPCs, environment/objects, effects,
-  UI polish, directional movement, and distinct enemy variants remain.
+- **New target:** a Steam-first party adventure in a three-quarter 2D world.
+  The active party of four remains visible; the same deterministic abilities
+  manipulate the same terrain and materials during exploration, puzzles, NPC
+  resolutions, and tactical encounters.
+- **Encounter contract:** combat happens in the current room. Threats are
+  visible and avoidable when appropriate, enemies telegraph exact intentions,
+  outcomes are deterministic, and a resolved problem stays resolved.
+- **Story hook:** Selena selects the player to assemble the expedition that
+  will remove the dragon from the mountain above the city. Friends and their
+  combinations—not four mandatory legendary items—drive progression.
+- **Current executable:** a healthy pre-pivot migration baseline with LDtk
+  rooms, puzzles, save/load, Kenney visuals, d10 combat, and separate authored
+  arenas. Those systems remain runnable only until proven replacements land.
+- **Reusable foundation:** Godot 4.7, LDtk, `TileMapLayer`, `RoomGrid`,
+  `AStarGrid2D`, Tween movement, Resource data, puzzle primitives, input/UI,
+  save/load, debug tools, assets, and the first-party test harness.
+- **Retirement candidates after proof:** `CombatScene`, arena selection and
+  handoff, d10 math, automatic enemy respawn, single-avatar assumptions, and
+  the strict top-down visual contract.
+- **Scope guardrail:** Hero plus two friends for the thesis slice; 5-6
+  recruitable friends for a Steam demo; approximately 10-12 as the full-game
+  planning ceiling before real production evidence supports expansion.
+- **Next work:** T-086 height/readability spike -> T-087 visible party -> T-088
+  material reactions -> T-089 same-room deterministic intent encounter ->
+  T-090 persistence -> T-091 thesis slice -> T-092 external playtest.
+- **Branch state:** `codex/unified-world-pivot` starts from
+  `origin/integration` at `e218ccd`, which already consolidates the Kenney,
+  QA, authored-arena, and code-audit branches. `main` remains Kayden-only.
 
 ## Pending Decisions
 
-The architecture/toolchain decisions were resolved in the original research
-audit (2026-06-11); the 2026-07-05/06 creative-direction additions were folded
-directly into `BLUEPRINT.md` - see Design Decisions there. **All Phase 2 open
-decisions are now resolved (2026-07-06 round 3)** and folded into `BLUEPRINT.md`
-(Design Decisions + Party And Combat Model + Core Logic):
+The following decisions are active for the unified-world pivot. Rows D-001
+through D-023 below are retained as historical evidence; where they conflict,
+D-024 onward and `BLUEPRINT.md` win.
+
+| ID | Decision | Resolution | Owner |
+|---|---|---|---|
+| D-024 | What is the new product identity? | **One persistent world and one rules vocabulary.** Adventure -> party progression -> encounter -> persistent world consequence. Combat is common but not the only encounter type. | Kayden |
+| D-025 | Where does combat happen? | **In the current LDtk room.** No target-design combat scene or generated/authored arena handoff. Existing terrain, height, objects, hazards, and orientation remain. | Kayden |
+| D-026 | How is the party represented? | **Up to four active friends remain visible.** One leader is directly controlled during exploration; followers do not block traversal/puzzles, then take valid occupied cells when an encounter begins. | Kayden |
+| D-027 | How are attacks resolved? | **Deterministically with exact previews.** No target-design d10 hit rolls; bonus effects come from positioning, height, states, or combinations. | Kayden |
+| D-028 | How does enemy AI communicate? | **Actionable telegraphs.** Show intended movement, target, affected cells, damage, and status before resolution. Prototype enemy-intent rounds before locking the final turn model. | Kayden |
+| D-029 | Do solved threats return? | **No routine room-rebuild respawn.** Stable encounter IDs and environmental state persist. Optional replay/auto-resolve is later scope. Supersedes D-009. | Kayden |
+| D-030 | What is the camera/spatial direction? | **Orthogonal square grid rendered three-quarter overhead with limited integer elevation.** Not true isometric and not 3D. | Kayden |
+| D-031 | How do friend powers avoid combinatorial scope? | **Shared material/effect system.** Start with Force, Flame, Water, Growth, and Air; friends compose those verbs rather than each owning a one-off subsystem. | Kayden |
+| D-032 | What roster size is planned? | Thesis slice Hero + 2 friends; Steam demo 5-6 recruitable; full-game planning ceiling approximately 10-12 before evidence supports more. | Kayden + Codex scope guardrail |
+| D-033 | Who is the audience and first platform? | **Public commercial game, Steam-first PC with keyboard/controller.** Google Play/mobile is deferred until the PC game is proven. | Kayden |
+
+### Historical decisions (superseded where conflicting)
+
+The tables below explain the migration baseline and historical proof. They are
+not a queue to resume.
 
 | ID | Decision | Resolution | Owner |
 |---|---|---|---|
@@ -167,7 +161,26 @@ A `claimed` or `in-progress` task that has gone stale (no update past one
 working day) may be reclaimed per the reclaim rule in `AGENTS.md` -> Long
 Session Control.
 
-## Ready
+## Unified-World Pivot - Ready
+
+Work in order. Each task is a reversible proof gate; do not combine several
+spikes into a broad rewrite.
+
+| ID | Priority | Task | Why now | Touches | Proof required | Status |
+|---|---:|---|---|---|---|---|
+| T-085 | 0 | **Pivot canon + new-chat setup.** Create `codex/unified-world-pivot` from the latest consolidated `origin/integration`; rewrite product, agent, story, public-status, and active-queue docs; preserve the current executable as the migration baseline. | Stops agents from treating the old Phase 4/5 plan as authority. | `AGENTS.md`, `BLUEPRINT.md`, `TASKBOARD.md`, `RUNBOOK.md`, `README.md`, `docs/WORLD_LORE.md` | `git diff --check`; stale-active-direction scan; baseline Godot import/unit/main boot; branch commit and push; append proof row | **done** - 2026-07-11 |
+| T-086 | 1 | **Three-quarter height/readability spike.** Build an isolated dev room on the existing orthogonal grid with two elevations, one ramp or stair, one tall wall, clear foreground/background overlap, and four placeholder party actors. Do not change production rooms yet. | Proves the visual pivot without committing to true isometric or rewriting LDtk/pathfinding. | new dev scene/script, minimal placeholder tiles/sprites, tests if height logic is introduced | Red/green on height metadata if present; 1280x720 screenshot; owner can identify walkable cells, elevation, occlusion, and actor positions in under one minute; baseline stays green | **ready - next task** |
+| T-087 | 1 | **Visible-party exploration spike.** Add a prototype leader plus three breadcrumb/formation followers. Followers must recover through doors/narrow corridors, never push blocks or hold plates accidentally, and never trap the leader. Encounter occupancy is not part of this task. | Tests the all-party-on-board fantasy and its largest navigation risk independently. | prototype party controller/actors, dev room, focused unit tests | Red/green follower placement/recovery tests; windowed route through a narrow corridor and door; no puzzle occupancy side effects; baseline green | **ready after T-086** |
+| T-088 | 1 | **Shared material/reaction spike.** Implement tag/effect data and prove at least: grow vine -> creates traversal/cover state; Flame burns vine; Water extinguishes Flame. Use the same service from exploration and a test encounter context. | This is the unifying mechanic and prevents per-friend hardcoding. | new effect/material data and resolver, tagged prototype objects/cells, tests | Strict red/green reaction matrix; deterministic before/after state; one-command demo plus screenshot; no production friend roster yet | **ready after T-087** |
+| T-089 | 1 | **Same-room deterministic intent encounter.** In the prototype room, promote Hero + one friend + one enemy into encounter occupancy without a scene swap. Enemy telegraphs one exact attack; the player can move, block, push, or alter terrain to avoid/interrupt it. Prototype intent rounds and exact previews. | Proves the replacement for `CombatScene`, d10 math, and arena handoff before any retirement. | prototype encounter controller/UI, adapted ability/unit data, focused tests | Strict red/green damage/intent/resolution; preview equals result; no separate scene/arena; under-one-minute windowed encounter demo; baseline remains runnable | **ready after T-088** |
+| T-090 | 1 | **Persistent resolution proof.** Give the prototype encounter and one environmental alteration stable IDs; resolve them, leave, reload, and confirm both remain changed. | Supersedes automatic respawn and proves that encounters change the world. | `GameState`/`SaveData` schema addition, save/load migration, prototype room, tests | Old saves load safely or fail with documented migration; two-process battery proves encounter and material state survive; baseline saves are not clobbered | **ready after T-089** |
+| T-091 | 2 | **Unified-world thesis slice.** Hero plus two real Dungeon Friends, one NPC resolution, one environmental puzzle, one avoidable tactical threat, shared ability combination, and one newly opened route toward the mountain. | First proof that the pivot is a game rather than disconnected technical spikes. | production-design scene/data/UI/art subset selected after spikes | Full automated battery plus 15-20 minute external-ready build; demo captures adventure -> progression -> encounter -> persistent consequence; Kayden windowed acceptance | **ready after T-090** |
+| T-092 | 2 | **External audience test.** Put the thesis slice in front of players outside the design process and test whether the encounter deepens the adventure. | Commercial direction requires evidence beyond owner/agent understanding. | build/export, feedback script, issue/task follow-ups | Record comprehension, encounter-transition sentiment, friend/ability recall, desire to continue, and concrete blockers; no feature expansion until results are triaged | **ready after T-091** |
+
+## Historical Ready (superseded 2026-07-11)
+
+The old Phase 4/5 and Kenney lanes below remain for traceability. Do not select
+them unless Kayden explicitly revives a scoped task under the new Blueprint.
 
 **Phase 4 (Combat MVP) is the active phase.** Its implementation work is
 complete; this lane now holds Kayden's final acceptance pass:
@@ -246,7 +259,7 @@ geometry and colored stand-ins as early as possible.
 | T-045 | 3 | **XP/level data shape** (not mechanics): `party_levels`/`party_xp` live on GameState/SaveData from T-036; add a pure `xp_to_next(level)` curve function as tested logic (placeholder numbers, clearly marked). Level-up *mechanics* (stat growth on level, combat integration) stay Phase 5 (M5.3) - do not build them early | SaveData must carry progression from day one or every save schema-bumps at Phase 5; the curve is the first strict red/green candidate | `game_state.gd` or `progression.gd`, tests | red/green: curve suite written failing-first (monotonic, positive deltas, level-1 base) | `BLUEPRINT.md` progression note | after T-036 | **done** (2026-07-08, red/green `test_progression`) | 2026-07-08 |
 | T-046 | 3 | **Shield unlocks Defend (D-007 resolved).** The combat menu's Defend command is absent/greyed until `shield` is in the inventory, then selectable (Defend's damage-reduction behavior itself unchanged for now). Chest reward + shield pickup dialogue say so ("You can now Defend in combat!"); smoke test asserts the gate both ways. Closes the D-001 debt | Kayden: "lets take away the defend ability until you get the shield, and then you can use it" | `combat.gd` (menu build + defend branch), chest/dialogue copy, `test_combat_math`/menu test, smoke | unit: defend absent without shield, present with it; smoke: pre-shield fight lacks Defend, post-shield fight has it | `BLUEPRINT.md` D-001 row resolved; combat scene contract note | after T-034 | **done** (2026-07-08: Defend absent from the menu without the shield, present with it - `test_combat_scene` pins both ways; chest copy announces the unlock) | 2026-07-08 |
 
-## Backlog
+## Historical Backlog (superseded unless re-scoped)
 
 Valid, scoped work that is not a stretch goal but is intentionally not next.
 Distinct from Deferred (the stretch goals - from the retired Gameplan §17,
@@ -269,7 +282,7 @@ now sequenced in `BLUEPRINT.md`'s build order - gated behind the whole MVP).
 | T-079 | medium | Controller-glyph prompt mode. Replace keyboard prompt labels with controller icons when a controller is the active input source; never show slash-separated mixed labels such as `E / A`. Include the five anchor pairs and a keyboard fallback. | Latest playthrough: mixed keyboard/controller text made the required button less clear, not more. Current prompts deliberately show keyboard keys only until this is coherent. | Implemented with T-083 | **done** (2026-07-11) |
 | T-058 | medium | Asset Batch H: audio pass - Furnace `.ogg` music and SFX for forest, dungeon, combat, menus, movement, push/jump/fall, chest, doors, save, attack/defend/hit per `docs/assets/ASSET_PLAN.md` | Audio belongs in M6.5 polish unless a specific sound is needed earlier for feel testing | Phase 6 M6.5 polish | planned |
 
-## Bugs
+## Historical Baseline Bugs
 
 From Kayden's windowed playtests of the slice (2026-07-05, third session).
 Fixes implemented on branch `fix/playtest-bugs` (off `integration`),
@@ -327,14 +340,10 @@ in `BLUEPRINT.md`.
 |---|---|---|---|---|---|---|
 | - | none blocked | - | - | - | - | - |
 
-## Deferred
+## Historical Deferred (superseded unless re-scoped)
 
-Valid work that should not be started yet - the stretch goals (from the
-retired Gameplan §17; `BLUEPRINT.md`'s build-order step 9 owns the current
-sequencing), sequenced. Equipment and elemental/magic are flagged highest-priority-after-
-MVP given this project's emphasis on weapon variety and magic (see
-`BLUEPRINT.md` -> Design Decisions), but none of these start before the MVP
-(Phases 0-6) is complete - see `AGENTS.md` -> Work Selection.
+These rows describe the old roadmap. Some concepts may return only after they
+are deliberately re-scoped into the unified-world pivot lane.
 
 | ID | Task | Deferred until | Why it matters | Revisit trigger |
 |---|---|---|---|---|
@@ -353,6 +362,7 @@ MVP given this project's emphasis on weapon variety and magic (see
 
 | ID | Task | Completed | Result | Proof row |
 |---|---|---|---|---|
+| T-085 | Unified-world pivot canon + new-chat setup | 2026-07-11 | Branch created from consolidated `origin/integration`; active design, story, agent rules, queue, runbook, public status, and asset direction aligned; baseline verified | See Proof Log row 2026-07-11 (T-085) |
 | T-001 | M0.2: Godot project scaffold - Mobile renderer, Nearest filter, 240x160 viewport/integer scale, `main.tscn` with `SceneManager` autoload + placeholder background | 2026-07-05 | pass | See Proof Log row 2026-07-05 |
 | T-005 | Repo doc update: replace fixed 240x160/GBA-locked resolution language with flexible HD/ultrawide display language | 2026-07-05 | pass (docs); resolution switch confirmed by a real headless run in the second session | See Proof Log rows 2026-07-05 (T-005/T-006/T-007) and (T-005/T-006/T-007 follow-up) |
 | T-006 | Project settings: `game/project.godot` updated to `canvas_items`/`expand`/`fractional` at a 1280x720 design reference (Nearest filter unchanged) | 2026-07-05 | pass - confirmed by a real headless run in the second session (`--import` + `main.tscn --quit-after 1` both exit 0) | See Proof Log rows 2026-07-05 (T-005/T-006/T-007) and (T-005/T-006/T-007 follow-up) |
@@ -423,6 +433,7 @@ dated heading.
 
 | Date | Task ID | Agent | Proof | Demo | Result | Docs | Remaining gap |
 |---|---|---|---|---|---|---|---|
+| 2026-07-11 | T-085 | Codex | Created `codex/unified-world-pivot` from consolidated `origin/integration` at `e218ccd`. Replaced the active product canon with the approved one-world/one-vocabulary direction: visible active party, same-room encounters, deterministic previews and enemy intents, persistent resolution, orthogonal three-quarter height, shared Force/Flame/Water/Growth/Air material effects, Selena/dragon expedition hook, Steam-first audience, and bounded roster. Added T-086..T-092 as reversible proof gates and explicitly marked old Phase 4/5 lanes historical. Preserved all executable code as the migration baseline. | Read the Executive Brief and T-086 row, then open `BLUEPRINT.md`; this is the new-chat handoff and under-one-minute review artifact | pass - `git diff --check`; active-direction scan; Godot 4.7 import completed with pre-existing headless shutdown leak diagnostics; unit **32 suites / 200 tests / 958 checks, 0 failed**; `main.tscn --quit-after 1` exited 0 with `SceneManager ready.` | updated (`AGENTS.md`, `BLUEPRINT.md`, `TASKBOARD.md`, `RUNBOOK.md`, `README.md`, `docs/WORLD_LORE.md`, `docs/assets/ASSET_PLAN.md`, `docs/assets/IMAGE_PROMPTS.md`, `docs/assets/KENNEY_IMPLEMENTATION_PLAN.md`); `CLAUDE.md` checked, no update needed because it correctly delegates shared rules to AGENTS | Start T-086 in the next chat. No three-quarter, visible-party, material-reaction, same-room deterministic encounter, or persistent-resolution implementation is claimed yet. |
 | 2026-07-05 | T-017 | Claude | Kayden completed his windowed play-check of the first-playable slice and confirmed it's ready. Committed the slice to a new `integration` branch (commit `097ced0`), then fast-forward-merged `integration` -> `main` (`git merge --ff-only integration`, 199561c..097ced0, no conflicts) on Kayden's explicit "promote integration" instruction. Re-ran all 3 headless checks (`--import`, `main.tscn --quit-after 3`, `slice_smoke_test.tscn`) on `main` post-merge - all exit 0, smoke test still 26/26 | Local `main` now at 097ced0, matches what Kayden play-tested on `integration` | pass | `AGENTS.md`/`RUNBOOK.md`/`BLUEPRINT.md` branch-flow rows updated to the `integration`-staging convention prior to this merge; this row | `main` is 5 commits ahead of `origin/main` - not yet pushed, pending Kayden's confirmation |
 | 2026-07-06 | T-021 | Claude | Movement feel rework on `feature/movement-feel` (stacked on `test/automated-test-suite`, whose unit harness it needs). Rewrote `player.gd`'s input layer around a pure `_movement_intent(dir, delta)` state machine the real `_process` calls: (1) hold time now matures *through* the move tween, killing the 0.2s dead stop after the first held step (residual tap-safety beat: ~0.08s, tunable); (2) Pokemon-style turn-in-place - tapping a new direction faces it without stepping, holding past `TURN_DELAY` (0.1s) walks, and the turn time counts toward the walk so there's no second pause; (3) last-pressed-wins direction stack (rolling between keys mid-walk is seamless, releasing falls back to the still-held key); (4) fresh same-direction presses during a tween are buffered to land the frame the move ends; (5) B-04's tap=exactly-one-step contract preserved and now unit-tested. New suite `test_player_movement` (12 tests, 27 checks) drives the real intent function with hand-fed deltas + `Input.action_press` rollover. Verified (Godot 4.6.3): unit tests `PASS` **3/3 consecutive runs** (10 suites, 65 tests, 176 checks, exit 0); negative control (corrupt the tap=one-step expectation) -> `CHECK FAILED`/suite FAIL, then restored; `--import` exit 0, 0 error lines; `main.tscn --quit-after 3` exit 0; `slice_smoke_test.tscn` `PASS (34/34)` **5/5 consecutive runs** | `cd game && /Applications/Godot.app/Contents/MacOS/Godot --headless --path . tests/run_tests.tscn` (~2s) then walk around in `main.tscn`: tap to turn, hold to walk, roll between directions | pass (headless); **windowed feel-check is Kayden's gate** - tuning knobs are `MOVE_REPEAT_DELAY` (0.2) and `TURN_DELAY` (0.1) in `player.gd` | `RUNBOOK.md` unit-test counts + suite list; `TASKBOARD.md` this row + T-021 gated + B-04 -> gated-via-T-021; no `BLUEPRINT.md` change (implements the already-documented feel bar) | Windowed judgment: does turn-in-place feel right at 0.1s, is the ~0.08s first-step beat perceptible, does hold-walk cadence read smooth? Camera smoothing untouched; deliberate swallow: a tap *released* mid-tween is dropped (anti-double-step) - flag if quick double-taps feel eaten |
 | 2026-07-06 | T-021 (windowed) | Claude | Kayden ran the windowed feel-check and confirmed: "This feels night and day different on the movement!" - T-021 moved to Done, B-04 closed, no tuning of `MOVE_REPEAT_DELAY`/`TURN_DELAY` requested | Kayden's own play session | pass | `TASKBOARD.md` this row + Done lane + Bugs lane | none - T-021 complete |
