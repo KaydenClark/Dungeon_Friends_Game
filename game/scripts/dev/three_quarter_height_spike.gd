@@ -12,23 +12,23 @@ extends Node2D
 const HeightLayout = preload("res://scripts/dev/three_quarter_height_layout.gd")
 
 const VIEWPORT_SIZE := Vector2i(1280, 720)
-const LOWER_A := Color("29374f")
-const LOWER_B := Color("31425d")
-const LOWER_GRID := Color("62728c")
-const UPPER_A := Color("326a64")
-const UPPER_B := Color("39776e")
-const UPPER_GRID := Color("82d8bd")
-const CLIFF_FACE := Color("244b49")
-const CLIFF_SHADOW := Color("173537")
-const WALKABLE_MARK := Color(0.54, 0.78, 0.91, 0.34)
-const BLOCKED_MARK := Color("e17373")
-const WALL_FACE := Color("725660")
-const WALL_LIGHT := Color("a77876")
-const WALL_DARK := Color("493f50")
+const LOWER_A := Color("3b4635")
+const LOWER_B := Color("46533d")
+const LOWER_GRID := Color("8a9a78")
+const UPPER_A := Color("58794d")
+const UPPER_B := Color("668958")
+const UPPER_GRID := Color("c5dda7")
+const CLIFF_FACE := Color("6b543f")
+const CLIFF_SHADOW := Color("382c25")
+const WALKABLE_MARK := Color(0.52, 0.78, 0.92, 0.30)
+const BLOCKED_MARK := Color("ef786d")
+const WALL_FACE := Color("705d52")
+const WALL_LIGHT := Color("b99b77")
+const WALL_DARK := Color("463a36")
 const WALL_RISE := 34.0
-const STAIR_FACE := Color("b9854e")
-const STAIR_LIGHT := Color("f0c978")
-const CAPTURE_ATTEMPTS := 3
+const STAIR_FACE := Color("9c7247")
+const STAIR_LIGHT := Color("f2cf86")
+const CAPTURE_ATTEMPTS := 6
 const CAPTURE_MIN_LUMINANCE_SPREAD := 0.08
 const CAPTURE_SAMPLE_POINTS := [
 	Vector2i(10, 10),
@@ -37,6 +37,17 @@ const CAPTURE_SAMPLE_POINTS := [
 	Vector2i(1000, 600),
 	Vector2i(250, 170),
 ]
+const CAPTURE_CONTENT_SAMPLE_POINTS := [
+	Vector2i(34, 574),
+	Vector2i(452, 574),
+	Vector2i(870, 574),
+	Vector2i(224, 150),
+	Vector2i(1054, 516),
+	Vector2i(824, 30),
+	Vector2i(24, 220),
+	Vector2i(1253, 220),
+]
+const CAPTURE_MIN_CONTENT_LUMINANCE := 0.12
 
 var _layout = HeightLayout.new()
 var _font: Font = ThemeDB.fallback_font
@@ -65,7 +76,7 @@ func _capture_when_ready() -> void:
 	var image: Image
 	for attempt in range(CAPTURE_ATTEMPTS):
 		queue_redraw()
-		for _frame in 30:
+		for _frame in 45:
 			await get_tree().process_frame
 		await RenderingServer.frame_post_draw
 		await get_tree().process_frame
@@ -102,8 +113,11 @@ func _capture_image_is_complete(image: Image) -> bool:
 			return false
 		darkest = minf(darkest, luminance)
 		brightest = maxf(brightest, luminance)
+	for point in CAPTURE_CONTENT_SAMPLE_POINTS:
+		if image.get_pixelv(point).get_luminance() < CAPTURE_MIN_CONTENT_LUMINANCE:
+			return false
 	# A background-only frame is nonblack but lacks the board/card borders. The
-	# dark-to-bright spread makes capture proof fail closed on that Metal race.
+	# spread plus explicit board/card samples fail closed on that Metal race.
 	return brightest - darkest >= CAPTURE_MIN_LUMINANCE_SPREAD
 
 
@@ -117,11 +131,11 @@ func _draw() -> void:
 
 
 func _draw_backdrop() -> void:
-	draw_rect(Rect2(Vector2.ZERO, Vector2(VIEWPORT_SIZE)), Color("09101f"))
-	draw_rect(Rect2(0, 0, 1280, 112), Color("101a2d"))
+	draw_rect(Rect2(Vector2.ZERO, Vector2(VIEWPORT_SIZE)), Color("0d1718"))
+	draw_rect(Rect2(0, 0, 1280, 112), Color("17252a"))
 	for i in range(8):
 		var alpha := 0.035 + float(i) * 0.006
-		draw_circle(Vector2(1110, 80), 90.0 + i * 34.0, Color(0.23, 0.55, 0.65, alpha))
+		draw_circle(Vector2(1110, 80), 90.0 + i * 34.0, Color(0.38, 0.66, 0.45, alpha))
 	# The board shadow establishes a compact diorama without changing its grid.
 	draw_rect(Rect2(_layout.BOARD_ORIGIN + Vector2(14, 22),
 			Vector2(_layout.GRID_SIZE) * _layout.CELL_SIZE), Color(0, 0, 0, 0.28))
@@ -178,12 +192,12 @@ func _draw_cliff_face(top_rect: Rect2) -> void:
 	var face := Rect2(top_rect.position + Vector2(0, top_rect.size.y),
 			Vector2(top_rect.size.x, _layout.ELEVATION_RISE))
 	draw_rect(face, CLIFF_FACE)
-	draw_rect(Rect2(face.position, Vector2(face.size.x, 8)), Color("3f7670"))
+	draw_rect(Rect2(face.position, Vector2(face.size.x, 8)), Color("9b7752"))
 	draw_line(Vector2(face.position.x, face.end.y), face.end, CLIFF_SHADOW, 3.0)
 	for y_offset in [17.0, 31.0]:
 		draw_line(face.position + Vector2(8, y_offset),
 				Vector2(face.end.x - 8, face.position.y + y_offset),
-				Color(0.55, 0.77, 0.70, 0.16), 1.0)
+				Color(0.88, 0.76, 0.57, 0.18), 1.0)
 
 
 func _draw_stairs() -> void:
@@ -290,7 +304,7 @@ func _draw_tall_wall() -> void:
 	var first := Rect2(_layout.project_cell(_layout.wall_cells()[0], 0), _layout.CELL_SIZE)
 	var last := Rect2(_layout.project_cell(_layout.wall_cells()[-1], 0), _layout.CELL_SIZE)
 	draw_line(first.position + Vector2(3, -WALL_RISE),
-			Vector2(last.end.x - 3, last.position.y - WALL_RISE), Color("f3a985"), 3.0)
+			Vector2(last.end.x - 3, last.position.y - WALL_RISE), Color("e8b77c"), 3.0)
 
 
 func _draw_callouts() -> void:

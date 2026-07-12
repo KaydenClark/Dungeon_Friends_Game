@@ -113,8 +113,14 @@ func test_capture_validation_rejects_partial_or_wrong_sized_frames() -> void:
 			"background-only frame is rejected even when it is not black")
 	var complete := background_only.duplicate()
 	complete.set_pixel(1000, 600, Color("d79bd9"))
+	for point in [
+		Vector2i(34, 574), Vector2i(452, 574), Vector2i(870, 574),
+		Vector2i(224, 150), Vector2i(1054, 516), Vector2i(824, 30),
+		Vector2i(24, 220), Vector2i(1253, 220),
+	]:
+		complete.set_pixelv(point, Color.WHITE)
 	ok(renderer._capture_image_is_complete(complete),
-			"frame with broad dark-to-bright visual coverage is accepted")
+			"frame with broad visual coverage and rendered proof regions is accepted")
 	var wrong_size := Image.create(640, 360, false, Image.FORMAT_RGB8)
 	wrong_size.fill(Color("101a2d"))
 	not_ok(renderer._capture_image_is_complete(wrong_size), "wrong-sized frame is rejected")
