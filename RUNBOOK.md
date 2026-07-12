@@ -308,6 +308,32 @@ and exits `0`; any `FAIL:` line exits `1`. The turn model inside is a
 throwaway step-tick - D-027's real turn structure is decided by T-092, not
 this spike.
 
+### Deterministic intent prototype (T-092)
+
+Pivot step 4: intent rounds on the same spike room, built to Kayden's
+2026-07-11 spec. The slime keeps a rolling 3-verb plan - future steps show
+the verb only, the current action telegraphs its locked cells, exact
+damage, and exact status, and resolves against whoever remains in those
+cells. Interactive: run `scenes/dev/intent_prototype_spike.tscn` windowed;
+in an encounter WASD/arrows step the active unit, `1` Strike / `2` Bash
+(stun-cancels the intention) / `3` Shove (push-cancels), `E` confirms with
+the exact damage shown first, `Tab` switches units, `Q` ends the turn.
+Scripted proof:
+
+```powershell
+$godot = 'E:\Godot\godot.cmd'
+& $godot --path game scenes/dev/intent_prototype_spike.tscn --resolution 1280x720 -- --out="$PWD\docs\screenshots\t092-intent-prototype\1280"
+& $godot --path game scenes/dev/intent_prototype_spike.tscn --resolution 1920x1080 -- --out="$PWD\docs\screenshots\t092-intent-prototype\1920"
+```
+
+Each run writes six captures and prints 23 `PASS:` assertions (preview =
+result, dodge, body-block, stun/push cancellation, exact burn/stun
+durations, world continuity), exiting `0`; any `FAIL:` exits `1`. The pure
+rules live in `game/scripts/dev/intent_logic.gd` with red/green coverage
+in `tests/test_intent_logic.gd`. **D-027 stays open until Kayden's played
+verdict** - this scene is the intent-rounds candidate; the v1 initiative
+combat remains on disk for comparison.
+
 ### Display-scaling spike (T-007)
 
 Checks the flexible HD/ultrawide stretch settings (revised 2026-07-05, see

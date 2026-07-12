@@ -41,6 +41,7 @@ const SUITES := [
 	"res://tests/test_debug_overlay.gd",
 	"res://tests/test_kenney_manifest.gd",
 	"res://tests/test_input_prompts.gd",
+	"res://tests/test_intent_logic.gd",
 ]
 
 
