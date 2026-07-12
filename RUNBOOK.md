@@ -403,6 +403,29 @@ rotation, deterministic nearest-valid fallback, unique reachable placement,
 and wall/enemy/prop/elevation-transition exclusions. It does not claim combat
 occupancy or production save/menu/LDtk integration.
 
+### Shared reaction core (T-093A)
+
+The pure preview-first API is `ReactionCore.calculate(state, request)` in
+`game/scripts/dev/reaction_core.gd`. Exploration and encounter callers use the
+same entry point; `request.context` is metadata only. The exact state/request/
+result schemas, deterministic reaction rules, propagation order, 32-cell
+cascade boundary, commit pattern, and Fable examples are documented in
+`docs/planning/T093_REACTION_CORE_API.md`.
+
+The under-one-minute proof is the complete unit command:
+
+```bash
+cd game
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path . tests/run_tests.tscn
+```
+
+The `test_reaction_core` tally must be green. It covers grow/vine/fire,
+water/flood/cold, wet conduction, both air rules, context parity, exact
+propagation order, cascade truncation, invalid inputs, repeat application, and
+the no-mutation preview contract. This T-093A slice intentionally has no room
+or visual demo; T-093B will consume this exact code path in the gray-box room
+and carry Kayden's fun/not-fun verdict.
+
 ### Display-scaling spike (T-007)
 
 Checks the flexible HD/ultrawide stretch settings (revised 2026-07-05, see

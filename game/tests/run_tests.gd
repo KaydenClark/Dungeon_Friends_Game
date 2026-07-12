@@ -45,6 +45,7 @@ const SUITES := [
 	"res://tests/test_party_formation_layout.gd",
 	"res://tests/test_visible_party_exploration_model.gd",
 	"res://tests/test_intent_logic.gd",
+	"res://tests/test_reaction_core.gd",
 ]
 
 
