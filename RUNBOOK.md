@@ -423,8 +423,40 @@ The `test_reaction_core` tally must be green. It covers grow/vine/fire,
 water/flood/cold, wet conduction, both air rules, context parity, exact
 propagation order, cascade truncation, invalid inputs, repeat application, and
 the no-mutation preview contract. This T-093A slice intentionally has no room
-or visual demo; T-093B will consume this exact code path in the gray-box room
-and carry Kayden's fun/not-fun verdict.
+or visual demo; T-093B consumes this exact code path in the gray-box room
+below and carries Kayden's fun/not-fun verdict.
+
+### Gray-box reaction room (T-093B)
+
+`scenes/dev/reaction_room_spike.tscn` is the playable proof that the shared
+vocabulary works in BOTH contexts. It extends the T-097 intent prototype (same
+room, party, encounter cue, and intent rounds) and adds the live reaction
+world-state: a channel run, a soil patch, a flammable brush chain, and a smoke
+pocket, plus six castable verbs - `5` grow, `6` fire, `7` water, `8` cold,
+`9` spark, `0` air - available in exploration AND on any unit's encounter
+turn. Casting opens a WASD-aimed cursor (range 3) and shows the complete
+neutral result (affected cells in order, damage, hazards, cell tag/status
+changes, consumed effects, forced movement, and exactly which units would be
+hit, including a promised intention cancel) BEFORE `E` commits; `Q` cancels.
+Both contexts route through `ReactionRoomLogic.cast` ->
+`ReactionCore.calculate`; the caller-side seams (unit mapping, intention
+disruption, shove's forced-movement preview) are red/green in
+`tests/test_reaction_room_logic.gd`.
+
+One-command replay (Windows; writes eleven inspected captures per size):
+
+```powershell
+$godot = 'E:\Godot\godot.cmd'
+& $godot --path game scenes/dev/reaction_room_spike.tscn --resolution 1280x720 -- --out="$PWD\docs\screenshots\t093-reaction-room\1280"
+& $godot --path game scenes/dev/reaction_room_spike.tscn --resolution 1920x1080 -- --out="$PWD\docs\screenshots\t093-reaction-room\1920"
+```
+
+The scripted tour must print `REACTION ROOM: done` with zero `FAIL` lines
+(88 assertions per run): grow-then-burn, air-fed fire spreading down the
+brush chain, flood-then-freeze, spark conduction stopped by the ice, smoke
+clearing, exploration/encounter context parity from identical state, and the
+round-2 spark that cancels the slime's declared spit before it resolves.
+Run it interactively (no `--out=`) for Kayden's fun/not-fun verdict.
 
 ### Display-scaling spike (T-007)
 

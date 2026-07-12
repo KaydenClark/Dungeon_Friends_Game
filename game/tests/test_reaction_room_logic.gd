@@ -1,0 +1,194 @@
+extends "res://tests/gd_test.gd"
+## T-093B strict red/green suite for the gray-box reaction room's caller-side
+## bridge. The bridge owns exactly the work Sol's T-093A API leaves to callers:
+## one shared invocation path into ReactionCore.calculate for BOTH exploration
+## and encounter casts, mapping cell-shaped damage onto units, disrupting a
+## declared enemy intention, and the forced-movement (shove) preview contract.
+## It must never contain reaction rules of its own.
+
+const ReactionRoomLogic := preload("res://scripts/dev/reaction_room_logic.gd")
+const IntentLogic := preload("res://scripts/dev/intent_logic.gd")
+
+
+func _cell(tags: Array = [], statuses := {}) -> Dictionary:
+	return {"tags": tags.duplicate(), "statuses": statuses.duplicate(true)}
+
+
+func _wet_chain_state() -> Dictionary:
+	return {"width": 10, "height": 8, "cells": {
+		Vector2i(2, 2): _cell(["wet"]),
+		Vector2i(3, 2): _cell(["wet"]),
+		Vector2i(4, 2): _cell(["floor"]),
+	}}
+
+
+func _outcome(result: Dictionary) -> Dictionary:
+	var copy := result.duplicate(true)
+	copy.erase("metadata")
+	return copy
+
+
+func _unit(id: String, cell: Vector2i, hp: int, side := "enemy") -> Dictionary:
+	return {"id": id, "cell": cell, "hp": hp, "max_hp": hp, "atk": 3, "df": 1,
+			"side": side, "statuses": {}}
+
+
+## The acceptance seam: the exploration caller and the encounter caller invoke
+## the SAME cast() path and identical state produces identical reaction data -
+## context is presentation metadata only.
+func test_exploration_and_encounter_casts_share_one_engine_and_agree() -> void:
+	var state := _wet_chain_state()
+	var before := state.duplicate(true)
+	var caster := Vector2i(2, 4)
+	var exploration := ReactionRoomLogic.cast(state, "spark", caster,
+			Vector2i(2, 2), "exploration")
+	var encounter := ReactionRoomLogic.cast(state, "spark", caster,
+			Vector2i(2, 2), "encounter")
+	eq(state, before, "cast never mutates the caller's world state")
+	ok(exploration["valid"], "the exploration cast is valid")
+	eq(_outcome(exploration), _outcome(encounter),
+			"identical state through both callers yields identical results")
+	eq(exploration["metadata"]["context"], "exploration",
+			"exploration context is metadata only")
+	eq(encounter["metadata"]["context"], "encounter",
+			"encounter context is metadata only")
+	eq(exploration["propagation_order"], [Vector2i(2, 2), Vector2i(3, 2)],
+			"the shared path is really Sol's engine (wet conduction happened)")
+
+
+## Air/fire direction is derived from caster -> target, cardinal only,
+## deterministically: larger axis wins, ties prefer horizontal.
+func test_cast_direction_is_deterministic_cardinal() -> void:
+	eq(ReactionRoomLogic.cast_direction(Vector2i(2, 2), Vector2i(5, 3)),
+			Vector2i.RIGHT, "larger x delta wins")
+	eq(ReactionRoomLogic.cast_direction(Vector2i(2, 2), Vector2i(2, 5)),
+			Vector2i.DOWN, "pure y delta goes vertical")
+	eq(ReactionRoomLogic.cast_direction(Vector2i(5, 2), Vector2i(2, 2)),
+			Vector2i.LEFT, "negative x delta goes left")
+	eq(ReactionRoomLogic.cast_direction(Vector2i(2, 5), Vector2i(2, 2)),
+			Vector2i.UP, "negative y delta goes up")
+	eq(ReactionRoomLogic.cast_direction(Vector2i(2, 2), Vector2i(4, 4)),
+			Vector2i.RIGHT, "diagonal ties prefer horizontal")
+	eq(ReactionRoomLogic.cast_direction(Vector2i(2, 2), Vector2i(2, 2)),
+			Vector2i.RIGHT, "self-target falls back to a legal cardinal")
+
+
+func test_cast_feeds_air_the_caster_relative_direction() -> void:
+	var state := {"width": 10, "height": 8, "cells": {
+		Vector2i(3, 3): _cell(["fire", "smoke"]),
+		Vector2i(2, 3): _cell(["vine"], {"vine_strength": 1}),
+		Vector2i(1, 3): _cell(["flammable"]),
+	}}
+	var result := ReactionRoomLogic.cast(state, "air", Vector2i(5, 3),
+			Vector2i(3, 3), "exploration")
+	ok(result["valid"], "air cast is valid")
+	eq(result["propagation_order"],
+			[Vector2i(3, 3), Vector2i(2, 3), Vector2i(1, 3)],
+			"air fed the flame away from the caster, through the chain")
+
+
+## Cell-shaped reaction damage maps onto whoever stands there NOW; dead units
+## and unhit bystanders are excluded. This mapping is the "caller work" Sol's
+## API doc names, in one pure place shared by preview and commit.
+func test_units_hit_maps_cell_damage_to_living_units_only() -> void:
+	var units := {
+		"slime": _unit("slime", Vector2i(2, 2), 5),
+		"husk": _unit("husk", Vector2i(3, 2), 0),
+		"hero": _unit("hero", Vector2i(6, 6), 20, "party"),
+	}
+	var state := _wet_chain_state()
+	var result := ReactionRoomLogic.cast(state, "spark", Vector2i(2, 4),
+			Vector2i(2, 2), "encounter")
+	var hits: Array = ReactionRoomLogic.units_hit(units, result)
+	eq(hits, [{"id": "slime", "cell": Vector2i(2, 2), "amount": 2,
+			"kind": "spark"}],
+			"the living unit on a damaged cell is hit; the dead one is not")
+
+
+func test_units_hit_is_empty_when_no_unit_stands_in_the_damage() -> void:
+	var units := {"hero": _unit("hero", Vector2i(6, 6), 20, "party")}
+	var state := _wet_chain_state()
+	var result := ReactionRoomLogic.cast(state, "spark", Vector2i(2, 4),
+			Vector2i(2, 2), "encounter")
+	eq(ReactionRoomLogic.units_hit(units, result), [],
+			"reaction damage on empty cells hits nobody")
+
+
+## An environmental hit on the intention's owner disrupts (cancels) it; hits
+## on anyone else never do, and an already-canceled intention stays canceled
+## rather than double-reporting.
+func test_intent_disrupted_only_by_hits_on_the_owner() -> void:
+	var intent := {"owner": "slime", "verb": "spit", "canceled": false}
+	var slime_hit := [{"id": "slime", "cell": Vector2i(2, 2), "amount": 2,
+			"kind": "spark"}]
+	var hero_hit := [{"id": "hero", "cell": Vector2i(5, 5), "amount": 2,
+			"kind": "fire"}]
+	ok(ReactionRoomLogic.intent_disrupted(intent, slime_hit),
+			"a hit on the owner disrupts its declared intention")
+	not_ok(ReactionRoomLogic.intent_disrupted(intent, hero_hit),
+			"a hit on someone else never disrupts it")
+	not_ok(ReactionRoomLogic.intent_disrupted(intent, []),
+			"no hits, no disruption")
+	var canceled := {"owner": "slime", "verb": "spit", "canceled": true}
+	not_ok(ReactionRoomLogic.intent_disrupted(canceled, slime_hit),
+			"an already-canceled intention is not re-disrupted")
+
+
+## Preview = result for the unit mapping: applying the hits changes each hp by
+## exactly the previewed amount and nothing else.
+func test_apply_hits_commits_exactly_the_previewed_amounts() -> void:
+	var units := {
+		"slime": _unit("slime", Vector2i(2, 2), 5),
+		"hero": _unit("hero", Vector2i(3, 2), 20, "party"),
+	}
+	var state := _wet_chain_state()
+	var result := ReactionRoomLogic.cast(state, "spark", Vector2i(2, 4),
+			Vector2i(2, 2), "encounter")
+	var hits: Array = ReactionRoomLogic.units_hit(units, result)
+	eq(hits.size(), 2, "both units in the conduction are previewed")
+	ReactionRoomLogic.apply_hits(units, hits)
+	eq(int(units["slime"]["hp"]), 3, "the slime lost exactly the previewed 2")
+	eq(int(units["hero"]["hp"]), 18, "the hero lost exactly the previewed 2")
+
+
+## Forced-movement preview contract: push_destination must predict exactly
+## what IntentLogic.push_unit will do, without mutating anything.
+func test_push_destination_predicts_push_unit_exactly() -> void:
+	var state := {"width": 8, "height": 6, "blocked": {Vector2i(4, 1): true},
+			"units": {
+				"slime": _unit("slime", Vector2i(4, 2), 5),
+				"hero": _unit("hero", Vector2i(4, 3), 20, "party"),
+			}}
+	for dir: Vector2i in [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN,
+			Vector2i.LEFT]:
+		var shown: Dictionary = ReactionRoomLogic.push_destination(
+				state, "slime", dir)
+		var live := state.duplicate(true)
+		var intent := {"owner": "slime", "canceled": false}
+		var pushed: bool = IntentLogic.push_unit(live, "slime", dir, intent)
+		eq(shown["legal"], pushed,
+				"push preview legality matches push_unit for %s" % str(dir))
+		if pushed:
+			eq(shown["dest"], live["units"]["slime"]["cell"],
+					"push preview destination matches push_unit for %s" % str(dir))
+	not_ok(ReactionRoomLogic.push_destination(state, "slime", Vector2i.UP)["legal"],
+			"pushing into blocked terrain previews as illegal")
+	not_ok(ReactionRoomLogic.push_destination(state, "slime", Vector2i.DOWN)["legal"],
+			"pushing into an occupied cell previews as illegal")
+
+
+## build_state exposes exactly the targetable cells; anything else fails
+## closed inside Sol's engine instead of silently springing into existence.
+func test_build_state_covers_exactly_the_targetable_cells() -> void:
+	var seeds := {Vector2i(1, 1): ["channel"], Vector2i(2, 1): ["smoke"]}
+	var state: Dictionary = ReactionRoomLogic.build_state(6, 4,
+			[Vector2i(1, 1), Vector2i(2, 1), Vector2i(3, 1)], seeds)
+	eq(state["width"], 6, "width carried")
+	eq(state["height"], 4, "height carried")
+	eq(state["cells"].size(), 3, "exactly the targetable cells exist")
+	eq(state["cells"][Vector2i(1, 1)]["tags"], ["channel"], "seed tags applied")
+	eq(state["cells"][Vector2i(3, 1)]["tags"], [], "unseeded cells start bare")
+	var offgrid := ReactionRoomLogic.cast(state, "grow", Vector2i(1, 2),
+			Vector2i(4, 1), "exploration")
+	not_ok(offgrid["valid"], "a wall/untargetable cell fails closed")
+	eq(offgrid["error"], "target_cell_missing", "with Sol's explicit error")
