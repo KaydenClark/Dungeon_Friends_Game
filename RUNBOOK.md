@@ -2,7 +2,7 @@
 
 > Generated from LLM Workbench v2.1. See Upgrading The Harness below.
 
-**Last reviewed:** 2026-07-11 (T-086 height/readability proof)
+**Last reviewed:** 2026-07-11 (T-087 visible-party exploration proof)
 **Runtime owner:** Kayden (solo developer)
 **Environment:** local macOS development; Steam-first PC target
 
@@ -14,14 +14,14 @@ It should be boring, exact, and executable.
 The executable currently implements the pre-pivot forest/tutorial slice and
 separate d10 combat arenas. It remains the regression baseline while the
 unified-world design in `BLUEPRINT.md` is built through isolated prototype
-scenes. T-086 now proves three-quarter height presentation in one isolated dev
-room; it does not add production-room elevation or pathfinding. Do not claim
-the target moving party, material reaction, same-room encounter, deterministic
-intent, or persistent-resolution systems exist until their TASKBOARD proof is
-recorded.
+scenes. T-086 proves three-quarter height presentation and T-087 adds a
+bootable four-member exploration party in isolated dev rooms. They do not add
+production-room elevation, pathfinding, or party movement. Do not claim the
+target material reaction, same-room encounter, deterministic intent, or
+persistent-resolution systems exist until their TASKBOARD proof is recorded.
 
-Active setup branch: `codex/unified-world-pivot`. T-086 is complete; the next
-implementation task is T-087. Each prototype task must document its own
+Active setup branch: `codex/unified-world-pivot`. T-087 is complete; the next
+implementation task is T-088. Each prototype task must document its own
 scene/command here before being marked done.
 
 ## Prerequisites
@@ -240,6 +240,46 @@ mode exits `0`, prints a `wrote ... (1280x720)` line, and produces the image at
 levels, stair endpoints, orthogonal projection, fail-closed bounds, four actor
 cells, and the wall's depth-order contract.
 
+### Visible-party exploration spike (T-087)
+
+This bootable, isolated scene extends the T-086 presentation proof with one
+selected leader and three visible breadcrumb followers. Followers are
+render-only: only the leader owns gameplay occupancy or interaction authority.
+No production room, LDtk import, pathfinding, puzzle script, or combat path is
+called or changed.
+
+Launch the interactive prototype:
+
+```bash
+cd game
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/visible_party_exploration_spike.tscn --resolution 1280x720
+```
+
+Controls and acceptance route:
+
+- WASD, arrow keys, or D-pad: move the selected leader one grid cell.
+- F or controller Y: cycle which visible party member is the leader.
+- R, Q, or controller X: reset the prototype.
+- From reset, move right five, up two through the open one-cell door and gold
+  stairs, then right four. All four members must remain visible, move only by
+  legal cardinal breadcrumbs, and finish in the `RECOVERED` upper formation.
+- Step right once onto the plate, then right again: a visible follower may
+  stand on it, but the `PLATE PROOF` remains off because followers have no
+  puzzle occupancy. Backtracking through a follower visual cell remains legal.
+
+Capture the GitHub-ready choke and recovered states (windowed; run serially):
+
+```bash
+cd game
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/visible_party_exploration_spike.tscn --resolution 1280x720 -- --out="$PWD/../docs/screenshots/visible_party_exploration.png"
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/visible_party_exploration_spike.tscn --resolution 1280x720 -- --state=recovered --out="$PWD/../docs/screenshots/visible_party_recovered.png"
+```
+
+Expected result: launch prints `VISIBLE PARTY PROTOTYPE: ready`. Each capture
+exits `0` with a 1280x720 `wrote` line; the second also prints `RECOVERED (4/4
+upstairs)`. Capture validation rejects black, wrong-sized, and background-only
+frames before a proof image can be written.
+
 ### Kenney visual-skeleton proof (T-080..T-084)
 
 Regenerate the promoted runtime crops after changing the manifest, import
@@ -328,7 +368,7 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
- per-suite tally (currently `UNIT TESTS: 33 suites, 205 tests, 997 checks, 0
+ per-suite tally (currently `UNIT TESTS: 34 suites, 214 tests, 1211 checks, 0
 failed`). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a
 few seconds (pure logic and controlled clocks, no real-time waits, unlike the
 slice smoke test; the tutorial soft-lock solver adds a second or two). Run
@@ -393,7 +433,11 @@ can-the-player-wedge-it proof the Known Risks row demands), and
 `test_debug_overlay` (T-030 hooks: hidden by default, grant dedup, reset
 delegation), and `test_three_quarter_height_layout` (T-086: exactly two integer
 levels, stair metadata, orthogonal screen projection, bounds, four static
-actors, and foreground/background wall ordering). Add a suite path to the
+actors, foreground/background wall ordering, and fail-closed capture
+validation), and `test_visible_party_exploration_model` (T-087: four distinct
+members, legal breadcrumb and leader-switch transitions, door/stair recovery,
+leader-only occupancy/interaction, inert follower plate presence, and
+fail-closed invalid movement). Add a suite path to the
 `SUITES` list in `run_tests.gd` to
 register new tests.
 
@@ -494,8 +538,9 @@ Every spike must:
    and feel claims;
 5. append actual commands/results to the TASKBOARD proof log.
 
-T-086's three-quarter-height commands above establish the pattern. Add T-087's
-exact entry point only after its scene exists; do not guess future filenames.
+T-086 and T-087 establish the presentation and moving-party pattern. Add
+T-088's exact entry point only after its scene exists; do not guess future
+filenames.
 
 ## Build/Export
 

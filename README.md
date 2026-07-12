@@ -33,25 +33,41 @@ scaffolding, and a separate d10 tactical-combat arena. That build is preserved
 as a tested migration baseline while the unified-world replacement is proven
 incrementally.
 
-The old executable behavior is **not** the current product target. The first
-reversible proof now exists as an isolated three-quarter height/readability
-scene; it does not modify or replace the playable production rooms. Migration
-continues through the remaining spikes:
+The old executable behavior is **not** the current product target. Two
+reversible proofs now exist as isolated dev scenes: three-quarter
+height/readability and a bootable four-member exploration party. Neither
+modifies or replaces the playable production rooms. Migration continues
+through the remaining spikes:
 
-1. visible-party exploration without follower softlocks;
-2. shared material reactions;
-3. same-room deterministic encounters with enemy intents;
-4. persistent encounter/world resolution;
-5. a short Hero-plus-two-friends thesis slice.
+1. shared material reactions;
+2. same-room deterministic encounters with enemy intents;
+3. persistent encounter/world resolution;
+4. a short Hero-plus-two-friends thesis slice.
 
 ## Unified-World Prototype
 
-![T-086 three-quarter height/readability spike](docs/screenshots/three_quarter_height_spike.png)
+![T-087 visible-party exploration prototype](docs/screenshots/visible_party_exploration.png)
 
-This 1280x720 dev-room proof keeps rectangular square-grid logic while adding
-two presentation elevations, authored stairs, a tall occluding wall, and four
-static party placeholders. The exact review and capture commands are in
-[`RUNBOOK.md`](RUNBOOK.md#three-quarter-heightreadability-spike-t-086).
+T-087 is a working, isolated prototype: control one selected leader while
+three render-only followers remain visible, thread a one-cell door and stair,
+then reform on the upper path. Followers cannot occupy puzzle cells, push the
+block, hold the plate, or trap the leader. Boot it directly:
+
+```bash
+cd game
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/visible_party_exploration_spike.tscn --resolution 1280x720
+```
+
+Use WASD, arrow keys, or D-pad to move; F or controller Y cycles the leader;
+R, Q, or controller X resets. The test route is right five, up two through the
+door, then right four to reform.
+
+| Height/readability foundation | Recovered visible party |
+|---|---|
+| ![T-086 three-quarter height/readability spike](docs/screenshots/three_quarter_height_spike.png) | ![T-087 recovered visible party](docs/screenshots/visible_party_recovered.png) |
+
+Both 1280x720 proofs keep rectangular square-grid logic. Exact review, route,
+and capture commands are in [`RUNBOOK.md`](RUNBOOK.md#visible-party-exploration-spike-t-087).
 
 ## Baseline Screenshots
 

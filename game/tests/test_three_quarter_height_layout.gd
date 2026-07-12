@@ -3,6 +3,7 @@ extends "res://tests/gd_test.gd"
 ## orthogonal square grid. The isolated showcase consumes this exact layout.
 
 const LAYOUT_PATH := "res://scripts/dev/three_quarter_height_layout.gd"
+const RENDERER_PATH := "res://scripts/dev/three_quarter_height_spike.gd"
 
 
 func _layout() -> Variant:
@@ -93,3 +94,28 @@ func test_actor_and_bounds_metadata_fail_closed() -> void:
 			"out-of-bounds elevation query fails closed")
 	not_ok(layout.is_walkable(Vector2i(layout.GRID_SIZE.x, 0)),
 			"out-of-bounds walkability query fails closed")
+
+
+func test_capture_validation_rejects_partial_or_wrong_sized_frames() -> void:
+	var renderer_script: GDScript = load(RENDERER_PATH)
+	var renderer: Node2D = renderer_script.new()
+	ok(renderer.has_method("_capture_image_is_complete"),
+			"renderer exposes a fail-closed capture completeness check")
+	if not renderer.has_method("_capture_image_is_complete"):
+		renderer.free()
+		return
+	var partial := Image.create(1280, 720, false, Image.FORMAT_RGB8)
+	partial.fill(Color.BLACK)
+	not_ok(renderer._capture_image_is_complete(partial), "black partial frame is rejected")
+	var background_only := Image.create(1280, 720, false, Image.FORMAT_RGB8)
+	background_only.fill(Color("101a2d"))
+	not_ok(renderer._capture_image_is_complete(background_only),
+			"background-only frame is rejected even when it is not black")
+	var complete := background_only.duplicate()
+	complete.set_pixel(1000, 600, Color("d79bd9"))
+	ok(renderer._capture_image_is_complete(complete),
+			"frame with broad dark-to-bright visual coverage is accepted")
+	var wrong_size := Image.create(640, 360, false, Image.FORMAT_RGB8)
+	wrong_size.fill(Color("101a2d"))
+	not_ok(renderer._capture_image_is_complete(wrong_size), "wrong-sized frame is rejected")
+	renderer.free()

@@ -28,6 +28,15 @@ const WALL_DARK := Color("493f50")
 const WALL_RISE := 34.0
 const STAIR_FACE := Color("b9854e")
 const STAIR_LIGHT := Color("f0c978")
+const CAPTURE_ATTEMPTS := 3
+const CAPTURE_MIN_LUMINANCE_SPREAD := 0.08
+const CAPTURE_SAMPLE_POINTS := [
+	Vector2i(10, 10),
+	Vector2i(640, 100),
+	Vector2i(40, 600),
+	Vector2i(1000, 600),
+	Vector2i(250, 170),
+]
 
 var _layout = HeightLayout.new()
 var _font: Font = ThemeDB.fallback_font
@@ -50,18 +59,24 @@ func _ready() -> void:
 
 
 func _capture_when_ready() -> void:
-	# Metal can expose a partially populated viewport if read back immediately
-	# after the first CanvasItem redraw. Let the real window settle, then cross
-	# two completed render frames before reading pixels.
-	for _frame in 30:
+	# Metal can occasionally expose a partially populated viewport even after a
+	# completed frame. Validate broad screen coverage and redraw before retrying
+	# so a successful command never silently writes a mostly black proof image.
+	var image: Image
+	for attempt in range(CAPTURE_ATTEMPTS):
+		queue_redraw()
+		for _frame in 30:
+			await get_tree().process_frame
+		await RenderingServer.frame_post_draw
 		await get_tree().process_frame
-	await RenderingServer.frame_post_draw
-	await get_tree().process_frame
-	await RenderingServer.frame_post_draw
-	var image := get_viewport().get_texture().get_image()
-	if image.get_width() != VIEWPORT_SIZE.x or image.get_height() != VIEWPORT_SIZE.y:
-		push_error("THREE-QUARTER HEIGHT SPIKE: expected 1280x720, got %dx%d"
-				% [image.get_width(), image.get_height()])
+		await RenderingServer.frame_post_draw
+		image = get_viewport().get_texture().get_image()
+		if _capture_image_is_complete(image):
+			break
+		print("THREE-QUARTER HEIGHT SPIKE: incomplete frame; redraw retry ", attempt + 1)
+	if not _capture_image_is_complete(image):
+		push_error("THREE-QUARTER HEIGHT SPIKE: viewport stayed incomplete after %d attempts"
+				% CAPTURE_ATTEMPTS)
 		get_tree().quit(1)
 		return
 	var error := image.save_png(_out_path)
@@ -72,6 +87,24 @@ func _capture_when_ready() -> void:
 		return
 	print("THREE-QUARTER HEIGHT SPIKE: wrote ", _out_path, " (1280x720)")
 	get_tree().quit(0)
+
+
+func _capture_image_is_complete(image: Image) -> bool:
+	if image == null or image.is_empty():
+		return false
+	if image.get_width() != VIEWPORT_SIZE.x or image.get_height() != VIEWPORT_SIZE.y:
+		return false
+	var darkest := 1.0
+	var brightest := 0.0
+	for point in CAPTURE_SAMPLE_POINTS:
+		var luminance := image.get_pixelv(point).get_luminance()
+		if luminance <= 0.01:
+			return false
+		darkest = minf(darkest, luminance)
+		brightest = maxf(brightest, luminance)
+	# A background-only frame is nonblack but lacks the board/card borders. The
+	# dark-to-bright spread makes capture proof fail closed on that Metal race.
+	return brightest - darkest >= CAPTURE_MIN_LUMINANCE_SPREAD
 
 
 func _draw() -> void:
@@ -115,7 +148,7 @@ func _draw_board() -> void:
 		var grid := UPPER_GRID if level == 1 else LOWER_GRID
 		draw_rect(rect, fill)
 		draw_rect(rect, grid, false, 1.0)
-		if _layout.is_walkable(cell):
+		if _cell_is_walkable(cell):
 			draw_rect(rect.grow(-5), WALKABLE_MARK, false, 1.0)
 		else:
 			draw_rect(rect.grow(-6), Color(BLOCKED_MARK, 0.22))
@@ -127,6 +160,10 @@ func _draw_board() -> void:
 			_draw_cliff_face(rect)
 	_draw_stairs()
 	_draw_level_tags()
+
+
+func _cell_is_walkable(cell: Vector2i) -> bool:
+	return _layout.is_walkable(cell)
 
 
 func _is_platform_front(cell: Vector2i) -> bool:
