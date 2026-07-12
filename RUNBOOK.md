@@ -265,6 +265,26 @@ $godot = 'E:\Godot\godot.cmd'
 Each run writes seven captures covering turn start, root menu, Item submenu,
 movement destination, attack result, forest battle, and dungeon battle.
 
+### Three-quarter perspective spike (T-089)
+
+Pivot step 2's readability proof (see `TASKBOARD.md` -> Pivot Sequence):
+one dev room with two integer elevation levels, a stair ramp, a tall north
+wall face, and a four-member party (controlled leader + three non-blocking
+breadcrumb followers). Interactive check: run the scene windowed and walk
+the party up and down the stairs with WASD/arrows. Scripted proof shots:
+
+```powershell
+$godot = 'E:\Godot\godot.cmd'
+& $godot --path game scenes/dev/three_quarter_spike.tscn --resolution 1280x720 -- --out="$PWD\docs\screenshots\t089-three-quarter-spike\1280"
+& $godot --path game scenes/dev/three_quarter_spike.tscn --resolution 1920x1080 -- --out="$PWD\docs\screenshots\t089-three-quarter-spike\1920"
+```
+
+Each run prints `THREE-QUARTER SPIKE: ready ...`, writes four captures
+(lower floor, ascending ramp, party spanning both elevations, plateau at
+the chest), then `THREE-QUARTER SPIKE: done`. Run windowed; headless image
+output renders black. This is throwaway spike code (`game/scenes/dev/`,
+`game/scripts/dev/`) - graduating it into production is its own decision.
+
 ### Display-scaling spike (T-007)
 
 Checks the flexible HD/ultrawide stretch settings (revised 2026-07-05, see
