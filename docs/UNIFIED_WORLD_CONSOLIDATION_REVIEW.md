@@ -64,9 +64,11 @@ Both implementations are retained because they answer different questions:
 
 ## Recommended next step
 
-Execute T-096 and T-097 from
-`docs/planning/SOL_FABLE_PIVOT_FIX_HANDOFF.md`, merge them back into this
-consolidation branch, and replay the owner gates. Then build T-093 as one
-gray-box reaction room using a single shared effect entry point in exploration
-and encounter contexts. If that room is not fun, revisit D-031 before adding
+T-096 and T-097 are merged on `codex/unified-world-consolidation`; Fable's
+encounter now consumes Sol's real four-member formation snapshot, and the
+combined automated battery is green. Kayden should replay the five owner gates
+in `docs/planning/SOL_FABLE_PIVOT_FIX_HANDOFF.md`. If accepted, split T-093 by
+dependency: first build the pure shared reaction entry point and matrix, then
+build one gray-box room that consumes that exact code path in exploration and
+encounter contexts. If that room is not fun, revisit D-031 before adding
 persistence, roster content, or production art.

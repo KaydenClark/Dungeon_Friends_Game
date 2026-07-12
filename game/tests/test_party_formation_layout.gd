@@ -2,6 +2,7 @@ extends "res://tests/gd_test.gd"
 ## T-096 contract tests for pure selectable layouts and encounter deployment.
 
 const LAYOUT_PATH := "res://scripts/dev/party_formation_layout.gd"
+const SNAPSHOT_ADAPTER_PATH := "res://scripts/dev/sol_snapshot_adapter.gd"
 const MEMBER_IDS := [&"hero", &"buddy", &"friend_c", &"friend_d"]
 const MEMBER_CELLS := {
 	&"hero": Vector2i.ZERO,
@@ -105,6 +106,25 @@ func test_open_deployment_is_pure_deterministic_and_differs_by_formation() -> vo
 	ne(snapshots[&"line"], snapshots[&"square"], "line and square differ in open space")
 	ne(snapshots[&"square"], snapshots[&"spaced"], "square and spaced differ in open space")
 	ne(snapshots[&"line"], snapshots[&"spaced"], "line and spaced differ in open space")
+
+
+func test_fable_adapter_consumes_the_real_sol_snapshot() -> void:
+	var layout: Variant = _layout()
+	var adapter: GDScript = load(SNAPSHOT_ADAPTER_PATH)
+	not_null(layout, "party formation layout exists")
+	not_null(adapter, "Fable snapshot adapter exists")
+	if layout == null or adapter == null:
+		return
+	var walkable := _open_cells(5)
+	var snapshot: Dictionary = layout.plan_deployment(
+			&"square", &"hero", Vector2i.RIGHT, MEMBER_IDS, MEMBER_CELLS,
+			walkable, [], [], [], _flat_elevations(walkable))
+	var fable_ids := ["hero", "buddy", "friend_c", "friend_d"]
+	var starts: Dictionary = adapter.encounter_start_cells(snapshot, fable_ids)
+	eq(starts.size(), 4, "adapter returns every Sol-planned party cell")
+	for id: String in fable_ids:
+		eq(starts.get(id), snapshot["deployment_cells"].get(StringName(id)),
+				"adapter preserves Sol's deployment for %s" % id)
 
 
 func test_dense_fallback_stays_reachable_and_excludes_obstacles_and_height_jumps() -> void:

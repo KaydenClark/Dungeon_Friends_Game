@@ -309,33 +309,45 @@ and exits `0`; any `FAIL:` line exits `1`. The turn model inside is a
 throwaway step-tick - D-027's real turn structure is decided by T-092, not
 this spike.
 
-### Deterministic intent prototype (T-092)
+### Deterministic intent prototype (T-092, revised by T-097)
 
 Pivot step 4: intent rounds on the same spike room, built to Kayden's
-2026-07-11 spec. The slime keeps a rolling 3-verb plan - future steps show
-the verb only, the current action telegraphs its locked cells, exact
-damage, and exact status, and resolves against whoever remains in those
-cells. Interactive: run `scenes/dev/intent_prototype_spike.tscn` windowed;
-in an encounter WASD/arrows step the active unit, `1` Strike / `2` Bash
-(stun-cancels the intention) / `3` Shove (push-cancels), `E` confirms with
-the exact damage shown first, `Tab` switches units, `Q` ends the turn.
-Scripted proof:
+2026-07-11 spec and recut per the T-097 handoff. The slime keeps a rolling
+3-verb plan - future steps serialize through `IntentLogic.future_verbs`
+(verb only, never targets/cells), the current action telegraphs its locked
+cells, exact damage, and exact status, and resolves against whoever remains
+in those cells. Plan entries carry private planning context; ordinary refill
+preserves already-telegraphed verbs, and a dead/changed target or illegal
+head verb rebuilds the whole horizon. Encounter entry is an explicit ENTER
+phase (D-036): input gates immediately (local flags, never
+`SceneTree.paused`), a synthesized sting plays under an ENCOUNTER/TURN-BASED
+banner, then the combat UI reveals and the first round declares. All four
+visible members get move/ability budgets and act in any order. Interactive:
+run `scenes/dev/intent_prototype_spike.tscn` windowed; in an encounter
+WASD/arrows step the active unit, `1` Strike / `2` Bash (stun-cancels the
+intention) / `3` Shove (push-cancels) / `4` Guard (guarded_cells intercepts
+the spit line for an exact duration), `E` confirms with the exact damage
+shown first, `Tab` switches units, `Q` ends the turn. Scripted proof:
 
 ```powershell
 $godot = 'E:\Godot\godot.cmd'
-& $godot --path game scenes/dev/intent_prototype_spike.tscn --resolution 1280x720 -- --out="$PWD\docs\screenshots\t092-intent-prototype\1280"
-& $godot --path game scenes/dev/intent_prototype_spike.tscn --resolution 1920x1080 -- --out="$PWD\docs\screenshots\t092-intent-prototype\1920"
+& $godot --path game scenes/dev/intent_prototype_spike.tscn --resolution 1280x720 -- --out="$PWD\docs\screenshots\t097-intent-recut\1280"
+& $godot --path game scenes/dev/intent_prototype_spike.tscn --resolution 1920x1080 -- --out="$PWD\docs\screenshots\t097-intent-recut\1920"
 ```
 
-Each run writes six captures and prints 23 `PASS:` assertions (preview =
-result, dodge, body-block, stun/push cancellation, exact burn/stun
-durations, world continuity), exiting `0`; any `FAIL:` exits `1`. The pure
-rules live in `game/scripts/dev/intent_logic.gd` with red/green coverage
-in `tests/test_intent_logic.gd`. **D-027 is resolved in favor of intent
-rounds.** T-097 owns the remaining revision: a clear local encounter-entry
-cue, four active party members, stable rolling-forecast semantics with full
-replan on invalidation, and a generic directional guard-field acceptance case.
-The v1 initiative combat remains on disk as historical comparison only.
+Each run writes ten captures (encounter cue, first intent, four-units
+any-order, spit telegraph, guard-vs-line, replan-after-invalidation, stun,
+victory-continuous) and prints 45 `PASS:` assertions, exiting `0`; any
+`FAIL:` exits `1`. The pure rules live in `game/scripts/dev/intent_logic.gd`
+with red/green coverage in `tests/test_intent_logic.gd`; the encounter builds
+Sol's real T-096 four-member deployment snapshot through
+`party_formation_layout.gd`, then passes it through the tiny
+`game/scripts/dev/sol_snapshot_adapter.gd` seam. Keys `1`/`2`/`3` select
+line/square/spaced before encounter entry; the scripted combined proof uses
+square. **D-027 is resolved in
+favor of intent rounds.** The pre-recut T-092 captures remain under
+`docs/screenshots/t092-intent-prototype/` as history. The v1 initiative
+combat remains on disk as historical comparison only.
 
 ### Alternative isolated pivot proofs (Sol branch)
 
@@ -426,7 +438,7 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
-per-suite tally (currently `UNIT TESTS: 36 suites, 244 tests, 1609 checks, 0
+per-suite tally (currently `UNIT TESTS: 36 suites, 257 tests, 1666 checks, 0
 failed`). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a
 few seconds (pure logic and controlled clocks, no real-time waits, unlike the
 slice smoke test; the tutorial soft-lock solver adds a second or two). Run

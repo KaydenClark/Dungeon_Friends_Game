@@ -179,12 +179,12 @@ or the full T-093 material/reaction matrix.
 
 ## Merge and owner gate
 
-1. Merge T-096 into `codex/unified-world-consolidation` and rerun its pure
-   formation tests.
-2. Rebase/merge T-097 onto that result, replace its tiny snapshot adapter with
-   Sol's actual neutral planner output, and rerun the combined battery.
-3. Kayden replays: three formations through the choke; encounter entry;
+Completed 2026-07-12: T-096 was merged first, T-097 second, and the encounter
+now consumes Sol's actual four-member neutral planner output. The combined
+automated battery is green at both target resolutions.
+
+1. Kayden replays: three formations through the choke; encounter entry;
    arbitrary four-member order; invalidated three-verb plan; guard blocking a
    breath-like line.
-4. Only after that replay passes does T-093 begin. Neither task merges directly
+2. Only after that replay passes does T-093 begin. Neither task merges directly
    into `integration`; draft PR #13 remains the review gate.

@@ -17,9 +17,25 @@ extends RefCounted
 ## - Status durations are exact: burn deals exactly 1 damage for exactly its
 ##   duration in environment ticks; stun skips exactly its duration.
 ##
+## T-097 recut (SOL_FABLE_PIVOT_FIX_HANDOFF.md):
+## - Plan entries are {verb, target_id}: the verb is public (the only thing
+##   the future UI may serialize - see future_verbs()); target_id is private
+##   planning context, never shown.
+## - Ordinary refill (refill_plan) preserves already-telegraphed verbs and
+##   appends only the newly exposed horizon step. When the plan's internal
+##   target dies/changes or the head verb becomes illegal
+##   (plan_needs_rebuild), the caller rebuilds the whole horizon.
+## - An empty move is invalid and can never silently consume a round.
+## - guarded_cells: a generic, data-shaped effect (state["effects"]) - facing
+##   defines the front/front-left/front-right protected cells for an exact
+##   duration; it intercepts a line-shaped spit before allies behind it, with
+##   preview == resolution. Gray-box for T-093 to absorb; not a friend kit.
+##
 ## State shape (plain dicts, no Nodes):
 ##   state = {width, height, blocked: {Vector2i: true},
-##            units: {id: {id, cell, hp, max_hp, atk, df, side, statuses}}}
+##            units: {id: {id, cell, hp, max_hp, atk, df, side, statuses}},
+##            effects: [{kind, owner, cells, rounds}]}  (optional)
+##   plan entry = {verb: String, target_id: String}     (target_id is private)
 ##   intent = {owner, verb, cells, damage, status, canceled}  (attacks)
 ##          | {owner, verb: "move", path}                     (executed move)
 ##          | {owner, verb: "stunned", cells: [], canceled: true}
@@ -35,28 +51,81 @@ const BURN_TICK_DAMAGE := 1
 
 ## --- plan --------------------------------------------------------------------
 
-## Deterministic verb plan from the current state: pure function of the
-## distance to the nearest party unit. Same state -> same plan, always.
+## Deterministic plan from the current state: a pure function of the distance
+## to the nearest party unit. Entries carry the public verb plus the private
+## planning context they were built around. Same state -> same plan, always.
 static func make_plan(state: Dictionary, enemy_id: String) -> Array:
 	var enemy: Dictionary = state["units"][enemy_id]
 	var target := nearest_party_unit(state, enemy["cell"])
-	if target.is_empty():
-		return ["move", "move", "move"]
-	var d := manhattan(enemy["cell"], target["cell"])
-	if d >= 4:
-		return ["move", "move", "spit"]
-	if d >= 2:
-		return ["move", "spit", "slam"]
-	return ["slam", "spit", "move"]
+	var target_id: String = "" if target.is_empty() else str(target["id"])
+	var verbs: Array = ["move", "move", "move"]
+	if not target.is_empty():
+		var d := manhattan(enemy["cell"], target["cell"])
+		if d >= 4:
+			verbs = ["move", "move", "spit"]
+		elif d >= 2:
+			verbs = ["move", "spit", "slam"]
+		else:
+			verbs = ["slam", "spit", "move"]
+	var plan: Array = []
+	for verb: String in verbs:
+		plan.append({"verb": verb, "target_id": target_id})
+	return plan
 
 
-## Rolling refill: consume the executed verb and keep PLAN_LENGTH visible by
-## appending the head of a fresh plan for the state as it now stands.
+## The ONLY thing the future-intent UI may serialize: the verb sequence.
+## Private context (targets, destinations, cells) never leaves the plan.
+static func future_verbs(plan: Array) -> Array:
+	var verbs: Array = []
+	for entry: Dictionary in plan:
+		verbs.append(str(entry["verb"]))
+	return verbs
+
+
+## Ordinary rolling refill: already-telegraphed entries stay untouched (they
+## remain trustworthy) and only the newly exposed horizon step is appended,
+## taken from a fresh plan for the state as it now stands.
 static func refill_plan(state: Dictionary, enemy_id: String, plan: Array) -> Array:
-	var next := plan.duplicate()
+	var next := plan.duplicate(true)
+	var fresh := make_plan(state, enemy_id)
 	while next.size() < PLAN_LENGTH:
-		next.append(make_plan(state, enemy_id)[next.size() % PLAN_LENGTH])
+		next.append(fresh[next.size()])
 	return next
+
+
+## True when the plan can no longer be trusted and the caller must rebuild the
+## whole horizon from current state: its internal target died or is no longer
+## the nearest unit, or the current head verb became illegal.
+static func plan_needs_rebuild(state: Dictionary, enemy_id: String, plan: Array) -> bool:
+	if plan.is_empty():
+		return true
+	var head: Dictionary = plan[0]
+	var target_id := str(head.get("target_id", ""))
+	if target_id == "" or not state["units"].has(target_id) \
+			or int(state["units"][target_id]["hp"]) <= 0:
+		return true
+	var enemy: Dictionary = state["units"][enemy_id]
+	var nearest := nearest_party_unit(state, enemy["cell"])
+	if nearest.is_empty() or str(nearest["id"]) != target_id:
+		return true
+	return not _verb_legal(state, enemy_id, str(head["verb"]))
+
+
+## Legality of a verb in the current state without mutating anything - the
+## pure check behind plan_needs_rebuild (declare() is the mutating twin).
+static func _verb_legal(state: Dictionary, enemy_id: String, verb: String) -> bool:
+	var enemy: Dictionary = state["units"][enemy_id]
+	var target := nearest_party_unit(state, enemy["cell"])
+	if target.is_empty():
+		return false
+	match verb:
+		"move":
+			return _move_path(state, enemy_id, target["cell"]).size() > 0
+		"spit":
+			return _line_cells(state, enemy["cell"], target["cell"]).size() > 0
+		"slam":
+			return manhattan(enemy["cell"], target["cell"]) == 1
+	return false
 
 
 ## --- declare phase -------------------------------------------------------------
@@ -82,21 +151,19 @@ static func declare(state: Dictionary, enemy_id: String, verb: String) -> Dictio
 	match verb:
 		"move":
 			var path := _move_path(state, enemy_id, target["cell"])
-			if path.size() > 0:
-				enemy["cell"] = path[path.size() - 1]
+			if path.is_empty():
+				# T-097: an empty move is invalid - it can never silently
+				# consume a round. The caller replans instead.
+				return {"invalid": true}
+			enemy["cell"] = path[path.size() - 1]
 			return {"owner": enemy_id, "verb": "move", "path": path,
 					"cells": [], "damage": 0, "status": {}, "canceled": false}
 		"spit":
-			var dir := _axis_dir_toward(enemy["cell"], target["cell"])
-			var cells: Array = []
-			for step in range(1, SPIT_RANGE + 1):
-				var c: Vector2i = enemy["cell"] + dir * step
-				if not _in_bounds(state, c) or state["blocked"].has(c):
-					break
-				cells.append(c)
+			var cells := _line_cells(state, enemy["cell"], target["cell"])
 			if cells.is_empty():
 				return {"invalid": true}
-			return {"owner": enemy_id, "verb": "spit", "dir": dir,
+			return {"owner": enemy_id, "verb": "spit",
+					"dir": _axis_dir_toward(enemy["cell"], target["cell"]),
 					"cells": cells, "damage": SPIT_DAMAGE,
 					"status": {"burn": SPIT_BURN_ROUNDS}, "canceled": false}
 		"slam":
@@ -119,8 +186,15 @@ static func preview(state: Dictionary, intent: Dictionary) -> Array:
 	var results: Array = []
 	match intent.get("verb", ""):
 		"spit":
-			# The line stops at the first body: nearer cells shield farther ones.
+			# The line stops at the first guarded cell or the first body:
+			# nearer cells shield farther ones, and a guarded cell intercepts
+			# even the unit standing on it.
 			for c: Vector2i in intent["cells"]:
+				var guard := _guard_covering(state, c)
+				if not guard.is_empty():
+					results.append({"id": guard["owner"], "blocked": true,
+							"damage": 0, "status": {}})
+					break
 				var hit := _unit_at(state, c, intent["owner"])
 				if not hit.is_empty():
 					results.append({"id": hit["id"], "damage": intent["damage"],
@@ -141,6 +215,8 @@ static func preview(state: Dictionary, intent: Dictionary) -> Array:
 static func resolve(state: Dictionary, intent: Dictionary) -> Array:
 	var results := preview(state, intent)
 	for r: Dictionary in results:
+		if r.get("blocked", false):
+			continue  # a guard's block reports, but nothing is applied
 		var unit: Dictionary = state["units"][r["id"]]
 		unit["hp"] = int(unit["hp"]) - int(r["damage"])
 		for status_name: String in r["status"]:
@@ -175,6 +251,40 @@ static func push_unit(state: Dictionary, target_id: String, dir: Vector2i,
 	if intent.get("owner", "") == target_id:
 		intent["canceled"] = true
 	return true
+
+
+## --- guarded_cells (T-097 gray-box - generic and data-shaped so the T-093
+## --- material/effect vocabulary can absorb it; not a dragon or friend kit) ---
+
+## Facing defines the protected cells: front, front-left, front-right.
+static func guard_cells(cell: Vector2i, facing: Vector2i) -> Array:
+	var front := cell + facing
+	var left := Vector2i(facing.y, -facing.x)
+	return [front, front + left, front - left]
+
+
+## Raise a guard for exactly `rounds` environment ticks. Effects live as
+## plain data on the state so preview/resolve/tick all read the same source.
+static func apply_guard(state: Dictionary, owner_id: String, facing: Vector2i,
+		rounds: int) -> Dictionary:
+	var owner: Dictionary = state["units"][owner_id]
+	var effect := {"kind": "guarded_cells", "owner": owner_id,
+			"cells": guard_cells(owner["cell"], facing), "rounds": rounds}
+	if not state.has("effects"):
+		state["effects"] = []
+	state["effects"].append(effect)
+	return effect
+
+
+## First active guard effect covering the cell (deterministic: application
+## order). Empty when the cell is unguarded.
+static func _guard_covering(state: Dictionary, c: Vector2i) -> Dictionary:
+	for effect: Dictionary in state.get("effects", []):
+		if effect.get("kind", "") == "guarded_cells" \
+				and int(effect.get("rounds", 0)) > 0 \
+				and (effect.get("cells", []) as Array).has(c):
+			return effect
+	return {}
 
 
 ## --- player side ------------------------------------------------------------------
@@ -223,6 +333,14 @@ static func environment_tick(state: Dictionary) -> Array:
 					"source": "burn"})
 			if int(unit["statuses"]["burn"]) <= 0:
 				unit["statuses"].erase("burn")
+	# Data-shaped effects (guarded_cells) expire on exact durations too.
+	if state.has("effects"):
+		var kept: Array = []
+		for effect: Dictionary in state["effects"]:
+			effect["rounds"] = int(effect.get("rounds", 0)) - 1
+			if int(effect["rounds"]) > 0:
+				kept.append(effect)
+		state["effects"] = kept
 	return results
 
 
@@ -230,6 +348,32 @@ static func environment_tick(state: Dictionary) -> Array:
 
 static func manhattan(a: Vector2i, b: Vector2i) -> int:
 	return absi(a.x - b.x) + absi(a.y - b.y)
+
+
+## Living party-side unit ids, sorted - the round loop iterates these instead
+## of any hard-coded roster (T-097: all visible members act, in any order).
+static func party_ids(state: Dictionary) -> Array:
+	var ids: Array = []
+	var all: Array = state["units"].keys()
+	all.sort()
+	for id: String in all:
+		var unit: Dictionary = state["units"][id]
+		if unit["side"] == "party" and int(unit["hp"]) > 0:
+			ids.append(id)
+	return ids
+
+
+## The spit's affected line: cells outward from `from` toward `toward` until
+## bounds/terrain stop it. Shared by declare() and _verb_legal().
+static func _line_cells(state: Dictionary, from: Vector2i, toward: Vector2i) -> Array:
+	var dir := _axis_dir_toward(from, toward)
+	var cells: Array = []
+	for step in range(1, SPIT_RANGE + 1):
+		var c: Vector2i = from + dir * step
+		if not _in_bounds(state, c) or state["blocked"].has(c):
+			break
+		cells.append(c)
+	return cells
 
 
 ## Nearest living party unit; ties break by cell (y then x) then id so the
