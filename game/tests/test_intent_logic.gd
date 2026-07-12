@@ -2,8 +2,13 @@ extends "res://tests/gd_test.gd"
 ## T-092: red/green for the deterministic intent-round core (D-026/D-027).
 ## The pinned contract is preview=result and exact cancellation/status
 ## behavior - the damage numbers themselves are tunables.
+## T-097 recut adds: plan entries with a public verb + private planning
+## context, ordinary rolling refill that preserves telegraphed verbs, full
+## rebuild on target/head invalidation, party_ids, the generic guarded_cells
+## effect, and the Sol deployment-snapshot adapter seam.
 
 const IntentLogic := preload("res://scripts/dev/intent_logic.gd")
+const SolAdapter := preload("res://scripts/dev/sol_snapshot_adapter.gd")
 
 
 ## Hero at (2,2), friend at (3,4), slime at (8,2) on a 12x8 open field.
@@ -28,27 +33,111 @@ func _state() -> Dictionary:
 
 func test_plan_is_deterministic_by_distance() -> void:
 	var far := _state()
-	eq(IntentLogic.make_plan(far, "slime"), ["move", "move", "spit"],
-			"far plan (d=6)")
+	eq(IntentLogic.future_verbs(IntentLogic.make_plan(far, "slime")),
+			["move", "move", "spit"], "far plan (d=6)")
 	eq(IntentLogic.make_plan(far, "slime"),
 			IntentLogic.make_plan(far, "slime"),
 			"same state -> same plan")
 	var mid := _state()
 	mid["units"]["slime"]["cell"] = Vector2i(4, 2)
-	eq(IntentLogic.make_plan(mid, "slime"), ["move", "spit", "slam"],
-			"mid plan (d=2)")
+	eq(IntentLogic.future_verbs(IntentLogic.make_plan(mid, "slime")),
+			["move", "spit", "slam"], "mid plan (d=2)")
 	var near := _state()
 	near["units"]["slime"]["cell"] = Vector2i(3, 2)
-	eq(IntentLogic.make_plan(near, "slime"), ["slam", "spit", "move"],
-			"adjacent plan (d=1)")
+	eq(IntentLogic.future_verbs(IntentLogic.make_plan(near, "slime")),
+			["slam", "spit", "move"], "adjacent plan (d=1)")
 
 
-func test_plan_refills_rolling_window() -> void:
+func test_plan_entries_expose_verb_and_keep_target_private() -> void:
 	var state := _state()
 	var plan: Array = IntentLogic.make_plan(state, "slime")
+	eq(plan.size(), IntentLogic.PLAN_LENGTH, "plan spans the whole horizon")
+	for entry: Dictionary in plan:
+		ok(entry.has("verb"), "every entry exposes a public verb")
+		ok(entry.has("target_id"), "every entry keeps its private planning context")
+	eq(plan[0]["target_id"], "hero", "the plan is built around the nearest unit")
+
+
+func test_future_verbs_serialize_only_verb_strings() -> void:
+	var state := _state()
+	var shown: Array = IntentLogic.future_verbs(IntentLogic.make_plan(state, "slime"))
+	eq(shown, ["move", "move", "spit"], "future UI feed is the verb sequence")
+	for v: Variant in shown:
+		ok(v is String, "future UI serialization is verb strings only - no "
+				+ "targets, destinations, or cells")
+
+
+func test_ordinary_refill_preserves_telegraphed_verbs() -> void:
+	var state := _state()
+	var plan: Array = IntentLogic.make_plan(state, "slime")  # [move, move, spit]
 	plan.pop_front()
+	var shown_before: Array = IntentLogic.future_verbs(plan)  # [move, spit]
+	# The enemy advanced meanwhile, so a fresh plan would differ - the two
+	# already-telegraphed verbs must survive anyway.
+	state["units"]["slime"]["cell"] = Vector2i(6, 2)
 	plan = IntentLogic.refill_plan(state, "slime", plan)
-	eq(plan.size(), IntentLogic.PLAN_LENGTH, "window stays at 3 verbs")
+	eq(plan.size(), IntentLogic.PLAN_LENGTH, "window refills to 3 verbs")
+	eq(IntentLogic.future_verbs(plan).slice(0, 2), shown_before,
+			"already-shown verbs remain trustworthy through ordinary refill")
+	eq(IntentLogic.refill_plan(state, "slime", plan.duplicate(true)), plan,
+			"refill of a full plan appends nothing")
+
+
+func test_plan_rebuilds_when_target_dies() -> void:
+	var state := _state()
+	var plan: Array = IntentLogic.make_plan(state, "slime")
+	not_ok(IntentLogic.plan_needs_rebuild(state, "slime", plan),
+			"a fresh plan in an unchanged state stays valid")
+	state["units"]["hero"]["hp"] = 0
+	ok(IntentLogic.plan_needs_rebuild(state, "slime", plan),
+			"a dead plan target invalidates the whole plan")
+	var rebuilt: Array = IntentLogic.make_plan(state, "slime")
+	eq(rebuilt[0]["target_id"], "friend", "the rebuild retargets from current state")
+	eq(rebuilt, IntentLogic.make_plan(state, "slime"),
+			"the rebuild is deterministic")
+
+
+func test_plan_rebuilds_when_nearest_target_changes() -> void:
+	var state := _state()
+	var plan: Array = IntentLogic.make_plan(state, "slime")  # target: hero
+	state["units"]["friend"]["cell"] = Vector2i(7, 2)  # friend is now nearest
+	ok(IntentLogic.plan_needs_rebuild(state, "slime", plan),
+			"a changed nearest target invalidates the plan")
+
+
+func test_plan_rebuilds_when_head_verb_becomes_illegal() -> void:
+	var state := _state()
+	state["units"]["slime"]["cell"] = Vector2i(3, 2)  # adjacent -> [slam, ...]
+	var plan: Array = IntentLogic.make_plan(state, "slime")
+	not_ok(IntentLogic.plan_needs_rebuild(state, "slime", plan),
+			"adjacent slam head is legal")
+	state["units"]["slime"]["cell"] = Vector2i(8, 2)  # same target, slam now illegal
+	ok(IntentLogic.plan_needs_rebuild(state, "slime", plan),
+			"an illegal head verb invalidates the plan")
+
+
+func test_empty_move_cannot_consume_a_round() -> void:
+	var boxed := _state()
+	for c: Vector2i in [Vector2i(7, 2), Vector2i(9, 2), Vector2i(8, 1), Vector2i(8, 3)]:
+		boxed["blocked"][c] = true
+	var stalled: Dictionary = IntentLogic.declare(boxed, "slime", "move")
+	ok(stalled.get("invalid", false),
+			"a zero-length move is invalid - never a silently consumed action")
+	var near := _state()
+	near["units"]["slime"]["cell"] = Vector2i(3, 2)  # already adjacent
+	var noop: Dictionary = IntentLogic.declare(near, "slime", "move")
+	ok(noop.get("invalid", false),
+			"an already-adjacent move is invalid too (caller replans)")
+
+
+## --- party round -------------------------------------------------------------
+
+func test_party_ids_are_living_party_members_sorted() -> void:
+	var state := _state()
+	eq(IntentLogic.party_ids(state), ["friend", "hero"],
+			"party ids are the party-side units, sorted")
+	state["units"]["friend"]["hp"] = 0
+	eq(IntentLogic.party_ids(state), ["hero"], "downed members drop out")
 
 
 func test_slam_declare_invalid_when_not_adjacent_forces_replan() -> void:
@@ -221,3 +310,97 @@ func test_move_never_steps_onto_a_unit() -> void:
 			"never lands on the hero")
 	eq(state["units"]["slime"]["cell"], Vector2i(3, 2),
 			"stops adjacent instead")
+
+
+## --- guarded_cells (T-097 gray-box; T-093 absorbs it later) --------------------
+
+func test_guard_cells_rotate_with_facing() -> void:
+	var c := Vector2i(5, 5)
+	eq(IntentLogic.guard_cells(c, Vector2i.UP),
+			[Vector2i(5, 4), Vector2i(4, 4), Vector2i(6, 4)],
+			"facing up: front, front-left, front-right")
+	eq(IntentLogic.guard_cells(c, Vector2i.RIGHT),
+			[Vector2i(6, 5), Vector2i(6, 4), Vector2i(6, 6)], "facing right rotates")
+	eq(IntentLogic.guard_cells(c, Vector2i.DOWN),
+			[Vector2i(5, 6), Vector2i(6, 6), Vector2i(4, 6)], "facing down rotates")
+	eq(IntentLogic.guard_cells(c, Vector2i.LEFT),
+			[Vector2i(4, 5), Vector2i(4, 6), Vector2i(4, 4)], "facing left rotates")
+
+
+func test_guard_intercepts_line_before_allies_behind() -> void:
+	var state := _state()
+	state["units"]["slime"]["cell"] = Vector2i(5, 2)
+	state["units"]["hero"]["cell"] = Vector2i(2, 2)    # in the line, farther back
+	state["units"]["friend"]["cell"] = Vector2i(3, 3)  # south of the line
+	var intent: Dictionary = IntentLogic.declare(state, "slime", "spit")
+	eq(intent["cells"], [Vector2i(4, 2), Vector2i(3, 2), Vector2i(2, 2)],
+			"line locks toward the hero")
+	IntentLogic.apply_guard(state, "friend", Vector2i.UP, 1)
+	var shown: Array = IntentLogic.preview(state, intent)
+	eq(shown.size(), 1, "preview reports exactly one blocked entry")
+	if shown.size() == 1:
+		eq(shown[0]["id"], "friend", "the guard owner reports the block")
+		ok(shown[0].get("blocked", false), "the entry is a block, not a hit")
+		eq(int(shown[0]["damage"]), 0, "a blocked line deals no damage")
+	var results: Array = IntentLogic.resolve(state, intent)
+	eq(results, shown, "GUARD PREVIEW EQUALS RESOLUTION - the D-026 contract")
+	eq(state["units"]["hero"]["hp"], 20, "the ally behind the guard is untouched")
+	eq(state["units"]["hero"]["statuses"].get("burn", 0), 0, "and takes no status")
+
+
+func test_guard_protects_a_unit_standing_on_a_guarded_cell() -> void:
+	var state := _state()
+	state["units"]["slime"]["cell"] = Vector2i(5, 2)
+	state["units"]["hero"]["cell"] = Vector2i(3, 2)    # standing inside the wall
+	state["units"]["friend"]["cell"] = Vector2i(2, 3)  # guards from behind-left
+	var intent: Dictionary = IntentLogic.declare(state, "slime", "spit")
+	IntentLogic.apply_guard(state, "friend", Vector2i.UP, 1)  # covers (2,2)(1,2)(3,2)
+	var results: Array = IntentLogic.resolve(state, intent)
+	eq(results.size(), 1, "the line stops at the guarded cell")
+	if results.size() == 1:
+		eq(results[0]["id"], "friend", "reported as the guard's block")
+		ok(results[0].get("blocked", false), "blocked, not a hit")
+	eq(state["units"]["hero"]["hp"], 20,
+			"a unit standing on a guarded cell is protected")
+
+
+func test_guard_expires_after_exact_duration() -> void:
+	var state := _state()
+	state["units"]["slime"]["cell"] = Vector2i(5, 2)
+	state["units"]["hero"]["cell"] = Vector2i(2, 2)
+	state["units"]["friend"]["cell"] = Vector2i(3, 3)
+	IntentLogic.apply_guard(state, "friend", Vector2i.UP, 2)
+	var round1: Array = IntentLogic.resolve(state,
+			IntentLogic.declare(state, "slime", "spit"))
+	ok(round1.size() == 1 and round1[0].get("blocked", false), "round 1: blocked")
+	IntentLogic.environment_tick(state)
+	var round2: Array = IntentLogic.resolve(state,
+			IntentLogic.declare(state, "slime", "spit"))
+	ok(round2.size() == 1 and round2[0].get("blocked", false),
+			"round 2: still blocked - duration is exact, not approximate")
+	IntentLogic.environment_tick(state)
+	var round3: Array = IntentLogic.resolve(state,
+			IntentLogic.declare(state, "slime", "spit"))
+	eq(round3.size(), 1, "round 3: the line goes through")
+	if round3.size() == 1:
+		eq(round3[0]["id"], "hero", "the hero takes the hit after expiry")
+		not_ok(round3[0].get("blocked", false), "no stale guard lingers")
+
+
+## --- Sol deployment-snapshot adapter seam (T-096/T-097) ------------------------
+
+func test_sol_snapshot_adapter_maps_ids_to_cells() -> void:
+	var snapshot := {
+		"formation_id": "line",
+		"leader_id": "hero",
+		"facing": Vector2i.UP,
+		"member_cells": {"hero": Vector2i(4, 4), "friend": Vector2i(4, 5)},
+		"deployment_cells": {"friend": Vector2i(3, 4)},
+	}
+	var cells: Dictionary = SolAdapter.encounter_start_cells(
+			snapshot, ["hero", "friend", "ghost"])
+	eq(cells.get("hero"), Vector2i(4, 4), "member cell used when no deployment cell")
+	eq(cells.get("friend"), Vector2i(3, 4), "deployment cell wins when present")
+	not_ok(cells.has("ghost"), "ids missing from the snapshot are ignored")
+	eq(SolAdapter.encounter_start_cells({}, ["hero"]), {},
+			"an empty snapshot deploys nothing")
