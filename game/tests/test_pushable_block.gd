@@ -28,6 +28,21 @@ func test_push_into_free_cell_moves_block() -> void:
 	g.queue_free()
 
 
+func test_block_restores_the_full_two_tone_slab_silhouette() -> void:
+	var g := _make_grid()
+	var b := _block(g, Vector2i(2, 2))
+	ok(b.body is ColorRect, "block uses the accepted solid slab body")
+	if b.body is ColorRect:
+		eq(b.body.size, Vector2(52, 52), "slab fills the old 52x52 footprint")
+		eq(b.body.position, Vector2(-26, -26), "slab remains centered in one cell")
+	var color_faces := 0
+	for child in b.get_children():
+		if child is ColorRect:
+			color_faces += 1
+	eq(color_faces, 2, "lighter top face preserves the preferred two-tone read")
+	g.queue_free()
+
+
 func test_push_into_wall_is_refused() -> void:
 	var g := _make_grid()
 	var b := _block(g, Vector2i(2, 2))

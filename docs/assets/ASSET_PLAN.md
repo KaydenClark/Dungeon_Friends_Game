@@ -47,6 +47,11 @@ batches below remain later custom-art candidates.
 | Hero/Buddy/slimes | `game/data/sprites/kenney_*.tres` | `CharacterStats` / `EnemyStats` `sprite_frames` slots |
 | NPCs | `game/assets/art/sprites/runtime/kenney/healer.png` and `quest_npc.png` | LDtk `Npc` fields and `NPC` behavior |
 | Combat/UI | `game/assets/art/ui/kenney/*.png` | combat FSM, range sets, turn order, and command input |
+
+T-086 owner exception: `door_closed.png` and `pushable_block.png` remain in the
+reference library but are intentionally unwired after the 2026-07-11
+playthrough rejected their half-door/fence silhouettes. `LockedDoor` and
+`PushableBlock` use the accepted full-cell door and two-tone slab renderings.
 | Input prompts | `game/assets/art/ui/prompts/kenney/*.png` | InputMap actions and `InputPrompts` active-device selection |
 
 Coverage note: every colored actor/interactable stand-in in the playable

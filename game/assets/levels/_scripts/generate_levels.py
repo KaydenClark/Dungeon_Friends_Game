@@ -398,7 +398,8 @@ def fight_level():
         entity_instance("Enemy", (5, 4), {
             "StatsId": ("String", "dungeon_slime"),
             "LeashRadius": ("Int", 3),
-            "UniqueId": ("String", "key_guardian")}),
+            "UniqueId": ("String", "key_guardian"),
+            "EncounterId": ("String", "dungeon_guardian")}),
         entity_instance("Doorway", (5, 8), {
             "TargetRoom": ("String", "pit_room_return")}),
         entity_instance("Doorway", (0, 4), {

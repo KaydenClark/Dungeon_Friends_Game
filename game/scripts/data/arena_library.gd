@@ -11,6 +11,7 @@ const RECORD_PATHS := [
 	"res://data/arenas/forest_crossroads.tres",
 	"res://data/arenas/forest_thorn_choke.tres",
 	"res://data/arenas/forest_old_growth_maze.tres",
+	"res://data/arenas/dungeon_stone_hall.tres",
 ]
 
 static var _registry: ArenaRegistry

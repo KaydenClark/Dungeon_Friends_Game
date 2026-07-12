@@ -75,6 +75,12 @@ This is the first visible milestone: after T-081, Kayden should be able to walk
 the full forest-to-dungeon loop and understand what is floor, obstacle,
 entrance, pickup, and interactable even if actors and UI are still transitional.
 
+**Owner correction (T-086, 2026-07-11):** the promoted `pushable_block` crop
+read as a fence and the `door_closed` crop covered only half the doorway.
+Those two crops are rejected/unwired. Runtime blocks deliberately retain the
+prior two-tone 52x52 stone slab, and doors retain the prior full-cell 56x56
+wood/steel silhouette with keyhole. Do not re-promote the rejected crops.
+
 **Exit proof:** LDtk schema/import checks pass; existing room-flow and puzzle
 tests stay green; screenshot tour covers forest, hub, chest, plate room, and
 fight room; Kayden can review the tour in under one minute.

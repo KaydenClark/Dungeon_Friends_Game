@@ -86,6 +86,10 @@ func test_unique_enemies_respawn_on_rebuild() -> void:
 	eq(room.enemies.size(), 1, "the key guardian spawns")
 	if room.enemies.size() == 1:
 		var guardian: OverworldEnemy = room.enemies[0]
+		not_null(guardian.encounter, "FightRoom guardian resolves EncounterId")
+		if guardian.encounter != null:
+			eq(guardian.encounter.id, "dungeon_guardian", "guardian uses the dungeon encounter")
+			eq(guardian.encounter.biome, "dungeon", "guardian requests dungeon arenas")
 		SceneManager.apply_victory_rewards(guardian.stats)
 		guardian.defeated()
 	room.free()

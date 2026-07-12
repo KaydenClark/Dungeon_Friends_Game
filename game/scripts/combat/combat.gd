@@ -22,8 +22,8 @@ enum InputMode { NONE, MENU, CURSOR_MOVE, CURSOR_TARGET, CONTINUE }
 
 const TILE := 64
 const HUD_MARGIN := 18.0
-const HUD_TOP_HEIGHT := 72.0
-const HUD_BOTTOM_HEIGHT := 164.0
+const HUD_TOP_HEIGHT := 112.0
+const HUD_BOTTOM_HEIGHT := 152.0
 const MOVE_HIGHLIGHT_FILL := Color(0.10, 0.42, 1.0, 0.42)
 const MOVE_HIGHLIGHT_BORDER := Color(0.52, 0.82, 1.0, 0.96)
 const ATTACK_HIGHLIGHT_FILL := Color(0.96, 0.16, 0.16, 0.35)
@@ -69,10 +69,10 @@ var turn_order_label: Label
 var party_status_label: Label
 var menu_panel: TextureRect
 var prompt_label: Label
-var menu_label: Label
+var menu_option_rows: Array[Label] = []
 var continue_label: Label
 var continue_glyph: TextureRect
-var cursor_rect: TextureRect
+var cursor_rect: Panel
 var highlight_root: Control
 var bottom_hud_origin := Vector2.ZERO
 var bottom_hud_size := Vector2.ZERO
@@ -376,7 +376,9 @@ func _execute_attack(atk: CombatUnit, def: CombatUnit, ability: AbilityData) -> 
 		result = "Rolled %d — MISS!  (needed %d+)" % [roll, needed]
 		_show_popup(def, "MISS", Color(0.8, 0.8, 0.9))
 	if log_label:
-		log_label.text = intro + "\n" + result
+		# The setup already remained visible for the anticipation beat. Replace
+		# it with the outcome instead of stacking both into the bounded header.
+		log_label.text = result
 	print("[combat] ", result)
 	await _wait_for_continue()
 
@@ -782,37 +784,42 @@ func _build_view() -> void:
 			u.state = CombatUnit.EntityState.DEAD
 			u.node.visible = false
 		layer.add_child(u.node)
-	cursor_rect = TextureRect.new()
-	cursor_rect.texture = load("res://assets/art/ui/kenney/cursor.png")
-	cursor_rect.modulate = Color(1, 1, 0.65, 0.9)
-	cursor_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	cursor_rect.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	cursor_rect = Panel.new()
+	var cursor_style := StyleBoxFlat.new()
+	cursor_style.bg_color = Color(1.0, 0.88, 0.18, 0.12)
+	cursor_style.border_color = Color(1.0, 0.92, 0.25, 1.0)
+	cursor_style.set_border_width_all(4)
+	cursor_rect.add_theme_stylebox_override("panel", cursor_style)
 	cursor_rect.size = Vector2(TILE - 6, TILE - 6)
+	cursor_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	cursor_rect.visible = false
 	layer.add_child(cursor_rect)
-	var top_hud := _make_hud_panel(Vector2(HUD_MARGIN, HUD_MARGIN),
-			Vector2(vs.x - HUD_MARGIN * 2.0, HUD_TOP_HEIGHT - HUD_MARGIN))
+	var layout := _layout_for_viewport(vs)
+	var top_hud := _make_hud_panel(layout["top_panel"].position,
+			layout["top_panel"].size)
 	layer.add_child(top_hud)
-	bottom_hud_origin = Vector2(HUD_MARGIN, vs.y - HUD_BOTTOM_HEIGHT + HUD_MARGIN * 0.5)
-	bottom_hud_size = Vector2(minf(540.0, vs.x - HUD_MARGIN * 2.0),
-			HUD_BOTTOM_HEIGHT - HUD_MARGIN)
+	bottom_hud_origin = layout["bottom_panel"].position
+	bottom_hud_size = layout["bottom_panel"].size
 
 	log_label = Label.new()
-	log_label.position = Vector2(260, HUD_MARGIN + 7.0)
-	log_label.size = Vector2(maxf(180.0, vs.x - 610.0), HUD_TOP_HEIGHT - HUD_MARGIN - 10.0)
+	log_label.position = layout["event"].position
+	log_label.size = layout["event"].size
 	log_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	log_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	log_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	log_label.add_theme_font_size_override("font_size", 18)
 	layer.add_child(log_label)
 	round_label = Label.new()
-	round_label.position = Vector2(36, HUD_MARGIN + 7.0)
+	round_label.position = layout["round"].position
+	round_label.size = Vector2(layout["round"].size.x, 22.0)
 	round_label.add_theme_font_size_override("font_size", 17)
 	round_label.modulate = Color(0.8, 0.8, 0.9)
 	layer.add_child(round_label)
 	if arena_id != "":
 		var arena_label := Label.new()
-		arena_label.position = Vector2(36, HUD_MARGIN + 28.0)
+		arena_label.position = layout["round"].position + Vector2(0, 24)
+		arena_label.size = Vector2(layout["round"].size.x, 20)
+		arena_label.clip_text = true
 		arena_label.add_theme_font_size_override("font_size", 13)
 		arena_label.modulate = Color(0.72, 0.9, 0.72)
 		var detail := "%s  %s" % [arena_id, arena_tier]
@@ -821,15 +828,16 @@ func _build_view() -> void:
 		arena_label.text = detail
 		layer.add_child(arena_label)
 	turn_order_label = Label.new()
-	turn_order_label.position = Vector2(260, HUD_MARGIN + 45.0)
-	turn_order_label.size = Vector2(maxf(180.0, vs.x - 610.0), 18)
+	turn_order_label.position = layout["turn_order"].position
+	turn_order_label.size = layout["turn_order"].size
+	turn_order_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	turn_order_label.clip_text = true
 	turn_order_label.add_theme_font_size_override("font_size", 14)
 	turn_order_label.modulate = Color(0.95, 0.9, 0.7)
 	layer.add_child(turn_order_label)
 	party_status_label = Label.new()
-	party_status_label.position = Vector2(vs.x - 320, HUD_MARGIN + 9.0)
-	party_status_label.size = Vector2(280, HUD_TOP_HEIGHT - HUD_MARGIN - 12.0)
+	party_status_label.position = layout["party"].position
+	party_status_label.size = layout["party"].size
 	party_status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	party_status_label.add_theme_font_size_override("font_size", 14)
 	party_status_label.modulate = Color(0.78, 0.9, 1.0)
@@ -845,19 +853,13 @@ func _build_view() -> void:
 	menu_panel.visible = false
 	layer.add_child(menu_panel)
 	prompt_label = Label.new()
-	prompt_label.position = bottom_hud_origin + Vector2(20, 14)
-	prompt_label.size = bottom_hud_size - Vector2(40, 18)
+	prompt_label.position = layout["prompt"].position
+	prompt_label.size = layout["prompt"].size
 	prompt_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	prompt_label.add_theme_font_size_override("font_size", 20)
 	prompt_label.modulate = Color(1, 0.95, 0.7)
 	prompt_label.visible = false
 	layer.add_child(prompt_label)
-	menu_label = Label.new()
-	menu_label.position = bottom_hud_origin + Vector2(28, 48)
-	menu_label.size = bottom_hud_size - Vector2(56, 58)
-	menu_label.add_theme_font_size_override("font_size", 19)
-	menu_label.visible = false
-	layer.add_child(menu_label)
 	continue_label = Label.new()
 	continue_label.position = bottom_hud_origin + Vector2(bottom_hud_size.x - 122, 20)
 	continue_label.add_theme_font_size_override("font_size", 18)
@@ -914,7 +916,8 @@ func _move_cursor_to(c: Vector2i) -> void:
 func _set_menu_visible(v: bool) -> void:
 	menu_panel.visible = v
 	prompt_label.visible = v
-	menu_label.visible = v
+	for row in menu_option_rows:
+		row.visible = v
 
 
 func _make_hud_panel(position: Vector2, size: Vector2) -> Panel:
@@ -929,15 +932,49 @@ func _make_hud_panel(position: Vector2, size: Vector2) -> Panel:
 	return panel
 
 
+## One source of truth for runtime placement and layout regression tests.
+func _layout_for_viewport(vs: Vector2) -> Dictionary:
+	var center_width := maxf(180.0, vs.x - 610.0)
+	var bottom_size := Vector2(minf(620.0, vs.x - HUD_MARGIN * 2.0),
+			HUD_BOTTOM_HEIGHT - HUD_MARGIN)
+	var bottom_origin := Vector2(HUD_MARGIN,
+			vs.y - HUD_BOTTOM_HEIGHT + HUD_MARGIN * 0.5)
+	return {
+		"top_panel": Rect2(Vector2(HUD_MARGIN, HUD_MARGIN),
+				Vector2(vs.x - HUD_MARGIN * 2.0, HUD_TOP_HEIGHT - HUD_MARGIN)),
+		"round": Rect2(Vector2(36, HUD_MARGIN + 7.0), Vector2(200, 48)),
+		"event": Rect2(Vector2(250, HUD_MARGIN + 7.0), Vector2(center_width, 48)),
+		"party": Rect2(Vector2(vs.x - 320, HUD_MARGIN + 7.0), Vector2(284, 48)),
+		"turn_order": Rect2(Vector2(250, HUD_MARGIN + 66.0),
+				Vector2(center_width, 20)),
+		"bottom_panel": Rect2(bottom_origin, bottom_size),
+		"prompt": Rect2(bottom_origin + Vector2(20, 4),
+				Vector2(bottom_size.x - 40, 22)),
+		"options": Rect2(bottom_origin + Vector2(20, 28),
+				Vector2(bottom_size.x - 40, 100)),
+	}
+
+
 func _render_menu() -> void:
-	var text := ""
+	for row in menu_option_rows:
+		row.queue_free()
+	menu_option_rows.clear()
+	var options_rect: Rect2 = _layout_for_viewport(get_viewport_rect().size)["options"]
 	for i in menu_options.size():
 		var o: Dictionary = menu_options[i]
 		var line: String = o.get("label", "?")
 		if not o.get("enabled", true):
 			line += "  (—)"
-		text += ("▶ " if i == menu_index else "    ") + line + "\n"
-	menu_label.text = text
+		var row := Label.new()
+		row.text = ("▶ " if i == menu_index else "    ") + line
+		row.position = options_rect.position + Vector2(0, i * 20.0)
+		row.size = Vector2(options_rect.size.x, 20.0)
+		row.clip_text = true
+		row.add_theme_font_size_override("font_size", 17)
+		row.modulate = Color.WHITE if o.get("enabled", true) else Color(0.55, 0.58, 0.66)
+		row.visible = menu_panel.visible
+		layer.add_child(row)
+		menu_option_rows.append(row)
 
 
 func _cell_pos(c: Vector2i) -> Vector2:
@@ -981,7 +1018,8 @@ func _show_popup(u: CombatUnit, text: String, color: Color) -> void:
 		return
 	var popup := Label.new()
 	popup.text = text
-	popup.position = u.node.position + Vector2(-18, -100)
+	var desired := u.node.position + Vector2(-18, -100)
+	popup.position = Vector2(desired.x, maxf(arena_origin.y + 4.0, desired.y))
 	popup.add_theme_font_size_override("font_size", 22)
 	popup.modulate = color
 	layer.add_child(popup)

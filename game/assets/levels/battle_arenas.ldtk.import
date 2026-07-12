@@ -7,10 +7,10 @@ path="res://.godot/imported/battle_arenas.ldtk-a4de1081302eb83e789257e79fad36fd.
 
 [deps]
 
-files=["res://assets/levels/tilesets/tileset_16px.res", "res://assets/levels/levels/ArenaOpenGlade.scn", "res://assets/levels/levels/ArenaSunlitMeadow.scn", "res://assets/levels/levels/ArenaSplitGrove.scn", "res://assets/levels/levels/ArenaWindingCopse.scn", "res://assets/levels/levels/ArenaCrossroads.scn", "res://assets/levels/levels/ArenaThornChoke.scn", "res://assets/levels/levels/ArenaOldGrowthMaze.scn", "res://.godot/imported/battle_arenas.ldtk-a4de1081302eb83e789257e79fad36fd.scn"]
+files=["res://assets/levels/tilesets/tileset_16px.res", "res://assets/levels/levels/ArenaOpenGlade.scn", "res://assets/levels/levels/ArenaSunlitMeadow.scn", "res://assets/levels/levels/ArenaSplitGrove.scn", "res://assets/levels/levels/ArenaWindingCopse.scn", "res://assets/levels/levels/ArenaCrossroads.scn", "res://assets/levels/levels/ArenaThornChoke.scn", "res://assets/levels/levels/ArenaOldGrowthMaze.scn", "res://assets/levels/levels/DungeonStoneHall.scn", "res://.godot/imported/battle_arenas.ldtk-a4de1081302eb83e789257e79fad36fd.scn"]
 
 source_file="res://assets/levels/battle_arenas.ldtk"
-dest_files=["res://.godot/imported/battle_arenas.ldtk-a4de1081302eb83e789257e79fad36fd.scn", "res://assets/levels/tilesets/tileset_16px.res", "res://assets/levels/levels/ArenaOpenGlade.scn", "res://assets/levels/levels/ArenaSunlitMeadow.scn", "res://assets/levels/levels/ArenaSplitGrove.scn", "res://assets/levels/levels/ArenaWindingCopse.scn", "res://assets/levels/levels/ArenaCrossroads.scn", "res://assets/levels/levels/ArenaThornChoke.scn", "res://assets/levels/levels/ArenaOldGrowthMaze.scn", "res://.godot/imported/battle_arenas.ldtk-a4de1081302eb83e789257e79fad36fd.scn"]
+dest_files=["res://.godot/imported/battle_arenas.ldtk-a4de1081302eb83e789257e79fad36fd.scn", "res://assets/levels/tilesets/tileset_16px.res", "res://assets/levels/levels/ArenaOpenGlade.scn", "res://assets/levels/levels/ArenaSunlitMeadow.scn", "res://assets/levels/levels/ArenaSplitGrove.scn", "res://assets/levels/levels/ArenaWindingCopse.scn", "res://assets/levels/levels/ArenaCrossroads.scn", "res://assets/levels/levels/ArenaThornChoke.scn", "res://assets/levels/levels/ArenaOldGrowthMaze.scn", "res://assets/levels/levels/DungeonStoneHall.scn", "res://.godot/imported/battle_arenas.ldtk-a4de1081302eb83e789257e79fad36fd.scn"]
 
 [params]
 
