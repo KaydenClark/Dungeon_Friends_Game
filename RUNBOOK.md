@@ -285,6 +285,29 @@ the chest), then `THREE-QUARTER SPIKE: done`. Run windowed; headless image
 output renders black. This is throwaway spike code (`game/scenes/dev/`,
 `game/scripts/dev/`) - graduating it into production is its own decision.
 
+### Unified in-room encounter spike (T-090)
+
+Pivot step 3's proof: an encounter that starts, plays, and resolves inside
+the T-089 room with no scene change or zoom. Interactive: run
+`scenes/dev/unified_encounter_spike.tscn` windowed, push the block, walk
+onto the plateau near the slime (detection range 2 or direct bump starts
+the fight), bump the slime to attack; the friend fights alongside and the
+other two followers stand as blockers. Scripted proof:
+
+```powershell
+$godot = 'E:\Godot\godot.cmd'
+& $godot --path game scenes/dev/unified_encounter_spike.tscn --resolution 1280x720 -- --out="$PWD\docs\screenshots\t090-unified-encounter\1280"
+& $godot --path game scenes/dev/unified_encounter_spike.tscn --resolution 1920x1080 -- --out="$PWD\docs\screenshots\t090-unified-encounter\1920"
+```
+
+Each run writes four captures (block pushed, encounter start, attack
+exchange, victory with the world continuous), prints eight `PASS:`
+continuity assertions (encounter in-room, followers snap into/out of the
+occupancy map, no scene change, pushed block and chest state preserved),
+and exits `0`; any `FAIL:` line exits `1`. The turn model inside is a
+throwaway step-tick - D-027's real turn structure is decided by T-092, not
+this spike.
+
 ### Display-scaling spike (T-007)
 
 Checks the flexible HD/ultrawide stretch settings (revised 2026-07-05, see
