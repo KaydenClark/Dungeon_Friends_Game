@@ -12,7 +12,6 @@ proof ledger. Run `node tools/spec-workbench.mjs next --json` to select work and
 | Spec | Current slice | Owner | Blocker | Latest meaningful event | Next gate |
 |---|---|---|---|---|---|
 | [S-002](specs/S-002-shared-material-reaction-vocabulary/SPEC.md) | TK-003: Record the owner fun, revise, or stop verdict. (blocked) | Kayden | Kayden played fun/not-fun verdict | The shared core and gray-box room are merged, automated green, and visually checked at two resolutions. | Kayden plays the reaction room and records fun, revise, or stop. |
-| [S-006](specs/S-006-workbench-v2-3-upgrade/SPEC.md) | TK-001: Reconcile controls, archive the old board, seed stable specs, install the canonical tool, and verify the migration. (in-progress) | Codex | none | Migration claimed in a clean worktree from origin/integration after a green baseline. | Finish control/spec migration, rerun verification, render, doctor, and publish the branch. |
 | [S-003](specs/S-003-persistent-world-resolution/SPEC.md) | TK-001: Add a failing two-process battery for resolved encounter, environment, and movable reset. (ready) | unassigned | S-002 | Capability migrated from legacy T-091; implementation waits on the reaction-vocabulary owner gate. | Complete S-002, then claim TK-001 and prove the two-process persistence battery red. |
 <!-- hot-specs:end -->
 

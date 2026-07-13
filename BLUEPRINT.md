@@ -32,7 +32,7 @@ normal execution.
 | [S-003 - Persistent World Resolution](specs/S-003-persistent-world-resolution/SPEC.md) | Persist resolved encounters and environmental changes across leave, save, quit, relaunch, and load without losing soft-lock recovery. | active |
 | [S-004 - V2 Thesis Slice](specs/S-004-thesis-slice/SPEC.md) | Build one authored recruit, non-combat resolution, shared-vocabulary puzzle, tactical fight, and persistent world change as a playable v2 loop. | planned |
 | [S-005 - External Thesis Playtest](specs/S-005-external-playtest/SPEC.md) | Test the v2 thesis slice with at least two new players and convert observed confusion and fun into evidence-backed follow-up specs. | planned |
-| [S-006 - Workbench v2.3 Upgrade](specs/S-006-workbench-v2-3-upgrade/SPEC.md) | Migrate Dungeon Friends from the v2.1 proof-heavy board to the v2.3 stable-spec lifecycle without losing project truth or verification. | active |
+| [S-006 - Workbench v2.3 Upgrade](specs/S-006-workbench-v2-3-upgrade/SPEC.md) | Migrate Dungeon Friends from the v2.1 proof-heavy board to the v2.3 stable-spec lifecycle without losing project truth or verification. | complete |
 <!-- spec-catalog:end -->
 
 ## What This Project Is

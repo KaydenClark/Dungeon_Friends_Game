@@ -111,4 +111,3 @@ Pending.
 
 - Supersedes: D-009 routine enemy respawn behavior when implemented
 - Superseded by: none
-

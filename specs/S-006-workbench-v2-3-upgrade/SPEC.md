@@ -3,14 +3,14 @@
 > Generated from LLM Workbench v2.3. This stable path never moves.
 
 **Spec ID:** S-006
-**Status:** active
+**Status:** complete
 **Priority:** 0
 **Owner:** Codex
 **Updated:** 2026-07-13
 **Catalog description:** Migrate Dungeon Friends from the v2.1 proof-heavy board to the v2.3 stable-spec lifecycle without losing project truth or verification.
 **Blockers:** none
-**Latest event:** Migration claimed in a clean worktree from origin/integration after a green baseline.
-**Next gate:** Finish control/spec migration, rerun verification, render, doctor, and publish the branch.
+**Latest event:** Spec completed and removed from the hot board.
+**Next gate:** none
 
 ## Outcome
 
@@ -69,16 +69,16 @@ tests / 1781 checks, and the 134/134 slice smoke test.
 
 | Ticket | Slice | Status | Blockers | Proof |
 |---|---|---|---|---|
-| TK-001 | Reconcile controls, archive the old board, seed stable specs, install the canonical tool, and verify the migration. | in-progress | none | pending |
+| TK-001 | Reconcile controls, archive the old board, seed stable specs, install the canonical tool, and verify the migration. | done | none | pre/post Godot import and main boot clean; 38 suites / 280 tests / 1781 checks; slice smoke 134/134; spec doctor passed; canonical tool exact-match; branch 06a9d45 pushed |
 
 ## Acceptance Criteria
 
-- [ ] Six root controls use the v2.3 ownership model and Claude remains a thin bridge.
-- [ ] Every old steering doc is classified and live content is preserved.
-- [ ] Stable specs represent the accepted foundation and actual next dependency chain.
-- [ ] Render, doctor, next, and placeholder/stale-routing checks pass.
-- [ ] Godot import, production boot, unit suite, and slice smoke match baseline.
-- [ ] The migration branch is committed and pushed for review into `integration`.
+- [x] Six root controls use the v2.3 ownership model and Claude remains a thin bridge.
+- [x] Every old steering doc is classified and live content is preserved.
+- [x] Stable specs represent the accepted foundation and actual next dependency chain.
+- [x] Render, doctor, next, and placeholder/stale-routing checks pass.
+- [x] Godot import, production boot, unit suite, and slice smoke match baseline.
+- [x] The migration branch is committed and pushed for review into `integration`.
 
 ## Testing Seams
 
@@ -110,10 +110,15 @@ cd game
 | Date | Ticket | Event | Verification | Docs | Remaining gap |
 |---|---|---|---|---|---|
 | 2026-07-13 | TK-001 | Baseline and migration started | baseline import and production boot passed; 38 suites / 280 tests / 1781 checks; slice smoke 134/134 | migration map recorded above | final verification, lifecycle close, commit, and push |
+| 2026-07-13 | TK-001 | Ticket closed | pre/post Godot import and main boot clean; 38 suites / 280 tests / 1781 checks; slice smoke 134/134; spec doctor passed; canonical tool exact-match; branch 06a9d45 pushed | v2.3 controls, six stable specs, archived v2.1 board, and Claude scope updated | none |
+| 2026-07-13 | spec | Spec completed | Acceptance gates satisfied | Documentation impact recorded above | none |
 
 ## Completion Result
 
-Pending.
+Dungeon Friends now uses the Workbench v2.3 stable-spec lifecycle. The previous
+board is cold history, the current dependency chain is represented without
+invented readiness, project verification matches baseline, and commit `06a9d45`
+is available on `origin/codex/workbench-v2-3` for review into `integration`.
 
 ## Remaining Limitations Or Follow-Up Specs
 
