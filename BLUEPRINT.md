@@ -1,22 +1,39 @@
 # Dungeon Friends - Blueprint
 
-> Generated from LLM Workbench v2.1. See `RUNBOOK.md` -> Upgrading The
+> Generated from LLM Workbench v2.3. See `RUNBOOK.md` -> Upgrading The
 > Harness.
 
-**Last reviewed:** 2026-07-11
+**Last reviewed:** 2026-07-13
 **Status:** active - **v2 vision pivot (controlled reboot), canon reset 2026-07-11.**
 Docs now describe the v2 canon; the code on disk is still the v1 build. The
-pivot sequence in `TASKBOARD.md` (T-089..T-095) is the active plan. Superseded
-v1 decisions are recorded in Design Decisions (D-024..D-037), never silently
-contradicted.
+stable specs project the active migration sequence into `TASKBOARD.md`.
+Superseded v1 decisions are recorded in Design Decisions (D-024..D-037), never
+silently contradicted.
 **Source root:** `/Users/kayden/GPT_OS/Projects/Dungeon_Friends_Game`
 
 This is the stable reference for what the project is. This file is the
 canonical design doc and the summary a future agent should read first; the
 toolchain research behind its decisions is in [`docs/research/audited_research.md`](docs/research/audited_research.md).
 Ongoing world/story details live in [`docs/WORLD_LORE.md`](docs/WORLD_LORE.md).
-(The former `docs/planning/Gameplan.md` was retired 2026-07-08 - its content is
-absorbed here, in `RUNBOOK.md`, and in `TASKBOARD.md`.)
+(The former `docs/planning/Gameplan.md` was retired 2026-07-08 - its stable
+content is absorbed here and in `RUNBOOK.md`; current execution lives in
+`specs/`.)
+
+## Capability Catalog
+
+This generated catalog is the durable index. Load only the assigned spec during
+normal execution.
+
+<!-- spec-catalog:start -->
+| Spec | Description | Status |
+|---|---|---|
+| [S-001 - Unified Party And Intent Foundation](specs/S-001-unified-party-intent-foundation/SPEC.md) | Prove same-room encounters, a visible formed party, deterministic intent rounds, and exact previews on the orthogonal grid. | complete |
+| [S-002 - Shared Material Reaction Vocabulary](specs/S-002-shared-material-reaction-vocabulary/SPEC.md) | Prove one preview-first material and effect vocabulary across exploration and encounters, then pass the owner fun gate. | needs-review |
+| [S-003 - Persistent World Resolution](specs/S-003-persistent-world-resolution/SPEC.md) | Persist resolved encounters and environmental changes across leave, save, quit, relaunch, and load without losing soft-lock recovery. | active |
+| [S-004 - V2 Thesis Slice](specs/S-004-thesis-slice/SPEC.md) | Build one authored recruit, non-combat resolution, shared-vocabulary puzzle, tactical fight, and persistent world change as a playable v2 loop. | planned |
+| [S-005 - External Thesis Playtest](specs/S-005-external-playtest/SPEC.md) | Test the v2 thesis slice with at least two new players and convert observed confusion and fun into evidence-backed follow-up specs. | planned |
+| [S-006 - Workbench v2.3 Upgrade](specs/S-006-workbench-v2-3-upgrade/SPEC.md) | Migrate Dungeon Friends from the v2.1 proof-heavy board to the v2.3 stable-spec lifecycle without losing project truth or verification. | active |
+<!-- spec-catalog:end -->
 
 ## What This Project Is
 
@@ -390,9 +407,8 @@ a follow-up pass to align (flagged, not yet done).
 | **Rework** | `Player` into party-leader + follower control; `RoomGrid` to understand elevation, material tags, and environmental states; `AbilityData` around deterministic effects and world verbs; `OverworldEnemy` into a persistent, avoidable encounter actor; `TurnManager` into the selected deterministic round model; `SaveData` to store resolved encounters and altered environmental states; character resources around field ability, combat role, and reactions |
 | **Retire** | The separate `CombatScene` battlefield model; arena generation/selection and the combat zoom transition; d10 hit thresholds and random attack rolls; the always-respawn rule; the single-overworld-avatar contract; the purely top-down art contract; tests that exist only to prove those superseded rules |
 
-Retirement is staged through the pivot sequence (`TASKBOARD.md`
-T-089..T-095) - do not delete working v1 code before its v2 replacement
-exists and is verified.
+Retirement is staged through the linked stable specs - do not delete working v1
+code before its v2 replacement exists and is verified.
 
 ## Current Product Shape
 
@@ -409,9 +425,9 @@ continue exploring. Everything below is this same loop playing out at a
 different scale - a single NPC conversation, a single puzzle switch, or a full
 combat encounter.
 
-Target shape once Phase 0-6 (the MVP) is complete - **not yet built**; see
-`TASKBOARD.md` for what actually exists today. When the project is working, a
-user can:
+The v1 target shape below is retained as verified implementation context; use
+the capability catalog and linked specs for current v2 state. When that build
+is running, a user can:
 
 - Walk a grid-based overworld and dungeon with precise, snapped movement.
 - Solve pushable-block / pressure-plate / locked-door puzzles gated by key
@@ -491,87 +507,34 @@ The most important quality bar is:
 
 ## Direction And Build Order
 
-> **Pivot note (2026-07-11):** Phases 0-4 below are history (built and mostly
-> accepted). The old "Phase 5 - Party System & Progression" and "Phase 6 -
-> First Playable Slice" are **superseded by the pivot sequence** in
-> `TASKBOARD.md` (T-089..T-095): canon reset, three-quarter visual spike,
-> unified encounter spike, deterministic intent prototype, reaction
-> prototype, persistence proof, thesis slice, external playtest. T-069's
-> windowed acceptance no longer gates anything.
+The v1 foundation, movement, puzzle, save/load, and tactical-combat phases are
+implemented history. They remain useful source and proof, but they no longer
+select future work. The v2 build order is:
 
-Current phase:
+1. **Unified party and intent foundation (`S-001`, complete):** preserve
+   same-room continuity, selectable formations, a visible four-member party,
+   clear encounter entry, deterministic intent rounds, and exact previews.
+2. **Shared material reaction vocabulary (`S-002`, needs review):** Kayden plays
+   the gray-box room and gives the fun/not-fun verdict. This is the D-031 risk
+   gate; stop and rethink if it fails.
+3. **Persistent world resolution (`S-003`, active but dependency-blocked):**
+   resolved encounters and environmental changes survive leave/save/quit/load
+   while puzzle soft-lock recovery still resets wedged movable state.
+4. **Thesis slice (`S-004`, planned):** one authored recruit, one non-combat
+   resolution, one shared-vocabulary puzzle, and one meaningful tactical fight
+   prove the v2 loop end to end.
+5. **External playtest (`S-005`, planned):** two or more new players test the
+   thesis before roster or world expansion.
 
-- **Phase 4 (Combat MVP) remains the current phase; a narrow Phase 2 puzzle
-  gap closure is reopened by Kayden's 2026-07-10 playthrough.**
-  Everything in "Phase 2 Target: Tutorial Dungeon" below (including the
-  2026-07-07 revision block) is implemented, headless-verified, and now
-  play-confirmed except for the newly reopened puzzle presentation: the LDtk
-  entity pipeline (T-031), the LDtk-authored forest (T-011), puzzle primitives,
-  dev tools (T-030), and the four-room tutorial dungeon (T-027). Jump is now
-  benched behind a future traversal item; the reopened tutorial room now
-  focuses only on a momentary pressure plate plus its pushable-block solution.
-  The latching-lever primitive remains available for a later dedicated room.
-  Phase 1 is fully done (T-020's
-  windowed 3-resolution check also passed 2026-07-08); Phase 0's M0.3
-  (export presets) stays in the TASKBOARD Backlog. **Build-order
-  re-sequencing (2026-07-08, Kayden):** combat is his main complaint, so
-  Phase 4 starts ahead of Phase 3's save/load half. Phase 3's M3.1
-  data-class half (ItemData, AbilityData, EncounterData/MapMeta, XP
-  shape, stat alignment, shield-gates-Defend) moves with Phase 4 as its
-  data foundation; the M3.2/M3.3 save/load half (SaveData, registry,
-  crystal, load flow, checkpoint respawn, pit falls, enemy respawn) was
-  parked behind combat and **resumed + built 2026-07-10 on Kayden's
-  explicit request** (T-037..T-042, T-047..T-049 - see TASKBOARD proof
-  log). **Current implementation position (2026-07-10):** T-060..T-068 and
-  the full Phase 3 save/load lane are built and verified; T-069 (combat
-  windowed acceptance) is the remaining Kayden gate, and the new save/load
-  slice adds its own windowed items to that pass (boot prompt, crystal,
-  pit falls, respawns, F1 warps). T-072..T-075 replace literal contact terrain;
-  T-077 makes Item use identify the selected consumable; T-078 recuts the
-  tutorial puzzle set. Phase 5 starts only after those acceptance gaps close.
-
-Build order (each phase is a real milestone with a stated "done" condition;
-live milestone tracking is in `TASKBOARD.md`):
-
-1. **Phase 0 - Foundation** - harness + a scaffold that actually runs. Nothing
-   else can start on a trustworthy base without this.
-2. **Phase 1 - Movement & World Skeleton** - grid movement, first LDtk room.
-   Proves the core Zelda-style movement feel before investing in systems on
-   top of it.
-3. **Phase 2 - Puzzle Primitives & Room Transitions** - the world-building
-   toolkit (pushable blocks, plates, locked doors, camera-panned transitions)
-   every dungeon after this depends on.
-4. **Phase 3 - Data Model & Save/Load** - the Resource-based data pipeline
-   (`CharacterStats`, `EnemyStats`, etc.) combat and party both build on.
-5. **Phase 4 - Combat MVP** - the turn-based tactical combat core (BG3
-   turn-based mode as the model, Fire Emblem-style range highlighting):
-   `TurnManager`, two-layer FSM, unit selection + highlighted move/attack range,
-   Attack/Ability/Item/Defend.
-6. **Phase 5 - Party System & Progression** - recruitment, XP/leveling,
-   party management menu. **The overworld avatar stays a single character**
-   (revised 2026-07-06 - see Party And Combat Model below); the party's
-   multiple characters appear only inside tactical combat, not as overworld
-   followers.
-7. **Phase 6 - First Playable Slice** - one full forest dungeon (3-5 rooms,
-   puzzles, encounters, boss) proving the whole loop end to end. This is the
-   MVP finish line.
-8. **World expansion (post-MVP, content work, no new architecture)** - starting
-   from the forest MVP, expand through the River Valley, Mountain, City, and
-   final Dragon Lair story spine in `docs/WORLD_LORE.md`; each region stays a
-   dense village/dungeon loop authored as new `world.ldtk` content using the
-   systems already built for the forest.
-9. **Stretch goals (sequenced)** - see `TASKBOARD.md` Deferred lane: equipment/
-   weapon variety and elemental/magic system are the two highest-priority
-   stretch items given the emphasis on magic and weapon variety in this
-   project's founding vision, followed by telegraphed combat UI, traversal
-   abilities, resource-gauge mechanics, more dungeons/full overworld map,
-   cosmetic shader, roguelike postgame.
+The archived v2.1 Taskboard preserves the detailed v1 phase ledger, backlog,
+asset lanes, bugs, and proof history. Future work promotes a coherent capability
+from that evidence into a stable spec instead of reviving the old queue.
 
 ### Movement-State Roadmap (2026-07-06, Kayden)
 
 Kayden's priority ordering for movement/traversal capability. Rows 1-3 are
-MVP work (Phases 1-2); rows 4-5 are Deferred (`TASKBOARD.md` S-009/S-010) -
-do not build them early.
+implemented v1 history; rows 4-5 remain deferred evidence in the archived v2.1
+Taskboard and require a new stable spec before implementation.
 
 | Priority | Movement type | Why | Where it lands |
 |---:|---|---|---|
@@ -731,10 +694,13 @@ Dungeon_Friends_Game/
 │   └── tests/                       <- first-party headless unit suites + runner (see RUNBOOK.md -> Unit tests)
 ├── docs/
 │   ├── research/audited_research.md <- toolchain research audit
+│   ├── archive/                      <- cold queues and historical proof
 │   └── LEGACY_HARNESS.md            <- archived pre-v2 AGENTS.md/CLAUDE.md
+├── specs/                            <- stable capability packets and proof
+├── tools/spec-workbench.mjs          <- spec selection, lifecycle, render, doctor
 ├── AGENTS.md                        <- agent behavior and read/edit scope
 ├── BLUEPRINT.md                     <- this file
-├── TASKBOARD.md                     <- live task queue, blockers, proof log
+├── TASKBOARD.md                     <- generated hot execution projection
 └── RUNBOOK.md                       <- setup, operation, verification, recovery
 ```
 
@@ -1066,7 +1032,7 @@ Rules:
 
 | Risk | Impact | Mitigation / owner |
 |---|---|---|
-| Scope creep from an oversized feature wishlist | High | The MVP/Stretch split (Non-Goals above; Deferred lane in `TASKBOARD.md`) is the guardrail - revisit it before adding any new system mid-phase |
+| Scope creep from an oversized feature wishlist | High | Non-Goals plus explicit stable-spec activation are the guardrail; deferred legacy ideas stay cold until promoted into a reviewed spec |
 | Solo + AI-assisted dev underestimates UI work (menus, inventory, party management) | Medium | UI-heavy phases (4, 5) get dedicated milestones rather than being bundled into "just add combat" |
 | Android export friction (SDK/JDK setup, device-specific quirks) | Medium | Addressed in Phase 0 (M0.3), not deferred to the end |
 | `heygleeson/godot-ldtk-importer` is a community plugin - could break on Godot updates | Low-Medium | Pin Godot to the current 4.7.x and the importer version (2.0); check its GitHub issues before any engine upgrade. **2026-07-07: the 4.6->4.7 upgrade re-verified clean** - importer 2.0 reimported all four `.ldtk` worlds with no errors/deprecations |
@@ -1161,5 +1127,5 @@ The project is healthy when:
 - Android keystores and signing passwords never appear in committed or
   exported output.
 
-Verification commands live in `RUNBOOK.md`. Current task status and proof
-history live in `TASKBOARD.md`.
+Verification commands live in `RUNBOOK.md`. Hot execution state projects into
+`TASKBOARD.md`; durable status and proof live in the linked stable specs.

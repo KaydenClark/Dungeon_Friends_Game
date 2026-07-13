@@ -1,6 +1,6 @@
 # Dungeon Friends - Harness Feedback
 
-> Generated from LLM Workbench v2.1. See `RUNBOOK.md` -> Upgrading The
+> Generated from LLM Workbench v2.3. See `RUNBOOK.md` -> Upgrading The
 > Harness.
 
 This is the return channel from this project back to the LLM Workbench
@@ -23,10 +23,11 @@ what happened, and propose a change if you have one.
 |---|---|---|---|---|---|
 | 2026-07-05 | `ADOPTION.md` -> Phase 0 | Adoption assumes an existing runnable baseline to confirm green before migrating docs; this project had real planning docs but zero code, so there was nothing to baseline. Worked around by borrowing Genesis's "Phase 3: Scaffold" step inside the Adoption run instead of treating it as out of scope. | low | Note explicitly in `ADOPTION.md` that a docs-only target with no code yet should produce its "smallest thing that runs" using Genesis's scaffold step as part of Phase 0/1, rather than leaving that case unaddressed | new |
 
-## What Belongs Here vs. TASKBOARD
+## What Belongs Here vs. Project Specs
 
-- This project's own work, bugs, and tasks -> `TASKBOARD.md`.
+- This project's own work, bugs, and tasks -> the owning stable spec; hot state
+  projects into `TASKBOARD.md`.
 - Problems with the *harness rules themselves* -> here.
 
 If a harness problem is also blocking this project right now, log it here
-**and** open a `TASKBOARD.md` task for the local workaround, linking the two.
+**and** add a linked ticket or blocker to the owning spec.

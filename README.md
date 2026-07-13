@@ -1,6 +1,6 @@
 # Dungeon Friends
 
-> Generated from LLM Workbench v2.1. See `RUNBOOK.md` -> Upgrading The
+> Generated from LLM Workbench v2.3. See `RUNBOOK.md` -> Upgrading The
 > Harness.
 
 A party-based 2D adventure RPG where the goddess Selena sends you to recruit
@@ -16,8 +16,7 @@ HD/ultrawide resolutions. Steam-first.
 > telegraphed encounters that permanently resolve problems. See
 > `BLUEPRINT.md` -> V2 Systems. **The playable build described below is still
 > the v1 slice** (separate d10 battle mode, single avatar, respawning
-> enemies); the pivot sequence in `TASKBOARD.md` (T-089..T-095) replaces it
-> piece by piece.
+> enemies); stable specs `S-002` through `S-005` replace it piece by piece.
 
 A solo, AI-assisted Godot 4.7 project. The world starts in a fantasy forest
 and later expands through a river valley, mountains, and the city beneath the
@@ -75,9 +74,10 @@ before changing anything:
   proof rules.
 - [`BLUEPRINT.md`](BLUEPRINT.md) - what this project is: vision, architecture,
   invariants, and preserved decisions. Stable and source-backed.
-- [`TASKBOARD.md`](TASKBOARD.md) - the live work queue and append-only proof
-  log. Its **Executive Brief** (top of the file) is the one-glance status for
-  anyone who doesn't want to read code.
+- [`TASKBOARD.md`](TASKBOARD.md) - the generated one-glance projection of hot
+  specs, owner gates, blockers, and next gates.
+- [`specs/`](specs/) - stable capability packets containing requirements,
+  decisions, acceptance, and append-only evidence.
 - [`RUNBOOK.md`](RUNBOOK.md) - how to set up, run, test, build/export, and
   recover this project, plus the verification commands that gate "done".
 
@@ -88,8 +88,8 @@ For the full toolchain and design rationale, see
 [`docs/research/audited_research.md`](docs/research/audited_research.md) -
 `BLUEPRINT.md` is the canonical design doc; the audit is the "why" behind its
 toolchain choices. (The former `docs/planning/Gameplan.md` was retired
-2026-07-08 - its content is absorbed into `BLUEPRINT.md`, `RUNBOOK.md`,
-`TASKBOARD.md`, and the audit.)
+2026-07-08 - its stable content is absorbed into `BLUEPRINT.md`, `RUNBOOK.md`,
+the stable specs, and the audit.)
 
 This project was originally adopted into the LLM Workbench harness from an
 existing set of planning docs (not bootstrapped from a blank prompt) - see
@@ -117,16 +117,16 @@ For **Claude Code**, `CLAUDE.md` contains `@AGENTS.md` so the rules load
 automatically. Other agents should be pointed at `AGENTS.md` as their entry
 point.
 
-Every completed agent task leaves proof in its final response and in the
-`TASKBOARD.md` proof log. Milestone tasks additionally require a short demo
+Every completed agent task leaves proof in its final response and in its owning
+stable spec. Milestone tasks additionally require a short demo
 artifact (screenshot, recording, or one-command demo) so work is accepted on
 product truth, not passing checks alone.
 
 ## Project Status
 
-See the **Executive Brief** at the top of [`TASKBOARD.md`](TASKBOARD.md) for
-the current shipping state, health, any decision the owner needs to make,
-blockers, and the next milestone.
+See [`TASKBOARD.md`](TASKBOARD.md) for hot execution state and owner gates. See
+the Blueprint capability catalog and linked stable specs for durable status,
+acceptance, and proof.
 
 ## License
 
