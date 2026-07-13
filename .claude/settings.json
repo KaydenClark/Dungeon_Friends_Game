@@ -41,6 +41,8 @@
       "Edit(./README.md)",
       "Edit(./CLAUDE.md)",
       "Edit(./HARNESS_FEEDBACK.md)",
+      "Edit(./specs/**)",
+      "Edit(./tools/spec-workbench.mjs)",
       "Bash(/Applications/Godot.app/Contents/MacOS/Godot --headless*)"
     ]
   }

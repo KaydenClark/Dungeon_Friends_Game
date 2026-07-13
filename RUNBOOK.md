@@ -1,8 +1,8 @@
 # Dungeon Friends - Runbook
 
-> Generated from LLM Workbench v2.1. See Upgrading The Harness below.
+> Generated from LLM Workbench v2.3. See Upgrading The Harness below.
 
-**Last reviewed:** 2026-07-11
+**Last reviewed:** 2026-07-13
 **Runtime owner:** Kayden (solo developer)
 **Environment:** local (macOS development machine; builds also target Windows
 and Android)
@@ -13,12 +13,35 @@ It should be boring, exact, and executable.
 > **Pivot note (2026-07-11):** the project's design rebooted to v2 (see
 > `BLUEPRINT.md` -> V2 Systems and D-024..D-037). Every procedure below still
 > applies - it operates the v1 code on disk, which stays in place until the
-> pivot sequence (`TASKBOARD.md` T-089..T-097; follow the board's dependency
-> order) replaces each piece. Update
+> linked stable specs replace each piece. Follow `S-002` through `S-005` in
+> dependency order. Update
 > the relevant procedure rows as v1 systems (d10 combat, arena selection,
 > zoom transition, enemy respawns, single avatar) are retired. Android export
 > material remains valid but is deprioritized (D-032: Steam-first, mobile
 > postponed).
+
+## Spec Workflow
+
+Run from the repository root:
+
+```bash
+node tools/spec-workbench.mjs doctor
+node tools/spec-workbench.mjs next --json
+node tools/spec-workbench.mjs show S-003
+node tools/spec-workbench.mjs claim S-003 --agent codex
+node tools/spec-workbench.mjs close S-003 \
+  --proof "named verification result" \
+  --docs "updated RUNBOOK.md" \
+  --remaining-gap "owner acceptance"
+node tools/spec-workbench.mjs complete S-003
+node tools/spec-workbench.mjs render
+node tools/spec-workbench.mjs doctor
+```
+
+`next` returns only an eligible active slice. `show` loads one stable packet.
+`render` changes only the marked Blueprint catalog and Taskboard projection.
+Completion requires finished slices, checked acceptance, a non-pending result,
+and execution evidence.
 
 ## Prerequisites
 
@@ -268,9 +291,9 @@ $godot = 'E:\Godot\godot.cmd'
 Each run writes seven captures covering turn start, root menu, Item submenu,
 movement destination, attack result, forest battle, and dungeon battle.
 
-### Three-quarter perspective spike (T-089)
+### Three-quarter perspective spike (archived T-089; `S-001` proof)
 
-Pivot step 2's readability proof (see `TASKBOARD.md` -> Pivot Sequence):
+The accepted foundation's readability proof:
 one dev room with two integer elevation levels, a stair ramp, a tall north
 wall face, and a four-member party (controlled leader + three non-blocking
 breadcrumb followers). Interactive check: run the scene windowed and walk
@@ -625,8 +648,8 @@ For the windowed T-069 acceptance gate:
    difficulty rather than treating the current numbers as final.
 5. After T-065/T-067, judge the zoom transition, exact-position return,
    HP/MP and turn-order HUD, prompts, and damage/heal feedback.
-6. Record Kayden's verdict in `TASKBOARD.md`; accepted behavior closes T-069,
-   while specific recuts become new scoped tasks.
+6. Record Kayden's verdict in the owning stable spec; accepted behavior closes
+   its owner gate, while specific recuts become linked specs or tickets.
 
 ### Test Coverage Policy
 
@@ -651,8 +674,8 @@ deliberately minimal until that call is made.
 ## Build/Export
 
 Godot exports are configured via the editor's Export dialog (Project ->
-Export), not a CLI build script, at this stage of the project. Export presets
-are set up in Milestone M0.3 (see `TASKBOARD.md`).
+Export), not a CLI build script, at this stage of the project. The archived
+v2.1 board retains the M0.3 export-presets history.
 
 ### macOS
 
@@ -692,13 +715,10 @@ the same placeholder scene as the editor.
   `main`, and do not merge `integration` into `main` without Kayden's
   explicit go-ahead.
 ~~No separate integration branch - PR directly into `main`~~ - superseded;
-  kept here for history. Branch-per-task/milestone naming still applies for
-  work branched off of `integration`: `type/short-description` (e.g.
-  `feat/pushable-block`, or the TASKBOARD task/milestone ID where applicable,
-  e.g. `t-023/pushable-block`).
-- Commit messages: imperative subject <= 72 chars, referencing the TASKBOARD
-  task/milestone where relevant (e.g. "T-023: implement PushableBlock +
-  PressurePlate"). One logical change per commit.
+  kept here for history. Branch-per-spec/ticket naming applies to work branched
+  off `integration`: `type/short-description` or `s-###/short-description`.
+- Commit messages: imperative subject <= 72 chars, referencing the stable spec
+  or ticket where useful. One logical change per commit.
 - Run `git status` before committing.
 - Never commit secrets, Android keystores (`.jks`/`.keystore`), local
   databases, logs, build output, or generated artifacts (see `.gitignore`).
@@ -713,20 +733,25 @@ the same placeholder scene as the editor.
 
 ## Upgrading The Harness
 
-These control docs were generated from LLM Workbench v2.1, recorded in the
-`Generated from LLM Workbench v2.1` stamp at the top of each doc. That stamp
+These control docs were generated from LLM Workbench v2.3, recorded in the
+`Generated from LLM Workbench v2.3` stamp at the top of each doc. That stamp
 lets you tell when this project is running an older harness than the current
 one.
 
 To upgrade:
 
-1. Check the `KaydenClark/LLM_Workbench` repo's releases/changelog for what
-   changed since v2.1.
+1. Verify the canonical local source at
+   `/Users/kayden/GPT_OS/workbench templates`, its branch, remote, version, and
+   dirty state; do not migrate from an assumed or retired template path.
 2. Re-copy only the changed template sections; keep this project's filled-in
    specifics. Never let `[BRACKETED]` placeholders leak back into filled docs.
-3. Update each doc's version stamp to the new version.
-4. Re-run the full verification suite (above) and record the upgrade as a
-   proof-log row in `TASKBOARD.md`.
+3. Preserve stable spec paths and completed evidence. If the lifecycle contract
+   changes, migrate active state deliberately and archive the superseded hot
+   projection.
+4. Copy the current `tools/spec-workbench.mjs`, update each control doc's
+   version stamp, render, and run doctor.
+5. Re-run the full verification suite above and record the upgrade in a
+   dedicated stable spec, not in `TASKBOARD.md`.
 
 If a downstream lesson should flow *back* to the harness, capture it in
 `HARNESS_FEEDBACK.md`.
@@ -748,13 +773,13 @@ If a change fails:
 1. Identify the touched files and failing command.
 2. Revert only the smallest change needed, preserving other work.
 3. Rerun the failing verification command (Test And Build, above).
-4. Update `TASKBOARD.md` with the result and remaining gap.
+4. Update the owning stable spec with the result and remaining gap, then render.
 
 Do not delete save data, rewrite history, or rotate anything unless Kayden
 explicitly approves.
 
 ## Operational Proof
 
-If a command in this runbook changed durable project state, append a row to
-the `TASKBOARD.md` proof log. For routine local runs that do not change state,
-a final response note is enough.
+If a command in this runbook changed durable project state, append a row to the
+owning stable spec. For routine local runs that do not change state, a final
+response note is enough.
