@@ -31,3 +31,11 @@ game/builds/
 # --- Editor/OS cruft ---
 *.tmp
 *.bak
+
+# --- Agent skills (installed via the `skills` CLI) ---
+# Regenerable, machine-specific. Restore with: npx skills@latest experimental_install
+# skills-lock.json is intentionally NOT ignored so installs stay reproducible.
+/.agent/skills/
+/agent/skills/
+/.agents/
+/.claude/skills/
