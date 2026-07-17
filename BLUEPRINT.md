@@ -3,7 +3,7 @@
 > Generated from LLM Workbench v2.3. See `RUNBOOK.md` -> Upgrading The
 > Harness.
 
-**Last reviewed:** 2026-07-13
+**Last reviewed:** 2026-07-17
 **Status:** active - **v2 vision pivot (controlled reboot), canon reset 2026-07-11.**
 Docs now describe the v2 canon; the code on disk is still the v1 build. The
 stable specs project the active migration sequence into `TASKBOARD.md`.
@@ -15,6 +15,7 @@ This is the stable reference for what the project is. This file is the
 canonical design doc and the summary a future agent should read first; the
 toolchain research behind its decisions is in [`docs/research/audited_research.md`](docs/research/audited_research.md).
 Ongoing world/story details live in [`docs/WORLD_LORE.md`](docs/WORLD_LORE.md).
+Shared product and Workbench terms live in [`LEXICON.md`](LEXICON.md).
 (The former `docs/planning/Gameplan.md` was retired 2026-07-08 - its stable
 content is absorbed here and in `RUNBOOK.md`; current execution lives in
 `specs/`.)
@@ -33,6 +34,15 @@ normal execution.
 | [S-004 - V2 Thesis Slice](specs/S-004-thesis-slice/SPEC.md) | Build one authored recruit, non-combat resolution, shared-vocabulary puzzle, tactical fight, and persistent world change as a playable v2 loop. | planned |
 | [S-005 - External Thesis Playtest](specs/S-005-external-playtest/SPEC.md) | Test the v2 thesis slice with at least two new players and convert observed confusion and fun into evidence-backed follow-up specs. | planned |
 | [S-006 - Workbench v2.3 Upgrade](specs/S-006-workbench-v2-3-upgrade/SPEC.md) | Migrate Dungeon Friends from the v2.1 proof-heavy board to the v2.3 stable-spec lifecycle without losing project truth or verification. | complete |
+| [S-007 - Canon-To-Spec Conversion](specs/S-007-canon-to-spec-conversion/SPEC.md) | Reconcile the settled unified-world canon, live source, legacy queue, owner gates, and release proof into complete stable capability specs. | complete |
+| [S-008 - Reaction Gate Readability](specs/S-008-reaction-gate-readability/SPEC.md) | Make the reaction-room payoff legible enough for Kayden to give the blocking shared-vocabulary fun verdict. | active |
+| [S-009 - Unified World Runtime](specs/S-009-unified-world-runtime/SPEC.md) | Replace the split production world/battle spine with one neutral room-state and party/encounter lifecycle without deleting the green v1 fallback early. | planned |
+| [S-010 - Production Party Formations](specs/S-010-production-party-formations/SPEC.md) | Graduate line, square, and spaced party formations into production exploration, leader switching, save state, and legal encounter deployment. | planned |
+| [S-011 - Production Reaction Vocabulary](specs/S-011-production-reaction-vocabulary/SPEC.md) | Graduate the accepted preview-first material/effect engine into production world cells, authored data, friend verbs, and encounter callers. | planned |
+| [S-012 - Production Deterministic Combat](specs/S-012-production-deterministic-combat/SPEC.md) | Replace v1 d10 arena combat with production same-room intent rounds, exact previews, four-unit any-order actions, and environmental resolution. | planned |
+| [S-013 - Finite Progression And Recruitment](specs/S-013-finite-progression-and-recruitment/SPEC.md) | Define and implement finite no-grind progression, defeat/revive rules, one real recruit, equipment/economy seams, and the character surface. | planned |
+| [S-014 - Opening Player Experience](specs/S-014-opening-player-experience/SPEC.md) | Make the opening unified-world journey readable, controllable, recoverable, controller-complete, and understandable without coaching. | planned |
+| [S-015 - Steam Release Proof](specs/S-015-steam-release-proof/SPEC.md) | Produce a reproducible, license-safe, controller-checked Steam-first release candidate and owner approval without authorizing publication. | planned |
 <!-- spec-catalog:end -->
 
 ## What This Project Is
@@ -396,8 +406,9 @@ it - party-building IS the story, not its progression menu:
 
 This supersedes the four-legendary-item errand structure (2026-07-09 row);
 the regional geography (forest, river valley, mountain, city, dragon lair)
-survives, with the city leaning toward hub status. `docs/WORLD_LORE.md` needs
-a follow-up pass to align (flagged, not yet done).
+survives, with the city leaning toward hub status. `docs/WORLD_LORE.md` is
+realigned to that spine; intentionally open character and region details remain
+future authored-content decisions.
 
 ### Reuse, Rework, Retire
 
@@ -509,22 +520,23 @@ The most important quality bar is:
 
 The v1 foundation, movement, puzzle, save/load, and tactical-combat phases are
 implemented history. They remain useful source and proof, but they no longer
-select future work. The v2 build order is:
+select future work. The v2 dependency chain is:
 
-1. **Unified party and intent foundation (`S-001`, complete):** preserve
-   same-room continuity, selectable formations, a visible four-member party,
-   clear encounter entry, deterministic intent rounds, and exact previews.
-2. **Shared material reaction vocabulary (`S-002`, needs review):** Kayden plays
-   the gray-box room and gives the fun/not-fun verdict. This is the D-031 risk
-   gate; stop and rethink if it fails.
-3. **Persistent world resolution (`S-003`, active but dependency-blocked):**
-   resolved encounters and environmental changes survive leave/save/quit/load
-   while puzzle soft-lock recovery still resets wedged movable state.
-4. **Thesis slice (`S-004`, planned):** one authored recruit, one non-combat
-   resolution, one shared-vocabulary puzzle, and one meaningful tactical fight
-   prove the v2 loop end to end.
-5. **External playtest (`S-005`, planned):** two or more new players test the
-   thesis before roster or world expansion.
+1. **Prototype risk gate (`S-001`, `S-002`, `S-008`):** preserve the accepted
+   foundation, recut the fire/smoke readability failures, then obtain Kayden's
+   explicit fun, revise, or stop verdict.
+2. **Production runtime (`S-009`, `S-010`, `S-011`):** establish one production
+   world, graduate the visible party and formations, and route exploration and
+   encounters through the same material/reaction vocabulary.
+3. **Production combat and persistence (`S-012`, `S-003`):** retire separate
+   random battle truth only after deterministic in-room combat is proven, then
+   persist resolved encounters and intentional environment state.
+4. **Progression and first experience (`S-013`, `S-014`):** lock the finite
+   roster/progression contract and produce a readable, tutorialized opening.
+5. **Thesis and player proof (`S-004`, `S-005`):** prove the full authored loop,
+   then run at least two neutral external first sessions.
+6. **Release proof (`S-015`):** close platform, packaging, accessibility,
+   performance, and release evidence; Kayden alone approves publication.
 
 The archived v2.1 Taskboard preserves the detailed v1 phase ledger, backlog,
 asset lanes, bugs, and proof history. Future work promotes a coherent capability
@@ -541,8 +553,8 @@ Taskboard and require a new stable spec before implementation.
 | 1 | Walk, face, act lock-in | Core feel | Phase 1 - T-021 (walk exists; feel polish + turn-in-place is the open work) |
 | 2 | Door transitions, ledges, stairs | Room/world structure | T-022 (door transition, Phase 1); manual jumping is benched until a future traversal item gives it a coherent rule |
 | 3 | Push/pull objects | Zelda puzzle baseline | Phase 2 - T-023 (PushableBlock) |
-| 4 | Dash/roll | Makes overworld feel better | Deferred S-009 |
-| 5 | Swim (or similar) | First major traversal upgrade | Deferred S-010 - pairs naturally with the post-MVP rivers region |
+| 4 | Dash/roll | Makes overworld feel better | Legacy stretch S-009, cold; reassess only through a linked future capability |
+| 5 | Swim (or similar) | First major traversal upgrade | Legacy stretch S-010, cold; reassess only through a linked future capability |
 
 ### Phase 2 Target: Tutorial Dungeon (2026-07-06, Kayden)
 
@@ -661,7 +673,7 @@ the player can cross a pit manually.
 | Levels | LDtk, imported via `heygleeson/godot-ldtk-importer`, entities all-in per D-002 | **Importer v2.0 + entity post-import pipeline live 2026-07-06** (T-004/T-031): each `.ldtk` sets `entities_post_import` to `scripts/ldtk/entities_post_import.gd`, which instantiates the matching game object per entity (conventions documented in that script); `LdtkRoom` adopts them into the runtime grid. Current worlds: `forest.ldtk` (T-011), `tutorial_dungeon.ldtk` (4 levels, T-027 + 2026-07-07 rework), `entity_test_room.ldtk` (pipeline test fixture), `test_room.ldtk` (T-004 fixture) - consolidation into one `world.ldtk` can wait for real LDtk-app authoring. The LDtk desktop app is installed (Gatekeeper cleared); the `.ldtk` files are still bootstrap-generated JSON (`assets/levels/_scripts/generate_levels.py`) until Kayden starts hand-authoring |
 | Art | Aseprite (primary, Lua/CLI-scriptable, **not yet installed** - purchase is Kayden's call), Pixelorama (fallback), normalized generated-source pipeline | 1280x720 design-reference base, flexible HD/ultrawide scaling (see Design Decisions); **grid unit decided at M1.1 (2026-07-06): 16x16 art pixels rendered at 4x = the 64px runtime cell** (`RoomGrid.TILE`). The first runtime character pass is wired (2026-07-10): four-frame transparent Hero knight, Buddy wizard, and red-ooze animations use shared scale/bottom-center anchors in overworld and combat. Raw edits, runtime atlases, prompt provenance, and the checkerboard-cleanup script live under `assets/art/` and `docs/assets/`; the Aseprite exporter remains ready for hand-authored replacements. |
 | Audio | Furnace Tracker -> `.ogg` -> `AudioStreamPlayer`/`AudioStreamPlayer2D` | No hardware-channel-emulation engine (dropped, not deferred) |
-| Testing | First-party headless GDScript unit harness + import/boot checks + end-to-end slice smoke + manual play-check | `game/tests/` (22 suites / 140 tests / 490 checks at the 2026-07-09 Phase 4 completion baseline); exact commands and coverage policy in `RUNBOOK.md` |
+| Testing | First-party headless GDScript unit harness + import/boot checks + end-to-end slice smoke + manual play-check | `game/tests/` (38 suites / 280 tests / 1781 checks at the 2026-07-17 canon-conversion baseline); exact commands and coverage policy in `RUNBOOK.md` |
 | Deployment/Export | Godot editor Export dialog: macOS, Windows, Android | `RUNBOOK.md` -> Test And Build |
 
 Architecture constraints:
@@ -700,6 +712,7 @@ Dungeon_Friends_Game/
 ├── tools/spec-workbench.mjs          <- spec selection, lifecycle, render, doctor
 ├── AGENTS.md                        <- agent behavior and read/edit scope
 ├── BLUEPRINT.md                     <- this file
+├── LEXICON.md                       <- shared project and Workbench terms
 ├── TASKBOARD.md                     <- generated hot execution projection
 └── RUNBOOK.md                       <- setup, operation, verification, recovery
 ```

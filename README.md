@@ -16,7 +16,8 @@ HD/ultrawide resolutions. Steam-first.
 > telegraphed encounters that permanently resolve problems. See
 > `BLUEPRINT.md` -> V2 Systems. **The playable build described below is still
 > the v1 slice** (separate d10 battle mode, single avatar, respawning
-> enemies); stable specs `S-002` through `S-005` replace it piece by piece.
+> enemies); the stable capability chain in `S-008` through `S-015`, plus the
+> preserved `S-002` through `S-005` gates, replaces it piece by piece.
 
 A solo, AI-assisted Godot 4.7 project. The world starts in a fantasy forest
 and later expands through a river valley, mountains, and the city beneath the
@@ -74,6 +75,7 @@ before changing anything:
   proof rules.
 - [`BLUEPRINT.md`](BLUEPRINT.md) - what this project is: vision, architecture,
   invariants, and preserved decisions. Stable and source-backed.
+- [`LEXICON.md`](LEXICON.md) - shared project and Workbench terminology.
 - [`TASKBOARD.md`](TASKBOARD.md) - the generated one-glance projection of hot
   specs, owner gates, blockers, and next gates.
 - [`specs/`](specs/) - stable capability packets containing requirements,

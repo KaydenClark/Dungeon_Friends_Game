@@ -6,11 +6,11 @@
 **Status:** planned
 **Priority:** 2
 **Owner:** unassigned
-**Updated:** 2026-07-13
+**Updated:** 2026-07-17
 **Catalog description:** Build one authored recruit, non-combat resolution, shared-vocabulary puzzle, tactical fight, and persistent world change as a playable v2 loop.
-**Blockers:** S-003
-**Latest event:** Capability migrated from legacy T-094 without expanding its product scope.
-**Next gate:** Complete S-003, refine the authored slice, and activate the first tracer bullet.
+**Blockers:** S-003; S-009 through S-014
+**Latest event:** Canon reconciliation preserved this as the cross-capability thesis proof after the production world, party, reaction, combat, progression, and opening-experience specs.
+**Next gate:** Complete S-003 and S-009 through S-014, then refine the authored route and activate TK-001.
 
 ## Outcome
 
@@ -52,12 +52,14 @@ new contracts end to end.
 ## Dependencies And Blockers
 
 - `S-003` complete with persistent world resolution.
+- `S-009` through `S-014` complete with the production world, party,
+  vocabulary, combat, progression, and opening player-experience contracts.
 
 ## Vertical Implementation Slices
 
 | Ticket | Slice | Status | Blockers | Proof |
 |---|---|---|---|---|
-| TK-001 | Specify the authored recruit and the shortest end-to-end route. | ready | S-003 | pending |
+| TK-001 | Specify the authored recruit and the shortest end-to-end route. | ready | S-003; S-009 through S-014 | pending |
 | TK-002 | Build one thin adventure-to-world-change tracer bullet. | ready | TK-001 | pending |
 | TK-003 | Complete the authored loop and capture the owner demo. | ready | TK-002 | pending |
 
@@ -94,6 +96,7 @@ cd game
 | Date | Ticket | Event | Verification | Docs | Remaining gap |
 |---|---|---|---|---|---|
 | 2026-07-13 | spec | Migrated from legacy T-094 | legacy scope reconciled against v2 decisions | v2.3 spec created | S-003 and all implementation slices |
+| 2026-07-17 | spec | Positioned the thesis slice after the production capability chain | full canon-to-spec coverage matrix reviewed | dependencies linked to S-003 and S-009 through S-014 | all implementation slices |
 
 ## Completion Result
 

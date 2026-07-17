@@ -5,7 +5,7 @@
 This always-loaded file controls how agents work. Product detail loads from
 `BLUEPRINT.md` only when a selected slice needs it; executable work comes from
 the assigned stable `specs/S-###-slug/SPEC.md`; exact commands live in
-`RUNBOOK.md`.
+`RUNBOOK.md`; shared project terms live in `LEXICON.md`.
 
 ## Authority Order
 
@@ -13,8 +13,8 @@ the assigned stable `specs/S-###-slug/SPEC.md`; exact commands live in
 2. This `AGENTS.md`.
 3. Source, tests, and the running Godot project verified live.
 4. The assigned stable spec.
-5. `BLUEPRINT.md`, then the generated `TASKBOARD.md` projection, then
-   `RUNBOOK.md`.
+5. `BLUEPRINT.md`, then `LEXICON.md`, the generated `TASKBOARD.md` projection,
+   and `RUNBOOK.md`.
 6. `README.md` and project-local research or legacy docs as evidence.
 
 If docs and verified behavior disagree, trust the verified behavior, flag the
@@ -113,6 +113,7 @@ Documentation is part of done; the implementing agent owns the matching update.
 |---|---|
 | agent rules, safety, Git, verification | `AGENTS.md` |
 | product direction, architecture, invariants, decision log | `BLUEPRINT.md` |
+| shared project and Workbench terminology | `LEXICON.md` |
 | active assignment, blocker, event, next gate | generated `TASKBOARD.md` |
 | capability requirements, acceptance, evidence, completion | assigned `SPEC.md` |
 | install, run, test, recovery, operations | `RUNBOOK.md` |

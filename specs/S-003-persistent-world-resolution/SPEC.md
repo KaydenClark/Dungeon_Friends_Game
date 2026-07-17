@@ -6,11 +6,11 @@
 **Status:** active
 **Priority:** 1
 **Owner:** unassigned
-**Updated:** 2026-07-13
+**Updated:** 2026-07-17
 **Catalog description:** Persist resolved encounters and environmental changes across leave, save, quit, relaunch, and load without losing soft-lock recovery.
-**Blockers:** S-002
-**Latest event:** Capability migrated from legacy T-091; implementation waits on the reaction-vocabulary owner gate.
-**Next gate:** Complete S-002, then claim TK-001 and prove the two-process persistence battery red.
+**Blockers:** S-009 production world state; S-011 production reaction vocabulary; S-012 production encounter resolution
+**Latest event:** Canon reconciliation separated dev-scene reaction proof from the production world and encounter state this persistence contract must serialize.
+**Next gate:** Complete the production-state contracts in S-009, S-011, and S-012, then claim TK-001 and prove the two-process battery red.
 
 ## Outcome
 
@@ -41,8 +41,8 @@ environmental state.
 ## Decisions And Contracts
 
 - D-028 supersedes D-009's routine-respawn contract.
-- Persistence consumes neutral state from `S-002`; it does not fork a second
-  reaction model.
+- Persistence consumes the neutral reaction contract proven by `S-002` and
+  productionized by `S-011`; it does not fork a second reaction model.
 - The two-process check must prove disk persistence, not one-process memory.
 
 ## Non-Goals
@@ -52,13 +52,15 @@ environmental state.
 
 ## Dependencies And Blockers
 
-- `S-002` must complete with an accepted reaction-vocabulary direction.
+- `S-009` must define stable production room and encounter identifiers.
+- `S-011` must expose production reaction state in a neutral serializable form.
+- `S-012` must define the deterministic production encounter-resolution state.
 
 ## Vertical Implementation Slices
 
 | Ticket | Slice | Status | Blockers | Proof |
 |---|---|---|---|---|
-| TK-001 | Add a failing two-process battery for resolved encounter, environment, and movable reset. | ready | S-002 | pending |
+| TK-001 | Add a failing two-process battery for resolved encounter, environment, and movable reset. | ready | S-009; S-011; S-012 | pending |
 | TK-002 | Persist stable encounter IDs and neutral environmental state with fail-closed loading. | ready | TK-001 | pending |
 | TK-003 | Run the full suite and owner-visible persistence demo. | ready | TK-002 | pending |
 
@@ -98,6 +100,7 @@ cd game
 | Date | Ticket | Event | Verification | Docs | Remaining gap |
 |---|---|---|---|---|---|
 | 2026-07-13 | spec | Migrated from legacy T-091 | existing v1 save/load battery and current schema inspected | v2.3 controls and spec created | S-002 owner gate and all implementation slices |
+| 2026-07-17 | spec | Reconciled persistence with the production capability chain | source and current schema inspected; dev-only proof kept distinct from production state | dependencies corrected to S-009, S-011, and S-012 | all implementation slices |
 
 ## Completion Result
 
@@ -105,7 +108,8 @@ Pending.
 
 ## Remaining Limitations Or Follow-Up Specs
 
-- Production-room rollout belongs to `S-004` or a linked implementation spec.
+- Production-room rollout belongs to `S-009`; production reaction and combat
+  state belong to `S-011` and `S-012`.
 
 ## Supersession
 

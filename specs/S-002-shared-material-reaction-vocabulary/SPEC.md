@@ -6,11 +6,11 @@
 **Status:** needs-review
 **Priority:** 0
 **Owner:** Kayden
-**Updated:** 2026-07-12
+**Updated:** 2026-07-17
 **Catalog description:** Prove one preview-first material and effect vocabulary across exploration and encounters, then pass the owner fun gate.
-**Blockers:** Kayden played fun/not-fun verdict
-**Latest event:** The shared core and gray-box room are merged, automated green, and visually checked at two resolutions.
-**Next gate:** Kayden plays the reaction room and records fun, revise, or stop.
+**Blockers:** S-008/TK-001 readability recut; Kayden played fun/not-fun verdict
+**Latest event:** Claude's scripted playtest found the system fun but the fire/smoke presentation weak; that evidence does not substitute for Kayden's owner verdict.
+**Next gate:** Complete S-008/TK-001, then Kayden plays the recut reaction room and records fun, revise, or stop.
 
 ## Outcome
 
@@ -29,7 +29,8 @@ the vocabulary must be understandable and fun before roster or world scale-up.
 statuses, hazards, damage, cancellations, propagation order, and `state_after`.
 The gray-box room uses one `cast()` path for both contexts, displays complete
 pre-commit consequences, and maps generic owner-hit disruption without bespoke
-character pairs. Automation is green; Kayden's played verdict is missing.
+character pairs. Automation is green. Claude's playtest supports mechanical fun
+but found material readability weak; Kayden's played verdict is still missing.
 
 ## Desired Behavior
 
@@ -55,6 +56,7 @@ character pairs. Automation is green; Kayden's played verdict is missing.
 ## Dependencies And Blockers
 
 - Completed foundation: `S-001`.
+- Readability prerequisite: `S-008/TK-001`.
 - Owner blocker: Kayden's played fun/not-fun verdict.
 
 ## Vertical Implementation Slices
@@ -63,7 +65,7 @@ character pairs. Automation is green; Kayden's played verdict is missing.
 |---|---|---|---|---|
 | TK-001 | Build the pure preview-first reaction matrix and neutral API. | done | S-001 | reaction core 55 checks; full unit and smoke suites green |
 | TK-002 | Build and verify the same-path gray-box room in both contexts. | done | TK-001 | 90/90 scripted tour assertions at 1280x720 and 1920x1080 |
-| TK-003 | Record the owner fun, revise, or stop verdict. | blocked | Kayden played fun/not-fun verdict | pending |
+| TK-003 | Record the owner fun, revise, or stop verdict. | blocked | S-008/TK-001; Kayden played fun/not-fun verdict | pending |
 
 ## Acceptance Criteria
 
@@ -102,6 +104,7 @@ and encounter casts.
 |---|---|---|---|---|---|
 | 2026-07-12 | TK-001 | Shared reaction core completed | strict red/green; 55 core checks; 38 suites and slice smoke green | Runbook and API contract updated | gray-box consumer and owner verdict |
 | 2026-07-12 | TK-002 | Gray-box room and consequence panel completed | 38 suites, 280 tests, 1781 checks; 90/90 tours at both resolutions; representative frames inspected | Runbook and playtest report updated | Kayden played verdict |
+| 2026-07-17 | spec | Reconciled the owner gate with the recorded Claude playtest | `docs/playtest/T093B_REACTION_ROOM_PLAYTEST_2026-07-12.md` inspected; Claude evidence is not Kayden acceptance | linked S-008 readability recut | S-008/TK-001 and Kayden verdict |
 
 ## Completion Result
 

@@ -2,7 +2,7 @@
 
 > Generated from LLM Workbench v2.3. See Upgrading The Harness below.
 
-**Last reviewed:** 2026-07-13
+**Last reviewed:** 2026-07-17
 **Runtime owner:** Kayden (solo developer)
 **Environment:** local (macOS development machine; builds also target Windows
 and Android)
@@ -13,8 +13,8 @@ It should be boring, exact, and executable.
 > **Pivot note (2026-07-11):** the project's design rebooted to v2 (see
 > `BLUEPRINT.md` -> V2 Systems and D-024..D-037). Every procedure below still
 > applies - it operates the v1 code on disk, which stays in place until the
-> linked stable specs replace each piece. Follow `S-002` through `S-005` in
-> dependency order. Update
+> linked stable specs replace each piece. Follow the dependency chain rendered
+> in `TASKBOARD.md`, beginning with `S-008/TK-001`. Update
 > the relevant procedure rows as v1 systems (d10 combat, arena selection,
 > zoom transition, enemy respawns, single avatar) are retired. Android export
 > material remains valid but is deprioritized (D-032: Steam-first, mobile
@@ -27,13 +27,13 @@ Run from the repository root:
 ```bash
 node tools/spec-workbench.mjs doctor
 node tools/spec-workbench.mjs next --json
-node tools/spec-workbench.mjs show S-003
-node tools/spec-workbench.mjs claim S-003 --agent codex
-node tools/spec-workbench.mjs close S-003 \
+node tools/spec-workbench.mjs show S-008
+node tools/spec-workbench.mjs claim S-008 --agent codex
+node tools/spec-workbench.mjs close S-008 \
   --proof "named verification result" \
   --docs "updated RUNBOOK.md" \
   --remaining-gap "owner acceptance"
-node tools/spec-workbench.mjs complete S-003
+node tools/spec-workbench.mjs complete S-008
 node tools/spec-workbench.mjs render
 node tools/spec-workbench.mjs doctor
 ```
@@ -75,6 +75,21 @@ cd Dungeon_Friends_Game
 
 Expected result: the repository is present locally with `game/`, `docs/`, and
 the control docs at root.
+
+For a disposable remote-recovery check, clone the exact branch under test and
+run the lifecycle doctor:
+
+```bash
+recovery_dir="$(mktemp -d /tmp/dungeon-friends-recovery.XXXXXX)"
+checkpoint_branch="$(git branch --show-current)"
+git clone --branch "$checkpoint_branch" --single-branch \
+  https://github.com/KaydenClark/Dungeon_Friends_Game.git "$recovery_dir"
+git -C "$recovery_dir" rev-parse HEAD
+(cd "$recovery_dir" && node tools/spec-workbench.mjs doctor)
+```
+
+Expected result: `HEAD` matches the pushed checkpoint and doctor prints
+`ok - spec workbench doctor passed`. The temporary clone can then be discarded.
 
 ## Run Locally
 
@@ -522,7 +537,7 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
-per-suite tally (currently `UNIT TESTS: 36 suites, 257 tests, 1666 checks, 0
+per-suite tally (currently `UNIT TESTS: 38 suites, 280 tests, 1781 checks, 0
 failed`). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a
 few seconds (pure logic and controlled clocks, no real-time waits, unlike the
 slice smoke test; the tutorial soft-lock solver adds a second or two). Run
@@ -741,15 +756,16 @@ one.
 To upgrade:
 
 1. Verify the canonical local source at
-   `/Users/kayden/GPT_OS/workbench templates`, its branch, remote, version, and
+   `/Users/kayden/GPT_OS/Workbench Factory`, its branch, remote, version, and
    dirty state; do not migrate from an assumed or retired template path.
 2. Re-copy only the changed template sections; keep this project's filled-in
-   specifics. Never let `[BRACKETED]` placeholders leak back into filled docs.
+   specifics. Never let unresolved template markers leak back into filled docs.
 3. Preserve stable spec paths and completed evidence. If the lifecycle contract
    changes, migrate active state deliberately and archive the superseded hot
    projection.
-4. Copy the current `tools/spec-workbench.mjs`, update each control doc's
-   version stamp, render, and run doctor.
+4. Copy the current `tools/spec-workbench.mjs` and any helper modules it imports
+   (currently `tools/markdown-table.mjs`), update each control doc's version
+   stamp, render, and run doctor.
 5. Re-run the full verification suite above and record the upgrade in a
    dedicated stable spec, not in `TASKBOARD.md`.
 
