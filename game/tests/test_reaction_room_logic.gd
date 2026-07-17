@@ -64,6 +64,46 @@ func test_capture_coverage_rejects_partial_metal_frames() -> void:
 			"missing capture samples fail closed")
 
 
+## Presentation cues are semantic shape names used by the live draw path.
+## Smoke is painted first and fire last so a combined cell keeps both a
+## smoke silhouette and an unobscured flame instead of becoming a muddy fill.
+func test_fire_and_smoke_keep_distinct_shape_cues_when_combined() -> void:
+	eq(ReactionRoomLogic.material_cue_shapes(["fire"]),
+			["fire_flame"], "fire owns a flame-shaped board cue")
+	eq(ReactionRoomLogic.material_cue_shapes(["smoke"]),
+			["smoke_puffs"], "smoke owns a puff-shaped board cue")
+	eq(ReactionRoomLogic.material_cue_shapes(["soil", "fire", "smoke"]),
+			["smoke_puffs", "fire_flame"],
+			"combined smoke renders below a still-visible fire mark")
+
+
+## The instruction layers are exploration-only. Encounter HUD and unit labels
+## must get the viewport without the inherited spike hints covering them.
+func test_exploration_hints_hide_during_an_encounter() -> void:
+	ok(ReactionRoomLogic.exploration_hints_visible(false),
+			"exploration instructions show while exploring")
+	not_ok(ReactionRoomLogic.exploration_hints_visible(true),
+			"exploration instructions hide for the active encounter")
+
+
+## Rejected input is not allowed to look like a frozen game. The live scene
+## consumes these exact messages for range/wall rejection and lost focus.
+func test_blocked_aim_and_window_focus_have_visible_feedback() -> void:
+	eq(ReactionRoomLogic.aim_rejection_text(false, 2, 3),
+			"Aim blocked by the room edge or wall.",
+			"an untargetable aim cell explains the refusal")
+	eq(ReactionRoomLogic.aim_rejection_text(true, 4, 3),
+			"Aim limit reached (range 3).",
+			"an out-of-range aim cell explains the clamp")
+	eq(ReactionRoomLogic.aim_rejection_text(true, 2, 3), "",
+			"a legal aim direction needs no warning")
+	eq(ReactionRoomLogic.focus_prompt_text(false),
+			"Click inside the game window to enable controls.",
+			"lost focus gives the player a recovery action")
+	eq(ReactionRoomLogic.focus_prompt_text(true), "",
+			"focused play keeps the prompt out of the way")
+
+
 ## The acceptance seam: the exploration caller and the encounter caller invoke
 ## the SAME cast() path and identical state produces identical reaction data -
 ## context is presentation metadata only.

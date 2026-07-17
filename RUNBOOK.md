@@ -480,6 +480,11 @@ changes, consumed effects, forced movement, and exactly which units would be
 hit, including a promised intention cancel) BEFORE `E` commits; `Q` cancels.
 The dense preview is contained in a dark, viewport-aware panel so its text
 does not collide with unit/HP labels at 1280x720 or 1920x1080.
+Fire and smoke use separate board silhouettes (charcoal puffs below a bright
+orange flame), and the material legend has its own dark backing. In interactive
+play, exploration-only instruction layers hide while the encounter HUD is
+active; rejected aim directions and lost window focus show a concrete recovery
+message instead of silently dropping input.
 Both contexts route through `ReactionRoomLogic.cast` ->
 `ReactionCore.calculate`; the caller-side seams (unit mapping, intention
 disruption, shove's forced-movement preview) are red/green in
@@ -537,7 +542,7 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
-per-suite tally (currently `UNIT TESTS: 38 suites, 280 tests, 1781 checks, 0
+per-suite tally (currently `UNIT TESTS: 38 suites, 283 tests, 1791 checks, 0
 failed`). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a
 few seconds (pure logic and controlled clocks, no real-time waits, unlike the
 slice smoke test; the tutorial soft-lock solver adds a second or two). Run

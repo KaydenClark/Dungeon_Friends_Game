@@ -55,8 +55,10 @@ const MAT_VINE := Color(0.15, 0.65, 0.20, 0.55)
 const MAT_WET := Color(0.20, 0.50, 0.95, 0.32)
 const MAT_FLOODED := Color(0.10, 0.30, 0.85, 0.30)
 const MAT_ICE := Color(0.75, 0.95, 1.00, 0.55)
-const MAT_FIRE := Color(1.00, 0.45, 0.10, 0.55)
-const MAT_SMOKE := Color(0.55, 0.55, 0.58, 0.60)
+const MAT_FIRE := Color(1.00, 0.28, 0.04, 0.98)
+const MAT_FIRE_CORE := Color(1.00, 0.88, 0.20, 1.00)
+const MAT_SMOKE := Color(0.20, 0.22, 0.28, 0.82)
+const MAT_SMOKE_EDGE := Color(0.72, 0.74, 0.80, 0.92)
 const MAT_ELECTRIFIED := Color(1.00, 0.95, 0.20, 0.90)
 const CAST_CURSOR_COLOR := Color(1, 1, 1, 0.95)
 const CAST_AFFECT_FILL := Color(0.80, 0.30, 1.00, 0.18)
@@ -71,7 +73,13 @@ var cast_preview := {}
 var reaction_ui: CanvasLayer
 var preview_panel: ColorRect
 var preview_label: Label
+var legend_panel: ColorRect
 var legend_label: Label
+var feedback_panel: ColorRect
+var feedback_label: Label
+var feedback_kind := ""
+var feedback_until_msec := 0
+var exploration_hint_layers: Array[CanvasLayer] = []
 
 
 func _ready() -> void:
@@ -107,13 +115,22 @@ func _ready() -> void:
 
 
 func _add_hint() -> void:
+	var existing_layers: Array[CanvasLayer] = []
+	for child: Node in get_children():
+		if child is CanvasLayer:
+			existing_layers.append(child)
 	super._add_hint()
+	for child: Node in get_children():
+		if child is CanvasLayer and not existing_layers.has(child):
+			exploration_hint_layers.append(child)
 	var ui := CanvasLayer.new()
 	var label := _make_ui_label(Vector2(12, 190), 15)
 	label.text = "T-093B reactions - cast anywhere (exploration AND combat turns):\n[5]Grow [6]Fire [7]Water [8]Cold [9]Spark [0]Air - WASD aims, E commits, Q cancels.\nTry: grow the soil then burn it; flood the channel then freeze it; wet the slime then spark it."
 	label.add_theme_color_override("font_color", Color(0.7, 1.0, 0.75))
 	ui.add_child(label)
 	add_child(ui)
+	exploration_hint_layers.append(ui)
+	_sync_exploration_hint_visibility()
 
 
 ## --- reaction world-state ------------------------------------------------------
@@ -148,19 +165,41 @@ func _build_reaction_ui() -> void:
 	preview_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	preview_label.clip_text = true
 	preview_panel.add_child(preview_label)
-	legend_label = _make_ui_label(Vector2(700, 8), 13)
-	legend_label.text = "Materials: channel=navy  soil=brown  brush=olive  smoke=gray\nvine=green  wet=blue  ice=pale  fire=orange  zap=yellow edge"
-	reaction_ui.add_child(legend_label)
+	legend_panel = ColorRect.new()
+	legend_panel.color = Color(0.02, 0.03, 0.05, 0.86)
+	legend_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	legend_label = _make_ui_label(Vector2(10, 6), 13)
+	legend_label.text = "Materials: channel=navy  soil=brown  brush=olive  smoke=charcoal puffs\nvine=green  wet=blue  ice=pale  fire=orange flame  zap=yellow edge"
+	legend_panel.add_child(legend_label)
+	reaction_ui.add_child(legend_panel)
+	feedback_panel = ColorRect.new()
+	feedback_panel.color = Color(0.05, 0.03, 0.02, 0.94)
+	feedback_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	feedback_panel.visible = false
+	feedback_label = _make_ui_label(Vector2(12, 8), 16)
+	feedback_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	feedback_label.add_theme_color_override("font_color", Color(1.0, 0.88, 0.30))
+	feedback_panel.add_child(feedback_label)
+	reaction_ui.add_child(feedback_panel)
 	add_child(reaction_ui)
-	_layout_preview_panel()
-	get_viewport().size_changed.connect(_layout_preview_panel)
+	_layout_reaction_ui()
+	get_viewport().size_changed.connect(_layout_reaction_ui)
+	_set_focus_feedback(DisplayServer.window_is_focused())
 
 
-func _layout_preview_panel() -> void:
+func _layout_reaction_ui() -> void:
+	var viewport_size := get_viewport_rect().size
 	var rect := RoomLogic.preview_panel_rect(get_viewport_rect().size)
 	preview_panel.position = rect.position
 	preview_panel.size = rect.size
 	preview_label.size = rect.size - Vector2(24, 24)
+	legend_panel.position = Vector2(maxf(12.0, viewport_size.x - 568.0), 8.0)
+	legend_panel.size = Vector2(556, 48)
+	legend_label.size = legend_panel.size - Vector2(20, 12)
+	feedback_panel.size = Vector2(480, 44)
+	feedback_panel.position = Vector2((viewport_size.x - feedback_panel.size.x) * 0.5,
+			viewport_size.y - 104.0)
+	feedback_label.size = feedback_panel.size - Vector2(24, 16)
 
 
 func _set_preview_visible(value: bool) -> void:
@@ -168,9 +207,53 @@ func _set_preview_visible(value: bool) -> void:
 	preview_label.visible = value
 
 
+func _show_feedback(text: String, kind: String, duration_msec := 0) -> void:
+	if text == "" or not is_instance_valid(feedback_panel):
+		return
+	feedback_kind = kind
+	feedback_until_msec = Time.get_ticks_msec() + duration_msec \
+			if duration_msec > 0 else 0
+	feedback_label.text = text
+	feedback_panel.visible = true
+
+
+func _clear_feedback(kind: String) -> void:
+	if feedback_kind != kind or not is_instance_valid(feedback_panel):
+		return
+	feedback_kind = ""
+	feedback_until_msec = 0
+	feedback_panel.visible = false
+
+
+func _set_focus_feedback(window_focused: bool) -> void:
+	var text := RoomLogic.focus_prompt_text(window_focused)
+	if text != "":
+		_show_feedback(text, "focus")
+	else:
+		_clear_feedback("focus")
+
+
+func _sync_exploration_hint_visibility() -> void:
+	var show_hints := RoomLogic.exploration_hints_visible(mode == Mode.ENCOUNTER)
+	for layer: CanvasLayer in exploration_hint_layers:
+		if is_instance_valid(layer):
+			layer.visible = show_hints
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		_set_focus_feedback(false)
+	elif what == NOTIFICATION_APPLICATION_FOCUS_IN:
+		_set_focus_feedback(true)
+
+
 ## --- casting input ---------------------------------------------------------------
 
 func _process(delta: float) -> void:
+	_sync_exploration_hint_visibility()
+	if feedback_kind == "aim" and feedback_until_msec > 0 \
+			and Time.get_ticks_msec() >= feedback_until_msec:
+		_clear_feedback("aim")
 	if out_dir == "" and not busy and casting_verb != "":
 		for action: String in DIR_ACTIONS:
 			if Input.is_action_just_pressed(action):
@@ -234,15 +317,21 @@ func _start_cast(verb: String) -> void:
 
 func _move_cast_cursor(dir: Vector2i) -> void:
 	var candidate := cast_cursor + dir
-	if _targetable(candidate) \
-			and _manhattan(_caster_actor().cell, candidate) <= CAST_RANGE:
+	var distance := _manhattan(_caster_actor().cell, candidate)
+	var is_targetable := _targetable(candidate)
+	if is_targetable and distance <= CAST_RANGE:
 		cast_cursor = candidate
+		_clear_feedback("aim")
 		_refresh_cast_preview()
+	else:
+		_show_feedback(RoomLogic.aim_rejection_text(
+				is_targetable, distance, CAST_RANGE), "aim", 1200)
 
 
 func _cancel_cast() -> void:
 	casting_verb = ""
 	cast_preview = {}
+	_clear_feedback("aim")
 	_set_preview_visible(false)
 	queue_redraw()
 
@@ -483,11 +572,30 @@ func _draw_cell_materials(cell: Vector2i, data: Dictionary) -> void:
 		draw_rect(rect, MAT_ICE)
 		draw_rect(Rect2(rect.position + Vector2(4, 4),
 				rect.size - Vector2(8, 8)), Color(1, 1, 1, 0.8), false, 2.0)
-	if tags.has("fire"):
-		draw_rect(Rect2(rect.position + Vector2(6, 6),
-				rect.size - Vector2(12, 12)), MAT_FIRE)
-	if tags.has("smoke"):
-		draw_rect(rect, MAT_SMOKE)
+	var material_cues := RoomLogic.material_cue_shapes(tags)
+	if material_cues.has("smoke_puffs"):
+		for offset: Vector2 in [Vector2(16, 20), Vector2(32, 13),
+				Vector2(48, 20)]:
+			var center := rect.position + offset
+			draw_circle(center, 11.0, MAT_SMOKE)
+			draw_arc(center, 11.0, 0.0, TAU, 20, MAT_SMOKE_EDGE, 2.0)
+	if material_cues.has("fire_flame"):
+		var center := rect.get_center()
+		draw_colored_polygon(PackedVector2Array([
+			center + Vector2(-15, 18),
+			center + Vector2(-11, -5),
+			center + Vector2(-2, 3),
+			center + Vector2(3, -20),
+			center + Vector2(15, 3),
+			center + Vector2(13, 18),
+		]), MAT_FIRE)
+		draw_colored_polygon(PackedVector2Array([
+			center + Vector2(-6, 15),
+			center + Vector2(-4, 4),
+			center + Vector2(1, 8),
+			center + Vector2(5, -4),
+			center + Vector2(8, 15),
+		]), MAT_FIRE_CORE)
 	if tags.has("vine"):
 		draw_rect(Rect2(rect.position + Vector2(12, 12),
 				rect.size - Vector2(24, 24)), MAT_VINE)

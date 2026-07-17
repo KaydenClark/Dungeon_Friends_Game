@@ -54,6 +54,42 @@ static func capture_samples_are_complete(luminances: Array,
 	return float(black_samples) / float(luminances.size()) <= max_black_fraction
 
 
+## Semantic shape cues consumed by the live gray-box draw path. Smoke is
+## deliberately listed first so the flame remains the topmost mark when both
+## states occupy one cell.
+static func material_cue_shapes(tags: Array) -> Array[String]:
+	var cues: Array[String] = []
+	if tags.has("smoke"):
+		cues.append("smoke_puffs")
+	if tags.has("fire"):
+		cues.append("fire_flame")
+	return cues
+
+
+## Exploration instruction layers must leave the viewport when the encounter
+## HUD becomes authoritative.
+static func exploration_hints_visible(in_encounter: bool) -> bool:
+	return not in_encounter
+
+
+## Rejected aim input needs a reason at the point of refusal. The range message
+## wins when a candidate is both outside the room and beyond the cast radius.
+static func aim_rejection_text(is_targetable: bool, distance: int,
+		cast_range: int) -> String:
+	if distance > cast_range:
+		return "Aim limit reached (range %d)." % cast_range
+	if not is_targetable:
+		return "Aim blocked by the room edge or wall."
+	return ""
+
+
+## Lost window focus is recoverable player state, not a silent input failure.
+static func focus_prompt_text(window_focused: bool) -> String:
+	if window_focused:
+		return ""
+	return "Click inside the game window to enable controls."
+
+
 ## Build the room's reaction world-state: exactly the targetable cells exist,
 ## seeded with their authored material tags. Anything not listed here fails
 ## closed inside the core with target_cell_missing.

@@ -5,12 +5,12 @@
 **Spec ID:** S-008
 **Status:** active
 **Priority:** 0
-**Owner:** unassigned
+**Owner:** codex-engineer
 **Updated:** 2026-07-17
 **Catalog description:** Make the reaction-room payoff legible and prove the recut with repeatable two-resolution tours.
 **Blockers:** none
-**Latest event:** Claude's played pass found the systems fun but fire/smoke, overlapping hints, and focus feedback still undersell them.
-**Next gate:** Claim TK-001 and add the failing readability assertions before changing the dev room.
+**Latest event:** TK-001 recut is green in the isolated Engineer worktree; immutable checkpoint review is pending.
+**Next gate:** Push the verified checkpoint for an exact-head Auditor review before closing TK-001.
 
 ## Outcome
 
@@ -58,7 +58,7 @@ That is useful evidence, not Kayden's missing verdict.
 
 | Ticket | Slice | Status | Blockers | Proof |
 |---|---|---|---|---|
-| TK-001 | Add failing readability/cue assertions, then recut fire/smoke marks, encounter-only hints, and blocked/focus feedback without changing reaction results. | ready | none | pending |
+| TK-001 | Add failing readability/cue assertions, then recut fire/smoke marks, encounter-only hints, and blocked/focus feedback without changing reaction results. | in-progress | none | red missing-seam suite; green unit/tours/import/boot/smoke; Auditor pending |
 | TK-002 | Run the full suite and both resolution tours, inspect the artifacts, and record the readability proof. | ready | TK-001 | pending |
 
 ## Acceptance Criteria
@@ -94,6 +94,7 @@ cd game
 | Date | Ticket | Event | Verification | Docs | Remaining gap |
 |---|---|---|---|---|---|
 | 2026-07-17 | spec | Legacy T-084/T-093 readability evidence promoted | source, tests, captures, and Claude playtest notes inspected | new stable gate-preparation spec | two agent-produced proof tickets |
+| 2026-07-17 | TK-001 | Added shape-distinct fire/smoke marks, encounter-only exploration hints, and explicit aim/focus recovery feedback without changing reaction outcomes | expected red: reaction-room suite could not load four missing presentation seams; green: 38 suites / 283 tests / 1791 checks, import, main boot, 1280x720 and 1920x1080 tours at 90/90 each, 134/134 slice smoke; inspected burned, spread, and encounter captures at both sizes | S-008 and Runbook updated | immutable pushed-head Auditor review; TK-002 remains ready |
 
 ## Completion Result
 
