@@ -67,6 +67,23 @@ func test_preview_panel_never_intersects_reserved_combat_label_rects() -> void:
 				"intent reservation ends at the panel gutter")
 
 
+## Per-unit HP labels live under world actors rather than the encounter
+## CanvasLayer. A viewport-space collision must still yield the exact shift
+## needed to reserve the panel gutter.
+func test_world_hp_label_collision_shifts_left_of_preview_panel() -> void:
+	var panel := Rect2(Vector2(768, 68), Vector2(500, 260))
+	var blocker_hp := Rect2(Vector2(832, 174), Vector2(104, 18))
+	var shift: Vector2 = ReactionRoomLogic.label_shift_left_of_panel(
+			panel, blocker_hp)
+	eq(shift, Vector2(-180, 0),
+			"intersecting HP label shifts to the panel's left gutter")
+	not_ok(panel.intersects(Rect2(blocker_hp.position + shift,
+			blocker_hp.size)), "shifted HP label is disjoint from the panel")
+	eq(ReactionRoomLogic.label_shift_left_of_panel(panel,
+			Rect2(Vector2(620, 174), Vector2(104, 18))), Vector2.ZERO,
+			"already disjoint HP labels keep their actor-relative placement")
+
+
 ## Proof runs fail closed when the requested physical PNG dimensions are
 ## absent or malformed; the live tour consumes this exact parser.
 func test_capture_size_parser_accepts_only_exact_positive_dimensions() -> void:

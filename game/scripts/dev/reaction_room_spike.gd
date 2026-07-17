@@ -216,11 +216,59 @@ func _layout_reaction_ui() -> void:
 		label.position = label_rect.position
 		label.size = label_rect.size
 		label.clip_text = true
+	_layout_hp_labels_away_from_preview()
+
+
+func _control_viewport_rect(control: Control) -> Rect2:
+	var transform := control.get_global_transform_with_canvas()
+	var corners: Array[Vector2] = [
+		transform * Vector2.ZERO,
+		transform * Vector2(control.size.x, 0.0),
+		transform * Vector2(0.0, control.size.y),
+		transform * control.size,
+	]
+	var minimum := corners[0]
+	var maximum := corners[0]
+	for corner: Vector2 in corners.slice(1):
+		minimum = minimum.min(corner)
+		maximum = maximum.max(corner)
+	return Rect2(minimum, maximum - minimum)
+
+
+## HP labels are children of moving world actors, not the encounter CanvasLayer.
+## Size them to their full text, measure them after the camera transform, and
+## shift only labels that would otherwise sit beneath the consequence panel.
+func _layout_hp_labels_away_from_preview() -> void:
+	if hp_labels.is_empty():
+		return
+	var panel_rect := _control_viewport_rect(preview_panel)
+	for id: String in hp_labels:
+		var label: Label = hp_labels[id]
+		if not is_instance_valid(label):
+			continue
+		var minimum_size := label.get_combined_minimum_size()
+		label.size = Vector2(maxf(64.0, minimum_size.x),
+				maxf(16.0, minimum_size.y))
+		label.position = Vector2(-label.size.x * 0.5,
+				-80.0 if id == "hero" else -62.0)
+		if not preview_panel.visible:
+			continue
+		var label_rect := _control_viewport_rect(label)
+		var viewport_shift := RoomLogic.label_shift_left_of_panel(
+				panel_rect, label_rect)
+		if viewport_shift == Vector2.ZERO:
+			continue
+		var parent := label.get_parent() as CanvasItem
+		var parent_transform := parent.get_global_transform_with_canvas()
+		var viewport_origin := parent_transform * label.position
+		label.position = parent_transform.affine_inverse() * (
+				viewport_origin + viewport_shift)
 
 
 func _set_preview_visible(value: bool) -> void:
 	preview_panel.visible = value
 	preview_label.visible = value
+	_layout_hp_labels_away_from_preview()
 
 
 func _show_feedback(text: String, kind: String, duration_msec := 0) -> void:
@@ -266,9 +314,15 @@ func _exploration_hints_match(expected_visible: bool) -> bool:
 
 
 func _preview_avoids_combat_labels() -> bool:
-	var panel_rect := Rect2(preview_panel.position, preview_panel.size)
-	for label: Label in [plan_label, intent_label, prompt_label]:
-		if panel_rect.intersects(Rect2(label.position, label.size)):
+	var panel_rect := _control_viewport_rect(preview_panel)
+	var combat_labels: Array[Label] = [plan_label, intent_label, prompt_label]
+	for id: String in hp_labels:
+		var hp_label: Label = hp_labels[id]
+		if is_instance_valid(hp_label):
+			combat_labels.append(hp_label)
+	for label: Label in combat_labels:
+		if label.is_visible_in_tree() \
+				and panel_rect.intersects(_control_viewport_rect(label)):
 			return false
 	return true
 
@@ -987,7 +1041,7 @@ func _scripted_tour() -> void:
 	_assert(preview_label.text.contains("WOULD CANCEL"),
 			"the cancel promise is visible in the panel before E is pressed")
 	_assert(_preview_avoids_combat_labels(),
-			"live consequence panel does not intersect combat labels")
+			"live consequence panel avoids the main HUD and every unit HP label")
 	await _shot("11-spark-cancel-preview")
 	await _commit_cast()
 	_assert(int(istate["units"]["slime"]["hp"]) == slime_hp - 2,

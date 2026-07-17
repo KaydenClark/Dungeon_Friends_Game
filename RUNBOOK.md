@@ -478,8 +478,10 @@ turn. Casting opens a WASD-aimed cursor (range 3) and shows the complete
 neutral result (affected cells in order, damage, hazards, cell tag/status
 changes, consumed effects, forced movement, and exactly which units would be
 hit, including a promised intention cancel) BEFORE `E` commits; `Q` cancels.
-The dense preview is contained in a dark, viewport-aware panel so its text
-does not collide with unit/HP labels at 1280x720 or 1920x1080.
+The dense preview is contained in a dark, viewport-aware panel. Main encounter
+labels own explicit reservations, while each world-attached unit/HP label is
+measured in viewport space and shifted to the panel's left gutter only when
+needed, so every combat label remains visible at 1280x720 and 1920x1080.
 Fire and smoke use separate board silhouettes (charcoal puffs below a bright
 orange flame), and the material legend has its own dark backing. In interactive
 play, exploration-only instruction layers hide while the encounter HUD is
@@ -506,7 +508,8 @@ cd game
 The scripted tour must print `REACTION ROOM: done` with zero `FAIL` lines
 (111/111 assertions per run): exact PNG dimensions; focus-loss/recovery and
 blocked-aim captures; exploration hints visible before the encounter and hidden
-for its HUD; consequence-panel/combat-label nonintersection; grow-then-burn;
+for its HUD; consequence-panel nonintersection with the main HUD and every
+per-unit HP label; grow-then-burn;
 air-fed fire spreading down the brush chain; flood-then-freeze; spark conduction
 stopped by the ice; smoke clearing; exploration/encounter context parity from
 identical state; and the round-2 spark that cancels the slime's declared spit
@@ -551,7 +554,7 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
-per-suite tally (currently `UNIT TESTS: 38 suites, 285 tests, 1808 checks, 0
+per-suite tally (currently `UNIT TESTS: 38 suites, 286 tests, 1811 checks, 0
 failed`). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a
 few seconds (pure logic and controlled clocks, no real-time waits, unlike the
 slice smoke test; the tutorial soft-lock solver adds a second or two). Run

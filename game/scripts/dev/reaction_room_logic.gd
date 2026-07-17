@@ -61,6 +61,18 @@ static func combat_label_rects(viewport_size: Vector2) -> Dictionary:
 	}
 
 
+## World-space HP labels can cross into the CanvasLayer preview after camera
+## transforms. Return the exact viewport-space translation that keeps the
+## label and the panel gutter disjoint; labels already outside keep their
+## actor-relative placement.
+static func label_shift_left_of_panel(panel_rect: Rect2,
+		label_rect: Rect2) -> Vector2:
+	if not panel_rect.intersects(label_rect):
+		return Vector2.ZERO
+	return Vector2(panel_rect.position.x - COMBAT_LABEL_GUTTER
+			- label_rect.end.x, 0.0)
+
+
 ## Parse the physical PNG size required by a proof run. Invalid input returns
 ## ZERO so the caller can fail before accepting mislabeled artifacts.
 static func capture_size_from_text(text: String) -> Vector2i:
