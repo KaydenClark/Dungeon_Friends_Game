@@ -3,14 +3,14 @@
 > Generated from LLM Workbench v2.3. This stable path never moves.
 
 **Spec ID:** S-008
-**Status:** active
+**Status:** complete
 **Priority:** 0
 **Owner:** codex-engineer
 **Updated:** 2026-07-17
 **Catalog description:** Make the reaction-room payoff legible and prove the recut with repeatable two-resolution tours.
 **Blockers:** none
-**Latest event:** TK-001 HP-label collision remediation is remotely recoverable at `a218d25`; exact-head re-audit is pending.
-**Next gate:** Run an exact-head Auditor re-review before closing TK-001.
+**Latest event:** Spec completed and removed from the hot board.
+**Next gate:** none
 
 ## Outcome
 
@@ -60,16 +60,16 @@ That is useful evidence, not Kayden's missing verdict.
 
 | Ticket | Slice | Status | Blockers | Proof |
 |---|---|---|---|---|
-| TK-001 | Add failing readability/cue assertions, then recut fire/smoke marks, encounter-only hints, and blocked/focus feedback without changing reaction results. | in-progress | none | HP-label viewport collision remediation pushed at `a218d25` with exact two-size live proof; re-audit pending |
-| TK-002 | Run the full suite and both resolution tours, inspect the artifacts, and record the readability proof. | ready | TK-001 | pending |
+| TK-001 | Add failing readability/cue assertions, then recut fire/smoke marks, encounter-only hints, and blocked/focus feedback without changing reaction results. | done | none | Auditor GREEN on immutable 493b40a..16c2c1d; 38 suites / 286 tests / 1811 checks; exact 1280x720 and 1920x1080 tours 111/111; import, main boot, and 134/134 slice smoke |
+| TK-002 | Run the full suite and both resolution tours, inspect the artifacts, and record the readability proof. | done | TK-001 | Thirteen exact PNGs at each review size inspected; fire/smoke, focus, blocked aim, encounter hint suppression, preview/HUD separation, and every unit HP label are independently visible |
 
 ## Acceptance Criteria
 
-- [ ] Distinct fire and smoke remain readable when combined.
-- [ ] Exploration hints never cover active encounter information.
-- [ ] Blocked aim and focus state do not look like a frozen game.
-- [ ] Both resolution tours and the full unit suite remain green.
-- [ ] Captured tour artifacts make the recut independently inspectable.
+- [x] Distinct fire and smoke remain readable when combined.
+- [x] Exploration hints never cover active encounter information.
+- [x] Blocked aim and focus state do not look like a frozen game.
+- [x] Both resolution tours and the full unit suite remain green.
+- [x] Captured tour artifacts make the recut independently inspectable.
 
 ## Testing Seams
 
@@ -101,10 +101,18 @@ cd game
 | 2026-07-17 | TK-001 | Published the remediated Engineer checkpoint at `c803f0d` | remote branch resolved to the exact implementation checkpoint after push | spec header and generated Taskboard handed off | exact-head Auditor re-review; TK-002 remains ready |
 | 2026-07-17 | TK-001 | Remediated the exact-head audit finding that world-attached HP labels were absent from the panel collision contract | expected red: reaction-room suite could not load the missing HP-label shift seam; green: 38 suites / 286 tests / 1811 checks, import, main boot, exact 1280x720 and fullscreen 1920x1080 tours at 111/111 each, 134/134 slice smoke; inspected both `11-spark-cancel-preview` captures with Blocker1 and every HP label visible outside the panel | S-008 and Runbook updated | push immutable checkpoint and exact-head Auditor re-review; TK-002 remains ready |
 | 2026-07-17 | TK-001 | Published the HP-label collision remediation at `a218d25` | remote branch resolved to the exact implementation checkpoint after push | spec header and generated Taskboard handed off | exact-head Auditor re-review; TK-002 remains ready |
+| 2026-07-17 | TK-001 | Ticket closed | Auditor GREEN on immutable 493b40a..16c2c1d; 38 suites / 286 tests / 1811 checks; exact 1280x720 and 1920x1080 tours 111/111; import, main boot, and 134/134 slice smoke | S-008, RUNBOOK.md, and generated TASKBOARD.md updated | TK-002 proof recording and spec completion |
+| 2026-07-17 | TK-002 | Ticket closed | Thirteen exact PNGs at each review size inspected; fire/smoke, focus, blocked aim, encounter hint suppression, preview/HUD separation, and every unit HP label are independently visible | S-008 and RUNBOOK.md record the repeatable proof | Kayden fun, revise, or stop verdict remains in S-002/TK-003; none for S-008 |
+| 2026-07-17 | spec | Spec completed | Acceptance gates satisfied | Documentation impact recorded above | none |
 
 ## Completion Result
 
-Pending.
+Completed. Fire and smoke now have distinct board silhouettes; exploration
+hints yield to the encounter HUD; aim and focus refusals have recovery feedback;
+and the consequence panel remains disjoint from the main HUD and every unit HP
+label. The exact two-resolution tours, full automated gates, artifact inspection,
+and immutable-head Auditor review are green. The remaining fun, revise, or stop
+decision belongs exclusively to `S-002 / TK-003`.
 
 ## Remaining Limitations Or Follow-Up Specs
 

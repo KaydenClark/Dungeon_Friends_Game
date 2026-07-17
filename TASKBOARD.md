@@ -11,8 +11,7 @@ proof ledger. Run `node tools/spec-workbench.mjs next --json` to select work and
 <!-- hot-specs:start -->
 | Spec | Current slice | Owner | Blocker | Latest meaningful event | Next gate |
 |---|---|---|---|---|---|
-| [S-002](specs/S-002-shared-material-reaction-vocabulary/SPEC.md) | TK-003: Record Kayden's owner fun, revise, or stop verdict. (blocked) | Kayden | S-008 | Claude's scripted playtest found the system fun but the fire/smoke presentation weak; that evidence does not substitute for Kayden's owner verdict. | Complete S-008, then Kayden plays the proven recut and records fun, revise, or stop. |
-| [S-008](specs/S-008-reaction-gate-readability/SPEC.md) | TK-001: Add failing readability/cue assertions, then recut fire/smoke marks, encounter-only hints, and blocked/focus feedback without changing reaction results. (in-progress) | codex-engineer | none | TK-001 HP-label collision remediation is remotely recoverable at `a218d25`; exact-head re-audit is pending. | Run an exact-head Auditor re-review before closing TK-001. |
+| [S-002](specs/S-002-shared-material-reaction-vocabulary/SPEC.md) | TK-003: Record Kayden's owner fun, revise, or stop verdict. (blocked) | Kayden | Kayden owner verdict | S-008 completed after an Auditor-green readability recut; the automated prerequisite is cleared and only Kayden's played verdict remains. | Kayden plays the proven recut and records fun, revise, or stop in TK-003. |
 | [S-003](specs/S-003-persistent-world-resolution/SPEC.md) | TK-001: Add a failing two-process battery for resolved encounter, environment, and movable reset. (ready) | unassigned | S-009, S-011, S-012 | Canon reconciliation separated dev-scene reaction proof from the production world and encounter state this persistence contract must serialize. | Complete the production-state contracts in S-009, S-011, and S-012, then claim TK-001 and prove the two-process battery red. |
 <!-- hot-specs:end -->
 
