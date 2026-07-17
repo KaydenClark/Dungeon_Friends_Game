@@ -8,9 +8,9 @@
 **Owner:** Kayden
 **Updated:** 2026-07-17
 **Catalog description:** Define and implement finite no-grind progression, defeat/revive rules, one real recruit, equipment/economy seams, and the character surface.
-**Blockers:** S-003, S-012, Kayden progression decisions
+**Blockers:** S-003, S-012
 **Latest event:** Live v1 XP/items/defeat state and legacy T-056/T-070/T-071/T-076 evidence were reconciled; the finite-XP fork is unresolved.
-**Next gate:** Kayden resolves TK-001 before an Engineer changes progression behavior.
+**Next gate:** Kayden resolves blocked TK-001 before an Engineer changes progression behavior; Kayden later owns the blocked TK-006 balance verdict.
 
 ## Outcome
 
@@ -65,11 +65,12 @@ provenance.
 
 | Ticket | Slice | Status | Blockers | Proof |
 |---|---|---|---|---|
-| TK-001 | Record Kayden's defeat penalty, revive/downed-member, currency, equipment, and real-recruit scope decisions. | blocked | Kayden progression decisions | pending |
-| TK-002 | Add a failing finite-source reward ledger and implement exact no-grind XP/reward accounting. | ready | TK-001 | pending |
+| TK-001 | Record Kayden's defeat penalty, revive/downed-member, currency, equipment, and real-recruit scope decisions. | blocked | none | pending |
+| TK-002 | Add a failing finite-source reward ledger and implement exact no-grind XP/reward accounting. | ready | S-003, S-012, TK-001 | pending |
 | TK-003 | Implement one real recruit data contract with world verb, combat kit, passive/reaction, and stable save identity. | ready | TK-002 | pending |
 | TK-004 | Implement the minimum character/equipment/currency surface required by the accepted progression contract. | ready | TK-003 | pending |
-| TK-005 | Run the finite-progression/recruitment demo and record Kayden's balance/replay verdict. | blocked | TK-004 and Kayden played verdict | pending |
+| TK-005 | Run and capture the finite-progression and recruitment demo with finite-source accounting proof. | ready | TK-004 | pending |
+| TK-006 | Record Kayden's progression-balance and replay-pressure verdict. | blocked | TK-005 | pending |
 
 ## Acceptance Criteria
 

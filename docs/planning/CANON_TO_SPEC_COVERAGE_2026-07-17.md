@@ -14,8 +14,10 @@ landed during the authorized conversion.
 - Inspected current state: 6 stable specs with 16 tickets.
 - Inspected legacy archive: 99 unique `T-###`/`T-093A`/`T-093B` task tokens
   and 23 `B-##` bug tokens, plus the surviving stretch rows.
-- Added: 9 stable specs with 35 dependency-aware tickets.
-- Result: 15 stable specs with 51 tickets.
+- Initial conversion added 9 stable specs with 35 dependency-aware tickets.
+- Auditor remediation split 6 bundled proof/verdict lanes without changing
+  capability ownership; the 9 added specs now contain 40 tickets.
+- Result: 15 stable specs with 57 tickets.
 - Required canon domains: 10 of 10 covered.
 - Non-closed legacy task/bug records: 34 of 34 mapped.
 - Surviving legacy stretch records: 7 of 7 mapped or explicitly kept cold.
@@ -111,6 +113,10 @@ by `S-008` and `S-014`.
 
 Agent or automated playthroughs can prepare evidence for these gates but cannot
 close them.
+
+All human and owner rows are `blocked`. Their blocker cells contain only real
+structural `S-###` or same-spec `TK-###` dependencies; prose conditions live in
+the owning spec's Owner and Next gate fields.
 
 ## Smallest Engineer Handoff
 

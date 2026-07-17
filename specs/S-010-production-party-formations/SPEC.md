@@ -5,12 +5,12 @@
 **Spec ID:** S-010
 **Status:** planned
 **Priority:** 1
-**Owner:** unassigned
+**Owner:** Kayden
 **Updated:** 2026-07-17
 **Catalog description:** Graduate line, square, and spaced party formations into production exploration, leader switching, save state, and legal encounter deployment.
 **Blockers:** S-009
 **Latest event:** T-096's pure planner and visible-party model are green but explicitly dev-only.
-**Next gate:** Complete S-009, then promote the pure planner without behavior changes.
+**Next gate:** Complete S-009, then an Engineer claims TK-001; Kayden owns the blocked TK-005 formation-feel verdict.
 
 ## Outcome
 
@@ -61,7 +61,8 @@ production rooms.
 | TK-001 | Promote the pure formation/deployment planner with dev-parity tests and no algorithm change. | ready | S-009 | pending |
 | TK-002 | Integrate selection, leader switching, choke compression, and reformation into production exploration. | ready | TK-001 | pending |
 | TK-003 | Persist formation identity and expose the smallest production selector/control surface. | ready | TK-002 | pending |
-| TK-004 | Consume legal deployment in the production encounter seam and record Kayden's formation/choke/deployment verdict. | blocked | TK-003 and Kayden played verdict | pending |
+| TK-004 | Consume legal deployment in the production encounter seam and capture the formation/choke/deployment demo. | ready | TK-003 | pending |
+| TK-005 | Record Kayden's formation, choke, and deployment-feel verdict. | blocked | TK-004 | pending |
 
 ## Acceptance Criteria
 

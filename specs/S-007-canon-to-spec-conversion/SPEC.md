@@ -9,7 +9,7 @@
 **Updated:** 2026-07-17
 **Catalog description:** Reconcile the settled unified-world canon, live source, legacy queue, owner gates, and release proof into complete stable capability specs.
 **Blockers:** none
-**Latest event:** Portfolio coverage, stable specs, vocabulary, dependencies, and live-source drift were reconciled and verified.
+**Latest event:** Auditor remediation normalized every blocker field and split agent-produced proof from owner-only verdict tickets without changing coverage.
 **Next gate:** none
 
 ## Outcome
@@ -48,6 +48,9 @@ comments, so future agents could select incomplete or superseded work.
 - Every required domain has one explicit stable owner and schedulable slices.
 - Completed proof stays immutable and cold history stays cold.
 - Agent-safe work and Kayden-only gates are unmistakable.
+- Every blocker field uses only comma-separated exact spec IDs or same-spec
+  ticket IDs; human conditions live in blocked status, ownership, and next-gate
+  language.
 - Live source contradictions are recorded rather than hidden by aspirational
   canon.
 - Render and doctor deterministically project the correct hot state.
@@ -84,6 +87,9 @@ comments, so future agents could select incomplete or superseded work.
 - [x] All 34 non-closed legacy task/bug rows are mapped.
 - [x] All 7 surviving stretch rows are mapped or explicitly cold.
 - [x] Agent-safe tickets and 10 owner/human gates are distinguished.
+- [x] All 72 blocker fields pass exact syntax and reference checks with zero
+  unsupported values.
+- [x] Agent-produced demos and owner verdicts are separate tickets.
 - [x] The smallest eligible Engineer ticket is explicit.
 - [x] Render, both project/current-Factory doctors, and static doc checks pass.
 - [x] The canonical dirty `game/project.godot` override remains byte-identical.
@@ -116,11 +122,12 @@ git diff --check
 | Date | Ticket | Event | Verification | Docs | Remaining gap |
 |---|---|---|---|---|---|
 | 2026-07-17 | TK-001 | Canon-to-spec inventory and planning conversion completed | 10/10 domains; 34/34 non-closed rows; 7/7 stretch rows; baseline 38/280/1781, smoke 134/134, save/load 10/10 + 11/11 | coverage, lexicon, specs, controls, render | none |
+| 2026-07-17 | audit | Auditor blocker and owner-gate remediation completed | 15 specs; 57 tickets; 72/72 blocker fields valid; 0 unsupported; both doctors and next passed; protected `project.godot` SHA-256 before/after `a7e45ecc35bee1768705d18343735a96708b86ed3283c5b90cb532a70508579f` | specs, coverage, and generated projections updated | none |
 
 ## Completion Result
 
-The project now has complete stable ownership and a dependency-aware handoff
-without implementing any gameplay ticket.
+The project now has complete stable ownership, machine-resolvable blockers, and
+separate agent-proof and owner-verdict handoffs without implementing gameplay.
 
 ## Remaining Limitations Or Follow-Up Specs
 

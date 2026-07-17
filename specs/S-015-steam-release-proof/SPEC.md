@@ -10,7 +10,7 @@
 **Catalog description:** Produce a reproducible, license-safe, controller-checked Steam-first release candidate and owner approval without authorizing publication.
 **Blockers:** S-004, S-005
 **Latest event:** Release, export, provenance, clean-clone, performance, save-recovery, and owner gates were extracted from canon and legacy evidence.
-**Next gate:** Complete the thesis slice and external playtest before activating release work.
+**Next gate:** Complete S-004 and S-005, then an Engineer claims TK-001; Kayden owns the blocked TK-005 release-candidate verdict.
 
 ## Outcome
 
@@ -67,7 +67,7 @@ export/touch work is postponed by D-032.
 | TK-002 | Prove clean-clone setup, lifecycle checks, full tests, and reproducible macOS/Windows exports. | ready | TK-001 | pending |
 | TK-003 | Audit licenses/provenance and exclude internal references, dev/debug content, secrets, and signing material. | ready | TK-002 | pending |
 | TK-004 | Run controller, display, performance, save compatibility/recovery, install, and rollback checks on the RC. | ready | TK-003 | pending |
-| TK-005 | Record Kayden's release-candidate verdict and exact remaining publication gates. | blocked | TK-004 and Kayden release approval | pending |
+| TK-005 | Record Kayden's release-candidate verdict and exact remaining publication gates. | blocked | TK-004 | pending |
 
 ## Acceptance Criteria
 

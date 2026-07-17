@@ -8,7 +8,7 @@
 **Owner:** unassigned
 **Updated:** 2026-07-17
 **Catalog description:** Persist resolved encounters and environmental changes across leave, save, quit, relaunch, and load without losing soft-lock recovery.
-**Blockers:** S-009 production world state; S-011 production reaction vocabulary; S-012 production encounter resolution
+**Blockers:** S-009, S-011, S-012
 **Latest event:** Canon reconciliation separated dev-scene reaction proof from the production world and encounter state this persistence contract must serialize.
 **Next gate:** Complete the production-state contracts in S-009, S-011, and S-012, then claim TK-001 and prove the two-process battery red.
 
@@ -60,7 +60,7 @@ environmental state.
 
 | Ticket | Slice | Status | Blockers | Proof |
 |---|---|---|---|---|
-| TK-001 | Add a failing two-process battery for resolved encounter, environment, and movable reset. | ready | S-009; S-011; S-012 | pending |
+| TK-001 | Add a failing two-process battery for resolved encounter, environment, and movable reset. | ready | S-009, S-011, S-012 | pending |
 | TK-002 | Persist stable encounter IDs and neutral environmental state with fail-closed loading. | ready | TK-001 | pending |
 | TK-003 | Run the full suite and owner-visible persistence demo. | ready | TK-002 | pending |
 

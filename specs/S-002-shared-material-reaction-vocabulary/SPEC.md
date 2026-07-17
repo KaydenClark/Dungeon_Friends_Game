@@ -8,9 +8,9 @@
 **Owner:** Kayden
 **Updated:** 2026-07-17
 **Catalog description:** Prove one preview-first material and effect vocabulary across exploration and encounters, then pass the owner fun gate.
-**Blockers:** S-008/TK-001 readability recut; Kayden played fun/not-fun verdict
+**Blockers:** S-008
 **Latest event:** Claude's scripted playtest found the system fun but the fire/smoke presentation weak; that evidence does not substitute for Kayden's owner verdict.
-**Next gate:** Complete S-008/TK-001, then Kayden plays the recut reaction room and records fun, revise, or stop.
+**Next gate:** Complete S-008, then Kayden plays the proven recut and records fun, revise, or stop.
 
 ## Outcome
 
@@ -56,7 +56,7 @@ but found material readability weak; Kayden's played verdict is still missing.
 ## Dependencies And Blockers
 
 - Completed foundation: `S-001`.
-- Readability prerequisite: `S-008/TK-001`.
+- Readability prerequisite: completed `S-008`.
 - Owner blocker: Kayden's played fun/not-fun verdict.
 
 ## Vertical Implementation Slices
@@ -65,7 +65,7 @@ but found material readability weak; Kayden's played verdict is still missing.
 |---|---|---|---|---|
 | TK-001 | Build the pure preview-first reaction matrix and neutral API. | done | S-001 | reaction core 55 checks; full unit and smoke suites green |
 | TK-002 | Build and verify the same-path gray-box room in both contexts. | done | TK-001 | 90/90 scripted tour assertions at 1280x720 and 1920x1080 |
-| TK-003 | Record the owner fun, revise, or stop verdict. | blocked | S-008/TK-001; Kayden played fun/not-fun verdict | pending |
+| TK-003 | Record Kayden's owner fun, revise, or stop verdict. | blocked | S-008 | pending |
 
 ## Acceptance Criteria
 

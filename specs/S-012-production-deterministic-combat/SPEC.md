@@ -5,12 +5,12 @@
 **Spec ID:** S-012
 **Status:** planned
 **Priority:** 1
-**Owner:** unassigned
+**Owner:** Kayden
 **Updated:** 2026-07-17
 **Catalog description:** Replace v1 d10 arena combat with production same-room intent rounds, exact previews, four-unit any-order actions, and environmental resolution.
 **Blockers:** S-009, S-010, S-011
 **Latest event:** Intent/guard/cue behavior is proven in dev; production CombatScene still rolls d10 and swaps to authored arenas.
-**Next gate:** Complete the world, formation, and reaction production seams, then promote the pure intent domain.
+**Next gate:** Complete S-009 through S-011, then an Engineer claims TK-001; Kayden owns the blocked TK-006 combat-feel verdict.
 
 ## Outcome
 
@@ -66,7 +66,8 @@ initiative, and zooms away from the world.
 | TK-002 | Implement local ENTER, forecast, exact current intent, and encounter-mode lifecycle in a production room. | ready | TK-001 | pending |
 | TK-003 | Integrate four-unit any-order actions, occupancy, movement, push/stun, and guarded-cell counterplay. | ready | TK-002 | pending |
 | TK-004 | Integrate environmental resolution, move undo, rewards, defeat, and staged retirement of d10/arena/zoom code. | ready | TK-003 | pending |
-| TK-005 | Run the full production encounter replay and record Kayden's combat-feel verdict. | blocked | TK-004 and Kayden played verdict | pending |
+| TK-005 | Run and capture the full production encounter replay with deterministic proof. | ready | TK-004 | pending |
+| TK-006 | Record Kayden's production combat-feel and v1-retirement verdict. | blocked | TK-005 | pending |
 
 ## Acceptance Criteria
 

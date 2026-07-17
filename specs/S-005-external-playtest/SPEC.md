@@ -6,11 +6,11 @@
 **Status:** planned
 **Priority:** 3
 **Owner:** Kayden
-**Updated:** 2026-07-13
+**Updated:** 2026-07-17
 **Catalog description:** Test the v2 thesis slice with at least two new players and convert observed confusion and fun into evidence-backed follow-up specs.
 **Blockers:** S-004
 **Latest event:** Capability migrated from legacy T-095; no external sessions are claimed complete.
-**Next gate:** Complete S-004 and prepare a neutral first-session script.
+**Next gate:** Complete S-004; an Engineer prepares TK-001, then Kayden coordinates the blocked TK-002 external sessions.
 
 ## Outcome
 
@@ -55,7 +55,7 @@ tester evidence exists for the integrated v2 thesis slice.
 | Ticket | Slice | Status | Blockers | Proof |
 |---|---|---|---|---|
 | TK-001 | Prepare the build, neutral script, consent boundary, and note template. | ready | S-004 | pending |
-| TK-002 | Run at least two external first sessions. | ready | TK-001 | pending |
+| TK-002 | Coordinate at least two external first sessions without coaching. | blocked | TK-001 | pending |
 | TK-003 | Synthesize findings and create linked follow-up specs. | ready | TK-002 | pending |
 
 ## Acceptance Criteria

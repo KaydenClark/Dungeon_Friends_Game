@@ -5,12 +5,12 @@
 **Spec ID:** S-004
 **Status:** planned
 **Priority:** 2
-**Owner:** unassigned
+**Owner:** Kayden
 **Updated:** 2026-07-17
 **Catalog description:** Build one authored recruit, non-combat resolution, shared-vocabulary puzzle, tactical fight, and persistent world change as a playable v2 loop.
-**Blockers:** S-003; S-009 through S-014
+**Blockers:** S-003, S-009, S-010, S-011, S-012, S-013, S-014
 **Latest event:** Canon reconciliation preserved this as the cross-capability thesis proof after the production world, party, reaction, combat, progression, and opening-experience specs.
-**Next gate:** Complete S-003 and S-009 through S-014, then refine the authored route and activate TK-001.
+**Next gate:** Complete S-003 and S-009 through S-014, then an Engineer claims TK-001; Kayden owns the blocked TK-004 thesis verdict.
 
 ## Outcome
 
@@ -59,9 +59,10 @@ new contracts end to end.
 
 | Ticket | Slice | Status | Blockers | Proof |
 |---|---|---|---|---|
-| TK-001 | Specify the authored recruit and the shortest end-to-end route. | ready | S-003; S-009 through S-014 | pending |
+| TK-001 | Specify the authored recruit and the shortest end-to-end route. | ready | S-003, S-009, S-010, S-011, S-012, S-013, S-014 | pending |
 | TK-002 | Build one thin adventure-to-world-change tracer bullet. | ready | TK-001 | pending |
-| TK-003 | Complete the authored loop and capture the owner demo. | ready | TK-002 | pending |
+| TK-003 | Complete the authored loop and capture the under-one-minute thesis demo artifact. | ready | TK-002 | pending |
+| TK-004 | Record Kayden's thesis-direction acceptance or revision verdict. | blocked | TK-003 | pending |
 
 ## Acceptance Criteria
 

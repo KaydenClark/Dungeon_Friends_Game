@@ -5,12 +5,12 @@
 **Spec ID:** S-011
 **Status:** planned
 **Priority:** 1
-**Owner:** unassigned
+**Owner:** Kayden
 **Updated:** 2026-07-17
 **Catalog description:** Graduate the accepted preview-first material/effect engine into production world cells, authored data, friend verbs, and encounter callers.
 **Blockers:** S-002, S-009
 **Latest event:** ReactionCore and its same-path gray-box consumer are green; production RoomGrid and AbilityData do not consume them.
-**Next gate:** Accept S-002 and complete the S-009 state seam, then promote the pure core unchanged.
+**Next gate:** Accept S-002 and complete S-009, then an Engineer claims TK-001; Kayden owns the blocked TK-005 production-vocabulary verdict.
 
 ## Outcome
 
@@ -62,7 +62,8 @@ state.
 | TK-001 | Promote ReactionCore schemas and rules behind a production API with exact dev-parity red/green coverage. | ready | S-002, S-009 | pending |
 | TK-002 | Add validated material/effect state to RoomGrid and the LDtk authoring/import path. | ready | TK-001 | pending |
 | TK-003 | Route production friend abilities and puzzle/encounter callers through one preview/commit seam. | ready | TK-002 | pending |
-| TK-004 | Capture a production same-state exploration/encounter replay and record Kayden's vocabulary verdict. | blocked | TK-003 and Kayden played verdict | pending |
+| TK-004 | Capture and verify a production same-state exploration/encounter replay. | ready | TK-003 | pending |
+| TK-005 | Record Kayden's production shared-vocabulary verdict. | blocked | TK-004 | pending |
 
 ## Acceptance Criteria
 

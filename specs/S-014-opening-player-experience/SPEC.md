@@ -5,12 +5,12 @@
 **Spec ID:** S-014
 **Status:** planned
 **Priority:** 2
-**Owner:** unassigned
+**Owner:** Kayden
 **Updated:** 2026-07-17
 **Catalog description:** Make the opening unified-world journey readable, controllable, recoverable, controller-complete, and understandable without coaching.
 **Blockers:** S-003, S-009, S-010, S-011, S-012, S-013
 **Latest event:** Legacy visual, movement, input, save, combat-UX, asset, and bug rows were consolidated under one production experience owner.
-**Next gate:** Complete the production capability chain, then activate the readability/accessibility matrix.
+**Next gate:** Complete the production capability chain, then an Engineer claims TK-001; Kayden owns the blocked TK-006 opening-journey verdict.
 
 ## Outcome
 
@@ -65,7 +65,8 @@ no production unified-world onboarding.
 | TK-002 | Implement the shortest no-coaching onboarding for controls, formation, friend verb, puzzle, and encounter entry. | ready | TK-001 | pending |
 | TK-003 | Close movement/facing/aggro, move-undo, focus/blocked-input, save failure, defeat, and party-status recovery gaps. | ready | TK-002 | pending |
 | TK-004 | Complete controller navigation/glyph parity and the minimum coherent visual/audio asset pass for the opening route. | ready | TK-003 | pending |
-| TK-005 | Run keyboard and controller first-session replays and record Kayden's opening-journey verdict. | blocked | TK-004 and Kayden played verdict | pending |
+| TK-005 | Run and capture keyboard and controller first-session replays at the supported resolutions. | ready | TK-004 | pending |
+| TK-006 | Record Kayden's complete opening-journey verdict. | blocked | TK-005 | pending |
 
 ## Acceptance Criteria
 
