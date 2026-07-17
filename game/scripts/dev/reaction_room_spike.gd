@@ -80,12 +80,17 @@ var feedback_label: Label
 var feedback_kind := ""
 var feedback_until_msec := 0
 var exploration_hint_layers: Array[CanvasLayer] = []
+var requested_capture_size := Vector2i.ZERO
+var hold_scripted_focus_loss := false
 
 
 func _ready() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--out="):
 			out_dir = arg.trim_prefix("--out=")
+		elif arg.begins_with("--expected-size="):
+			requested_capture_size = RoomLogic.capture_size_from_text(
+					arg.trim_prefix("--expected-size="))
 		elif arg.begins_with("--formation="):
 			var requested := StringName(arg.trim_prefix("--formation="))
 			if formation_layout.is_valid_formation(requested):
@@ -100,6 +105,7 @@ func _ready() -> void:
 	_build_encounter_ui()
 	_build_reaction_state()
 	_build_reaction_ui()
+	_add_hint()
 	print("REACTION ROOM: ready (shared vocabulary, one engine, two contexts)")
 	if out_dir != "":
 		DirAccess.make_dir_recursive_absolute(out_dir)
@@ -107,11 +113,10 @@ func _ready() -> void:
 		for line in tour_log:
 			print(line)
 		var failed := tour_log.filter(func(l: String) -> bool: return l.begins_with("FAIL"))
-		print("REACTION ROOM: %s -> %s" % \
-				["FAIL" if failed.size() > 0 else "done", out_dir])
+		print("REACTION ROOM: %s (%d/%d assertions) -> %s" % [
+				"FAIL" if failed.size() > 0 else "done",
+				tour_log.size() - failed.size(), tour_log.size(), out_dir])
 		get_tree().quit(1 if failed.size() > 0 else 0)
-	else:
-		_add_hint()
 
 
 func _add_hint() -> void:
@@ -189,7 +194,7 @@ func _build_reaction_ui() -> void:
 
 func _layout_reaction_ui() -> void:
 	var viewport_size := get_viewport_rect().size
-	var rect := RoomLogic.preview_panel_rect(get_viewport_rect().size)
+	var rect := RoomLogic.preview_panel_rect(viewport_size)
 	preview_panel.position = rect.position
 	preview_panel.size = rect.size
 	preview_label.size = rect.size - Vector2(24, 24)
@@ -200,6 +205,17 @@ func _layout_reaction_ui() -> void:
 	feedback_panel.position = Vector2((viewport_size.x - feedback_panel.size.x) * 0.5,
 			viewport_size.y - 104.0)
 	feedback_label.size = feedback_panel.size - Vector2(24, 16)
+	var combat_rects: Dictionary = RoomLogic.combat_label_rects(viewport_size)
+	for entry: Dictionary in [
+			{"label": plan_label, "rect": combat_rects["plan"]},
+			{"label": intent_label, "rect": combat_rects["intent"]},
+			{"label": prompt_label, "rect": combat_rects["prompt"]},
+	]:
+		var label: Label = entry["label"]
+		var label_rect: Rect2 = entry["rect"]
+		label.position = label_rect.position
+		label.size = label_rect.size
+		label.clip_text = true
 
 
 func _set_preview_visible(value: bool) -> void:
@@ -240,10 +256,29 @@ func _sync_exploration_hint_visibility() -> void:
 			layer.visible = show_hints
 
 
+func _exploration_hints_match(expected_visible: bool) -> bool:
+	if exploration_hint_layers.is_empty():
+		return false
+	for layer: CanvasLayer in exploration_hint_layers:
+		if not is_instance_valid(layer) or layer.visible != expected_visible:
+			return false
+	return true
+
+
+func _preview_avoids_combat_labels() -> bool:
+	var panel_rect := Rect2(preview_panel.position, preview_panel.size)
+	for label: Label in [plan_label, intent_label, prompt_label]:
+		if panel_rect.intersects(Rect2(label.position, label.size)):
+			return false
+	return true
+
+
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
 		_set_focus_feedback(false)
 	elif what == NOTIFICATION_APPLICATION_FOCUS_IN:
+		if hold_scripted_focus_loss:
+			return
 		_set_focus_feedback(true)
 
 
@@ -614,7 +649,7 @@ func _draw_cell_materials(cell: Vector2i, data: Dictionary) -> void:
 ## after frame_post_draw, which is not valid demo evidence.
 func _shot(shot_name: String, settle_frames := 4) -> void:
 	if shot_name == "02-encounter-cue":
-		shot_name = "08-encounter-cue"
+		shot_name = "10-encounter-cue"
 	var image: Image
 	for attempt in 6:
 		queue_redraw()
@@ -651,6 +686,13 @@ func _shot(shot_name: String, settle_frames := 4) -> void:
 			_refresh_cast_preview()
 	if not _capture_image_is_complete(image):
 		_assert(false, "capture %s populated the complete viewport" % shot_name)
+		return
+	var actual_size := Vector2i(image.get_width(), image.get_height())
+	var exact_size := requested_capture_size != Vector2i.ZERO \
+			and actual_size == requested_capture_size
+	_assert(exact_size, "capture %s is exactly %dx%d"
+			% [shot_name, requested_capture_size.x, requested_capture_size.y])
+	if not exact_size:
 		return
 	var path := "%s/%s.png" % [out_dir, shot_name]
 	var error := image.save_png(path)
@@ -742,7 +784,34 @@ func _scripted_tour() -> void:
 	await _frames(6)
 	var scene_before := get_tree().current_scene
 	var camera_before := get_viewport().get_camera_2d()
-	await _shot("01-explore-materials")
+	_assert(requested_capture_size != Vector2i.ZERO,
+			"proof run names an exact physical capture size")
+	_assert(_exploration_hints_match(true),
+			"exploration hint layers are visible before the encounter")
+	hold_scripted_focus_loss = true
+	_notification(NOTIFICATION_APPLICATION_FOCUS_OUT)
+	_assert(feedback_panel.visible and feedback_kind == "focus"
+			and feedback_label.text == RoomLogic.focus_prompt_text(false),
+			"live focus-loss notification shows the click-to-focus recovery")
+	await _shot("01-focus-lost")
+	hold_scripted_focus_loss = false
+	_notification(NOTIFICATION_APPLICATION_FOCUS_IN)
+	_assert(not feedback_panel.visible and feedback_kind == "",
+			"live focus recovery clears the click-to-focus prompt")
+	_assert(_exploration_hints_match(true),
+			"focus recovery keeps exploration instructions visible")
+	await _shot("02-focus-recovered")
+
+	# Exercise the real cursor refusal path, not only its pure message helper.
+	_start_cast("grow")
+	cast_cursor = _caster_actor().cell + Vector2i(CAST_RANGE, 0)
+	_refresh_cast_preview()
+	_move_cast_cursor(Vector2i.RIGHT)
+	_assert(feedback_panel.visible and feedback_kind == "aim"
+			and feedback_label.text == "Aim limit reached (range 3).",
+			"live blocked aim shows the range refusal")
+	await _shot("03-blocked-aim-feedback")
+	_cancel_cast()
 
 	# --- exploration: grow a vine, then burn it -------------------------------
 	_start_cast("grow")
@@ -760,7 +829,7 @@ func _scripted_tour() -> void:
 			and get_viewport_rect().has_point(preview_panel.position
 					+ preview_panel.size - Vector2.ONE),
 			"the consequence panel stays inside the live viewport")
-	await _shot("02-grow-preview")
+	await _shot("04-grow-preview")
 	await _commit_cast()
 	_assert(_tags_at(SOIL_CELL).has("vine"), "grow created a vine on the soil")
 	await _tour_cast("grow", SOIL_CELL)
@@ -773,7 +842,7 @@ func _scripted_tour() -> void:
 	_assert(not _tags_at(SOIL_CELL).has("vine")
 			and _tags_at(SOIL_CELL).has("fire") and _tags_at(SOIL_CELL).has("smoke"),
 			"the vine burned into fire + smoke")
-	await _shot("03-vine-burned")
+	await _shot("05-vine-burned")
 
 	# --- exploration: air feeds the fire down the flammable brush chain -------
 	var spread_prev: Dictionary = await _tour_cast("air", SOIL_CELL)
@@ -783,7 +852,7 @@ func _scripted_tour() -> void:
 	for cell: Vector2i in FLAMMABLE_CELLS:
 		_assert(_tags_at(cell).has("fire") and not _tags_at(cell).has("flammable"),
 				"brush at %s ignited and was consumed" % str(cell))
-	await _shot("04-air-fire-spread")
+	await _shot("06-air-fire-spread")
 
 	# --- exploration: flood the channel, then freeze part of it ---------------
 	await _walk([Vector2i.LEFT, Vector2i.LEFT, Vector2i.LEFT])   # toward the channel
@@ -798,7 +867,7 @@ func _scripted_tour() -> void:
 			"cold froze the flooded cell into ice")
 	_assert(freeze_prev["canceled_effects"].size() == 2,
 			"the freeze reported both consumed water effects")
-	await _shot("05-flood-freeze")
+	await _shot("07-flood-freeze")
 
 	# --- exploration: spark conducts through the remaining connected wet run --
 	# Context parity at the acceptance seam: the identical state through both
@@ -820,7 +889,7 @@ func _scripted_tour() -> void:
 			"the live exploration cast is the exact shared-engine result")
 	_assert(spark_prev["propagation_order"] == [CHANNEL_CELLS[1], CHANNEL_CELLS[2]],
 			"spark conducts through connected wet cells and stops at the ice")
-	await _shot("06-spark-conduction-preview")
+	await _shot("08-spark-conduction-preview")
 	await _commit_cast()
 	_assert(rstate["cells"][CHANNEL_CELLS[2]]["statuses"].get("electrified", false),
 			"conducted cells are electrified after commit")
@@ -832,7 +901,7 @@ func _scripted_tour() -> void:
 			"air cleared every connected smoke cell")
 	for cell: Vector2i in SMOKE_CELLS:
 		_assert(not _tags_at(cell).has("smoke"), "smoke gone at %s" % str(cell))
-	await _shot("07-smoke-cleared")
+	await _shot("09-smoke-cleared")
 
 	# --- encounter: same room, same cue, same intent rounds --------------------
 	var steps: Array = [Vector2i.RIGHT, Vector2i.RIGHT, Vector2i.RIGHT,
@@ -845,6 +914,8 @@ func _scripted_tour() -> void:
 	_assert(mode == Mode.ENCOUNTER, "detection started the in-room encounter")
 	_assert(await _until_player_phase(),
 			"the entry cue completed and opened the first player phase")
+	_assert(_exploration_hints_match(false),
+			"live exploration hint layers are hidden for the encounter HUD")
 	_assert(cue_plays == 1, "the encounter cue ran exactly once")
 	_assert(get_tree().current_scene == scene_before, "no scene change at entry")
 	_assert(get_viewport().get_camera_2d() == camera_before,
@@ -915,7 +986,9 @@ func _scripted_tour() -> void:
 			"the pre-commit preview promises the intention cancel")
 	_assert(preview_label.text.contains("WOULD CANCEL"),
 			"the cancel promise is visible in the panel before E is pressed")
-	await _shot("09-spark-cancel-preview")
+	_assert(_preview_avoids_combat_labels(),
+			"live consequence panel does not intersect combat labels")
+	await _shot("11-spark-cancel-preview")
 	await _commit_cast()
 	_assert(int(istate["units"]["slime"]["hp"]) == slime_hp - 2,
 			"the spark dealt exactly the previewed 2 damage")
@@ -924,7 +997,7 @@ func _scripted_tour() -> void:
 	_assert(telegraph_cells.is_empty(), "the canceled telegraph disappeared")
 	_assert(IntentLogic.preview(istate, current_intent) == [],
 			"the canceled spit can no longer hit anyone")
-	await _shot("10-intent-canceled")
+	await _shot("12-intent-canceled")
 	for id: String in PARTY_ORDER:
 		_end_unit(id)
 	_assert(await _until_player_phase(), "round 3 reached the player phase")
@@ -971,4 +1044,4 @@ func _scripted_tour() -> void:
 			"the encounter's own casts persist into exploration")
 	await _player_act(Vector2i.DOWN)
 	await _frames(8)
-	await _shot("11-victory-materials-persist")
+	await _shot("13-victory-materials-persist")

@@ -490,19 +490,28 @@ Both contexts route through `ReactionRoomLogic.cast` ->
 disruption, shove's forced-movement preview) are red/green in
 `tests/test_reaction_room_logic.gd`.
 
-One-command replay (Windows; writes eleven inspected captures per size):
+One-command replay (macOS; writes thirteen inspected captures per size and
+fails if any PNG does not match the declared physical dimensions):
 
-```powershell
-$godot = 'E:\Godot\godot.cmd'
-& $godot --path game scenes/dev/reaction_room_spike.tscn --resolution 1280x720 -- --out="$PWD\docs\screenshots\t093-reaction-room\1280"
-& $godot --path game scenes/dev/reaction_room_spike.tscn --resolution 1920x1080 -- --out="$PWD\docs\screenshots\t093-reaction-room\1920"
+```bash
+cd game
+/Applications/Godot.app/Contents/MacOS/Godot --path . \
+  scenes/dev/reaction_room_spike.tscn --resolution 1280x720 -- \
+  --out=/tmp/dungeon-reaction-gate-1280 --expected-size=1280x720
+/Applications/Godot.app/Contents/MacOS/Godot --fullscreen --path . \
+  scenes/dev/reaction_room_spike.tscn --resolution 1920x1080 -- \
+  --out=/tmp/dungeon-reaction-gate-1920 --expected-size=1920x1080
 ```
 
 The scripted tour must print `REACTION ROOM: done` with zero `FAIL` lines
-(90 assertions per run): grow-then-burn, air-fed fire spreading down the
-brush chain, flood-then-freeze, spark conduction stopped by the ice, smoke
-clearing, exploration/encounter context parity from identical state, and the
-round-2 spark that cancels the slime's declared spit before it resolves.
+(111/111 assertions per run): exact PNG dimensions; focus-loss/recovery and
+blocked-aim captures; exploration hints visible before the encounter and hidden
+for its HUD; consequence-panel/combat-label nonintersection; grow-then-burn;
+air-fed fire spreading down the brush chain; flood-then-freeze; spark conduction
+stopped by the ice; smoke clearing; exploration/encounter context parity from
+identical state; and the round-2 spark that cancels the slime's declared spit
+before it resolves. On macOS, the 1920 proof uses fullscreen because a nominal
+1920x1080 window can expose only a 1920x928 drawable client area.
 The capture path rejects partially populated Metal readbacks, forces a full
 CanvasItem refresh, and retries instead of silently writing black-hole proof.
 Run it interactively (no `--out=`) for Kayden's fun/not-fun verdict.
@@ -542,7 +551,7 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
-per-suite tally (currently `UNIT TESTS: 38 suites, 283 tests, 1791 checks, 0
+per-suite tally (currently `UNIT TESTS: 38 suites, 285 tests, 1808 checks, 0
 failed`). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a
 few seconds (pure logic and controlled clocks, no real-time waits, unlike the
 slice smoke test; the tutorial soft-lock solver adds a second or two). Run

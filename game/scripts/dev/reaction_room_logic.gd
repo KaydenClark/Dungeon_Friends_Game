@@ -22,9 +22,11 @@ extends RefCounted
 const ReactionCore := preload("res://scripts/dev/reaction_core.gd")
 
 const PREVIEW_PANEL_MARGIN := 12.0
-const PREVIEW_PANEL_TOP := 52.0
+const PREVIEW_PANEL_TOP := 68.0
 const PREVIEW_PANEL_WIDTH := 500.0
 const PREVIEW_PANEL_HEIGHT := 260.0
+const COMBAT_LABEL_LEFT := 12.0
+const COMBAT_LABEL_GUTTER := 12.0
 
 
 ## Keep the dense neutral consequence preview inside the current viewport.
@@ -38,6 +40,38 @@ static func preview_panel_rect(viewport_size: Vector2) -> Rect2:
 	var height := minf(PREVIEW_PANEL_HEIGHT, available_height)
 	return Rect2(Vector2(viewport_size.x - width - PREVIEW_PANEL_MARGIN,
 			PREVIEW_PANEL_TOP), Vector2(width, height))
+
+
+## Reserve explicit logical-viewport rectangles for the inherited encounter
+## labels. Header labels stop at a gutter left of the consequence panel; the
+## command prompt owns a separate bottom band.
+static func combat_label_rects(viewport_size: Vector2) -> Dictionary:
+	var panel := preview_panel_rect(viewport_size)
+	var header_width := maxf(0.0,
+			panel.position.x - COMBAT_LABEL_GUTTER - COMBAT_LABEL_LEFT)
+	return {
+		"plan": Rect2(Vector2(COMBAT_LABEL_LEFT, 8.0),
+				Vector2(header_width, 24.0)),
+		"intent": Rect2(Vector2(COMBAT_LABEL_LEFT, 34.0),
+				Vector2(header_width, 28.0)),
+		"prompt": Rect2(Vector2(COMBAT_LABEL_LEFT,
+				maxf(0.0, viewport_size.y - 52.0)),
+				Vector2(maxf(0.0, viewport_size.x - COMBAT_LABEL_LEFT * 2.0),
+						40.0)),
+	}
+
+
+## Parse the physical PNG size required by a proof run. Invalid input returns
+## ZERO so the caller can fail before accepting mislabeled artifacts.
+static func capture_size_from_text(text: String) -> Vector2i:
+	var parts := text.split("x", false)
+	if parts.size() != 2 or not parts[0].is_valid_int() \
+			or not parts[1].is_valid_int():
+		return Vector2i.ZERO
+	var size := Vector2i(int(parts[0]), int(parts[1]))
+	if size.x <= 0 or size.y <= 0:
+		return Vector2i.ZERO
+	return size
 
 
 ## A complete frame may contain very dark UI, but broad exactly-black samples

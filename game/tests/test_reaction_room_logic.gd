@@ -50,6 +50,38 @@ func test_preview_panel_layout_is_viewport_contained() -> void:
 				"panel remains readable at %s" % str(viewport_size))
 
 
+## Combat labels get an explicit left/bottom reservation instead of relying on
+## whatever minimum size a Label happens to calculate. Every reserved label
+## rectangle must stay disjoint from the consequence panel.
+func test_preview_panel_never_intersects_reserved_combat_label_rects() -> void:
+	for viewport_size: Vector2 in [Vector2(1280, 720), Vector2(1920, 1080),
+			Vector2(960, 540)]:
+		var panel := ReactionRoomLogic.preview_panel_rect(viewport_size)
+		var labels: Dictionary = ReactionRoomLogic.combat_label_rects(viewport_size)
+		for label_name: String in labels:
+			var label_rect: Rect2 = labels[label_name]
+			not_ok(panel.intersects(label_rect),
+					"%s label stays outside the panel at %s"
+					% [label_name, str(viewport_size)])
+		eq(labels["intent"].end.x, panel.position.x - 12.0,
+				"intent reservation ends at the panel gutter")
+
+
+## Proof runs fail closed when the requested physical PNG dimensions are
+## absent or malformed; the live tour consumes this exact parser.
+func test_capture_size_parser_accepts_only_exact_positive_dimensions() -> void:
+	eq(ReactionRoomLogic.capture_size_from_text("1280x720"),
+			Vector2i(1280, 720), "1280 proof size parses exactly")
+	eq(ReactionRoomLogic.capture_size_from_text("1920x1080"),
+			Vector2i(1920, 1080), "1920 proof size parses exactly")
+	eq(ReactionRoomLogic.capture_size_from_text("1920X1080"),
+			Vector2i.ZERO, "uppercase separator fails closed")
+	eq(ReactionRoomLogic.capture_size_from_text("0x720"),
+			Vector2i.ZERO, "non-positive dimensions fail closed")
+	eq(ReactionRoomLogic.capture_size_from_text("wide"),
+			Vector2i.ZERO, "malformed dimensions fail closed")
+
+
 ## Metal may expose a partially populated frame even after frame_post_draw.
 ## The proof tour must reject broad black holes while accepting the intentionally
 ## near-black preview panel.

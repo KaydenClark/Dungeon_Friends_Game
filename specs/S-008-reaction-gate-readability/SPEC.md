@@ -9,8 +9,8 @@
 **Updated:** 2026-07-17
 **Catalog description:** Make the reaction-room payoff legible and prove the recut with repeatable two-resolution tours.
 **Blockers:** none
-**Latest event:** TK-001 recut is green and remotely recoverable; immutable checkpoint review is pending.
-**Next gate:** Run an exact-head Auditor review before closing TK-001.
+**Latest event:** TK-001 audit remediation is green in the isolated Engineer worktree; a new immutable checkpoint review is pending.
+**Next gate:** Push the remediated checkpoint and run an exact-head Auditor re-review before closing TK-001.
 
 ## Outcome
 
@@ -25,7 +25,8 @@ readability build rather than test nearly invisible fire and smoke.
 
 ## Current Verified State
 
-The room passes 90/90 scripted assertions at 1280x720 and 1920x1080. Claude's
+The remediated room passes 111/111 scripted assertions with exact 1280x720 and
+1920x1080 physical PNGs. Claude's
 interactive pass called the system fun but found fire/smoke hard to distinguish,
 the exploration hint overlapping combat HUD, and blocked/focus input unclear.
 That is useful evidence, not Kayden's missing verdict.
@@ -58,7 +59,7 @@ That is useful evidence, not Kayden's missing verdict.
 
 | Ticket | Slice | Status | Blockers | Proof |
 |---|---|---|---|---|
-| TK-001 | Add failing readability/cue assertions, then recut fire/smoke marks, encounter-only hints, and blocked/focus feedback without changing reaction results. | in-progress | none | pushed red/green unit/tours/import/boot/smoke checkpoint; Auditor pending |
+| TK-001 | Add failing readability/cue assertions, then recut fire/smoke marks, encounter-only hints, and blocked/focus feedback without changing reaction results. | in-progress | none | audit remediation green for UI separation, exact PNG dimensions, and live cue captures; re-audit pending |
 | TK-002 | Run the full suite and both resolution tours, inspect the artifacts, and record the readability proof. | ready | TK-001 | pending |
 
 ## Acceptance Criteria
@@ -80,8 +81,8 @@ That is useful evidence, not Kayden's missing verdict.
 ```bash
 cd game
 /Applications/Godot.app/Contents/MacOS/Godot --headless --path . tests/run_tests.tscn
-/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/reaction_room_spike.tscn --resolution 1280x720 -- --out=/tmp/dungeon-reaction-gate-1280
-/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/reaction_room_spike.tscn --resolution 1920x1080 -- --out=/tmp/dungeon-reaction-gate-1920
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/reaction_room_spike.tscn --resolution 1280x720 -- --out=/tmp/dungeon-reaction-gate-1280 --expected-size=1280x720
+/Applications/Godot.app/Contents/MacOS/Godot --fullscreen --path . scenes/dev/reaction_room_spike.tscn --resolution 1920x1080 -- --out=/tmp/dungeon-reaction-gate-1920 --expected-size=1920x1080
 ```
 
 ## Documentation Impact
@@ -95,6 +96,7 @@ cd game
 |---|---|---|---|---|---|
 | 2026-07-17 | spec | Legacy T-084/T-093 readability evidence promoted | source, tests, captures, and Claude playtest notes inspected | new stable gate-preparation spec | two agent-produced proof tickets |
 | 2026-07-17 | TK-001 | Added shape-distinct fire/smoke marks, encounter-only exploration hints, and explicit aim/focus recovery feedback without changing reaction outcomes | expected red: reaction-room suite could not load four missing presentation seams; green: 38 suites / 283 tests / 1791 checks, import, main boot, 1280x720 and 1920x1080 tours at 90/90 each, 134/134 slice smoke; inspected burned, spread, and encounter captures at both sizes | S-008 and Runbook updated | immutable pushed-head Auditor review; TK-002 remains ready |
+| 2026-07-17 | TK-001 | Remediated Auditor findings with reserved combat-label rectangles, exact-size fail-closed captures, and live scripted hint/focus/aim proof | expected red: missing layout and capture-size seams; reproduced nominal 1920 run as rejected 1920x928; green: 38 suites / 285 tests / 1808 checks, import, main boot, exact 1280x720 and fullscreen 1920x1080 tours at 111/111 each, 134/134 slice smoke; inspected focus, recovery, blocked aim, encounter cue, and consequence-panel captures at both sizes | S-008 and Runbook updated | push immutable checkpoint and exact-head Auditor re-review; TK-002 remains ready |
 
 ## Completion Result
 
