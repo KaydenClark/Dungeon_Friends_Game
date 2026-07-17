@@ -9,8 +9,8 @@
 **Updated:** 2026-07-17
 **Catalog description:** Make the reaction-room payoff legible and prove the recut with repeatable two-resolution tours.
 **Blockers:** none
-**Latest event:** TK-001 recut is green in the isolated Engineer worktree; immutable checkpoint review is pending.
-**Next gate:** Push the verified checkpoint for an exact-head Auditor review before closing TK-001.
+**Latest event:** TK-001 recut is green and remotely recoverable; immutable checkpoint review is pending.
+**Next gate:** Run an exact-head Auditor review before closing TK-001.
 
 ## Outcome
 
@@ -58,7 +58,7 @@ That is useful evidence, not Kayden's missing verdict.
 
 | Ticket | Slice | Status | Blockers | Proof |
 |---|---|---|---|---|
-| TK-001 | Add failing readability/cue assertions, then recut fire/smoke marks, encounter-only hints, and blocked/focus feedback without changing reaction results. | in-progress | none | red missing-seam suite; green unit/tours/import/boot/smoke; Auditor pending |
+| TK-001 | Add failing readability/cue assertions, then recut fire/smoke marks, encounter-only hints, and blocked/focus feedback without changing reaction results. | in-progress | none | pushed red/green unit/tours/import/boot/smoke checkpoint; Auditor pending |
 | TK-002 | Run the full suite and both resolution tours, inspect the artifacts, and record the readability proof. | ready | TK-001 | pending |
 
 ## Acceptance Criteria
