@@ -3,14 +3,14 @@
 > Generated from LLM Workbench v2.3. This stable path never moves.
 
 **Spec ID:** S-004
-**Status:** planned
+**Status:** active
 **Priority:** 2
 **Owner:** Kayden
-**Updated:** 2026-07-17
+**Updated:** 2026-07-20
 **Catalog description:** Build one authored recruit, non-combat resolution, shared-vocabulary puzzle, tactical fight, and persistent world change as a playable v2 loop.
-**Blockers:** S-003, S-009, S-010, S-011, S-012, S-013, S-014
-**Latest event:** Canon reconciliation preserved this as the cross-capability thesis proof after the production world, party, reaction, combat, progression, and opening-experience specs.
-**Next gate:** Complete S-003 and S-009 through S-014, then an Engineer claims TK-001; Kayden owns the blocked TK-004 thesis verdict.
+**Blockers:** none
+**Latest event:** Dependency gate satisfied per D-038: S-003 complete; S-009 through S-014 engineering-done with their owner verdicts batched into TK-004 here.
+**Next gate:** Complete TK-001.
 
 ## Outcome
 
@@ -59,7 +59,7 @@ new contracts end to end.
 
 | Ticket | Slice | Status | Blockers | Proof |
 |---|---|---|---|---|
-| TK-001 | Specify the authored recruit and the shortest end-to-end route. | ready | S-003, S-009, S-010, S-011, S-012, S-013, S-014 | pending |
+| TK-001 | Specify the authored recruit and the shortest end-to-end route. | ready | none | pending |
 | TK-002 | Build one thin adventure-to-world-change tracer bullet. | ready | TK-001 | pending |
 | TK-003 | Complete the authored loop and capture the under-one-minute thesis demo artifact. | ready | TK-002 | pending |
 | TK-004 | Record Kayden's thesis-direction acceptance or revision verdict. | blocked | TK-003 | pending |
@@ -98,6 +98,7 @@ cd game
 |---|---|---|---|---|---|
 | 2026-07-13 | spec | Migrated from legacy T-094 | legacy scope reconciled against v2 decisions | v2.3 spec created | S-003 and all implementation slices |
 | 2026-07-17 | spec | Positioned the thesis slice after the production capability chain | full canon-to-spec coverage matrix reviewed | dependencies linked to S-003 and S-009 through S-014 | all implementation slices |
+| 2026-07-20 | spec | Dependency gate opened per D-038 (flagged product call, not a new decision): S-003 is complete, and S-009 through S-014 have every engineering ticket closed with proof - their only remaining tickets are the owner verdicts D-038 batches into TK-004 here, so treating those deferred verdicts as blockers would deadlock the chain Kayden ordered | spec statuses and ticket tables of S-003 and S-009..S-014 inspected via the workbench; doctor green | this spec's status/blockers; Taskboard rerendered | TK-001 route specification, TK-002 tracer, TK-003 demo artifact, TK-004 Kayden verdict |
 
 ## Completion Result
 
