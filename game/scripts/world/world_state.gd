@@ -231,23 +231,26 @@ static func snapshot_room_grid(grid: RoomGrid, actor_map := {}) -> Dictionary:
 	}
 
 
-## S-009/TK-002 fail-closed production adapter: one LDtk-authored room in,
-## either a fully valid neutral snapshot or {"error": <named_error>} out -
-## never a half-guessed state. Actors are keyed deterministically (the player
-## as the single-member production party until TK-003 graduates followers,
-## NPCs by cell, enemies by their stable encounter id, everything else by
-## snapshot_room_grid's object ids). Encounter records come from the authored
-## identities: a live enemy's encounter is unresolved at its current cell; a
-## defeated one is resolved at its authored cell (D-028 groundwork).
+## S-009/TK-002+TK-003 fail-closed production adapter: one LDtk-authored room
+## in, either a fully valid neutral snapshot or {"error": <named_error>} out -
+## never a half-guessed state. Actors are keyed deterministically (the Player
+## by the roster leader id, render-only followers by their roster ids at
+## deterministic distinct cells, NPCs by cell, enemies by their stable
+## encounter id, everything else by snapshot_room_grid's object ids).
+## Encounter records come from the authored identities: a live enemy's
+## encounter is unresolved at its current cell; a defeated one is resolved at
+## its authored cell (D-028 groundwork).
 static func snapshot_ldtk_room(room: LdtkRoom) -> Dictionary:
 	if not room.authoring_errors.is_empty():
 		return {"error": str(room.authoring_errors[0])}
+	var leader_id := room.party_leader_id if room.party_leader_id != "" \
+			else "player"
 	var actor_map := {}
 	var live_enemies := {}
 	for cell in _sorted_cells(room.occupants.keys()):
 		var node: Node2D = room.occupants[cell]
 		if node is Player:
-			actor_map[node] = {"id": "player", "kind": "party"}
+			actor_map[node] = {"id": leader_id, "kind": "party"}
 		elif node is OverworldEnemy:
 			if node.world_encounter_id == "":
 				return {"error": "enemy_without_encounter_id:%s" % cell}
@@ -262,8 +265,24 @@ static func snapshot_ldtk_room(room: LdtkRoom) -> Dictionary:
 	# cell id) would silently overwrite an actor in the keyed dictionary.
 	if data["actors"].size() != room.occupants.size():
 		return {"error": "actor_id_collision"}
-	if actor_map.values().any(func(m): return m["id"] == "player"):
-		data["party"] = {"leader": "player", "members": ["player"]}
+	if actor_map.values().any(func(m): return m["id"] == leader_id):
+		var members := [leader_id]
+		if room.party_trail != null:
+			var occupied := {}
+			for id in data["actors"]:
+				occupied[data["actors"][id]["cell"]] = true
+			var follower_cells: Dictionary = room.party_trail.snapshot_cells(
+					occupied)
+			for follower in room.party_followers:
+				var fid: String = follower.member_id
+				if not follower_cells.has(fid):
+					return {"error": "party_snapshot_unplaceable:%s" % fid}
+				if data["actors"].has(fid):
+					return {"error": "actor_id_collision"}
+				data["actors"][fid] = {"kind": "party",
+						"cell": follower_cells[fid]}
+				members.append(fid)
+		data["party"] = {"leader": leader_id, "members": members}
 	var out_encounters := {}
 	for id in _sorted_ids(room.authored_encounters.keys()):
 		if live_enemies.has(id):

@@ -67,6 +67,12 @@ var authoring_errors: Array[String] = []
 ## Stable encounter id -> the authored (spawn) cell it was declared at.
 ## Survives defeats: a resolved encounter keeps its authored identity.
 var authored_encounters := {}
+## S-009/TK-003 visible pass-through party (D-029). The roster leader is the
+## Player; every other roster member is a render-only PartyFollower driven by
+## the PartyTrail model. Followers never enter the occupancy map.
+var party_leader_id := ""
+var party_followers: Array = []
+var party_trail: PartyTrail
 
 
 func _ready() -> void:
@@ -377,11 +383,55 @@ func _spawn_player() -> void:
 	player.move_finished.connect(_on_player_moved)
 	for e in enemies:
 		e.target_player = player
+	_spawn_party()
+
+
+## Spawns the visible pass-through party from the session roster: the leader
+## identity stays on the Player; every other member becomes a render-only
+## follower seeded beside the spawn cell (D-029).
+func _spawn_party() -> void:
+	var roster: Array = SceneManager.state.party_roster
+	party_leader_id = "hero" if roster.is_empty() else str(roster[0])
+	party_followers = []
+	party_trail = null
+	if roster.size() <= 1:
+		return
+	var follower_ids := []
+	for i in range(1, roster.size()):
+		follower_ids.append(str(roster[i]))
+	party_trail = PartyTrail.new()
+	party_trail.setup(follower_ids, spawn_cell,
+			func(c: Vector2i) -> bool: return is_walkable(c))
+	var seeded: Dictionary = party_trail.follower_cells()
+	for fid in follower_ids:
+		var follower := PartyFollower.new()
+		follower.setup(fid, SceneManager.character_stats_for(fid), self,
+				seeded[fid])
+		add_child(follower)
+		party_followers.append(follower)
+
+
+func _sync_party(instant := false) -> void:
+	if party_trail == null:
+		return
+	party_trail.leader_moved(player.cell)
+	var cells: Dictionary = party_trail.follower_cells()
+	for follower in party_followers:
+		follower.glide_to(cells[follower.member_id], instant)
+
+
+## Teleports (room restore, pit-fall respawn, dev warps) reseed the party
+## beside the leader instead of leaving followers stranded across the room.
+func teleport(node: Node2D, to: Vector2i) -> void:
+	super.teleport(node, to)
+	if node == player:
+		_sync_party(true)
 
 
 func _on_player_moved() -> void:
 	if SceneManager.transitioning:
 		return
+	_sync_party()
 	if doorways.has(player.cell):
 		_on_doorway(doorways[player.cell])
 	player_moved.emit()

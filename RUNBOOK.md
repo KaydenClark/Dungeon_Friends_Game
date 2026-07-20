@@ -554,7 +554,7 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
-per-suite tally (currently `UNIT TESTS: 40 suites, 301 tests, 2107 checks, 0
+per-suite tally (currently `UNIT TESTS: 42 suites, 315 tests, 2164 checks, 0
 failed`). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a
 few seconds (pure logic and controlled clocks, no real-time waits, unlike the
 slice smoke test; the tutorial soft-lock solver adds a second or two). Run
@@ -628,8 +628,13 @@ pure in-room encounter lifecycle), and `test_ldtk_world_authoring`
 (S-009/TK-002: Elevation/Material IntGrid adoption, stable encounter ids
 from UniqueId/authored-cell, the fail-closed `snapshot_ldtk_room` adapter,
 no-invented-data on pre-TK-002 rooms, and the bad-authoring fixture refusing
-partial adoption). Add a suite path to the `SUITES` list in `run_tests.gd` to
-register new tests.
+partial adoption), `test_party_trail` (S-009/TK-003: the pure breadcrumb
+model - distinct walkable follower cells, single-file chokes, teleport
+reseeds, deterministic snapshot projection with fail-closed refusal), and
+`test_production_party` (S-009/TK-003: roster-driven render-only followers
+in the production LdtkRoom - never occupants, never pressing plates, leader
+pass-through, party actors in the world snapshot, teleport reseeds). Add a
+suite path to the `SUITES` list in `run_tests.gd` to register new tests.
 
 For a one-command S-009/TK-002 world-state demo (prints the fixture room's
 neutral snapshot - authored elevation/materials, stable encounters, a defeat

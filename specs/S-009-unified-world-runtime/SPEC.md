@@ -9,8 +9,8 @@
 **Updated:** 2026-07-20
 **Catalog description:** Replace the split production world/battle spine with one neutral room-state and party/encounter lifecycle without deleting the green v1 fallback early.
 **Blockers:** none
-**Latest event:** TK-003 claimed by claude-engineer.
-**Next gate:** Close TK-003 with verification and documentation proof.
+**Latest event:** TK-003 closed with proof.
+**Next gate:** Complete TK-004.
 
 ## Outcome
 
@@ -62,7 +62,7 @@ height, party visibility, room continuity, intent, and reactions.
 |---|---|---|---|---|
 | TK-001 | Define the neutral production world-state contract with failing parity/validation tests. | done | none | red: suite failed to load pre-implementation; green: test_world_state 69 checks; full unit 39 suites/292 tests/1880 checks PASS; --import 0 errors; slice smoke 134/134 |
 | TK-002 | Extend RoomGrid/LDtk authoring with elevation, materials, stable encounter IDs, and fail-closed adapters. | done | TK-001 | red: test_ldtk_world_authoring failed to load pre-implementation; green: 218 checks in-suite; full unit 40 suites/299 tests/2098 checks PASS; --import 0 script errors; slice smoke 134/134; main boot SceneManager ready; demo probe scenes/dev/world_snapshot_probe.tscn all PASS, transcript docs/planning/S009_TK002_world_snapshot_demo.txt |
-| TK-003 | Graduate leader plus visible pass-through followers into the production room lifecycle. | in-progress | TK-002 | pending |
+| TK-003 | Graduate leader plus visible pass-through followers into the production room lifecycle. | done | TK-002 | red: test_party_trail + test_production_party failed to load pre-implementation; green: full unit 42 suites/315 tests/2164 checks PASS; slice smoke 134/134; --import 0 script errors; main boot SceneManager ready; windowed screenshot tour docs/screenshots/s009-tk003-party (Hero + visible Buddy follower in all five production rooms); probe transcript refreshed with roster party |
 | TK-004 | Add the in-room encounter mode seam and prove room/camera/positions/puzzle state survive entry and victory. | ready | TK-003 | pending |
 
 ## Acceptance Criteria
@@ -101,8 +101,8 @@ cd game
 | 2026-07-19 | spec | Activated: S-002 fun verdict recorded; D-038 owner-approval consolidation applied across the production chain | spec doctor green after activation and rerender | Blueprint D-038 row; hot board rerendered | TK-001 through TK-004 |
 | 2026-07-20 | TK-001 | Ticket closed | red: suite failed to load pre-implementation; green: test_world_state 69 checks; full unit 39 suites/292 tests/1880 checks PASS; --import 0 errors; slice smoke 134/134 | contract documented in scripts/world/world_state.gd header; Blueprint/Runbook unchanged until the default route changes (per spec Documentation Impact) | TK-002 LDtk/RoomGrid authoring adapters, TK-003 production party, TK-004 encounter seam |
 | 2026-07-20 | TK-002 | Ticket closed | red: test_ldtk_world_authoring failed to load pre-implementation; green: 218 checks in-suite; full unit 40 suites/299 tests/2098 checks PASS; --import 0 script errors; slice smoke 134/134; main boot SceneManager ready; demo probe scenes/dev/world_snapshot_probe.tscn all PASS, transcript docs/planning/S009_TK002_world_snapshot_demo.txt | Blueprint D-039 flagged authoring-contract row (per D-038); RUNBOOK unit-test tally + new suite coverage + probe command; contract docs in ldtk_room.gd/world_state.gd headers | TK-003 production party graduation, TK-004 in-room encounter seam; snapshot consumers (S-010..S-012, S-003) not yet wired |
-
 | 2026-07-20 | TK-002 | Adversarial-review hardening: source-declaration validation (reordered/gapped Elevation/Material IntGrid values now fail closed instead of silently re-meaning painted cells) and adapter reserved-id collision guard (an authored UniqueId such as "player" can no longer overwrite another actor) | red: 7 targeted failures on the new bad-declaration fixture and collision test; green: unit 40 suites/301 tests/2107 checks PASS; slice smoke 134/134 | RUNBOOK tally; ldtk_room.gd header contract updated to match actual behavior | declaration check runs only where .ldtk sources exist (dev/CI; exported builds carry frozen validated data) |
+| 2026-07-20 | TK-003 | Ticket closed | red: test_party_trail + test_production_party failed to load pre-implementation; green: full unit 42 suites/315 tests/2164 checks PASS; slice smoke 134/134; --import 0 script errors; main boot SceneManager ready; windowed screenshot tour docs/screenshots/s009-tk003-party (Hero + visible Buddy follower in all five production rooms); probe transcript refreshed with roster party | Blueprint D-040 flagged roster-party row (per D-038); RUNBOOK tally + two new suite entries; D-029 contract notes in party_trail.gd/party_follower.gd headers | TK-004 in-room encounter seam; leader switching and formation selection stay owned by S-010 |
 
 ## Completion Result
 

@@ -6,7 +6,7 @@ PASS: snapshot validates
   room: 12x8, 44 contract cells
   authored elevation: (3, 1)=1, (4, 1)=2
   authored materials: (5, 1)=["vine"], (6, 1)=["flammable"], (7, 1)=["channel"], (8, 1)=["smoke"]
-  party: leader=player members=["player"]
+  party: leader=hero members=["hero", "companion_test"]
   encounter enc_9_5: unresolved at [(9, 5)]
   encounter fixture_guardian: unresolved at [(5, 6)]
 PASS: two authored elevation cells
@@ -14,25 +14,12 @@ PASS: four authored material cells
 PASS: two stable encounters
 PASS: snapshot after defeat has no error
 PASS: defeated encounter resolved under its stable id
+ERROR: LdtkRoom authoring (res://assets/levels/entity_bad_authoring_room.ldtk): material_declaration_mismatch:value_5
 ERROR: LdtkRoom authoring (res://assets/levels/entity_bad_authoring_room.ldtk): unknown_material_value:(9, 1)
-   GDScript backtrace (most recent call first):
-       [0] _apply_authoring_layers (res://scripts/overworld/ldtk_room.gd:192)
-       [1] _build (res://scripts/overworld/ldtk_room.gd:97)
-       [2] _ready (res://scripts/overworld/ldtk_room.gd:62)
-       [3] _probe_bad_fixture (res://scripts/dev/world_snapshot_probe.gd:83)
-       [4] _ready (res://scripts/dev/world_snapshot_probe.gd:20)
-       [5] _probe_good_fixture (res://scripts/dev/world_snapshot_probe.gd:77)
 ERROR: LdtkRoom authoring (res://assets/levels/entity_bad_authoring_room.ldtk): duplicate_encounter_id:twin
-   GDScript backtrace (most recent call first):
-       [0] _adopt_entities (res://scripts/overworld/ldtk_room.gd:261)
-       [1] _build (res://scripts/overworld/ldtk_room.gd:98)
-       [2] _ready (res://scripts/overworld/ldtk_room.gd:62)
-       [3] _probe_bad_fixture (res://scripts/dev/world_snapshot_probe.gd:83)
-       [4] _ready (res://scripts/dev/world_snapshot_probe.gd:20)
-       [5] _probe_good_fixture (res://scripts/dev/world_snapshot_probe.gd:77)
-  bad fixture authoring_errors: ["unknown_material_value:(9, 1)", "duplicate_encounter_id:twin"]
+  bad fixture authoring_errors: ["material_declaration_mismatch:value_5", "unknown_material_value:(9, 1)", "duplicate_encounter_id:twin"]
 PASS: bad-authored room is refused (fail closed)
-  adapter error: unknown_material_value:(9, 1)
+  adapter error: material_declaration_mismatch:value_5
 PASS: no partial authoring adopted
 PASS: v1 room build still works
 WORLD SNAPSHOT PROBE: done

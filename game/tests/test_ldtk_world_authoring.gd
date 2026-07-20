@@ -105,9 +105,11 @@ func test_world_snapshot_valid_and_complete() -> void:
 			"authored elevation lands in the snapshot")
 	eq(data["cells"][Vector2i(5, 1)]["tags"], ["vine"],
 			"authored material tags land in the snapshot")
-	eq(data["actors"]["player"]["kind"], "party", "player is a party actor")
-	eq(data["party"]["leader"], "player", "player leads the production party")
-	eq(data["party"]["members"], ["player"], "party membership is explicit")
+	eq(data["actors"]["hero"]["kind"], "party",
+			"the Player is the roster leader's party actor")
+	eq(data["party"]["leader"], "hero", "leader keyed by roster id")
+	eq(data["party"]["members"], ["hero", "companion_test"],
+			"party membership is the full roster (TK-003)")
 	eq(data["actors"]["enc_9_5"]["kind"], "enemy",
 			"enemy actor keyed by its stable encounter id")
 	eq(data["actors"]["fixture_guardian"]["cell"], Vector2i(5, 6),
@@ -204,13 +206,22 @@ func test_actor_id_collision_fails_closed() -> void:
 	not_null(pair, "fixture enemy present")
 	if pair != null:
 		room.authored_encounters.erase(pair.world_encounter_id)
-		pair.world_encounter_id = "player"
-		room.authored_encounters["player"] = Vector2i(9, 5)
+		pair.world_encounter_id = "hero"   # collides with the roster leader
+		room.authored_encounters["hero"] = Vector2i(9, 5)
 		var data: Dictionary = WorldState.snapshot_ldtk_room(room)
-		ok(data.has("error"), "colliding actor ids refuse the snapshot")
+		ok(data.has("error"), "leader-id collision refuses the snapshot")
 		if data.has("error"):
 			ok(str(data["error"]).begins_with("actor_id_collision"),
 					"collision error is named")
+		room.authored_encounters.erase("hero")
+		pair.world_encounter_id = "companion_test"   # collides with a follower
+		room.authored_encounters["companion_test"] = Vector2i(9, 5)
+		var follower_case: Dictionary = WorldState.snapshot_ldtk_room(room)
+		ok(follower_case.has("error"),
+				"follower-id collision refuses the snapshot")
+		if follower_case.has("error"):
+			ok(str(follower_case["error"]).begins_with("actor_id_collision"),
+					"follower collision error is named")
 	room.queue_free()
 	SceneManager.flags = {}
 
