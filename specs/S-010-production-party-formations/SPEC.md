@@ -3,14 +3,14 @@
 > Generated from LLM Workbench v2.3. This stable path never moves.
 
 **Spec ID:** S-010
-**Status:** planned
+**Status:** active
 **Priority:** 1
-**Owner:** Kayden
-**Updated:** 2026-07-17
+**Owner:** claude-engineer
+**Updated:** 2026-07-20
 **Catalog description:** Graduate line, square, and spaced party formations into production exploration, leader switching, save state, and legal encounter deployment.
-**Blockers:** S-009
-**Latest event:** T-096's pure planner and visible-party model are green but explicitly dev-only.
-**Next gate:** Complete S-009, then an Engineer claims TK-001; the owner feel verdict batches into the S-004 thesis replay per D-038.
+**Blockers:** none
+**Latest event:** TK-001 closed with proof.
+**Next gate:** Complete TK-002.
 
 ## Outcome
 
@@ -52,13 +52,14 @@ production rooms.
 
 ## Dependencies And Blockers
 
-- `S-009` production party and world-state lifecycle.
+- `S-009` production party and world-state lifecycle - **cleared 2026-07-20
+  (S-009 complete: contract, authoring, visible party, encounter seam).**
 
 ## Vertical Implementation Slices
 
 | Ticket | Slice | Status | Blockers | Proof |
 |---|---|---|---|---|
-| TK-001 | Promote the pure formation/deployment planner with dev-parity tests and no algorithm change. | ready | S-009 | pending |
+| TK-001 | Promote the pure formation/deployment planner with dev-parity tests and no algorithm change. | done | S-009 | red: all planner tests failed against the production path pre-move plus new parity test 10 failures; green: unit 43 suites/322 tests/2214 checks PASS; slice smoke 134/134; --import 0 script errors; parity test pins identical golden line deployment and that dev consumers load the exact production script; retired dev path guarded absent |
 | TK-002 | Integrate selection, leader switching, choke compression, and reformation into production exploration. | ready | TK-001 | pending |
 | TK-003 | Persist formation identity and expose the smallest production selector/control surface. | ready | TK-002 | pending |
 | TK-004 | Consume legal deployment in the production encounter seam and capture the formation/choke/deployment demo. | ready | TK-003 | pending |
@@ -98,6 +99,8 @@ cd game
 |---|---|---|---|---|---|
 | 2026-07-17 | spec | Legacy T-096 promoted into a production capability | planner/model/tests and prior 36-suite/244-test proof inspected | new stable formation spec | all slices and owner verdict |
 | 2026-07-19 | TK-005 | D-038 owner-approval consolidation: the feel verdict batches into the S-004 thesis replay; TK-005 deferred to that gate | Kayden chat directive 2026-07-19; Blueprint D-038 row | this spec, Blueprint | TK-001 through TK-004 |
+| 2026-07-20 | spec | Activated: S-009 completed (world-state contract, LDtk authoring, visible roster party, in-room encounter seam), unblocking production formation work | S-009 completion evidence + spec doctor green after activation and rerender | spec header updated; hot board rerendered | TK-001 through TK-004 |
+| 2026-07-20 | TK-001 | Ticket closed | red: all planner tests failed against the production path pre-move plus new parity test 10 failures; green: unit 43 suites/322 tests/2214 checks PASS; slice smoke 134/134; --import 0 script errors; parity test pins identical golden line deployment and that dev consumers load the exact production script; retired dev path guarded absent | RUNBOOK tally + T-096 seam section notes the production path; planner header records the promotion contract | TK-002 production exploration integration, TK-003 persistence/selector, TK-004 seam deployment consumption |
 
 ## Completion Result
 

@@ -1,9 +1,16 @@
 class_name PartyFormationLayout
 extends RefCounted
-## Pure T-096 selectable formation and encounter-deployment planner.
+## Pure selectable formation and encounter-deployment planner (D-029/D-037).
+##
+## S-010/TK-001 promoted this planner unchanged from the T-096 dev spike into
+## the production world namespace: tests/test_party_formation_layout.gd pins
+## the algorithm (three formations, four-facing rotation, deterministic legal
+## deployment with reachable fallback) and the parity test pins that dev
+## consumers route through this exact script - no divergent copy.
 ##
 ## The planner owns no scene or input state. Callers provide walkable cells and
-## blockers; the returned neutral snapshot can be consumed by another spike.
+## blockers; the returned neutral snapshot is consumed by exploration
+## formation selection (S-010/TK-002+) and encounter deployment (S-012).
 
 const FORMATION_IDS: Array[StringName] = [&"line", &"square", &"spaced"]
 const FOLLOWER_OFFSETS_RIGHT := {

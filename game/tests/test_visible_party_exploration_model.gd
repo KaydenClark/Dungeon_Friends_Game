@@ -2,7 +2,7 @@ extends "res://tests/gd_test.gd"
 ## T-087 contract tests for the pure visible-party breadcrumb model.
 
 const MODEL_PATH := "res://scripts/dev/visible_party_exploration_model.gd"
-const FORMATION_LAYOUT_PATH := "res://scripts/dev/party_formation_layout.gd"
+const FORMATION_LAYOUT_PATH := "res://scripts/world/party_formation_layout.gd"
 
 
 func _model() -> Variant:

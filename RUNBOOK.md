@@ -436,7 +436,9 @@ must show `SQUARE / RECOVERED`. The capture guard rejects incomplete Metal
 frames by sampling the board, header badges, side callouts, and all three
 bottom proof cards before writing.
 
-The neutral pure seam is `PartyFormationLayout.plan_deployment()`, returning
+The neutral pure seam is `PartyFormationLayout.plan_deployment()` (promoted
+unchanged to `game/scripts/world/party_formation_layout.gd` by S-010/TK-001;
+the dev spikes consume the production script), returning
 `formation_id`, `leader_id`, `facing`, `member_cells`, and
 `deployment_cells`. `test_party_formation_layout.gd` proves four-facing
 rotation, deterministic nearest-valid fallback, unique reachable placement,
@@ -554,7 +556,7 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
-per-suite tally (currently `UNIT TESTS: 43 suites, 321 tests, 2205 checks, 0
+per-suite tally (currently `UNIT TESTS: 43 suites, 322 tests, 2214 checks, 0
 failed`). The runner fails any test that records zero checks - a test aborted
 by a runtime script error can no longer masquerade as a pass (S-009/TK-004
 runner guard). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a

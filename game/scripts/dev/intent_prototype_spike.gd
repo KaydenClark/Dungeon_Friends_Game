@@ -33,7 +33,7 @@ extends "res://scripts/dev/unified_encounter_spike.gd"
 
 const IntentLogic := preload("res://scripts/dev/intent_logic.gd")
 const SolSnapshotAdapter := preload("res://scripts/dev/sol_snapshot_adapter.gd")
-const FormationLayoutScript := preload("res://scripts/dev/party_formation_layout.gd")
+const FormationLayoutScript := preload("res://scripts/world/party_formation_layout.gd")
 const MOVE_BUDGET := 3
 const PARTY_ORDER: Array[String] = ["hero", "friend", "blocker1", "blocker2"]
 const FORMATION_MEMBER_IDS: Array[StringName] = [

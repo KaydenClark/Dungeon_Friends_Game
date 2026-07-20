@@ -1,7 +1,12 @@
 extends "res://tests/gd_test.gd"
 ## T-096 contract tests for pure selectable layouts and encounter deployment.
+## S-010/TK-001 promoted the planner to the production world namespace
+## unchanged; these tests now pin the production path, and
+## test_production_planner_parity pins that every dev consumer routes through
+## the same script (no divergent dev copy can reappear).
 
-const LAYOUT_PATH := "res://scripts/dev/party_formation_layout.gd"
+const LAYOUT_PATH := "res://scripts/world/party_formation_layout.gd"
+const RETIRED_DEV_PATH := "res://scripts/dev/party_formation_layout.gd"
 const SNAPSHOT_ADAPTER_PATH := "res://scripts/dev/sol_snapshot_adapter.gd"
 const MEMBER_IDS := [&"hero", &"buddy", &"friend_c", &"friend_d"]
 const MEMBER_CELLS := {
@@ -197,3 +202,38 @@ func test_elevation_changes_require_an_explicit_transition_edge() -> void:
 			MEMBER_IDS, MEMBER_CELLS, walkable, [], [], [], elevations, stair_edges)
 	eq(snapshot.get("deployment_cells", {}).size(), 4,
 			"an authored one-level stair edge connects the deployment component")
+
+
+func test_production_planner_parity() -> void:
+	# S-010/TK-001: the planner lives in the production world namespace and
+	# the dev consumers route through that exact script - no divergent copy.
+	ok(ResourceLoader.exists(LAYOUT_PATH),
+			"planner exists at the production path")
+	not_ok(ResourceLoader.exists(RETIRED_DEV_PATH),
+			"the retired dev copy is gone")
+	var production: GDScript = load(LAYOUT_PATH)
+	var model := VisiblePartyExplorationModel.new()
+	eq(model.formation_layout.get_script(), production,
+			"the dev exploration model consumes the production planner")
+	var layout = _layout()
+	not_null(layout, "production planner instantiates")
+	if layout == null:
+		return
+	# Golden parity spot-check: the promoted planner still produces the exact
+	# T-096 line deployment for the canonical member set.
+	var walkable: Array[Vector2i] = []
+	for x in range(-4, 4):
+		for y in range(-4, 4):
+			walkable.append(Vector2i(x, y))
+	var snapshot: Dictionary = layout.plan_deployment(&"line", &"hero",
+			Vector2i.RIGHT, MEMBER_IDS, MEMBER_CELLS, walkable,
+			[], [], [], {}, [])
+	eq(snapshot.get("formation_id"), &"line", "formation id carried")
+	eq(snapshot.get("deployment_cells", {}).get(&"hero"), Vector2i.ZERO,
+			"leader anchors the deployment")
+	eq(snapshot.get("deployment_cells", {}).get(&"buddy"), Vector2i(-1, 0),
+			"line offset one behind the leader unchanged")
+	eq(snapshot.get("deployment_cells", {}).get(&"friend_c"), Vector2i(-2, 0),
+			"line offset two behind the leader unchanged")
+	eq(snapshot.get("deployment_cells", {}).get(&"friend_d"), Vector2i(-3, 0),
+			"line offset three behind the leader unchanged")

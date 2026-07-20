@@ -7,7 +7,7 @@ extends RefCounted
 ## cannot block, push puzzle objects, or hold plates by construction.
 
 const HeightLayout = preload("res://scripts/dev/three_quarter_height_layout.gd")
-const FormationLayout = preload("res://scripts/dev/party_formation_layout.gd")
+const FormationLayout = preload("res://scripts/world/party_formation_layout.gd")
 
 const MEMBER_IDS := [&"hero", &"buddy", &"friend_c", &"friend_d"]
 const START_CELLS := {
