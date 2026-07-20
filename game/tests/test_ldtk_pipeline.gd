@@ -32,9 +32,12 @@ func test_entities_adopted_at_cells() -> void:
 	not_null(room.healer, "healer NPC adopted (Heals=true)")
 	eq(room.healer.cell, Vector2i(4, 2), "NPC at its LDtk cell")
 	eq(room.healer.lines[0], "Hello from LDtk!", "NPC lines carried from LDtk")
-	eq(room.enemies.size(), 1, "enemy adopted")
-	var enemy: OverworldEnemy = room.enemies[0]
-	eq(enemy.cell, Vector2i(9, 5), "enemy at its LDtk cell")
+	eq(room.enemies.size(), 2, "both fixture enemies adopted (TK-002 added the guardian)")
+	var enemy: OverworldEnemy = null
+	for candidate in room.enemies:
+		if candidate.cell == Vector2i(9, 5):
+			enemy = candidate
+	not_null(enemy, "enemy at its LDtk cell")
 	eq(enemy.stats.id, "forest_slime", "enemy stats loaded from StatsId")
 	not_null(enemy.encounter, "enemy encounter loaded from LDtk EncounterId")
 	if enemy.encounter != null:
@@ -106,7 +109,7 @@ func test_unique_enemies_respawn_on_rebuild() -> void:
 
 func test_persistence_flags_respected_on_build() -> void:
 	var room := _make_room()
-	eq(room.enemies.size(), 1, "enemy spawns on build")
+	eq(room.enemies.size(), 2, "enemies spawn on build")
 	room.queue_free()
 	# A door already opened stays open on rebuild.
 	SceneManager.flags = {"door_test_door_opened": true}

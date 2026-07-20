@@ -305,6 +305,13 @@
       "color": "#6B6B6B",
       "tile": null,
       "groupUid": 0
+     },
+     {
+      "value": 5,
+      "identifier": "Mystery",
+      "color": "#FF00FF",
+      "tile": null,
+      "groupUid": 0
      }
     ],
     "tilesetDefUid": null
@@ -1252,8 +1259,8 @@
  },
  "levels": [
   {
-   "identifier": "EntityTestRoom",
-   "iid": "00000000-0000-0000-0000-000000000066",
+   "identifier": "EntityBadAuthoringRoom",
+   "iid": "00000000-0000-0000-0000-000000000203",
    "uid": 104,
    "worldX": 0,
    "worldY": 0,
@@ -1460,6 +1467,21 @@
            "id": "V_Int",
            "params": [
             1
+           ]
+          }
+         ]
+        },
+        {
+         "__identifier": "UniqueId",
+         "__type": "String",
+         "__value": "twin",
+         "__tile": null,
+         "defUid": 1017,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "forest_slime"
            ]
           }
          ]
@@ -1798,7 +1820,7 @@
         {
          "__identifier": "UniqueId",
          "__type": "String",
-         "__value": "fixture_guardian",
+         "__value": "twin",
          "__tile": null,
          "defUid": 1017,
          "realEditorValues": [
@@ -1976,7 +1998,7 @@
       2,
       3,
       4,
-      0,
+      5,
       0,
       0,
       0,

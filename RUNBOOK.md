@@ -554,7 +554,7 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
-per-suite tally (currently `UNIT TESTS: 38 suites, 286 tests, 1811 checks, 0
+per-suite tally (currently `UNIT TESTS: 40 suites, 299 tests, 2098 checks, 0
 failed`). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a
 few seconds (pure logic and controlled clocks, no real-time waits, unlike the
 slice smoke test; the tutorial soft-lock solver adds a second or two). Run
@@ -619,10 +619,26 @@ can-the-player-wedge-it proof the Known Risks row demands), and
 `test_debug_overlay` (T-030 hooks: hidden by default, grant dedup, reset
 delegation), `test_party_formation_layout` (T-096 exact choices, four-facing
 offsets, deterministic legal deployment/fallback, and authored elevation
-transition edges), and `test_visible_party_exploration_model` (T-087/T-096
+transition edges), `test_visible_party_exploration_model` (T-087/T-096
 leader-only occupancy, selectable formation persistence, choke compression,
-and recovery). Add a suite path to the `SUITES` list in `run_tests.gd` to
+and recovery), `test_world_state` (S-009/TK-001: the neutral production
+world-state contract - fail-closed validation, deterministic round-trip,
+RoomGrid parity without invented data, exact ReactionCore projection parity,
+pure in-room encounter lifecycle), and `test_ldtk_world_authoring`
+(S-009/TK-002: Elevation/Material IntGrid adoption, stable encounter ids
+from UniqueId/authored-cell, the fail-closed `snapshot_ldtk_room` adapter,
+no-invented-data on pre-TK-002 rooms, and the bad-authoring fixture refusing
+partial adoption). Add a suite path to the `SUITES` list in `run_tests.gd` to
 register new tests.
+
+For a one-command S-009/TK-002 world-state demo (prints the fixture room's
+neutral snapshot - authored elevation/materials, stable encounters, a defeat
+resolving in place, and the bad fixture failing closed; exit `0` = all PASS):
+
+```bash
+cd game
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path . scenes/dev/world_snapshot_probe.tscn
+```
 
 The runner `await`s each test, so a suite method may be a coroutine when a test
 genuinely needs to yield; most tests read state synchronously right after the

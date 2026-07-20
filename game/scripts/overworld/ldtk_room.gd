@@ -12,6 +12,21 @@ extends RoomGrid
 const ART_SCALE := 4.0
 const ART_GRID := 16
 
+## S-009/TK-002 authoring contract for the neutral world-state seam.
+## An optional `Elevation` IntGrid layer authors integer cell elevation: its
+## values MUST be declared ascending from 1, so the imported atlas.x index
+## maps as elevation = index + 1 (the importer stores only the value index -
+## see addons/ldtk-importer/src/layer.gd create_intgrid_layer).
+## An optional `Material` IntGrid layer authors initial material tags: its
+## values MUST be declared in MATERIAL_TAGS order (vine, flammable, channel,
+## smoke - the authorable subset of the D-031 ReactionCore vocabulary;
+## transient states like wet/fire/ice are never authored).
+## Any unknown value or duplicate encounter id is recorded in
+## `authoring_errors` and the world-state adapter fails closed; the v1 room
+## build itself stays green (S-009: v1 remains runnable until replacement).
+const MATERIAL_TAGS := ["vine", "flammable", "channel", "smoke"]
+const MAX_ELEVATION := 8
+
 var level_path := ""
 ## Which level to use from a multi-level world ("" = the first level).
 var level_name := ""
@@ -34,6 +49,13 @@ var spawn_cell := Vector2i.ZERO
 ## level's PlayerSpawn (e.g. entering a room through its far door).
 var spawn_override := Vector2i(-1, -1)
 var puzzle: PuzzleController
+## Named authoring failures (unknown material value, invalid elevation value,
+## duplicate encounter id). Non-empty means the world-state adapter refuses
+## this room; the v1 build continues regardless.
+var authoring_errors: Array[String] = []
+## Stable encounter id -> the authored (spawn) cell it was declared at.
+## Survives defeats: a resolved encounter keeps its authored identity.
+var authored_encounters := {}
 
 
 func _ready() -> void:
@@ -72,6 +94,7 @@ func _build() -> void:
 		set_blocked(c, true)
 	for c in _intgrid_cells(level, "Pit-values"):
 		set_pit(c, true)
+	_apply_authoring_layers(level)
 	_adopt_entities(level)
 	_spawn_player()
 	puzzle = PuzzleController.new()
@@ -96,6 +119,78 @@ func _pick_level(world: Node) -> LDTKLevel:
 func _intgrid_cells(level: Node, layer_name: String) -> Array:
 	var layer := _find_tile_layer(level, layer_name)
 	return layer.get_used_cells() if layer else []
+
+
+## IntGrid value *index* per painted cell: the importer stores each cell as
+## atlas coords (value_index, 0), so atlas.x recovers the authored value's
+## position in the layer's declared value list.
+func _intgrid_value_indices(level: Node, layer_name: String) -> Dictionary:
+	var layer := _find_tile_layer(level, layer_name)
+	if layer == null:
+		return {}
+	var indices := {}
+	for cell in layer.get_used_cells():
+		indices[cell] = layer.get_cell_atlas_coords(cell).x
+	return indices
+
+
+## Maps an imported Elevation IntGrid value index to its integer elevation,
+## or -1 for an index outside the supported authoring range (fail closed).
+static func elevation_for_index(index: int) -> int:
+	if index < 0 or index + 1 > MAX_ELEVATION:
+		return -1
+	return index + 1
+
+
+## Maps an imported Material IntGrid value index to its D-031 material tag,
+## or "" for an unknown index (fail closed).
+static func material_for_index(index: int) -> String:
+	if index < 0 or index >= MATERIAL_TAGS.size():
+		return ""
+	return MATERIAL_TAGS[index]
+
+
+## The stable encounter identity for an authored Enemy: its UniqueId when
+## set, else a deterministic id from the authored cell. Both are stable
+## across room rebuilds because both come from the authored level data.
+static func encounter_id_for(unique_id: String, cell: Vector2i) -> String:
+	if unique_id != "":
+		return unique_id
+	return "enc_%d_%d" % [cell.x, cell.y]
+
+
+## Adopts the optional Elevation/Material IntGrid layers into the RoomGrid
+## world-state extensions. Fail closed: any invalid authored value voids BOTH
+## stores (no partial or guessed adoption) and records a named error; the v1
+## room build continues unaffected.
+func _apply_authoring_layers(level: Node) -> void:
+	var errors: Array[String] = []
+	var elevation_indices := _intgrid_value_indices(level, "Elevation-values")
+	for cell: Vector2i in elevation_indices:
+		if not in_bounds(cell):
+			errors.append("elevation_out_of_bounds:%s" % cell)
+			continue
+		var value := elevation_for_index(int(elevation_indices[cell]))
+		if value < 0:
+			errors.append("invalid_elevation_value:%s" % cell)
+			continue
+		set_elevation(cell, value)
+	var material_indices := _intgrid_value_indices(level, "Material-values")
+	for cell: Vector2i in material_indices:
+		if not in_bounds(cell):
+			errors.append("material_out_of_bounds:%s" % cell)
+			continue
+		var tag := material_for_index(int(material_indices[cell]))
+		if tag == "":
+			errors.append("unknown_material_value:%s" % cell)
+			continue
+		add_material(cell, tag)
+	if not errors.is_empty():
+		elevation.clear()
+		materials.clear()
+		for error in errors:
+			push_error("LdtkRoom authoring (%s): %s" % [level_path, error])
+		authoring_errors.append_array(errors)
 
 
 func _find_tile_layer(root: Node, name_part: String) -> TileMapLayer:
@@ -159,6 +254,14 @@ func _adopt_entities(level: Node) -> void:
 				# they are never rebuilt.
 				var enemy: OverworldEnemy = node
 				enemy.home_cell = cell
+				# S-009/TK-002: stable encounter identity from authored data.
+				enemy.world_encounter_id = encounter_id_for(enemy.unique_id, cell)
+				if authored_encounters.has(enemy.world_encounter_id):
+					var dup := "duplicate_encounter_id:%s" % enemy.world_encounter_id
+					push_error("LdtkRoom authoring (%s): %s" % [level_path, dup])
+					authoring_errors.append(dup)
+				else:
+					authored_encounters[enemy.world_encounter_id] = cell
 				register(enemy, cell)
 				enemies.append(enemy)
 				if enemy.is_boss and boss == null:

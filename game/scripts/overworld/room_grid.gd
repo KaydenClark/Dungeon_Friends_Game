@@ -17,6 +17,13 @@ var occupants := {}  # Vector2i -> Node2D (player, enemies, NPCs, doors, blocks)
 ## plugging the room's exit would be an unrecoverable soft-lock; blocks stay
 ## in their room, classic Zelda).
 var no_block_cells := {}
+## S-009/TK-002 authored world-state extensions. Both stay empty unless an
+## authoring source (LDtk Elevation/Material IntGrid layers) supplies real
+## values - rooms without them keep elevation 0 and no tags everywhere, so no
+## data is ever invented. v1 walkability/pathing deliberately ignores both;
+## the v2 systems consume them through WorldState snapshots.
+var elevation := {}  # Vector2i -> int > 0 (absent = ground level 0)
+var materials := {}  # Vector2i -> Array[String] initial material tags
 var enemies: Array = []
 var astar := AStarGrid2D.new()
 ## The last entrance the player came through into this room (T-047): the
@@ -69,6 +76,31 @@ func set_pit(c: Vector2i, v: bool) -> void:
 
 func is_pit(c: Vector2i) -> bool:
 	return pits.has(c)
+
+
+## Integer cell elevation (D-030). 0 is ground; only authored cells differ.
+func elevation_at(c: Vector2i) -> int:
+	return int(elevation.get(c, 0))
+
+
+func set_elevation(c: Vector2i, level: int) -> void:
+	if level <= 0:
+		elevation.erase(c)
+	else:
+		elevation[c] = level
+
+
+## Initial material tags authored on a cell (D-031 vocabulary). Returns a
+## copy; live material state belongs to the WorldState snapshot, not the grid.
+func material_tags(c: Vector2i) -> Array:
+	return materials.get(c, []).duplicate()
+
+
+func add_material(c: Vector2i, tag: String) -> void:
+	var tags: Array = materials.get(c, [])
+	if not tags.has(tag):
+		tags.append(tag)
+	materials[c] = tags
 
 
 ## A block pushed into a pit permanently converts it to walkable floor

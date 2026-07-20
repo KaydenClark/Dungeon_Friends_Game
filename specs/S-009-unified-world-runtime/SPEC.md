@@ -9,8 +9,8 @@
 **Updated:** 2026-07-20
 **Catalog description:** Replace the split production world/battle spine with one neutral room-state and party/encounter lifecycle without deleting the green v1 fallback early.
 **Blockers:** none
-**Latest event:** TK-001 closed with proof.
-**Next gate:** Complete TK-002.
+**Latest event:** TK-002 closed with proof.
+**Next gate:** Complete TK-003.
 
 ## Outcome
 
@@ -61,7 +61,7 @@ height, party visibility, room continuity, intent, and reactions.
 | Ticket | Slice | Status | Blockers | Proof |
 |---|---|---|---|---|
 | TK-001 | Define the neutral production world-state contract with failing parity/validation tests. | done | none | red: suite failed to load pre-implementation; green: test_world_state 69 checks; full unit 39 suites/292 tests/1880 checks PASS; --import 0 errors; slice smoke 134/134 |
-| TK-002 | Extend RoomGrid/LDtk authoring with elevation, materials, stable encounter IDs, and fail-closed adapters. | ready | TK-001 | pending |
+| TK-002 | Extend RoomGrid/LDtk authoring with elevation, materials, stable encounter IDs, and fail-closed adapters. | done | TK-001 | red: test_ldtk_world_authoring failed to load pre-implementation; green: 218 checks in-suite; full unit 40 suites/299 tests/2098 checks PASS; --import 0 script errors; slice smoke 134/134; main boot SceneManager ready; demo probe scenes/dev/world_snapshot_probe.tscn all PASS, transcript docs/planning/S009_TK002_world_snapshot_demo.txt |
 | TK-003 | Graduate leader plus visible pass-through followers into the production room lifecycle. | ready | TK-002 | pending |
 | TK-004 | Add the in-room encounter mode seam and prove room/camera/positions/puzzle state survive entry and victory. | ready | TK-003 | pending |
 
@@ -100,6 +100,7 @@ cd game
 | 2026-07-17 | spec | Production gap extracted from D-024/D-025 and live source | SceneManager, RoomGrid, LDtk, main, and dev inheritance inspected | new stable runtime spec | all slices and S-002 |
 | 2026-07-19 | spec | Activated: S-002 fun verdict recorded; D-038 owner-approval consolidation applied across the production chain | spec doctor green after activation and rerender | Blueprint D-038 row; hot board rerendered | TK-001 through TK-004 |
 | 2026-07-20 | TK-001 | Ticket closed | red: suite failed to load pre-implementation; green: test_world_state 69 checks; full unit 39 suites/292 tests/1880 checks PASS; --import 0 errors; slice smoke 134/134 | contract documented in scripts/world/world_state.gd header; Blueprint/Runbook unchanged until the default route changes (per spec Documentation Impact) | TK-002 LDtk/RoomGrid authoring adapters, TK-003 production party, TK-004 encounter seam |
+| 2026-07-20 | TK-002 | Ticket closed | red: test_ldtk_world_authoring failed to load pre-implementation; green: 218 checks in-suite; full unit 40 suites/299 tests/2098 checks PASS; --import 0 script errors; slice smoke 134/134; main boot SceneManager ready; demo probe scenes/dev/world_snapshot_probe.tscn all PASS, transcript docs/planning/S009_TK002_world_snapshot_demo.txt | Blueprint D-039 flagged authoring-contract row (per D-038); RUNBOOK unit-test tally + new suite coverage + probe command; contract docs in ldtk_room.gd/world_state.gd headers | TK-003 production party graduation, TK-004 in-room encounter seam; snapshot consumers (S-010..S-012, S-003) not yet wired |
 
 ## Completion Result
 

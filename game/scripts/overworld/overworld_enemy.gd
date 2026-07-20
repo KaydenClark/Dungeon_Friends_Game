@@ -29,6 +29,10 @@ var target_player: Player
 ## authoring/debugging and any future rule that needs to name a specific
 ## enemy; it does NOT gate respawn.
 @export var unique_id := ""
+## S-009/TK-002 stable encounter identity, stamped by LdtkRoom at adoption:
+## the authored UniqueId when set, else a deterministic authored-cell id.
+## WorldState keys this enemy's actor and encounter records by it.
+var world_encounter_id := ""
 ## Spawn cell; with a leash set, the enemy drifts back here when it strays.
 var home_cell := Vector2i.ZERO
 ## Max Manhattan distance from home_cell while wandering (< 0 = roam freely).

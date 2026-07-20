@@ -187,7 +187,9 @@ static func default_cell() -> Dictionary:
 ## Snapshot an existing production RoomGrid's geometry and occupancy into the
 ## neutral contract shape. actor_map optionally names occupant nodes
 ## ({node: {"id": ..., "kind": ...}}); unmapped occupants get deterministic
-## object ids in cell order. No material or elevation data is invented.
+## object ids in cell order. No material or elevation data is invented: the
+## grid's authored elevation/materials stores (TK-002) are the only source,
+## and they stay empty for rooms authored without those layers.
 static func snapshot_room_grid(grid: RoomGrid, actor_map := {}) -> Dictionary:
 	var out_cells := {}
 	for cell in _sorted_cells(grid.blocked.keys()):
@@ -197,6 +199,14 @@ static func snapshot_room_grid(grid: RoomGrid, actor_map := {}) -> Dictionary:
 	for cell in _sorted_cells(grid.pits.keys()):
 		var data: Dictionary = out_cells.get(cell, default_cell())
 		data["pit"] = true
+		out_cells[cell] = data
+	for cell in _sorted_cells(grid.elevation.keys()):
+		var data: Dictionary = out_cells.get(cell, default_cell())
+		data["elevation"] = int(grid.elevation[cell])
+		out_cells[cell] = data
+	for cell in _sorted_cells(grid.materials.keys()):
+		var data: Dictionary = out_cells.get(cell, default_cell())
+		data["tags"] = grid.materials[cell].duplicate()
 		out_cells[cell] = data
 	var out_actors := {}
 	var auto_index := 0
@@ -219,6 +229,49 @@ static func snapshot_room_grid(grid: RoomGrid, actor_map := {}) -> Dictionary:
 		"mode": "exploration",
 		"active_encounter": "",
 	}
+
+
+## S-009/TK-002 fail-closed production adapter: one LDtk-authored room in,
+## either a fully valid neutral snapshot or {"error": <named_error>} out -
+## never a half-guessed state. Actors are keyed deterministically (the player
+## as the single-member production party until TK-003 graduates followers,
+## NPCs by cell, enemies by their stable encounter id, everything else by
+## snapshot_room_grid's object ids). Encounter records come from the authored
+## identities: a live enemy's encounter is unresolved at its current cell; a
+## defeated one is resolved at its authored cell (D-028 groundwork).
+static func snapshot_ldtk_room(room: LdtkRoom) -> Dictionary:
+	if not room.authoring_errors.is_empty():
+		return {"error": str(room.authoring_errors[0])}
+	var actor_map := {}
+	var live_enemies := {}
+	for cell in _sorted_cells(room.occupants.keys()):
+		var node: Node2D = room.occupants[cell]
+		if node is Player:
+			actor_map[node] = {"id": "player", "kind": "party"}
+		elif node is OverworldEnemy:
+			if node.world_encounter_id == "":
+				return {"error": "enemy_without_encounter_id:%s" % cell}
+			actor_map[node] = {"id": node.world_encounter_id, "kind": "enemy"}
+			live_enemies[node.world_encounter_id] = cell
+		elif node is NPC:
+			actor_map[node] = {"id": "npc_%d_%d" % [cell.x, cell.y],
+					"kind": "npc"}
+	var data := snapshot_room_grid(room, actor_map)
+	if actor_map.values().any(func(m): return m["id"] == "player"):
+		data["party"] = {"leader": "player", "members": ["player"]}
+	var out_encounters := {}
+	for id in _sorted_ids(room.authored_encounters.keys()):
+		if live_enemies.has(id):
+			out_encounters[id] = {"status": "unresolved",
+					"cells": [live_enemies[id]]}
+		else:
+			out_encounters[id] = {"status": "resolved",
+					"cells": [room.authored_encounters[id]]}
+	data["encounters"] = out_encounters
+	var error := validate(data)
+	if error != "":
+		return {"error": error}
+	return data
 
 
 ## Projects exactly the state shape ReactionCore.calculate consumes. The

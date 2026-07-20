@@ -66,7 +66,8 @@ const FACE_FOOT := Color(0.0, 0.0, 0.0, 0.30)
 ## walkable gap in the cliff row that connects the levels.
 class SpikeRoom extends RoomGrid:
 	var elev_px := 48.0
-	var elevation := {}   # Vector2i -> int (0 or 1 in this spike)
+	# `elevation` (Vector2i -> int) is inherited from RoomGrid since
+	# S-009/TK-002 moved the store into the production grid model.
 	var ramp_cells := {}  # Vector2i -> true
 
 	func lift_px(c: Vector2i) -> float:
