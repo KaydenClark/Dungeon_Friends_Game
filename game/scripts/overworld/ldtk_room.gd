@@ -159,6 +159,7 @@ func _build() -> void:
 		set_pit(c, true)
 	_apply_authoring_layers(level)
 	_seed_material_state()
+	_build_material_overlay()
 	_adopt_entities(level)
 	_spawn_player()
 	puzzle = PuzzleController.new()
@@ -822,6 +823,43 @@ func resolve_room_encounter(victory: bool) -> String:
 	return ""
 
 
+## S-014/TK-004: production material readability (closes the matrix GAP -
+## the debug-only overlay graduates). Simple colored silhouettes per live
+## tag, redrawn on every commit; art polish stays owned by S-004.
+const MATERIAL_COLORS := {
+	"vine": Color(0.28, 0.62, 0.30, 0.85),
+	"flammable": Color(0.75, 0.45, 0.18, 0.85),
+	"channel": Color(0.25, 0.47, 0.66, 0.85),
+	"smoke": Color(0.45, 0.45, 0.45, 0.8),
+	"fire": Color(0.95, 0.45, 0.10, 0.9),
+	"wet": Color(0.35, 0.65, 0.95, 0.8),
+	"flooded": Color(0.15, 0.35, 0.85, 0.85),
+	"ice": Color(0.6, 0.9, 1.0, 0.9),
+}
+var _material_overlay: Node2D
+
+
+func _build_material_overlay() -> void:
+	_material_overlay = Node2D.new()
+	_material_overlay.z_index = 20
+	add_child(_material_overlay)
+	_material_overlay.draw.connect(_draw_material_overlay)
+	_material_overlay.queue_redraw()
+
+
+func _draw_material_overlay() -> void:
+	if not material_state.get("cells") is Dictionary:
+		return
+	for cell in material_state["cells"]:
+		var tags: Array = material_state["cells"][cell]["tags"]
+		var offset := 0
+		for tag in tags:
+			_material_overlay.draw_rect(Rect2(cell_to_pos(cell)
+					+ Vector2(-20 + offset * 14, 14), Vector2(12, 12)),
+					MATERIAL_COLORS.get(tag, Color(1, 0, 1, 0.8)))
+			offset += 1
+
+
 ## Seeds the live reaction state: every in-bounds cell exists (so any target
 ## is previewable), authored material tags copy in, nothing else is invented.
 func _seed_material_state() -> void:
@@ -908,6 +946,8 @@ func commit_reaction(result: Dictionary) -> String:
 		return "invalid_reaction_result"
 	material_state = (after as Dictionary).duplicate(true)
 	_persist_material_state()
+	if _material_overlay != null and is_instance_valid(_material_overlay):
+		_material_overlay.queue_redraw()
 	return ""
 
 
@@ -929,6 +969,33 @@ func _show_encounter_banner() -> void:
 	label.offset_bottom = 90
 	_encounter_banner.add_child(label)
 	add_child(_encounter_banner)
+	_play_encounter_sting()
+
+
+## S-014/TK-004: the minimum coherent D-036 audio cue - a short synthesized
+## two-note sting (generated at runtime; no asset, no provenance risk). The
+## authored audio pass stays owned by S-004/S-015.
+func _play_encounter_sting() -> void:
+	var sample_rate := 22050
+	var stream := AudioStreamWAV.new()
+	stream.format = AudioStreamWAV.FORMAT_8_BITS
+	stream.mix_rate = sample_rate
+	var data := PackedByteArray()
+	for note in [[440.0, 0.12], [660.0, 0.18]]:
+		var frames := int(sample_rate * note[1])
+		for i in frames:
+			var t := float(i) / sample_rate
+			var envelope := 1.0 - float(i) / frames
+			var value := sin(TAU * note[0] * t) * envelope * 0.5
+			data.append(int(clampf(value, -1.0, 1.0) * 127.0) + 128)
+	stream.data = data
+	var player_node := AudioStreamPlayer.new()
+	player_node.name = "EncounterSting"
+	player_node.stream = stream
+	player_node.volume_db = -8.0
+	add_child(player_node)
+	player_node.play()
+	player_node.finished.connect(player_node.queue_free)
 
 
 func _hide_encounter_banner() -> void:

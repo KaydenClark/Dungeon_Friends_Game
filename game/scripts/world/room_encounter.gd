@@ -472,7 +472,8 @@ func _refresh_panel() -> void:
 		lines.append("%s %s %d/%d  mv %d%s" % [marker, str(id).to_upper(),
 				int(unit["hp"]), int(unit["max_hp"]), moves_left(id),
 				"  (acted)" if not can_act(id) else ""])
-	lines.append("WASD move - 1 atk 2 bash 3 shove 4 guard 5 cast - Z undo - TAB unit - Q end")
+	lines.append("WASD/D-pad move - 1/A atk 2/Y bash 3/B shove 4/L1 guard 5/R1 cast")
+	lines.append("Z undo - TAB/Back unit - Q/X end turn")
 	_intent_label.text = "\n".join(lines)
 	if _highlights != null and is_instance_valid(_highlights):
 		_highlights.queue_redraw()
@@ -523,6 +524,26 @@ func _unhandled_input(event: InputEvent) -> void:
 				cycle_active_unit()
 			KEY_Z:
 				undo_move()
+			_:
+				return
+	elif event is InputEventJoypadButton and event.pressed:
+		# S-014/TK-004 controller parity (D-019 anchors): A attack, Y bash,
+		# B shove, L1 guard, R1 cast, Back switches the acting unit; the
+		# D-pad moves via the bound move_* actions and X (cancel) ends the
+		# turn through the action branch above.
+		match (event as InputEventJoypadButton).button_index:
+			JOY_BUTTON_A:
+				attack(enemy_id)
+			JOY_BUTTON_Y:
+				bash(enemy_id)
+			JOY_BUTTON_B:
+				shove(enemy_id)
+			JOY_BUTTON_LEFT_SHOULDER:
+				guard(_facing_toward_enemy())
+			JOY_BUTTON_RIGHT_SHOULDER:
+				cast_reaction()
+			JOY_BUTTON_BACK:
+				cycle_active_unit()
 			_:
 				return
 	else:

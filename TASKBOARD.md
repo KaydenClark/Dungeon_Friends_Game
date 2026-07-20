@@ -15,7 +15,7 @@ proof ledger. Run `node tools/spec-workbench.mjs next --json` to select work and
 | [S-011](specs/S-011-production-reaction-vocabulary/SPEC.md) | Acceptance / owner gate | claude-engineer | none | TK-004 closed with proof. | Complete TK-005. |
 | [S-012](specs/S-012-production-deterministic-combat/SPEC.md) | Acceptance / owner gate | claude-engineer | none | TK-005 closed with proof. | Complete TK-006. |
 | [S-013](specs/S-013-finite-progression-and-recruitment/SPEC.md) | Acceptance / owner gate | claude-engineer | none | TK-005 closed with proof. | Complete TK-006. |
-| [S-014](specs/S-014-opening-player-experience/SPEC.md) | TK-004: Complete controller navigation/glyph parity and the minimum coherent visual/audio asset pass for the opening route. (ready) | claude-engineer | TK-003 | TK-003 closed with proof. | Complete TK-004. |
+| [S-014](specs/S-014-opening-player-experience/SPEC.md) | TK-005: Run and capture keyboard and controller first-session replays at the supported resolutions. (ready) | claude-engineer | TK-004 | TK-004 closed with proof. | Complete TK-005. |
 <!-- hot-specs:end -->
 
 ## Collision And Owner Gates

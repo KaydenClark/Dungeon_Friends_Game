@@ -213,9 +213,9 @@ func test_encounter_surface_teaches_its_own_controls() -> void:
 	var controller = room.room_encounter
 	not_null(controller, "controller running")
 	if controller != null:
-		ok(controller._intent_label.text.contains("1 atk"),
+		ok(controller._intent_label.text.contains("1/A atk"),
 				"the intent panel footer teaches the combat controls")
-		ok(controller._intent_label.text.contains("Q end"),
+		ok(controller._intent_label.text.contains("Q/X end"),
 				"ending the turn is always visible")
 		room.resolve_room_encounter(false)
 	room.queue_free()
@@ -273,5 +273,47 @@ func test_focus_loss_is_surfaced_to_the_player() -> void:
 	add_child(room)
 	room.notification(Node.NOTIFICATION_APPLICATION_FOCUS_OUT)
 	not_null(room._party_toast, "losing window focus shows a readable toast")
+	room.queue_free()
+	_fresh()
+
+
+func test_controller_buttons_drive_the_encounter() -> void:
+	# S-014/TK-004 controller parity: the same fight completes on joypad
+	# buttons - A attacks through the same API the keyboard drives.
+	_fresh()
+	var room := LdtkRoom.new()
+	room.level_path = FIXTURE
+	add_child(room)
+	room.teleport(room.player, Vector2i(8, 5))
+	for enemy in room.enemies:
+		if enemy.cell == Vector2i(9, 5):
+			eq(room.begin_room_encounter(enemy), "", "encounter begins")
+	var controller = room.room_encounter
+	not_null(controller, "controller running")
+	if controller != null:
+		var enemy_hp: int = controller.state["units"]["enc_9_5"]["hp"]
+		var press := InputEventJoypadButton.new()
+		press.button_index = JOY_BUTTON_A
+		press.pressed = true
+		controller._unhandled_input(press)
+		ok(int(controller.state["units"].get("enc_9_5",
+				{"hp": 0})["hp"]) < enemy_hp \
+				or room.active_encounter_id == "",
+				"the A button lands the same attack as the 1 key")
+		if room.active_encounter_id != "":
+			room.resolve_room_encounter(false)
+	room.queue_free()
+	_fresh()
+
+
+func test_production_material_overlay_exists() -> void:
+	# S-014/TK-004: the matrix GAP closes - live material state renders in
+	# PRODUCTION rooms, not just demos.
+	_fresh()
+	var room := LdtkRoom.new()
+	room.level_path = FIXTURE
+	add_child(room)
+	not_null(room._material_overlay, "every room owns a material overlay")
+	ok(room._material_overlay.is_inside_tree(), "the overlay renders in-tree")
 	room.queue_free()
 	_fresh()
