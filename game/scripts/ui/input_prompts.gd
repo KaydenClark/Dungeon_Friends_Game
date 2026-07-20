@@ -13,6 +13,7 @@ const BASENAMES := {
 	"jump": "jump",
 	"cancel": "cancel",
 	"character_menu": "character",
+	"formation_cycle": "formation",
 	"menu": "menu",
 }
 

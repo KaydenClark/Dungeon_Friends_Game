@@ -38,7 +38,12 @@ func _run() -> void:
 	await _frames(15)
 	SceneManager.ui_busy = true   # freeze ambient enemy AI for determinism
 
-	_check(room.set_party_formation(&"spaced"), "spaced formation selected")
+	# TK-003: drive the production selector (G/L1 cycles) rather than the raw
+	# API, so the capture shows the player-facing toast.
+	_check(room.cycle_party_formation() == &"square", "cycle reaches square")
+	_check(room.cycle_party_formation() == &"spaced", "cycle reaches spaced")
+	_check(str(SceneManager.state.party_formation) == "spaced",
+			"selection persisted to session state")
 	for dir in [Vector2i.DOWN, Vector2i.DOWN, Vector2i.RIGHT, Vector2i.RIGHT]:
 		room.player.try_step(dir)
 		await room.player.move_finished

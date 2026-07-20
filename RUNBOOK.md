@@ -115,6 +115,12 @@ prompts show keyboard keys only until T-079 supplies controller glyphs):
 
 - WASD / arrow keys: grid-snapped movement. E: talk, interact, and confirm.
   Q: cancel/back. The controller equivalents remain D-pad, A, and X.
+- Party controls (S-010/TK-003): **G** (controller L1) cycles the exploration
+  formation line -> square -> spaced with a short confirmation toast; **F**
+  (controller Y, the D-019 character action) switches the controlled leader
+  to the next visible party member - control, camera, and sprites swap in
+  place. Both persist for the session; the formation choice also persists
+  into saves (older saves default to line).
 - Space/B remains reserved for a future traversal item, but no shipped room
   requires manual jumping. The tutorial route uses mechanisms instead.
 - Loop: talk to the quest NPC -> bump a slime to enter an authored,
@@ -556,7 +562,7 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
-per-suite tally (currently `UNIT TESTS: 43 suites, 331 tests, 2261 checks, 0
+per-suite tally (currently `UNIT TESTS: 43 suites, 335 tests, 2276 checks, 0
 failed`). The runner fails any test that records zero checks - a test aborted
 by a runtime script error can no longer masquerade as a pass (S-009/TK-004
 runner guard). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a

@@ -23,6 +23,8 @@ var flags: Dictionary = {}
 ## Optional since T-072. SCHEMA_VERSION stays at 1 because version-1 saves
 ## simply omit this field and resume with a fresh deterministic selector.
 var arena_selector_state: Dictionary = {}
+## Optional since S-010/TK-003; older saves omit it and default to "line".
+var party_formation := "line"
 
 
 func to_dict() -> Dictionary:
@@ -38,6 +40,7 @@ func to_dict() -> Dictionary:
 		"inventory": inventory,
 		"flags": flags,
 		"arena_selector_state": arena_selector_state.duplicate(true),
+		"party_formation": party_formation,
 	}
 
 
@@ -63,12 +66,17 @@ static func from_dict(raw: Variant) -> SaveData:
 	out.party_hp = _int_values(d.get("party_hp", {}))
 	out.party_mp = _int_values(d.get("party_mp", {}))
 	out.inventory = _int_values(d.get("inventory", {}))
-	if d.get("flags", {}) is Dictionary:
-		out.flags = d["flags"]
+	# Read the default-guarded value, not d["flags"]: a payload missing the
+	# key entirely used to crash here (found by the S-010/TK-003 legacy-save
+	# test), violating the tolerant-load rule.
+	var raw_flags: Variant = d.get("flags", {})
+	if raw_flags is Dictionary:
+		out.flags = raw_flags
 	var raw_selector_state: Variant = d.get("arena_selector_state", {})
 	if raw_selector_state is Dictionary:
 		var selector_state: Dictionary = raw_selector_state
 		out.arena_selector_state = selector_state.duplicate(true)
+	out.party_formation = str(d.get("party_formation", "line"))
 	return out
 
 
@@ -84,6 +92,7 @@ func to_game_state() -> GameState:
 	s.inventory = inventory.duplicate()
 	s.flags = flags.duplicate()
 	s.arena_selector_state = arena_selector_state.duplicate(true)
+	s.party_formation = party_formation
 	return s
 
 

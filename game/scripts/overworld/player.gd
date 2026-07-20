@@ -119,6 +119,17 @@ func _process(delta: float) -> void:
 	if not moving and Input.is_action_just_pressed("jump"):
 		try_jump()
 		return
+	# S-010/TK-003 party controls: F/Y switches the leader (the D-019
+	# character action, matching the accepted dev-spike control), G/L1 cycles
+	# line -> square -> spaced.
+	if not moving and Input.is_action_just_pressed("character_menu") \
+			and room is LdtkRoom:
+		(room as LdtkRoom).switch_party_leader()
+		return
+	if not moving and Input.is_action_just_pressed("formation_cycle") \
+			and room is LdtkRoom:
+		(room as LdtkRoom).cycle_party_formation()
+		return
 	var dir := _read_dir()
 	if dir == Vector2i.ZERO:
 		_reset_hold()

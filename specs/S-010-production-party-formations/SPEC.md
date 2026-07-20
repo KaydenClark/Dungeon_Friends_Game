@@ -9,8 +9,8 @@
 **Updated:** 2026-07-20
 **Catalog description:** Graduate line, square, and spaced party formations into production exploration, leader switching, save state, and legal encounter deployment.
 **Blockers:** none
-**Latest event:** TK-002 closed with proof.
-**Next gate:** Complete TK-003.
+**Latest event:** TK-003 closed with proof.
+**Next gate:** Complete TK-004.
 
 ## Outcome
 
@@ -61,7 +61,7 @@ production rooms.
 |---|---|---|---|---|
 | TK-001 | Promote the pure formation/deployment planner with dev-parity tests and no algorithm change. | done | S-009 | red: all planner tests failed against the production path pre-move plus new parity test 10 failures; green: unit 43 suites/322 tests/2214 checks PASS; slice smoke 134/134; --import 0 script errors; parity test pins identical golden line deployment and that dev consumers load the exact production script; retired dev path guarded absent |
 | TK-002 | Integrate selection, leader switching, choke compression, and reformation into production exploration. | done | TK-001 | red: production suite failed to load + 4 zero-check trail tests pre-implementation; green: unit 43 suites/331 tests/2261 checks PASS; slice smoke 134/134; --import 0 script errors; main boot SceneManager ready; windowed party_formation_demo 6/6 PASS, captures docs/screenshots/s010-tk002-formations (spaced trailing + leader switch with control/identity swap); TK-004 review F1 (stranded in_encounter gate on freed rooms) and F2 (active-encounter status invariant) fixed with red/green in the same slice; reseed leapfrog bug found by the old choke test and fixed with chained anchoring |
-| TK-003 | Persist formation identity and expose the smallest production selector/control surface. | ready | TK-002 | pending |
+| TK-003 | Persist formation identity and expose the smallest production selector/control surface. | done | TK-002 | red: 6 targeted failures pre-implementation; green: unit 43 suites/335 tests/2276 checks PASS; slice smoke 134/134; saveload battery 10/10 + 11/11 (schema touched); --import 0 script errors; main boot SceneManager ready; windowed party_formation_demo 8/8 PASS with toast-driven cycling; cross-room persistence + leader restore tested; legacy-save default proven (and a pre-existing tolerant-load crash on saves missing flags found and fixed) |
 | TK-004 | Consume legal deployment in the production encounter seam and capture the formation/choke/deployment demo. | ready | TK-003 | pending |
 | TK-005 | Owner formation/choke/deployment-feel verdict - consolidated into the S-004 thesis replay per D-038 (2026-07-19); TK-004's demo artifact feeds that batch review. | deferred | S-004 | owner verdict batches at S-004 per D-038 |
 
@@ -102,6 +102,7 @@ cd game
 | 2026-07-20 | spec | Activated: S-009 completed (world-state contract, LDtk authoring, visible roster party, in-room encounter seam), unblocking production formation work | S-009 completion evidence + spec doctor green after activation and rerender | spec header updated; hot board rerendered | TK-001 through TK-004 |
 | 2026-07-20 | TK-001 | Ticket closed | red: all planner tests failed against the production path pre-move plus new parity test 10 failures; green: unit 43 suites/322 tests/2214 checks PASS; slice smoke 134/134; --import 0 script errors; parity test pins identical golden line deployment and that dev consumers load the exact production script; retired dev path guarded absent | RUNBOOK tally + T-096 seam section notes the production path; planner header records the promotion contract | TK-002 production exploration integration, TK-003 persistence/selector, TK-004 seam deployment consumption |
 | 2026-07-20 | TK-002 | Ticket closed | red: production suite failed to load + 4 zero-check trail tests pre-implementation; green: unit 43 suites/331 tests/2261 checks PASS; slice smoke 134/134; --import 0 script errors; main boot SceneManager ready; windowed party_formation_demo 6/6 PASS, captures docs/screenshots/s010-tk002-formations (spaced trailing + leader switch with control/identity swap); TK-004 review F1 (stranded in_encounter gate on freed rooms) and F2 (active-encounter status invariant) fixed with red/green in the same slice; reseed leapfrog bug found by the old choke test and fixed with chained anchoring | RUNBOOK tally + production-party suite entry; model contracts in party_trail.gd header | TK-003 persistence + player-facing selector/switch controls (no InputMap action yet; APIs only), TK-004 deployment consumption in the encounter seam |
+| 2026-07-20 | TK-003 | Ticket closed | red: 6 targeted failures pre-implementation; green: unit 43 suites/335 tests/2276 checks PASS; slice smoke 134/134; saveload battery 10/10 + 11/11 (schema touched); --import 0 script errors; main boot SceneManager ready; windowed party_formation_demo 8/8 PASS with toast-driven cycling; cross-room persistence + leader restore tested; legacy-save default proven (and a pre-existing tolerant-load crash on saves missing flags found and fixed) | Blueprint D-041 flagged interim-controls row (per D-038); RUNBOOK party-controls bullet + tally; GameState/SaveData field docs | TK-004 legal deployment consumption in the encounter seam + combined formation/choke/deployment demo |
 
 ## Completion Result
 

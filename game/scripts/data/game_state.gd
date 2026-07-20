@@ -27,3 +27,11 @@ extends Resource
 ## T-072's compact deterministic authored-arena selector payload. It remains
 ## empty until the first encounter draw, keeping version-1 saves compatible.
 @export var arena_selector_state: Dictionary = {}
+## S-010/TK-003 (D-029/D-037): the selected exploration formation identity.
+## Serialized with saves; pre-TK-003 saves omit it and default to "line".
+@export var party_formation: String = "line"
+## The currently controlled roster member ("" = the roster's first member).
+## Session-only authority: rooms read it so a leader switch survives room
+## changes and defeat respawns; it deliberately stays out of the save schema
+## (loading resumes control with the roster leader).
+@export var party_leader: String = ""

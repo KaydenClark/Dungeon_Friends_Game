@@ -183,3 +183,58 @@ func test_leader_switch_refused_during_encounter() -> void:
 	room.resolve_room_encounter(false)
 	SceneManager.unified_encounters = false
 	_teardown(room)
+
+
+func test_formation_and_leader_persist_across_rooms() -> void:
+	var room := _make_room()
+	ok(room.set_party_formation(&"spaced"), "formation set in the first room")
+	eq(room.switch_party_leader(), "companion_test", "leader switched")
+	remove_child(room)
+	room.free()
+	var next_room := LdtkRoom.new()
+	next_room.level_path = FIXTURE
+	add_child(next_room)
+	eq(next_room.party_formation(), &"spaced",
+			"formation selection survives the room change")
+	eq(next_room.party_leader_id, "companion_test",
+			"switched leader survives the room change")
+	eq(next_room.party_followers[0].member_id, "hero",
+			"the hero follows in the next room")
+	_teardown(next_room)
+
+
+func test_cycle_formation_order_and_state() -> void:
+	var room := _make_room()
+	eq(room.cycle_party_formation(), &"square", "line cycles to square")
+	eq(room.cycle_party_formation(), &"spaced", "square cycles to spaced")
+	eq(room.cycle_party_formation(), &"line", "spaced cycles back to line")
+	eq(str(SceneManager.state.party_formation), "line",
+			"session state tracks the selection")
+	_teardown(room)
+
+
+func test_party_control_actions_registered() -> void:
+	ok(InputMap.has_action("character_menu"),
+			"leader-switch rides the D-019 character action (F/Y)")
+	ok(InputMap.has_action("formation_cycle"),
+			"formation-cycle action exists")
+
+
+func test_formation_identity_survives_save_round_trip() -> void:
+	SceneManager.reset_session_state()
+	SceneManager.state.party_formation = "spaced"
+	var captured := SaveManager.capture(SceneManager.state, "forest",
+			Vector2i(2, 2))
+	var rebuilt := SaveData.from_dict(captured.to_dict())
+	not_null(rebuilt, "save payload round-trips")
+	if rebuilt != null:
+		var loaded: GameState = rebuilt.to_game_state()
+		eq(loaded.party_formation, "spaced",
+				"formation identity survives save/load")
+	var legacy := SaveData.from_dict({"schema_version": 1,
+			"current_map": "forest"})
+	not_null(legacy, "a pre-TK-003 save still loads")
+	if legacy != null:
+		eq(legacy.to_game_state().party_formation, "line",
+				"legacy saves default to line (tolerant load)")
+	SceneManager.reset_session_state()

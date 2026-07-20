@@ -81,6 +81,7 @@ var party_trail: PartyTrail
 var active_encounter_id := ""
 var _active_encounter_enemy: OverworldEnemy
 var _encounter_banner: CanvasLayer
+var _party_toast: CanvasLayer
 
 signal encounter_started(encounter_id: String)
 signal encounter_resolved(encounter_id: String, victory: bool)
@@ -401,18 +402,30 @@ func _spawn_player() -> void:
 ## identity stays on the Player; every other member becomes a render-only
 ## follower seeded beside the spawn cell (D-029).
 func _spawn_party() -> void:
-	var roster: Array = SceneManager.state.party_roster
-	party_leader_id = "hero" if roster.is_empty() else str(roster[0])
+	var roster: Array = []
+	for id in SceneManager.state.party_roster:
+		roster.append(str(id))
+	# S-010/TK-003: leader authority and formation identity live in session
+	# state, so a switch or selection survives room changes and respawns.
+	var session_leader := str(SceneManager.state.party_leader)
+	if session_leader != "" and roster.has(session_leader):
+		party_leader_id = session_leader
+	else:
+		party_leader_id = "hero" if roster.is_empty() else roster[0]
+	if party_leader_id != "hero" and player != null:
+		player.apply_character(SceneManager.character_stats_for(party_leader_id))
 	party_followers = []
 	party_trail = null
 	if roster.size() <= 1:
 		return
 	var follower_ids := []
-	for i in range(1, roster.size()):
-		follower_ids.append(str(roster[i]))
+	for id in roster:
+		if id != party_leader_id:
+			follower_ids.append(id)
 	party_trail = PartyTrail.new()
 	party_trail.setup(follower_ids, spawn_cell,
 			func(c: Vector2i) -> bool: return is_walkable(c))
+	party_trail.set_formation(StringName(SceneManager.state.party_formation))
 	var seeded: Dictionary = party_trail.follower_cells()
 	for fid in follower_ids:
 		var follower := PartyFollower.new()
@@ -451,10 +464,25 @@ func set_party_formation(formation_id: StringName) -> bool:
 		return false
 	if not party_trail.set_formation(formation_id):
 		return false
+	SceneManager.state.party_formation = String(formation_id)
 	var cells: Dictionary = party_trail.follower_cells()
 	for follower in party_followers:
 		follower.glide_to(cells[follower.member_id])
 	return true
+
+
+## The smallest production selector (TK-003): one action cycles the accepted
+## formations in planner order and announces the result.
+func cycle_party_formation() -> StringName:
+	if party_trail == null:
+		return party_formation()
+	var order: Array = PartyFormationLayout.new().formation_ids()
+	var index := order.find(party_formation())
+	var next: StringName = order[(index + 1) % order.size()] if index >= 0 \
+			else order[0]
+	if set_party_formation(next):
+		_show_party_toast("FORMATION: %s" % String(next).to_upper())
+	return party_formation()
 
 
 ## S-010/TK-002 leader switching (D-029): control and camera move to the next
@@ -501,7 +529,38 @@ func switch_party_leader() -> String:
 	for follower in party_followers:
 		follower_cells[follower.member_id] = follower.cell
 	party_trail.assume(control_to, follower_cells, follower_order)
+	SceneManager.state.party_leader = next_leader
+	var stats := SceneManager.character_stats_for(next_leader)
+	_show_party_toast("LEADER: %s" % (stats.display_name.to_upper()
+			if stats != null else next_leader.to_upper()))
 	return next_leader
+
+
+## Transient control feedback (TK-003): a short centered toast, no persistent
+## HUD chrome. Replaces any previous toast immediately.
+func _show_party_toast(text: String) -> void:
+	if _party_toast != null and is_instance_valid(_party_toast):
+		_party_toast.queue_free()
+	_party_toast = CanvasLayer.new()
+	_party_toast.layer = 40
+	var label := Label.new()
+	label.text = text
+	label.add_theme_font_size_override("font_size", 22)
+	label.add_theme_color_override("font_color", Color(0.85, 0.95, 1.0))
+	label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	label.add_theme_constant_override("outline_size", 6)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	label.offset_top = 96
+	label.offset_bottom = 130
+	_party_toast.add_child(label)
+	add_child(_party_toast)
+	var toast := _party_toast
+	get_tree().create_timer(1.4).timeout.connect(func():
+		if is_instance_valid(toast):
+			toast.queue_free()
+		if _party_toast == toast:
+			_party_toast = null)
 
 
 ## TK-004 review F1: a room freed or removed while owning the active
