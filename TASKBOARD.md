@@ -14,7 +14,7 @@ proof ledger. Run `node tools/spec-workbench.mjs next --json` to select work and
 | [S-010](specs/S-010-production-party-formations/SPEC.md) | Acceptance / owner gate | claude-engineer | none | TK-004 closed with proof. | Complete TK-005. |
 | [S-011](specs/S-011-production-reaction-vocabulary/SPEC.md) | Acceptance / owner gate | claude-engineer | none | TK-004 closed with proof. | Complete TK-005. |
 | [S-012](specs/S-012-production-deterministic-combat/SPEC.md) | Acceptance / owner gate | claude-engineer | none | TK-005 closed with proof. | Complete TK-006. |
-| [S-013](specs/S-013-finite-progression-and-recruitment/SPEC.md) | TK-003: Implement one real recruit data contract with world verb, combat kit, passive/reaction, and stable save identity. (ready) | claude-engineer | TK-002 | TK-002 closed with proof. | Complete TK-003. |
+| [S-013](specs/S-013-finite-progression-and-recruitment/SPEC.md) | TK-004: Implement the minimum character/equipment/currency surface required by the accepted progression contract. (ready) | claude-engineer | TK-003 | TK-003 closed with proof. | Complete TK-004. |
 <!-- hot-specs:end -->
 
 ## Collision And Owner Gates

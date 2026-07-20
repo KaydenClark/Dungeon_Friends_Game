@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="CharacterStats" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/character_stats.gd" id="1_stats"]
+[ext_resource type="Resource" path="res://data/abilities/strike.tres" id="2_strike"]
+[ext_resource type="Resource" path="res://data/abilities/verdant_growth.tres" id="3_grow"]
+[ext_resource type="SpriteFrames" path="res://data/sprites/kenney_buddy.tres" id="4_sprite"]
+
+[resource]
+script = ExtResource("1_stats")
+id = "wren"
+display_name = "Wren"
+max_hp = 16
+max_mp = 5
+attack = 2
+defense = 1
+speed = 3
+move_range = 3
+attack_range = 1
+sprite_frames = ExtResource("4_sprite")
+starting_abilities = [ExtResource("2_strike"), ExtResource("3_grow")]
+passive_id = "verdant_mender"

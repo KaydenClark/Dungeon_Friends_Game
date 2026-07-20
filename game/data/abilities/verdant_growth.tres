@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="AbilityData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/ability_data.gd" id="1_ab"]
+
+[resource]
+script = ExtResource("1_ab")
+id = "verdant_growth"
+display_name = "Verdant Growth"
+description = "Coax a vine from the earth. Routes through the shared reaction vocabulary in exploration and encounters alike (S-011)."
+mp_cost = 1
+target_type = 0
+power = 0
+attack_range = 3
+overworld_use = true
+reaction_verb = "grow"

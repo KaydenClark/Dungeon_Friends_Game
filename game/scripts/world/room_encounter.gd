@@ -82,6 +82,8 @@ func _party_unit(id: String, cell: Vector2i) -> Dictionary:
 			"atk": stats.attack if stats != null else 1,
 			"df": stats.defense if stats != null else 0,
 			"move_range": stats.move_range if stats != null else 3,
+			"passives": [stats.passive_id] if stats != null \
+					and stats.passive_id != "" else [],
 			"side": "party", "statuses": {}}
 
 

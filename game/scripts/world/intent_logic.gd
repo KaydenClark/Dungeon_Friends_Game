@@ -331,6 +331,12 @@ static func environment_tick(state: Dictionary) -> Array:
 	ids.sort()
 	for id: String in ids:
 		var unit: Dictionary = state["units"][id]
+		# S-013 (D-033): deterministic friend passives ride the same exact
+		# tick as every other duration - no randomness, no hidden timing.
+		if (unit.get("passives", []) as Array).has("verdant_mender") \
+				and int(unit["hp"]) > 0 and int(unit["hp"]) < int(unit["max_hp"]):
+			unit["hp"] = int(unit["hp"]) + 1
+			results.append({"id": id, "heal": 1, "source": "verdant_mender"})
 		if int(unit["statuses"].get("burn", 0)) > 0:
 			unit["hp"] = int(unit["hp"]) - BURN_TICK_DAMAGE
 			unit["statuses"]["burn"] = int(unit["statuses"]["burn"]) - 1

@@ -16,6 +16,11 @@ extends Resource
 ## their own attack_range on AbilityData.
 @export var move_range: int = 3
 @export var attack_range: int = 1
+## S-013 (D-033): one deterministic passive per friend, honored by the
+## intent domain's environment tick. "" = no passive. Known ids:
+## "verdant_mender" - regenerate exactly 1 HP per environment tick while
+## below max HP.
+@export var passive_id: String = ""
 @export var sprite_frames: SpriteFrames
 @export var starting_abilities: Array[AbilityData] = []
 ## Art-pass slots (T-043): empty until Asset Batch C/F wire real art.

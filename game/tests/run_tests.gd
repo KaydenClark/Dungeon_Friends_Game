@@ -57,6 +57,7 @@ const SUITES := [
 	"res://tests/test_room_encounter_intent.gd",
 	"res://tests/test_world_persistence.gd",
 	"res://tests/test_finite_progression.gd",
+	"res://tests/test_recruit.gd",
 ]
 
 

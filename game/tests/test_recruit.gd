@@ -1,0 +1,101 @@
+extends "res://tests/gd_test.gd"
+## S-013/TK-003 strict suite: the first real Dungeon Friend (D-033/D-043).
+## Wren carries the full friend contract - a primary world verb (grow,
+## through the shared S-011 reaction seam), a small deterministic combat kit,
+## one deterministic passive honored by the environment tick, and a stable
+## save identity - and recruitment is a fail-closed, once-per-save finite
+## source that immediately grows the visible exploration party.
+
+const FIXTURE := "res://assets/levels/entity_test_room.ldtk"
+
+
+func _fresh() -> void:
+	SceneManager.reset_session_state()
+	SceneManager.flags = {}
+	SceneManager.unified_encounters = true
+
+
+func test_wren_satisfies_the_friend_contract() -> void:
+	var stats := SceneManager.character_stats_for("wren")
+	not_null(stats, "wren's CharacterStats resource loads")
+	if stats == null:
+		return
+	eq(stats.id, "wren", "stable id")
+	eq(stats.display_name, "Wren", "display name authored")
+	eq(stats.passive_id, "verdant_mender", "one deterministic passive")
+	not_null(stats.sprite_frames, "provenance-safe (Kenney CC0) frames wired")
+	var verbs: Array[String] = []
+	for ability in stats.starting_abilities:
+		if ability.reaction_verb != "":
+			verbs.append(ability.reaction_verb)
+	eq(verbs, ["grow"], "exactly one primary world verb: grow (lore: the
+first friend is Growth-oriented)".replace("\n", " "))
+
+
+func test_recruitment_is_fail_closed_and_finite() -> void:
+	_fresh()
+	eq(SceneManager.state.party_roster, ["hero", "companion_test"],
+			"baseline roster")
+	ok(SceneManager.recruit_member("wren"), "wren recruits")
+	eq(SceneManager.state.party_roster, ["hero", "companion_test", "wren"],
+			"roster grows in order")
+	eq(int(SceneManager.state.party_hp.get("wren", 0)),
+			SceneManager.character_stats_for("wren").max_hp,
+			"recruit seeds full HP")
+	not_ok(SceneManager.recruit_member("wren"),
+			"a friend can only be recruited once (finite source)")
+	not_ok(SceneManager.recruit_member("nobody_real"),
+			"unknown stats are refused")
+	SceneManager.state.party_roster.append("filler")
+	not_ok(SceneManager.recruit_member("hero2"),
+			"a full four-member party refuses further recruits")
+	_fresh()
+
+
+func test_recruited_wren_walks_and_fights() -> void:
+	_fresh()
+	ok(SceneManager.recruit_member("wren"), "wren recruits")
+	var room := LdtkRoom.new()
+	room.level_path = FIXTURE
+	add_child(room)
+	eq(room.party_followers.size(), 2,
+			"wren joins the visible exploration party (D-029/D-040)")
+	var wren_follower: PartyFollower = null
+	for follower in room.party_followers:
+		if follower.member_id == "wren":
+			wren_follower = follower
+	not_null(wren_follower, "wren renders as a follower")
+	for enemy in room.enemies:
+		if enemy.cell == Vector2i(9, 5):
+			eq(room.begin_room_encounter(enemy), "", "encounter begins")
+	var controller = room.room_encounter
+	not_null(controller, "controller running")
+	if controller != null:
+		ok(controller.state["units"].has("wren"), "wren fields as a unit")
+		eq(controller.state["units"]["wren"]["passives"], ["verdant_mender"],
+				"the passive rides into the domain")
+		controller.state["units"]["wren"]["hp"] = 5
+		controller.set_active_unit("hero")
+		controller.guard(Vector2i.RIGHT)
+		controller.end_party_turn()
+		eq(int(controller.state["units"]["wren"]["hp"]), 6,
+				"verdant_mender heals exactly 1 at the environment tick")
+		room.resolve_room_encounter(false)
+	room.queue_free()
+	_fresh()
+
+
+func test_recruit_identity_survives_save_load() -> void:
+	_fresh()
+	ok(SceneManager.recruit_member("wren"), "wren recruits")
+	var captured := SaveManager.capture(SceneManager.state, "forest",
+			Vector2i(2, 2))
+	var rebuilt := SaveData.from_dict(JSON.parse_string(
+			JSON.stringify(captured.to_dict())))
+	not_null(rebuilt, "save round-trips")
+	if rebuilt != null:
+		var loaded: GameState = rebuilt.to_game_state()
+		ok(loaded.party_roster.has("wren"), "wren's identity survives save/load")
+		eq(loaded.reward_ledger.get("recruit#wren", false), true,
+				"the recruitment source stays claimed after load")
+	_fresh()

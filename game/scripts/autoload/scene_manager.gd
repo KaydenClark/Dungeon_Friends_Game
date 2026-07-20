@@ -340,6 +340,27 @@ func apply_enemy_rewards(enemy: OverworldEnemy) -> String:
 	return _apply_enemy_rewards(enemy)
 
 
+## S-013 (D-033/D-043): recruit a real Dungeon Friend into the active
+## roster. Fail-closed: unknown stats, duplicates, and a full active party
+## (four, D-013 revision) are refused. Recruitment is itself a finite
+## source - it can only happen once per save.
+func recruit_member(id: String) -> bool:
+	if id == "" or state.party_roster.has(id) \
+			or state.party_roster.size() >= 4:
+		return false
+	var stats := character_stats_for(id)
+	if stats == null:
+		return false
+	if not claim_reward_source("recruit#%s" % id):
+		return false
+	state.party_roster.append(id)
+	state.party_levels[id] = 1
+	state.party_xp[id] = 0
+	state.party_hp[id] = stats.max_hp
+	state.party_mp[id] = stats.max_mp
+	return true
+
+
 ## S-013 (D-028/D-043): finite reward accounting. A source id claims exactly
 ## once per save; callers grant rewards only on a true return, so no finite
 ## source can ever pay twice.
