@@ -578,7 +578,7 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
-per-suite tally (currently `UNIT TESTS: 49 suites, 382 tests, 2550 checks, 0
+per-suite tally (currently `UNIT TESTS: 49 suites, 384 tests, 2559 checks, 0
 failed`). The runner fails any test that records zero checks - a test aborted
 by a runtime script error can no longer masquerade as a pass (S-009/TK-004
 runner guard). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a

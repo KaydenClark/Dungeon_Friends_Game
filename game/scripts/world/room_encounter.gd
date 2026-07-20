@@ -400,6 +400,7 @@ func _sync_enemy_node() -> void:
 
 func _ready() -> void:
 	_build_panel()
+	_refresh_panel()   # setup() declared round one before we entered the tree
 	var timer := get_tree().create_timer(ENTER_REVEAL_DELAY)
 	timer.timeout.connect(func():
 		if _panel != null and is_instance_valid(_panel):
@@ -456,7 +457,7 @@ func _refresh_panel() -> void:
 		lines.append("%s %s %d/%d  mv %d%s" % [marker, str(id).to_upper(),
 				int(unit["hp"]), int(unit["max_hp"]), moves_left(id),
 				"  (acted)" if not can_act(id) else ""])
-	lines.append("WASD move - 1 atk 2 bash 3 shove 4 guard - TAB unit - Q end")
+	lines.append("WASD move - 1 atk 2 bash 3 shove 4 guard 5 cast - Z undo - TAB unit - Q end")
 	_intent_label.text = "\n".join(lines)
 	if _highlights != null and is_instance_valid(_highlights):
 		_highlights.queue_redraw()

@@ -103,6 +103,27 @@ signal encounter_resolved(encounter_id: String, victory: bool)
 func _ready() -> void:
 	_build()
 	_room_ready()
+	_show_onboarding_hint()
+
+
+## S-014/TK-002: the shortest no-coaching onboarding. Exactly one one-time
+## contextual hint per room entry, gated by persistent flags, using the
+## existing toast surface - the player is never told to press a dev key, and
+## a seen hint never repeats (flags ride the save schema). Encounter-entry
+## teaching lives on the encounter surface itself (D-036 banner + the intent
+## panel's always-visible controls footer).
+func _show_onboarding_hint() -> void:
+	if party_followers.size() > 0 \
+			and not SceneManager.flags.get("hint_party_controls", false):
+		SceneManager.flags["hint_party_controls"] = true
+		_show_party_toast("G: CHANGE FORMATION    F: SWITCH LEADER")
+		return
+	var leader_stats := SceneManager.character_stats_for(party_leader_id)
+	if _first_reaction_ability(leader_stats) != null \
+			and not SceneManager.flags.get("hint_cast", false):
+		SceneManager.flags["hint_cast"] = true
+		_show_party_toast("5: CAST %s AT THE FACED TILE"
+				% _first_reaction_ability(leader_stats).display_name.to_upper())
 
 
 ## Post-build hook for room subclasses (welcome dialogue, extra wiring).

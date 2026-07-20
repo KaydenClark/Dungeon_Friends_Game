@@ -15,7 +15,7 @@ proof ledger. Run `node tools/spec-workbench.mjs next --json` to select work and
 | [S-011](specs/S-011-production-reaction-vocabulary/SPEC.md) | Acceptance / owner gate | claude-engineer | none | TK-004 closed with proof. | Complete TK-005. |
 | [S-012](specs/S-012-production-deterministic-combat/SPEC.md) | Acceptance / owner gate | claude-engineer | none | TK-005 closed with proof. | Complete TK-006. |
 | [S-013](specs/S-013-finite-progression-and-recruitment/SPEC.md) | Acceptance / owner gate | claude-engineer | none | TK-005 closed with proof. | Complete TK-006. |
-| [S-014](specs/S-014-opening-player-experience/SPEC.md) | TK-002: Implement the shortest no-coaching onboarding for controls, formation, friend verb, puzzle, and encounter entry. (ready) | claude-engineer | TK-001 | TK-001 closed with proof. | Complete TK-002. |
+| [S-014](specs/S-014-opening-player-experience/SPEC.md) | TK-003: Close movement/facing/aggro, move-undo, focus/blocked-input, save failure, defeat, and party-status recovery gaps. (ready) | claude-engineer | TK-002 | TK-002 closed with proof. | Complete TK-003. |
 <!-- hot-specs:end -->
 
 ## Collision And Owner Gates

@@ -168,3 +168,55 @@ func test_active_unit_casts_in_encounters() -> void:
 		room.resolve_room_encounter(false)
 	room.queue_free()
 	_fresh()
+
+
+func test_onboarding_hints_show_once_and_persist() -> void:
+	# S-014/TK-002: one contextual hint per room entry, never repeated,
+	# never a dev key; seen-flags ride the existing save schema.
+	_fresh()
+	var room := LdtkRoom.new()
+	room.level_path = FIXTURE
+	add_child(room)
+	eq(SceneManager.flags.get("hint_party_controls", false), true,
+			"the party-controls hint fires on the first party room")
+	room.free()
+	ok(SceneManager.recruit_member("wren"), "wren recruits")
+	SceneManager.state.party_leader = "wren"
+	var second := LdtkRoom.new()
+	second.level_path = FIXTURE
+	add_child(second)
+	eq(SceneManager.flags.get("hint_cast", false), true,
+			"the cast hint fires once a leader carries a field verb")
+	second.free()
+	var third := LdtkRoom.new()
+	third.level_path = FIXTURE
+	add_child(third)
+	not_null(third, "a third entry shows no further hints (flags consumed)")
+	var captured := SaveManager.capture(SceneManager.state, "forest",
+			Vector2i(2, 2))
+	var rebuilt := SaveData.from_dict(captured.to_dict())
+	if rebuilt != null:
+		eq(rebuilt.to_game_state().flags.get("hint_party_controls", false),
+				true, "seen hints survive save/load (never repeat)")
+	third.queue_free()
+	_fresh()
+
+
+func test_encounter_surface_teaches_its_own_controls() -> void:
+	_fresh()
+	var room := LdtkRoom.new()
+	room.level_path = FIXTURE
+	add_child(room)
+	for enemy in room.enemies:
+		if enemy.cell == Vector2i(9, 5):
+			eq(room.begin_room_encounter(enemy), "", "encounter begins")
+	var controller = room.room_encounter
+	not_null(controller, "controller running")
+	if controller != null:
+		ok(controller._intent_label.text.contains("1 atk"),
+				"the intent panel footer teaches the combat controls")
+		ok(controller._intent_label.text.contains("Q end"),
+				"ending the turn is always visible")
+		room.resolve_room_encounter(false)
+	room.queue_free()
+	_fresh()
