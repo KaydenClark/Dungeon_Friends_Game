@@ -1,5 +1,10 @@
 extends RefCounted
-## T-093A shared deterministic material/effect reaction core (D-031).
+## Shared deterministic material/effect reaction core (D-031, T-093A).
+##
+## S-011/TK-001 promoted this core unchanged from the dev spike into the
+## production world namespace: tests/test_reaction_core.gd pins the full rule
+## matrix at the production path, and its parity test pins that dev consumers
+## route through this exact script - no divergent copy.
 ##
 ## Both exploration and encounter callers use calculate(). It is deliberately
 ## preview-first: caller state is never mutated, and state_after is the complete

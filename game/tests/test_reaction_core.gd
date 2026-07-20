@@ -3,7 +3,12 @@ extends "res://tests/gd_test.gd"
 ## core. Tests speak only to the neutral ReactionCore API that both exploration
 ## and encounter callers will use.
 
-const ReactionCore := preload("res://scripts/dev/reaction_core.gd")
+## S-011/TK-001 promoted the core to the production world namespace
+## unchanged; this suite now pins the production path and
+## test_production_core_parity pins that dev consumers route through the
+## same script (no divergent dev copy can reappear).
+const ReactionCore := preload("res://scripts/world/reaction_core.gd")
+const RETIRED_DEV_PATH := "res://scripts/dev/reaction_core.gd"
 
 
 func _cell(tags: Array = [], statuses := {}) -> Dictionary:
@@ -222,3 +227,35 @@ func test_repeat_application_is_bounded_and_deterministic() -> void:
 			_request("water", Vector2i(2, 2)))
 	eq(water_twice["state_after"], water_once["state_after"],
 			"repeat water refreshes to the same exact state rather than stacking")
+
+
+func test_production_core_parity() -> void:
+	# S-011/TK-001: one engine, one script. The gray-box room logic (the
+	# S-002 accepted consumer) must load the exact production core, the
+	# retired dev path must stay gone, and a golden fire-on-vine reaction
+	# must produce the exact accepted result shape through the promoted path.
+	not_ok(ResourceLoader.exists(RETIRED_DEV_PATH),
+			"the retired dev copy is gone")
+	var room_logic: GDScript = load("res://scripts/dev/reaction_room_logic.gd")
+	not_null(room_logic, "gray-box room logic still loads")
+	if room_logic != null:
+		eq(room_logic.get_script_constant_map().get("ReactionCore"),
+				ReactionCore,
+				"the gray-box consumer routes through the production core")
+	var state := {"width": 3, "height": 1, "cells": {
+		Vector2i(0, 0): {"tags": [], "statuses": {}},
+		Vector2i(1, 0): {"tags": ["vine"], "statuses": {"vine_strength": 1}},
+		Vector2i(2, 0): {"tags": [], "statuses": {}},
+	}}
+	var result: Dictionary = ReactionCore.calculate(state,
+			{"verb": "fire", "target": Vector2i(1, 0),
+			"context": "exploration"})
+	eq(result["valid"], true, "golden request valid through the promoted core")
+	ok(result["state_after"]["cells"][Vector2i(1, 0)]["tags"].has("fire"),
+			"burned vine catches fire (golden parity)")
+	ok(result["state_after"]["cells"][Vector2i(1, 0)]["tags"].has("smoke"),
+			"burned vine smokes (golden parity)")
+	eq(result["damage"], [{"cell": Vector2i(1, 0), "amount": 2,
+			"kind": "fire"}], "exact fire damage unchanged")
+	eq(state["cells"][Vector2i(1, 0)]["tags"], ["vine"],
+			"preview never mutates caller state")

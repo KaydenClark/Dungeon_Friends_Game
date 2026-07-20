@@ -7,7 +7,7 @@ extends "res://tests/gd_test.gd"
 ## ReactionCore projection parity, and pure in-room encounter lifecycle.
 
 const WorldState := preload("res://scripts/world/world_state.gd")
-const ReactionCore := preload("res://scripts/dev/reaction_core.gd")
+const ReactionCore := preload("res://scripts/world/reaction_core.gd")
 
 
 func _cell(overrides := {}) -> Dictionary:

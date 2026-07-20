@@ -19,7 +19,7 @@ extends RefCounted
 ## No reaction rules, no scene nodes, no randomness. Spike code - graduating
 ## it into production architecture is its own explicit decision.
 
-const ReactionCore := preload("res://scripts/dev/reaction_core.gd")
+const ReactionCore := preload("res://scripts/world/reaction_core.gd")
 
 const PREVIEW_PANEL_MARGIN := 12.0
 const PREVIEW_PANEL_TOP := 68.0
