@@ -41,6 +41,28 @@ const FALL_TIME := 0.3
 func fall_damage() -> int:
 	return FALL_DAMAGE
 
+
+## (Re)builds the avatar's visual body for a roster member. Used at spawn
+## (hero) and by S-010 leader switching, which hands control to another
+## visible party member without moving anyone else (D-029).
+func apply_character(stats: CharacterStats) -> void:
+	if body != null:
+		body.queue_free()
+		body = null
+	if face_marker != null:
+		face_marker.queue_free()
+		face_marker = null
+	if _pip != null:
+		_pip.queue_free()
+		_pip = null
+	var frames: SpriteFrames = stats.sprite_frames if stats != null else null
+	if not USE_SPRITE_BODY or not _make_sprite(frames, 0.5):
+		_make_body(Color(0.25, 0.5, 0.95))
+	# The facing chevron only accompanies sprite bodies; the placeholder square
+	# already carries its own face marker.
+	if body is AnimatedSprite2D:
+		_make_facing_pip()
+
 ## The Kenney skeleton is enabled for visual playtesting. Directional animation
 ## remains a later polish pass, but the promoted sprite is intentional here.
 const USE_SPRITE_BODY := true
@@ -73,13 +95,7 @@ var _pressed_stack: Array[Vector2i] = []
 
 
 func _ready() -> void:
-	var hero: CharacterStats = load("res://data/characters/hero.tres")
-	if not USE_SPRITE_BODY or not _make_sprite(hero.sprite_frames, 0.5):
-		_make_body(Color(0.25, 0.5, 0.95))
-	# The facing chevron only accompanies sprite bodies; the placeholder square
-	# already carries its own face marker.
-	if body is AnimatedSprite2D:
-		_make_facing_pip()
+	apply_character(load("res://data/characters/hero.tres"))
 	# Snappier per-step tween than the default so grid movement reads as crisp
 	# steps rather than a laggy glide (playtest feedback 2026-07-05).
 	move_time = WALK_MOVE_TIME

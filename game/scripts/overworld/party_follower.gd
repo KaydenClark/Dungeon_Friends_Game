@@ -17,6 +17,18 @@ func setup(id: String, stats: CharacterStats, grid: RoomGrid,
 	cell = start_cell
 	position = grid.cell_to_pos(start_cell)
 	move_time = 0.16   # match the leader's WALK_MOVE_TIME pace
+	apply_character(stats)
+
+
+## (Re)builds the visual body for a roster member - used at spawn and when a
+## leader switch demotes a different character into this follower slot.
+func apply_character(stats: CharacterStats) -> void:
+	if body != null:
+		body.queue_free()
+		body = null
+	if face_marker != null:
+		face_marker.queue_free()
+		face_marker = null
 	var frames: SpriteFrames = stats.sprite_frames if stats != null else null
 	if not _make_sprite(frames, 0.5):
 		_make_body(Color(0.35, 0.7, 0.55))

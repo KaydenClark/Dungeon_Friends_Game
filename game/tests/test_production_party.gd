@@ -122,3 +122,64 @@ func test_teleport_reseeds_followers() -> void:
 		eq(data["actors"]["hero"]["cell"], Vector2i(9, 1),
 				"leader actor at the teleport target")
 	_teardown(room)
+
+
+func test_room_formation_selection() -> void:
+	var room := _make_room()
+	eq(room.party_formation(), &"line", "rooms start on the default formation")
+	not_ok(room.set_party_formation(&"wedge"), "unknown formation refused")
+	ok(room.set_party_formation(&"spaced"), "known formation accepted")
+	eq(room.party_formation(), &"spaced", "room reports the selection")
+	# Walk down open floor; the follower must keep trailing near the leader
+	# whatever mix of formation and catch-up placement applies.
+	await _step(room, Vector2i.DOWN)   # (2,3)
+	await _step(room, Vector2i.DOWN)   # (2,4)
+	var follower: PartyFollower = room.party_followers[0]
+	var dist: int = absi(follower.cell.x - room.player.cell.x) \
+			+ absi(follower.cell.y - room.player.cell.y)
+	ok(dist >= 1 and dist <= 3, "spaced follower stays near the leader")
+	ok(room.is_walkable(follower.cell), "follower cell stays walkable")
+	_teardown(room)
+
+
+func test_leader_switch_swaps_control_and_identity() -> void:
+	var room := _make_room()
+	var follower: PartyFollower = room.party_followers[0]
+	var leader_cell := room.player.cell
+	var follower_cell := follower.cell
+	var switched := room.switch_party_leader()
+	eq(switched, "companion_test", "cycle promotes the next roster member")
+	eq(room.party_leader_id, "companion_test", "room leader identity updated")
+	eq(room.player.cell, follower_cell,
+			"control moves to the new leader's cell")
+	eq(follower.member_id, "hero", "the old leader becomes a follower")
+	eq(follower.cell, leader_cell, "the demoted follower holds the old cell")
+	eq(room.get_occupant(follower_cell), room.player,
+			"occupancy follows the controlled avatar")
+	ok(room.is_walkable(leader_cell),
+			"the demoted follower stays pass-through")
+	var data: Dictionary = WorldState.snapshot_ldtk_room(room)
+	not_ok(data.has("error"), "post-switch snapshot has no error")
+	if not data.has("error"):
+		eq(data["party"]["leader"], "companion_test",
+				"snapshot leader follows the switch")
+		eq(data["actors"]["companion_test"]["cell"], follower_cell,
+				"new leader actor at the control cell")
+	var back := room.switch_party_leader()
+	eq(back, "hero", "cycling again returns the original leader")
+	eq(room.party_leader_id, "hero", "leader identity restored")
+	_teardown(room)
+
+
+func test_leader_switch_refused_during_encounter() -> void:
+	var room := _make_room()
+	SceneManager.unified_encounters = true
+	for enemy in room.enemies:
+		if enemy.cell == Vector2i(9, 5):
+			room.begin_room_encounter(enemy)
+	eq(room.switch_party_leader(), "",
+			"leader switching is refused inside an encounter")
+	eq(room.party_leader_id, "hero", "identity unchanged after refusal")
+	room.resolve_room_encounter(false)
+	SceneManager.unified_encounters = false
+	_teardown(room)

@@ -96,6 +96,12 @@ static func validate(data: Dictionary) -> String:
 		return "active_encounter_missing"
 	if data["mode"] == "exploration" and active != "":
 		return "active_without_encounter_mode"
+	# TK-004 review F2: encounter mode requires the active encounter to
+	# actually BE active - a stale active id over a resolved (or never-begun)
+	# encounter is a seam bug, not a valid state.
+	if data["mode"] == "encounter" \
+			and data["encounters"][active].get("status") != "active":
+		return "active_encounter_not_active"
 	return ""
 
 

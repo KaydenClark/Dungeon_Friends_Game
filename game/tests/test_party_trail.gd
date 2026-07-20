@@ -136,3 +136,65 @@ func test_snapshot_cells_fails_closed_when_unplaceable() -> void:
 	var snapshot: Dictionary = trail.snapshot_cells(
 			{Vector2i(1, 1): true, Vector2i(2, 1): true})
 	eq(snapshot, {}, "unplaceable follower refuses the snapshot (fail closed)")
+
+
+func test_formation_selection_validated() -> void:
+	_walls = {}
+	var trail := _make_trail(["companion_test"], Vector2i(3, 3))
+	eq(trail.selected_formation(), &"line", "line is the default formation")
+	ok(trail.set_formation(&"spaced"), "known formation accepted")
+	eq(trail.selected_formation(), &"spaced", "selection recorded")
+	not_ok(trail.set_formation(&"wedge"), "unknown formation refused")
+	eq(trail.selected_formation(), &"spaced", "refusal leaves selection alone")
+
+
+func test_open_space_follows_formation_offsets() -> void:
+	_walls = {}
+	var trail := _make_trail(["companion_test"], Vector2i(2, 3))
+	trail.set_formation(&"line")
+	trail.leader_moved(Vector2i(3, 3))
+	trail.leader_moved(Vector2i(4, 3))
+	eq(trail.follower_cells()["companion_test"], Vector2i(3, 3),
+			"line keeps the follower one cell behind the facing")
+	eq(trail.formation_state(), &"formed", "open-space line reads as formed")
+	trail.set_formation(&"spaced")
+	eq(trail.follower_cells()["companion_test"], Vector2i(2, 3),
+			"selecting spaced reforms two cells behind")
+	eq(trail.formation_state(), &"formed", "reform lands in formed state")
+
+
+func test_blocked_offset_compresses_then_reforms() -> void:
+	# Walk right in spaced formation, then turn down beside a wall: the
+	# formation cell (two cells behind the new facing) is walled, so the
+	# follower compresses onto the breadcrumb trail and reforms once the
+	# offset frees up again.
+	_walls = {Vector2i(4, 2): true, Vector2i(4, 1): true}
+	var trail := _make_trail(["companion_test"], Vector2i(2, 3))
+	trail.set_formation(&"spaced")
+	trail.leader_moved(Vector2i(3, 3))
+	trail.leader_moved(Vector2i(4, 3))
+	eq(trail.follower_cells()["companion_test"], Vector2i(2, 3),
+			"spaced holds two cells behind while the offset is open")
+	eq(trail.formation_state(), &"formed", "open route reads as formed")
+	trail.leader_moved(Vector2i(4, 4))   # turn down; offset (4, 2) is walled
+	eq(trail.follower_cells()["companion_test"], Vector2i(3, 3),
+			"a walled offset compresses onto the breadcrumb trail")
+	eq(trail.formation_state(), &"compressed",
+			"compressed state reported while the offset is blocked")
+	trail.leader_moved(Vector2i(4, 5))   # offset is now the open (4, 3)
+	eq(trail.follower_cells()["companion_test"], Vector2i(4, 3),
+			"the follower reforms once the offset frees up")
+	eq(trail.formation_state(), &"formed", "party reforms after the block")
+
+
+func test_assume_rebuilds_authority_without_moving_anyone() -> void:
+	_walls = {}
+	var trail := _make_trail(["companion_test"], Vector2i(1, 1))
+	trail.leader_moved(Vector2i(2, 1))
+	trail.assume(Vector2i(4, 4), {"hero": Vector2i(5, 4)}, ["hero"])
+	eq(trail.leader_cell(), Vector2i(4, 4), "assume adopts the new leader cell")
+	eq(trail.follower_cells(), {"hero": Vector2i(5, 4)},
+			"assume adopts the handed follower cells verbatim")
+	trail.leader_moved(Vector2i(4, 3))
+	ok(_walkable(trail.follower_cells()["hero"]),
+			"movement continues normally after assume")

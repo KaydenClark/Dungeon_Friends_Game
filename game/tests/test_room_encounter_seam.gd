@@ -143,3 +143,38 @@ func test_player_bump_routes_through_the_seam_when_enabled() -> void:
 	eq(room.player.cell, Vector2i(8, 5), "bump never moves the leader")
 	eq(room.resolve_room_encounter(true), "", "seam-started encounter resolves")
 	_teardown(room)
+
+
+func test_freed_room_releases_the_input_gate() -> void:
+	# TK-004 review F1: load_game frees rooms without an in_encounter guard;
+	# a freed room must never strand the global gate.
+	var room := _make_room()
+	SceneManager.unified_encounters = true
+	var enemy := _enemy_at(room, Vector2i(9, 5))
+	eq(room.begin_room_encounter(enemy), "", "encounter begins")
+	ok(SceneManager.in_encounter, "gate held during the encounter")
+	remove_child(room)
+	room.free()
+	not_ok(SceneManager.in_encounter,
+			"freeing a room mid-encounter releases the gate")
+	SceneManager.unified_encounters = false
+	SceneManager.reset_session_state()
+	SceneManager.flags = {}
+
+
+func test_stale_active_id_fails_closed_in_snapshot() -> void:
+	# TK-004 review F2: an active id pointing at a resolved encounter is a
+	# seam bug and must refuse the snapshot, not validate.
+	var room := _make_room()
+	SceneManager.unified_encounters = true
+	var enemy := _enemy_at(room, Vector2i(9, 5))
+	eq(room.begin_room_encounter(enemy), "", "encounter begins")
+	eq(room.resolve_room_encounter(true), "", "victory resolves")
+	room.active_encounter_id = "enc_9_5"   # simulate the stale-id bug
+	var data: Dictionary = WorldState.snapshot_ldtk_room(room)
+	ok(data.has("error"), "stale active id refuses the snapshot")
+	if data.has("error"):
+		eq(str(data["error"]), "active_encounter_not_active",
+				"the invariant names the seam bug")
+	room.active_encounter_id = ""
+	_teardown(room)

@@ -97,6 +97,11 @@ func test_validation_fails_closed() -> void:
 	# mode/encounter coherence: encounter mode requires an active encounter.
 	_expect_invalid(func(d): d["mode"] = "encounter",
 			"active_encounter_missing")
+	# ...and that encounter must actually be active (TK-004 review F2).
+	_expect_invalid(func(d):
+		d["mode"] = "encounter"
+		d["active_encounter"] = "forest_pair",
+		"active_encounter_not_active")
 
 
 func test_round_trip_is_deterministic() -> void:

@@ -439,6 +439,81 @@ func teleport(node: Node2D, to: Vector2i) -> void:
 		_sync_party(true)
 
 
+## S-010/TK-002: the room's selected formation (line/square/spaced).
+func party_formation() -> StringName:
+	if party_trail == null:
+		return &"line"
+	return party_trail.selected_formation()
+
+
+func set_party_formation(formation_id: StringName) -> bool:
+	if party_trail == null:
+		return false
+	if not party_trail.set_formation(formation_id):
+		return false
+	var cells: Dictionary = party_trail.follower_cells()
+	for follower in party_followers:
+		follower.glide_to(cells[follower.member_id])
+	return true
+
+
+## S-010/TK-002 leader switching (D-029): control and camera move to the next
+## roster member's cell; the demoted leader becomes a follower at the old
+## control cell. Nobody else moves and no occupancy is invented - the switch
+## is refused if the promoted member's render cell is occupied. Returns the
+## new leader id, or "" when refused.
+func switch_party_leader() -> String:
+	if player == null or party_trail == null or party_followers.is_empty():
+		return ""
+	if active_encounter_id != "" or SceneManager.in_encounter \
+			or SceneManager.transitioning:
+		return ""
+	var order: Array = []
+	for id in SceneManager.state.party_roster:
+		order.append(str(id))
+	var index := order.find(party_leader_id)
+	if index < 0 or order.size() < 2:
+		return ""
+	var next_leader: String = order[(index + 1) % order.size()]
+	var promoted: PartyFollower = null
+	for follower in party_followers:
+		if follower.member_id == next_leader:
+			promoted = follower
+	if promoted == null:
+		return ""
+	var control_from := player.cell
+	var control_to := promoted.cell
+	if occupants.has(control_to):
+		return ""   # a real occupant holds that cell; switching would stomp it
+	var old_leader := party_leader_id
+	party_leader_id = next_leader
+	promoted.member_id = old_leader
+	promoted.apply_character(SceneManager.character_stats_for(old_leader))
+	player.apply_character(SceneManager.character_stats_for(next_leader))
+	super.teleport(player, control_to)
+	promoted.glide_to(control_from, true)
+	var follower_order: Array = []
+	var follower_cells := {}
+	for id in order:
+		if id == party_leader_id:
+			continue
+		follower_order.append(id)
+	for follower in party_followers:
+		follower_cells[follower.member_id] = follower.cell
+	party_trail.assume(control_to, follower_cells, follower_order)
+	return next_leader
+
+
+## TK-004 review F1: a room freed or removed while owning the active
+## encounter must never strand the global input gate (load_game frees rooms
+## without an in_encounter guard).
+func _exit_tree() -> void:
+	if active_encounter_id != "":
+		active_encounter_id = ""
+		_active_encounter_enemy = null
+		SceneManager.in_encounter = false
+
+
 ## Enters encounter mode for a live, authored enemy in THIS room instance.
 ## Pure mode/bookkeeping change (D-025): nothing moves, nothing is rebuilt.
 ## Returns "" on success or a named refusal (fail closed, no side effects).
