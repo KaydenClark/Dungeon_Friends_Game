@@ -14,7 +14,7 @@ proof ledger. Run `node tools/spec-workbench.mjs next --json` to select work and
 | [S-010](specs/S-010-production-party-formations/SPEC.md) | Acceptance / owner gate | claude-engineer | none | TK-004 closed with proof. | Complete TK-005. |
 | [S-011](specs/S-011-production-reaction-vocabulary/SPEC.md) | Acceptance / owner gate | claude-engineer | none | TK-004 closed with proof. | Complete TK-005. |
 | [S-012](specs/S-012-production-deterministic-combat/SPEC.md) | Acceptance / owner gate | claude-engineer | none | TK-005 closed with proof. | Complete TK-006. |
-| [S-004](specs/S-004-thesis-slice/SPEC.md) | TK-001: Specify the authored recruit and the shortest end-to-end route. (ready) | Kayden | none | Dependency gate satisfied per D-038: S-003 complete; S-009 through S-014 engineering-done with their owner verdicts batched into TK-004 here. | Complete TK-001. |
+| [S-004](specs/S-004-thesis-slice/SPEC.md) | TK-002: Build one thin adventure-to-world-change tracer bullet. (ready) | claude-engineer | TK-001 | TK-001 closed with proof. | Complete TK-002. |
 | [S-013](specs/S-013-finite-progression-and-recruitment/SPEC.md) | Acceptance / owner gate | claude-engineer | none | TK-005 closed with proof. | Complete TK-006. |
 | [S-014](specs/S-014-opening-player-experience/SPEC.md) | Acceptance / owner gate | claude-engineer | none | TK-005 closed with proof. | Complete TK-006. |
 <!-- hot-specs:end -->

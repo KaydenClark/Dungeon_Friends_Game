@@ -5,12 +5,12 @@
 **Spec ID:** S-004
 **Status:** active
 **Priority:** 2
-**Owner:** Kayden
+**Owner:** claude-engineer
 **Updated:** 2026-07-20
 **Catalog description:** Build one authored recruit, non-combat resolution, shared-vocabulary puzzle, tactical fight, and persistent world change as a playable v2 loop.
 **Blockers:** none
-**Latest event:** Dependency gate satisfied per D-038: S-003 complete; S-009 through S-014 engineering-done with their owner verdicts batched into TK-004 here.
-**Next gate:** Complete TK-001.
+**Latest event:** TK-001 closed with proof.
+**Next gate:** Complete TK-002.
 
 ## Outcome
 
@@ -59,7 +59,7 @@ new contracts end to end.
 
 | Ticket | Slice | Status | Blockers | Proof |
 |---|---|---|---|---|
-| TK-001 | Specify the authored recruit and the shortest end-to-end route. | ready | none | pending |
+| TK-001 | Specify the authored recruit and the shortest end-to-end route. | done | none | docs-only slice: the route contract docs/planning/S004_THESIS_ROUTE.md specifies Wren as the authored recruit (S-013 contract placed in-world with the D-033 role/hook; Buddy does not graduate) and the shortest end-to-end route - the Withered Grove: doorway adventure, recruit-on-dialogue, Moss's non-combat herb-bed resolution via grow, vine-gate vocabulary puzzle, grove_guardian tactical fight, persistent grove-heart regrowth - each beat under a minute and mapped to its proven contract; the five smallest new mechanics TK-002 must build are named with fail-closed rules; flagged Blueprint row D-044 records the product call per D-038; referenced paths verified present; doctor green |
 | TK-002 | Build one thin adventure-to-world-change tracer bullet. | ready | TK-001 | pending |
 | TK-003 | Complete the authored loop and capture the under-one-minute thesis demo artifact. | ready | TK-002 | pending |
 | TK-004 | Record Kayden's thesis-direction acceptance or revision verdict. | blocked | TK-003 | pending |
@@ -99,6 +99,7 @@ cd game
 | 2026-07-13 | spec | Migrated from legacy T-094 | legacy scope reconciled against v2 decisions | v2.3 spec created | S-003 and all implementation slices |
 | 2026-07-17 | spec | Positioned the thesis slice after the production capability chain | full canon-to-spec coverage matrix reviewed | dependencies linked to S-003 and S-009 through S-014 | all implementation slices |
 | 2026-07-20 | spec | Dependency gate opened per D-038 (flagged product call, not a new decision): S-003 is complete, and S-009 through S-014 have every engineering ticket closed with proof - their only remaining tickets are the owner verdicts D-038 batches into TK-004 here, so treating those deferred verdicts as blockers would deadlock the chain Kayden ordered | spec statuses and ticket tables of S-003 and S-009..S-014 inspected via the workbench; doctor green | this spec's status/blockers; Taskboard rerendered | TK-001 route specification, TK-002 tracer, TK-003 demo artifact, TK-004 Kayden verdict |
+| 2026-07-20 | TK-001 | Ticket closed | docs-only slice: the route contract docs/planning/S004_THESIS_ROUTE.md specifies Wren as the authored recruit (S-013 contract placed in-world with the D-033 role/hook; Buddy does not graduate) and the shortest end-to-end route - the Withered Grove: doorway adventure, recruit-on-dialogue, Moss's non-combat herb-bed resolution via grow, vine-gate vocabulary puzzle, grove_guardian tactical fight, persistent grove-heart regrowth - each beat under a minute and mapped to its proven contract; the five smallest new mechanics TK-002 must build are named with fail-closed rules; flagged Blueprint row D-044 records the product call per D-038; referenced paths verified present; doctor green | Blueprint D-044 flagged row; WORLD_LORE thesis-slice canon for Wren; route contract doc created | TK-002 tracer bullet builds the five mechanics; TK-003 authored loop + under-one-minute demo; TK-004 Kayden batch verdict |
 
 ## Completion Result
 

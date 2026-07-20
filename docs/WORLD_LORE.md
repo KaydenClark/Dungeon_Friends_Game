@@ -57,6 +57,17 @@ The first story-complete prototype should remain deliberately small:
 Names, species, classes, and personalities for the first two friends are open
 until their gameplay verbs and relationship are designed together.
 
+**Thesis-slice canon (D-044, flagged per D-038):** the Growth friend is
+**Wren**, a quiet forager-botanist of the Foothills/Forest who stayed behind
+as the dragon's shadow withered the grove she tends. She will not fight for
+sport - "things want to live, mostly" - but joins the expedition to regrow
+what the dragon's presence ruins. Her route home is the Withered Grove
+(`docs/planning/S004_THESIS_ROUTE.md`): a forager's dead herb bed resolved
+without combat, a vine-gate puzzle, one squatting slime guardian, and a grove
+heart that stays regrown. The second (elemental) friend, and every open dragon
+and Selena question above, remain open; the thesis slice scopes to one
+recruit per S-004.
+
 ## Dungeon Friends
 
 Every friend should answer five questions:
