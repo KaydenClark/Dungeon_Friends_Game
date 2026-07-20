@@ -6,11 +6,11 @@
 **Status:** active
 **Priority:** 1
 **Owner:** claude-engineer
-**Updated:** 2026-07-19
+**Updated:** 2026-07-20
 **Catalog description:** Replace the split production world/battle spine with one neutral room-state and party/encounter lifecycle without deleting the green v1 fallback early.
 **Blockers:** none
-**Latest event:** S-002's fun gate passed (2026-07-19) and D-038 consolidated intermediate owner verdicts into the S-004 replay; this spec is now the active head of the production chain.
-**Next gate:** Engineer claims TK-001 and proves the neutral world-state contract red, then green.
+**Latest event:** TK-001 closed with proof.
+**Next gate:** Complete TK-002.
 
 ## Outcome
 
@@ -60,7 +60,7 @@ height, party visibility, room continuity, intent, and reactions.
 
 | Ticket | Slice | Status | Blockers | Proof |
 |---|---|---|---|---|
-| TK-001 | Define the neutral production world-state contract with failing parity/validation tests. | ready | none | pending |
+| TK-001 | Define the neutral production world-state contract with failing parity/validation tests. | done | none | red: suite failed to load pre-implementation; green: test_world_state 69 checks; full unit 39 suites/292 tests/1880 checks PASS; --import 0 errors; slice smoke 134/134 |
 | TK-002 | Extend RoomGrid/LDtk authoring with elevation, materials, stable encounter IDs, and fail-closed adapters. | ready | TK-001 | pending |
 | TK-003 | Graduate leader plus visible pass-through followers into the production room lifecycle. | ready | TK-002 | pending |
 | TK-004 | Add the in-room encounter mode seam and prove room/camera/positions/puzzle state survive entry and victory. | ready | TK-003 | pending |
@@ -99,6 +99,7 @@ cd game
 |---|---|---|---|---|---|
 | 2026-07-17 | spec | Production gap extracted from D-024/D-025 and live source | SceneManager, RoomGrid, LDtk, main, and dev inheritance inspected | new stable runtime spec | all slices and S-002 |
 | 2026-07-19 | spec | Activated: S-002 fun verdict recorded; D-038 owner-approval consolidation applied across the production chain | spec doctor green after activation and rerender | Blueprint D-038 row; hot board rerendered | TK-001 through TK-004 |
+| 2026-07-20 | TK-001 | Ticket closed | red: suite failed to load pre-implementation; green: test_world_state 69 checks; full unit 39 suites/292 tests/1880 checks PASS; --import 0 errors; slice smoke 134/134 | contract documented in scripts/world/world_state.gd header; Blueprint/Runbook unchanged until the default route changes (per spec Documentation Impact) | TK-002 LDtk/RoomGrid authoring adapters, TK-003 production party, TK-004 encounter seam |
 
 ## Completion Result
 

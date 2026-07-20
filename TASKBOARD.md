@@ -12,7 +12,7 @@ proof ledger. Run `node tools/spec-workbench.mjs next --json` to select work and
 | Spec | Current slice | Owner | Blocker | Latest meaningful event | Next gate |
 |---|---|---|---|---|---|
 | [S-003](specs/S-003-persistent-world-resolution/SPEC.md) | TK-001: Add a failing two-process battery for resolved encounter, environment, and movable reset. (ready) | unassigned | S-009, S-011, S-012 | Canon reconciliation separated dev-scene reaction proof from the production world and encounter state this persistence contract must serialize. | Complete the production-state contracts in S-009, S-011, and S-012, then claim TK-001 and prove the two-process battery red. |
-| [S-009](specs/S-009-unified-world-runtime/SPEC.md) | TK-001: Define the neutral production world-state contract with failing parity/validation tests. (ready) | claude-engineer | none | S-002's fun gate passed (2026-07-19) and D-038 consolidated intermediate owner verdicts into the S-004 replay; this spec is now the active head of the production chain. | Engineer claims TK-001 and proves the neutral world-state contract red, then green. |
+| [S-009](specs/S-009-unified-world-runtime/SPEC.md) | TK-002: Extend RoomGrid/LDtk authoring with elevation, materials, stable encounter IDs, and fail-closed adapters. (ready) | claude-engineer | TK-001 | TK-001 closed with proof. | Complete TK-002. |
 <!-- hot-specs:end -->
 
 ## Collision And Owner Gates
