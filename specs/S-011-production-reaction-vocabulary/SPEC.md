@@ -9,8 +9,8 @@
 **Updated:** 2026-07-20
 **Catalog description:** Graduate the accepted preview-first material/effect engine into production world cells, authored data, friend verbs, and encounter callers.
 **Blockers:** none
-**Latest event:** TK-001 closed with proof.
-**Next gate:** Complete TK-002.
+**Latest event:** TK-002 closed with proof.
+**Next gate:** Complete TK-003.
 
 ## Outcome
 
@@ -60,7 +60,7 @@ state.
 | Ticket | Slice | Status | Blockers | Proof |
 |---|---|---|---|---|
 | TK-001 | Promote ReactionCore schemas and rules behind a production API with exact dev-parity red/green coverage. | done | S-009 | red: test_reaction_core failed to load against the production path pre-move; green: unit 43 suites/339 tests/2307 checks PASS with 0 script errors; slice smoke 134/134; --import clean; main boot clean; parity test pins the gray-box consumer loads the exact production script, the retired dev path stays absent, and a golden fire-on-vine result is unchanged |
-| TK-002 | Add validated material/effect state to RoomGrid and the LDtk authoring/import path. | ready | TK-001 | pending |
+| TK-002 | Add validated material/effect state to RoomGrid and the LDtk authoring/import path. | done | TK-001 | red: 6 targeted failures pre-implementation; green: unit 44 suites/345 tests/2338 checks PASS with 0 script errors; slice smoke 134/134; main boot clean; live material_state seeded from validated authoring, preview-first ReactionCore seam with fail-closed wholesale commit, snapshot carries live state (burned vine stays burned, cleared cells drop out), context parity pinned, pre-authoring rooms seed clean |
 | TK-003 | Route production friend abilities and puzzle/encounter callers through one preview/commit seam. | ready | TK-002 | pending |
 | TK-004 | Capture and verify a production same-state exploration/encounter replay. | ready | TK-003 | pending |
 | TK-005 | Owner production shared-vocabulary verdict - consolidated into the S-004 thesis replay per D-038 (2026-07-19); TK-004's replay capture feeds that batch review. | deferred | S-004 | owner verdict batches at S-004 per D-038 |
@@ -101,6 +101,7 @@ cd game
 | 2026-07-17 | spec | Production half split from S-002 prototype gate | live RoomGrid/AbilityData/puzzles compared with ReactionCore and room bridge | new stable production-reaction spec | dependencies and all slices |
 | 2026-07-19 | TK-005 | S-002 fun verdict cleared the prototype blocker; D-038 batches the production-vocabulary verdict into the S-004 thesis replay; TK-005 deferred to that gate | Kayden chat directive 2026-07-19; Blueprint D-038 row | this spec, Blueprint | TK-001 through TK-004 |
 | 2026-07-20 | TK-001 | Ticket closed | red: test_reaction_core failed to load against the production path pre-move; green: unit 43 suites/339 tests/2307 checks PASS with 0 script errors; slice smoke 134/134; --import clean; main boot clean; parity test pins the gray-box consumer loads the exact production script, the retired dev path stays absent, and a golden fire-on-vine result is unchanged | RUNBOOK tally; reaction_core.gd header records the promotion contract | TK-002 RoomGrid/LDtk material-effect state (S-009 authoring covers initial tags; live effect state pending), TK-003 ability/puzzle callers, TK-004 same-state replay |
+| 2026-07-20 | TK-002 | Ticket closed | red: 6 targeted failures pre-implementation; green: unit 44 suites/345 tests/2338 checks PASS with 0 script errors; slice smoke 134/134; main boot clean; live material_state seeded from validated authoring, preview-first ReactionCore seam with fail-closed wholesale commit, snapshot carries live state (burned vine stays burned, cleared cells drop out), context parity pinned, pre-authoring rooms seed clean | RUNBOOK tally; seam contracts documented in ldtk_room.gd material-state section and world_state.gd overlay comment | TK-003 ability/puzzle/encounter callers, TK-004 production same-state replay; live-state persistence stays owned by S-003 |
 
 ## Completion Result
 

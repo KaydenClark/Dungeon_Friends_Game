@@ -274,6 +274,27 @@ static func snapshot_ldtk_room(room: LdtkRoom) -> Dictionary:
 	# cell id) would silently overwrite an actor in the keyed dictionary.
 	if data["actors"].size() != room.occupants.size():
 		return {"error": "actor_id_collision"}
+	# S-011/TK-002: the snapshot carries the LIVE material/effect state, not
+	# the authoring-time record - a burned vine stays burned. Cells whose only
+	# reason to exist was a now-cleared material drop back out (no invented
+	# data); live effects on plain floor materialize their cell.
+	if room.material_state.get("cells") is Dictionary:
+		for cell in _sorted_cells(room.material_state["cells"].keys()):
+			var live: Dictionary = room.material_state["cells"][cell]
+			var has_content: bool = not live["tags"].is_empty() \
+					or not live["statuses"].is_empty()
+			if data["cells"].has(cell):
+				var entry: Dictionary = data["cells"][cell]
+				entry["tags"] = live["tags"].duplicate()
+				entry["statuses"] = live["statuses"].duplicate(true)
+				if not has_content and not entry["blocked"] \
+						and not entry["pit"] and int(entry["elevation"]) == 0:
+					data["cells"].erase(cell)
+			elif has_content:
+				var entry := default_cell()
+				entry["tags"] = live["tags"].duplicate()
+				entry["statuses"] = live["statuses"].duplicate(true)
+				data["cells"][cell] = entry
 	if actor_map.values().any(func(m): return m["id"] == leader_id):
 		var members := [leader_id]
 		if room.party_deployed:

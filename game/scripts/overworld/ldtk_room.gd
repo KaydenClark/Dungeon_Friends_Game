@@ -34,6 +34,7 @@ const ART_GRID := 16
 ## replacement).
 const MATERIAL_TAGS := ["vine", "flammable", "channel", "smoke"]
 const MAX_ELEVATION := 8
+const ReactionCore := preload("res://scripts/world/reaction_core.gd")
 
 ## level_path -> Array of declaration errors, parsed once per source file.
 static var _declaration_cache := {}
@@ -85,6 +86,12 @@ var _party_toast: CanvasLayer
 ## S-010/TK-004 (D-037): true while followers hold real occupancy on their
 ## legal deployment cells for the active encounter.
 var party_deployed := false
+## S-011/TK-002 (D-031): the room's LIVE material/effect state - exactly the
+## {width, height, cells: {tags, statuses}} shape ReactionCore consumes.
+## Seeded once at build from the validated authored Material layer; mutated
+## only through commit_reaction(). The authored `materials` store stays
+## intact as the rebuild-time record.
+var material_state := {}
 
 signal encounter_started(encounter_id: String)
 signal encounter_resolved(encounter_id: String, victory: bool)
@@ -127,6 +134,7 @@ func _build() -> void:
 	for c in _intgrid_cells(level, "Pit-values"):
 		set_pit(c, true)
 	_apply_authoring_layers(level)
+	_seed_material_state()
 	_adopt_entities(level)
 	_spawn_player()
 	puzzle = PuzzleController.new()
@@ -685,6 +693,39 @@ func resolve_room_encounter(victory: bool) -> String:
 	_hide_encounter_banner()
 	encounter_resolved.emit(encounter_id, victory)
 	SceneManager.encounter_finished.emit(victory)
+	return ""
+
+
+## Seeds the live reaction state: every in-bounds cell exists (so any target
+## is previewable), authored material tags copy in, nothing else is invented.
+func _seed_material_state() -> void:
+	var cells := {}
+	for y in height:
+		for x in width:
+			var cell := Vector2i(x, y)
+			cells[cell] = {"tags": material_tags(cell), "statuses": {}}
+	material_state = {"width": width, "height": height, "cells": cells}
+
+
+## S-011 preview seam: runs the promoted ReactionCore against the live state
+## without mutating it. Exploration and encounter callers share this exact
+## entry point; request.context stays metadata (D-031).
+func preview_reaction(request: Dictionary) -> Dictionary:
+	return ReactionCore.calculate(material_state, request)
+
+
+## S-011 commit seam: applies a previewed result's state_after wholesale so
+## the committed world is EXACTLY what the preview showed. Fails closed with
+## a named error on anything else; a failed commit changes nothing.
+func commit_reaction(result: Dictionary) -> String:
+	if not result.get("valid", false):
+		return "invalid_reaction_result"
+	var after: Variant = result.get("state_after")
+	if not after is Dictionary or not after.get("cells") is Dictionary \
+			or int(after.get("width", -1)) != width \
+			or int(after.get("height", -1)) != height:
+		return "invalid_reaction_result"
+	material_state = (after as Dictionary).duplicate(true)
 	return ""
 
 
