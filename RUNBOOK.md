@@ -694,6 +694,24 @@ cd game
 /Applications/Godot.app/Contents/MacOS/Godot --fullscreen --path . scenes/dev/opening_readability_matrix.tscn --resolution 1920x1080 -- --out=/tmp/matrix-1920
 ```
 
+For the S-014/TK-005 first-session replay (real parsed input events drive the
+opening loop - walk, cycle formation, bump into the in-room encounter, fight to
+victory, write a real save - once per input layout; two verified non-black
+exact-size captures per run; exit `0` = all PASS; run 1920 with `--fullscreen`
+per the macOS drawable note, which yields the documented 1900x908 drawable on
+the remote display):
+
+```bash
+cd game
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/first_session_replay.tscn --resolution 1280x720 -- --input=keyboard --out=/abs/dir/1280
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/first_session_replay.tscn --resolution 1280x720 -- --input=controller --out=/abs/dir/1280
+/Applications/Godot.app/Contents/MacOS/Godot --fullscreen --path . scenes/dev/first_session_replay.tscn --resolution 1920x1080 -- --input=keyboard --out=/abs/dir/1920
+/Applications/Godot.app/Contents/MacOS/Godot --fullscreen --path . scenes/dev/first_session_replay.tscn --resolution 1920x1080 -- --input=controller --out=/abs/dir/1920
+```
+
+The committed S-004 batch-review artifacts live under
+`docs/screenshots/s014-first-session/`.
+
 For the S-013 finite-progression and recruitment demo (Wren recruits once,
 casts her field verb, wins the slime exactly once, and the ledger refuses
 every double-pay; three captures; exit `0` = all PASS):

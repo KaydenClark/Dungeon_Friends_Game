@@ -222,6 +222,40 @@ func test_encounter_surface_teaches_its_own_controls() -> void:
 	_fresh()
 
 
+func test_intent_panel_never_draws_past_its_rect() -> void:
+	# S-014/TK-005: the first-session replay caught the footer line drawing
+	# off the right screen edge at both review sizes. A Godot Label abandons
+	# alignment when a line is wider than its rect and draws the overflow
+	# from the rect's left edge outward, so any line wider than the rect
+	# must wrap - and wrapped lines need a real rect height to render.
+	_fresh()
+	var room := LdtkRoom.new()
+	room.level_path = FIXTURE
+	add_child(room)
+	for enemy in room.enemies:
+		if enemy.cell == Vector2i(9, 5):
+			eq(room.begin_room_encounter(enemy), "", "encounter begins")
+	var controller = room.room_encounter
+	not_null(controller, "controller running")
+	if controller != null:
+		var label: Label = controller._intent_label
+		var rect_width: float = label.offset_right - label.offset_left
+		var font := label.get_theme_font("font")
+		var font_size := label.get_theme_font_size("font_size")
+		var widest := 0.0
+		for line in label.text.split("\n"):
+			widest = maxf(widest, font.get_string_size(line,
+					HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x)
+		ok(widest <= rect_width
+				or label.autowrap_mode != TextServer.AUTOWRAP_OFF,
+				"a line wider than the intent rect must wrap, not overflow")
+		ok(label.offset_bottom > label.offset_top,
+				"the intent rect has real height so wrapped lines render")
+		room.resolve_room_encounter(false)
+	room.queue_free()
+	_fresh()
+
+
 func test_downed_ally_self_revives_when_the_encounter_ends() -> void:
 	# S-014/TK-003 (D-043 rule 2): a KO'd ally stands back up at exactly
 	# 1 HP on ANY encounter release unless the whole party is down.

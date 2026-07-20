@@ -36,7 +36,7 @@ func _check(cond: bool, label: String) -> void:
 
 func _press_move(dir: Vector2i, frames_held: int) -> void:
 	# Movement rides the bound actions on both layouts (WASD / D-pad).
-	var action := {Vector2i.RIGHT: "move_right", Vector2i.LEFT: "move_left",
+	var action: String = {Vector2i.RIGHT: "move_right", Vector2i.LEFT: "move_left",
 			Vector2i.UP: "move_up", Vector2i.DOWN: "move_down"}[dir]
 	Input.action_press(action)
 	await _frames(frames_held)
@@ -69,6 +69,8 @@ func _tap(key_code: int, joy_button: int) -> void:
 
 
 func _run() -> void:
+	# _ready is still setting up children; defer one frame so add_child works.
+	await get_tree().process_frame
 	print("FIRST SESSION REPLAY (%s): begin" % input_mode)
 	SceneManager.reset_session_state()
 	SceneManager.flags = {}
@@ -82,6 +84,12 @@ func _run() -> void:
 	await _press_move(Vector2i.DOWN, 6)
 	_check(room.player.cell != start, "movement input walks the leader")
 	# 2. Formation control (G / L1 via the bound action path in Player).
+	# The tween step may still be in flight and Player gates formation on
+	# `not moving`; a just_pressed tap lasts one frame, so wait it out first.
+	var settle := 0
+	while room.player.moving and settle < 60:
+		await _frames(1)
+		settle += 1
 	var formation_before: StringName = room.party_formation()
 	if input_mode == "controller":
 		var press := InputEventJoypadButton.new()
@@ -147,4 +155,16 @@ func _shot(name: String) -> void:
 	var img := get_viewport().get_texture().get_image()
 	var path := "%s/%s.png" % [out_dir, name]
 	img.save_png(path)
+	# Non-black + exact-size verification: a replay capture that is black
+	# or resized is not proof (T-085/T-093B precedent, same as the matrix).
+	var expected: Vector2i = get_viewport().size
+	_check(img.get_size() == expected,
+			"%s is exactly %s" % [name, expected])
+	var lit := false
+	for probe in [Vector2i(expected.x / 2, expected.y / 2),
+			Vector2i(expected.x / 4, expected.y / 4),
+			Vector2i(3 * expected.x / 4, 3 * expected.y / 4)]:
+		if img.get_pixelv(probe).get_luminance() > 0.02:
+			lit = true
+	_check(lit, "%s is not a black frame" % name)
 	print("  wrote ", path)

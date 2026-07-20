@@ -416,11 +416,16 @@ func _sync_enemy_node() -> void:
 func _ready() -> void:
 	_build_panel()
 	_refresh_panel()   # setup() declared round one before we entered the tree
-	var timer := get_tree().create_timer(ENTER_REVEAL_DELAY)
-	timer.timeout.connect(func():
-		if _panel != null and is_instance_valid(_panel):
-			_panel.visible = true
-		_refresh_panel())
+	# A bound method, not a lambda: if this controller frees before the
+	# reveal delay (fast resolve), a lambda's captures die noisily while a
+	# method connection to a freed object is dropped silently.
+	get_tree().create_timer(ENTER_REVEAL_DELAY).timeout.connect(_reveal_panel)
+
+
+func _reveal_panel() -> void:
+	if _panel != null and is_instance_valid(_panel):
+		_panel.visible = true
+	_refresh_panel()
 
 
 func _build_panel() -> void:
@@ -434,10 +439,15 @@ func _build_panel() -> void:
 			Color(0, 0, 0, 0.9))
 	_intent_label.add_theme_constant_override("outline_size", 6)
 	_intent_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	# A Label abandons alignment for a line wider than its rect and draws
+	# the overflow off-screen (S-014/TK-005 replay finding): wrap instead,
+	# and keep a real rect height so the wrapped lines render.
+	_intent_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_intent_label.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	_intent_label.offset_left = -520
 	_intent_label.offset_top = 96
 	_intent_label.offset_right = -16
+	_intent_label.offset_bottom = 560
 	_panel.add_child(_intent_label)
 	add_child(_panel)
 	_highlights = Node2D.new()

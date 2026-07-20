@@ -601,12 +601,19 @@ func _show_party_toast(text: String) -> void:
 	label.offset_bottom = 130
 	_party_toast.add_child(label)
 	add_child(_party_toast)
-	var toast := _party_toast
-	get_tree().create_timer(1.4).timeout.connect(func():
-		if is_instance_valid(toast):
-			toast.queue_free()
-		if _party_toast == toast:
-			_party_toast = null)
+	# A bound method with an instance id, not a lambda: a replacement toast
+	# inside the 1.4s frees the captured node and a freed lambda capture is
+	# an engine ERROR line on the first-session route (S-014/TK-005).
+	get_tree().create_timer(1.4).timeout.connect(
+			_dismiss_party_toast.bind(_party_toast.get_instance_id()))
+
+
+func _dismiss_party_toast(toast_id: int) -> void:
+	var toast := instance_from_id(toast_id)
+	if toast is CanvasLayer:
+		(toast as CanvasLayer).queue_free()
+	if _party_toast != null and _party_toast.get_instance_id() == toast_id:
+		_party_toast = null
 
 
 ## S-014/TK-003: losing window focus must never read as a frozen game -
