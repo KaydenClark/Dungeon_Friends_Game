@@ -683,6 +683,15 @@ cd game
 /Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/world_persistence_demo.tscn -- --out=/tmp/world-persistence
 ```
 
+For the S-013 finite-progression and recruitment demo (Wren recruits once,
+casts her field verb, wins the slime exactly once, and the ledger refuses
+every double-pay; three captures; exit `0` = all PASS):
+
+```bash
+cd game
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/progression_demo.tscn -- --out=/tmp/progression-demo
+```
+
 For the S-012/TK-005 deterministic combat replay (two scripted fights on
 fresh sessions must produce byte-identical event logs; four captures: ENTER
 cue, intent+forecast, shove counterplay, victory; exit `0` = all PASS):

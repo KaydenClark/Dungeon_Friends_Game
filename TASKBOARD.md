@@ -14,7 +14,7 @@ proof ledger. Run `node tools/spec-workbench.mjs next --json` to select work and
 | [S-010](specs/S-010-production-party-formations/SPEC.md) | Acceptance / owner gate | claude-engineer | none | TK-004 closed with proof. | Complete TK-005. |
 | [S-011](specs/S-011-production-reaction-vocabulary/SPEC.md) | Acceptance / owner gate | claude-engineer | none | TK-004 closed with proof. | Complete TK-005. |
 | [S-012](specs/S-012-production-deterministic-combat/SPEC.md) | Acceptance / owner gate | claude-engineer | none | TK-005 closed with proof. | Complete TK-006. |
-| [S-013](specs/S-013-finite-progression-and-recruitment/SPEC.md) | TK-005: Run and capture the finite-progression and recruitment demo with finite-source accounting proof. (ready) | claude-engineer | TK-004 | TK-004 closed with proof. | Complete TK-005. |
+| [S-013](specs/S-013-finite-progression-and-recruitment/SPEC.md) | Acceptance / owner gate | claude-engineer | none | TK-005 closed with proof. | Complete TK-006. |
 <!-- hot-specs:end -->
 
 ## Collision And Owner Gates
