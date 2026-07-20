@@ -86,12 +86,35 @@ func _act() -> void:
 	# ai_behavior.
 	var to_player: Vector2i = target_player.cell - cell
 	var dist: int = absi(to_player.x) + absi(to_player.y)
+	# S-014/TK-003 aggro readability: a chasing enemy says so. The "!" cue
+	# appears the moment tracking starts and drops when the player escapes.
+	_show_aggro(dist <= TRACK_RADIUS)
 	if dist <= TRACK_RADIUS:
 		_step_toward(target_player)
 	elif leash_radius >= 0 and _manhattan(cell, home_cell) > leash_radius:
 		_step_home()
 	else:
 		_wander()
+
+
+var _aggro_marker: Label
+
+
+func _show_aggro(active: bool) -> void:
+	if active and _aggro_marker == null:
+		_aggro_marker = Label.new()
+		_aggro_marker.text = "!"
+		_aggro_marker.add_theme_font_size_override("font_size", 26)
+		_aggro_marker.add_theme_color_override("font_color",
+				Color(1.0, 0.35, 0.25))
+		_aggro_marker.add_theme_color_override("font_outline_color",
+				Color(0, 0, 0, 0.9))
+		_aggro_marker.add_theme_constant_override("outline_size", 6)
+		_aggro_marker.position = Vector2(-6, -52)
+		_aggro_marker.z_index = 3
+		add_child(_aggro_marker)
+	if _aggro_marker != null:
+		_aggro_marker.visible = active
 
 
 func _step_toward(player: Player) -> void:

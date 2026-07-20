@@ -608,6 +608,14 @@ func _show_party_toast(text: String) -> void:
 			_party_toast = null)
 
 
+## S-014/TK-003: losing window focus must never read as a frozen game -
+## surface it through the toast channel (player-facing, never "check logs").
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and is_inside_tree() \
+			and player != null:
+		_show_party_toast("WINDOW FOCUS LOST - INPUT PAUSED")
+
+
 ## TK-004 review F1: a room freed or removed while owning the active
 ## encounter must never strand the global input gate (load_game frees rooms
 ## without an in_encounter guard).
@@ -792,6 +800,9 @@ func resolve_room_encounter(victory: bool) -> String:
 		resolved[encounter_id] = true
 		SceneManager.state.resolved_encounters[world_key()] = resolved
 	if room_encounter != null:
+		# S-014/TK-003 (D-043): KO'd allies stand back up at 1 HP when the
+		# encounter releases (full wipes skip this - defeat owns recovery).
+		room_encounter.revive_downed_members()
 		# TK-004: combat damage is real - persist unit HP into the session
 		# before the controller goes away (defeat rules own revival).
 		room_encounter.write_back_party_hp()

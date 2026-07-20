@@ -220,3 +220,58 @@ func test_encounter_surface_teaches_its_own_controls() -> void:
 		room.resolve_room_encounter(false)
 	room.queue_free()
 	_fresh()
+
+
+func test_downed_ally_self_revives_when_the_encounter_ends() -> void:
+	# S-014/TK-003 (D-043 rule 2): a KO'd ally stands back up at exactly
+	# 1 HP on ANY encounter release unless the whole party is down.
+	_fresh()
+	var room := LdtkRoom.new()
+	room.level_path = FIXTURE
+	add_child(room)
+	for enemy in room.enemies:
+		if enemy.cell == Vector2i(9, 5):
+			eq(room.begin_room_encounter(enemy), "", "encounter begins")
+	var controller = room.room_encounter
+	not_null(controller, "controller running")
+	if controller != null:
+		controller.state["units"]["companion_test"]["hp"] = 0
+		eq(room.resolve_room_encounter(false), "", "retreat releases")
+		eq(int(SceneManager.state.party_hp.get("companion_test", -1)), 1,
+				"the KO'd follower self-revives at exactly 1 HP")
+	room.queue_free()
+	_fresh()
+
+
+func test_aggro_cue_appears_and_clears() -> void:
+	_fresh()
+	var room := LdtkRoom.new()
+	room.level_path = FIXTURE
+	add_child(room)
+	var enemy: OverworldEnemy = null
+	for candidate in room.enemies:
+		if candidate.cell == Vector2i(9, 5):
+			enemy = candidate
+	room.teleport(room.player, Vector2i(8, 5))   # within TRACK_RADIUS
+	enemy._act()
+	not_null(enemy._aggro_marker, "the chase cue exists once tracking starts")
+	if enemy._aggro_marker != null:
+		ok(enemy._aggro_marker.visible, "the chase cue is visible in range")
+	room.teleport(room.player, Vector2i(2, 2))   # far outside the radius
+	enemy._act()
+	if enemy._aggro_marker != null:
+		not_ok(enemy._aggro_marker.visible,
+				"the cue clears when the player escapes")
+	room.queue_free()
+	_fresh()
+
+
+func test_focus_loss_is_surfaced_to_the_player() -> void:
+	_fresh()
+	var room := LdtkRoom.new()
+	room.level_path = FIXTURE
+	add_child(room)
+	room.notification(Node.NOTIFICATION_APPLICATION_FOCUS_OUT)
+	not_null(room._party_toast, "losing window focus shows a readable toast")
+	room.queue_free()
+	_fresh()

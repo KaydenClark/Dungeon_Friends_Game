@@ -278,6 +278,21 @@ func undo_move(id := active_unit_id) -> bool:
 	return true
 
 
+## S-014/TK-003 (D-043 rule 2): a KO'd ally self-revives at exactly 1 HP
+## when the encounter ends EITHER way - unless the whole party is down, in
+## which case the defeat rules own recovery. Never an unrecoverable state.
+func revive_downed_members() -> void:
+	var anyone_alive := false
+	for id in party_unit_ids():
+		if int(state["units"][id]["hp"]) > 0:
+			anyone_alive = true
+	if not anyone_alive:
+		return
+	for id in party_unit_ids():
+		if int(state["units"][id]["hp"]) <= 0:
+			state["units"][id]["hp"] = 1
+
+
 ## TK-004: persist combat HP into the session so damage taken in an
 ## encounter is real afterwards (clamped at zero; defeat rules own revival).
 func write_back_party_hp() -> void:

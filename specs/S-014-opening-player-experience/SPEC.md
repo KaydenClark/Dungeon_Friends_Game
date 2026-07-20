@@ -9,8 +9,8 @@
 **Updated:** 2026-07-20
 **Catalog description:** Make the opening unified-world journey readable, controllable, recoverable, controller-complete, and understandable without coaching.
 **Blockers:** none
-**Latest event:** TK-002 closed with proof.
-**Next gate:** Complete TK-003.
+**Latest event:** TK-003 closed with proof.
+**Next gate:** Complete TK-004.
 
 ## Outcome
 
@@ -63,7 +63,7 @@ no production unified-world onboarding.
 |---|---|---|---|---|
 | TK-001 | Build the production readability/accessibility matrix for party, height, materials, intents, HUD, and supported resolutions. | done | none | windowed matrix green at both review sizes (1280x720 windowed, 1920x1080 fullscreen per the documented macOS drawable limit): four captures each under docs/screenshots/s014-readability verified exact-size and non-black (party formation, Wren's cast toast, full encounter intent/HUD, post-victory world) plus three explicit GAP findings recorded (no production elevation lift, material VFX debug-only, keyboard-only prompts pre-T-079) |
 | TK-002 | Implement the shortest no-coaching onboarding for controls, formation, friend verb, puzzle, and encounter entry. | done | TK-001 | green: unit 49 suites/384 tests/2559 checks PASS with 0 script errors; slice smoke 134/134; boot clean; one-time contextual hints on the production route (party controls on the first party room, cast hint once a leader carries a field verb) with persistent seen-flags riding saves, no dev keys, one hint per room entry; the encounter surface teaches its own controls via the always-visible intent-panel footer (now including 5 cast and Z undo) plus the D-036 banner, pinned by tests |
-| TK-003 | Close movement/facing/aggro, move-undo, focus/blocked-input, save failure, defeat, and party-status recovery gaps. | ready | TK-002 | pending |
+| TK-003 | Close movement/facing/aggro, move-undo, focus/blocked-input, save failure, defeat, and party-status recovery gaps. | done | TK-002 | green: unit 49 suites/387 tests/2567 checks PASS with 0 script errors; slice smoke 134/134; boot clean; gap closure: KO'd allies self-revive at exactly 1 HP on any encounter release unless the party is wiped (D-043 rule 2, tested); a chasing enemy shows a readable aggro cue that clears on escape (tested); window focus loss surfaces a player-facing toast (tested via notification); move-undo landed in S-012/TK-004; the B-18 save-failure copy was already player-facing (verified in source); defeat recovery routes through the tested T-041 rules |
 | TK-004 | Complete controller navigation/glyph parity and the minimum coherent visual/audio asset pass for the opening route. | ready | TK-003 | pending |
 | TK-005 | Run and capture keyboard and controller first-session replays at the supported resolutions. | ready | TK-004 | pending |
 | TK-006 | Owner complete opening-journey verdict - consolidated into the S-004 thesis replay per D-038 (2026-07-19); TK-005's first-session replays feed that batch review. | deferred | S-004 | owner verdict batches at S-004 per D-038 |
@@ -106,6 +106,7 @@ cd game
 | 2026-07-19 | TK-006 | D-038 owner-approval consolidation: the opening-journey verdict batches into the S-004 thesis replay; TK-006 deferred to that gate | Kayden chat directive 2026-07-19; Blueprint D-038 row | this spec, Blueprint | TK-001 through TK-005 |
 | 2026-07-20 | TK-001 | Ticket closed | windowed matrix green at both review sizes (1280x720 windowed, 1920x1080 fullscreen per the documented macOS drawable limit): four captures each under docs/screenshots/s014-readability verified exact-size and non-black (party formation, Wren's cast toast, full encounter intent/HUD, post-victory world) plus three explicit GAP findings recorded (no production elevation lift, material VFX debug-only, keyboard-only prompts pre-T-079) | RUNBOOK matrix commands; gaps recorded in the matrix output and this evidence row | TK-002 onboarding, TK-003 gap closure, TK-004 controller/asset pass, TK-005 first-session replays; the three GAP findings feed TK-004 and the S-004 art scope |
 | 2026-07-20 | TK-002 | Ticket closed | green: unit 49 suites/384 tests/2559 checks PASS with 0 script errors; slice smoke 134/134; boot clean; one-time contextual hints on the production route (party controls on the first party room, cast hint once a leader carries a field verb) with persistent seen-flags riding saves, no dev keys, one hint per room entry; the encounter surface teaches its own controls via the always-visible intent-panel footer (now including 5 cast and Z undo) plus the D-036 banner, pinned by tests | hint contract documented at _show_onboarding_hint; RUNBOOK tally | TK-003 recovery-gap closure, TK-004 controller/asset pass, TK-005 first-session replays |
+| 2026-07-20 | TK-003 | Ticket closed | green: unit 49 suites/387 tests/2567 checks PASS with 0 script errors; slice smoke 134/134; boot clean; gap closure: KO'd allies self-revive at exactly 1 HP on any encounter release unless the party is wiped (D-043 rule 2, tested); a chasing enemy shows a readable aggro cue that clears on escape (tested); window focus loss surfaces a player-facing toast (tested via notification); move-undo landed in S-012/TK-004; the B-18 save-failure copy was already player-facing (verified in source); defeat recovery routes through the tested T-041 rules | gap-closure contracts documented inline at each site; RUNBOOK tally | TK-004 controller/asset pass (needs the T-079 glyph work and the coherent audio/visual pass), TK-005 keyboard+controller first-session replays |
 
 ## Completion Result
 
