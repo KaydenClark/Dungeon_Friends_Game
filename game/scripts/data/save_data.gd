@@ -29,6 +29,7 @@ var party_formation := "line"
 ## resolved encounters, authored material state everywhere).
 var resolved_encounters: Dictionary = {}
 var world_materials: Dictionary = {}
+var reward_ledger: Dictionary = {}
 
 
 func to_dict() -> Dictionary:
@@ -47,6 +48,7 @@ func to_dict() -> Dictionary:
 		"party_formation": party_formation,
 		"resolved_encounters": resolved_encounters.duplicate(true),
 		"world_materials": world_materials.duplicate(true),
+		"reward_ledger": reward_ledger.duplicate(true),
 	}
 
 
@@ -89,6 +91,9 @@ static func from_dict(raw: Variant) -> SaveData:
 	var raw_materials: Variant = d.get("world_materials", {})
 	if raw_materials is Dictionary:
 		out.world_materials = (raw_materials as Dictionary).duplicate(true)
+	var raw_ledger: Variant = d.get("reward_ledger", {})
+	if raw_ledger is Dictionary:
+		out.reward_ledger = (raw_ledger as Dictionary).duplicate(true)
 	return out
 
 
@@ -107,6 +112,7 @@ func to_game_state() -> GameState:
 	s.party_formation = party_formation
 	s.resolved_encounters = resolved_encounters.duplicate(true)
 	s.world_materials = world_materials.duplicate(true)
+	s.reward_ledger = reward_ledger.duplicate(true)
 	return s
 
 

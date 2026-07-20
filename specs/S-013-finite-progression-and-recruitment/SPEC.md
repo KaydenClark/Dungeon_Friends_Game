@@ -9,8 +9,8 @@
 **Updated:** 2026-07-20
 **Catalog description:** Define and implement finite no-grind progression, defeat/revive rules, one real recruit, equipment/economy seams, and the character surface.
 **Blockers:** none
-**Latest event:** TK-001 closed with proof.
-**Next gate:** Complete TK-002.
+**Latest event:** TK-002 closed with proof.
+**Next gate:** Complete TK-003.
 
 ## Outcome
 
@@ -70,7 +70,7 @@ provenance.
 | Ticket | Slice | Status | Blockers | Proof |
 |---|---|---|---|---|
 | TK-001 | Resolve the progression fork per Blueprint canon under D-038: record defeat penalty, revive/downed-member, currency, equipment, and real-recruit scope as flagged Blueprint decision rows for the S-004 batch review. | done | none | progression fork resolved as flagged Blueprint row D-043 grounded in D-028 (finite economy, flagged D-008 review), D-033 (roster/kit scope), and the tuned D-014/D-015 checkpoint feel: XP-loss penalty retired (soft-lock risk), KO+self-revive-at-1HP downed rule, no thesis currency, item-flag equipment surface, one real recruit replacing companion_test; docs-only slice, no behavior change, doctor green |
-| TK-002 | Add a failing finite-source reward ledger and implement exact no-grind XP/reward accounting. | ready | TK-001 | pending |
+| TK-002 | Add a failing finite-source reward ledger and implement exact no-grind XP/reward accounting. | done | TK-001 | red: 3 script-error aborts on the missing ledger APIs; green: unit 48 suites/375 tests/2509 checks PASS with 0 script errors; slice smoke 134/134 (v1 fallback incl. its kept penalty); both batteries green; boot clean; claim_reward_source pays each finite source exactly once and rides the save schema with legacy defaults; the unified victory path claims its stable world_key#encounter source before paying; apply_defeat_xp_penalty returns 0 under the v2 default (D-043) while the v1 fallback keeps the tuned D-014 rule the smoke pins |
 | TK-003 | Implement one real recruit data contract with world verb, combat kit, passive/reaction, and stable save identity. | ready | TK-002 | pending |
 | TK-004 | Implement the minimum character/equipment/currency surface required by the accepted progression contract. | ready | TK-003 | pending |
 | TK-005 | Run and capture the finite-progression and recruitment demo with finite-source accounting proof. | ready | TK-004 | pending |
@@ -111,6 +111,7 @@ cd game
 | 2026-07-17 | spec | Legacy progression/recruit/art/economy work consolidated | GameState, SaveData, Progression, items, character resources, tests, and asset notes inspected | new stable progression spec | owner fork, dependencies, all slices |
 | 2026-07-19 | TK-001/TK-006 | D-038 owner-approval consolidation: TK-001's progression fork becomes Engineer-resolved per Blueprint canon with flagged decision rows; TK-006's balance verdict batches into the S-004 thesis replay | Kayden chat directive 2026-07-19; Blueprint D-038 row | this spec, Blueprint | TK-001 through TK-005 |
 | 2026-07-20 | TK-001 | Ticket closed | progression fork resolved as flagged Blueprint row D-043 grounded in D-028 (finite economy, flagged D-008 review), D-033 (roster/kit scope), and the tuned D-014/D-015 checkpoint feel: XP-loss penalty retired (soft-lock risk), KO+self-revive-at-1HP downed rule, no thesis currency, item-flag equipment surface, one real recruit replacing companion_test; docs-only slice, no behavior change, doctor green | Blueprint D-043 flagged row; spec Decisions And Contracts already anticipated this path | TK-002 finite-source ledger implements the accepted contract (including removing the 25% XP penalty in code); TK-003 real recruit; TK-004 minimum surface; TK-005 demo |
+| 2026-07-20 | TK-002 | Ticket closed | red: 3 script-error aborts on the missing ledger APIs; green: unit 48 suites/375 tests/2509 checks PASS with 0 script errors; slice smoke 134/134 (v1 fallback incl. its kept penalty); both batteries green; boot clean; claim_reward_source pays each finite source exactly once and rides the save schema with legacy defaults; the unified victory path claims its stable world_key#encounter source before paying; apply_defeat_xp_penalty returns 0 under the v2 default (D-043) while the v1 fallback keeps the tuned D-014 rule the smoke pins | GameState/SaveData ledger docs; scene_manager penalty comment records the D-043 gate; RUNBOOK tally | chests/quests still dedup via their v1 flag mechanisms rather than the ledger (extensible later); TK-003 real recruit next |
 
 ## Completion Result
 

@@ -723,7 +723,11 @@ func resolve_room_encounter(victory: bool) -> String:
 		# S-012 review C2: the in-room fight currently fields exactly the
 		# touched enemy, so victory pays exactly that enemy's stats. When
 		# encounter groups spawn as in-room units, the group pays instead.
-		SceneManager.apply_victory_rewards(_active_encounter_enemy.stats)
+		# S-013 (D-028): the payout claims its stable finite source first -
+		# a source that somehow resolves twice can never pay twice.
+		if SceneManager.claim_reward_source("%s#%s" % [world_key(),
+				encounter_id]):
+			SceneManager.apply_victory_rewards(_active_encounter_enemy.stats)
 		_active_encounter_enemy.defeated()
 		# S-003 (D-028): a resolved encounter stays resolved forever - across
 		# room rebuilds and save/load - under its stable authored identity.

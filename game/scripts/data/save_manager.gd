@@ -34,6 +34,7 @@ static func capture(state: GameState, current_map: String,
 	out.party_formation = state.party_formation
 	out.resolved_encounters = state.resolved_encounters.duplicate(true)
 	out.world_materials = state.world_materials.duplicate(true)
+	out.reward_ledger = state.reward_ledger.duplicate(true)
 	return out
 
 

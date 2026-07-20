@@ -100,6 +100,9 @@ func test_forest_defeat_respawns_by_the_healer() -> void:
 
 func test_defeat_penalty_clamps_xp_and_restores_hp() -> void:
 	_setup()
+	# This suite pins the V1 FALLBACK defeat rules (D-014 25% penalty); the
+	# v2 default keeps XP per D-043 and is pinned in test_finite_progression.
+	SceneManager.unified_encounters = false
 	SceneManager.total_xp = 15          # level 1, floor 0
 	SceneManager.state.party_xp["companion_test"] = 7
 	SceneManager.hero_hp = 1
@@ -117,4 +120,5 @@ func test_defeat_penalty_clamps_xp_and_restores_hp() -> void:
 	eq(SceneManager.state.party_mp.get("hero"),
 			SceneManager.hero_stats.max_mp,
 			"MP restored in full (flagged interpretation - no MP economy yet)")
+	SceneManager.unified_encounters = true   # restore the production default
 	_teardown()

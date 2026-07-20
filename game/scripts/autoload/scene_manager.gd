@@ -340,6 +340,16 @@ func apply_enemy_rewards(enemy: OverworldEnemy) -> String:
 	return _apply_enemy_rewards(enemy)
 
 
+## S-013 (D-028/D-043): finite reward accounting. A source id claims exactly
+## once per save; callers grant rewards only on a true return, so no finite
+## source can ever pay twice.
+func claim_reward_source(source_id: String) -> bool:
+	if source_id == "" or state.reward_ledger.get(source_id, false):
+		return false
+	state.reward_ledger[source_id] = true
+	return true
+
+
 func _apply_rewards(enemy_group: Array[EnemyStats]) -> String:
 	var xp := 0
 	var drops := PackedStringArray()
@@ -562,8 +572,13 @@ func restore_party_after_defeat() -> void:
 			state.party_mp[id] = stats.max_mp
 
 
-## Apply the D-008 XP penalty to every roster member; returns the total lost.
+## Apply the defeat XP rule; returns the total lost. Under the v2 default
+## route this is ZERO (D-043): finite XP (D-028) cannot absorb a loss-based
+## penalty without soft-lock risk, so the checkpoint reposition is the whole
+## cost. The v1 fallback keeps the tuned D-014 25% rule the smoke test pins.
 func apply_defeat_xp_penalty() -> int:
+	if unified_encounters:
+		return 0
 	var lost := 0
 	for id in state.party_roster:
 		var level: int = state.party_levels.get(id, 1)

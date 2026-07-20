@@ -39,6 +39,10 @@ extends Resource
 ## JSON-safe. Loading is fail-closed: an invalid entry is ignored wholesale
 ## and the room keeps its authored state.
 @export var world_materials: Dictionary = {}
+## S-013 (D-028/D-043): one-shot finite reward accounting. {source_id: true}
+## - a claimed source (encounter victory, quest, discovery) can never pay
+## again, in this session or any save.
+@export var reward_ledger: Dictionary = {}
 ## The currently controlled roster member ("" = the roster's first member).
 ## Session-only authority: rooms read it so a leader switch survives room
 ## changes and defeat respawns; it deliberately stays out of the save schema
