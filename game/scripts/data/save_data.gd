@@ -25,6 +25,10 @@ var flags: Dictionary = {}
 var arena_selector_state: Dictionary = {}
 ## Optional since S-010/TK-003; older saves omit it and default to "line".
 var party_formation := "line"
+## Optional since S-003; older saves omit both and default to empty (no
+## resolved encounters, authored material state everywhere).
+var resolved_encounters: Dictionary = {}
+var world_materials: Dictionary = {}
 
 
 func to_dict() -> Dictionary:
@@ -41,6 +45,8 @@ func to_dict() -> Dictionary:
 		"flags": flags,
 		"arena_selector_state": arena_selector_state.duplicate(true),
 		"party_formation": party_formation,
+		"resolved_encounters": resolved_encounters.duplicate(true),
+		"world_materials": world_materials.duplicate(true),
 	}
 
 
@@ -77,6 +83,12 @@ static func from_dict(raw: Variant) -> SaveData:
 		var selector_state: Dictionary = raw_selector_state
 		out.arena_selector_state = selector_state.duplicate(true)
 	out.party_formation = str(d.get("party_formation", "line"))
+	var raw_resolved: Variant = d.get("resolved_encounters", {})
+	if raw_resolved is Dictionary:
+		out.resolved_encounters = (raw_resolved as Dictionary).duplicate(true)
+	var raw_materials: Variant = d.get("world_materials", {})
+	if raw_materials is Dictionary:
+		out.world_materials = (raw_materials as Dictionary).duplicate(true)
 	return out
 
 
@@ -93,6 +105,8 @@ func to_game_state() -> GameState:
 	s.flags = flags.duplicate()
 	s.arena_selector_state = arena_selector_state.duplicate(true)
 	s.party_formation = party_formation
+	s.resolved_encounters = resolved_encounters.duplicate(true)
+	s.world_materials = world_materials.duplicate(true)
 	return s
 
 

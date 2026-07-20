@@ -30,6 +30,15 @@ extends Resource
 ## S-010/TK-003 (D-029/D-037): the selected exploration formation identity.
 ## Serialized with saves; pre-TK-003 saves omit it and default to "line".
 @export var party_formation: String = "line"
+## S-003 (D-028): {world_key: {encounter_id: true}}. A resolved encounter
+## never respawns on room rebuild or load; world_key is the room's stable
+## level_path#level_name identity.
+@export var resolved_encounters: Dictionary = {}
+## S-003 (D-031): {world_key: {"x,y": {"tags": [...], "statuses": {...}}}}.
+## The room's material truth as of its last committed reaction, serialized
+## JSON-safe. Loading is fail-closed: an invalid entry is ignored wholesale
+## and the room keeps its authored state.
+@export var world_materials: Dictionary = {}
 ## The currently controlled roster member ("" = the roster's first member).
 ## Session-only authority: rooms read it so a leader switch survives room
 ## changes and defeat respawns; it deliberately stays out of the save schema

@@ -364,3 +364,44 @@ func test_victory_writes_back_party_hp() -> void:
 	ok(int(SceneManager.state.party_hp.get("hero", -1)) >= 0,
 			"written-back HP is never negative")
 	_teardown(room)
+
+
+func test_combat_movement_never_presses_plates() -> void:
+	# S-012 review C1: tactical repositioning is not puzzle input. A shove
+	# onto the plate mid-encounter must not press it; whoever ends the fight
+	# standing there presses it for real when the encounter releases.
+	var room := _make_room()
+	var guardian: OverworldEnemy = null
+	for enemy in room.enemies:
+		if enemy.cell == Vector2i(5, 6):
+			guardian = enemy
+	room.teleport(guardian, Vector2i(2, 4))
+	room.teleport(room.player, Vector2i(2, 3))
+	var plate: PressurePlate = room.plates[0]
+	eq(room.begin_room_encounter(guardian), "", "plate-side encounter begins")
+	var controller = room.room_encounter
+	controller.set_active_unit("hero")
+	if controller.state["units"][guardian.world_encounter_id]["cell"] == Vector2i(2, 4):
+		ok(controller.shove(guardian.world_encounter_id),
+				"shove pushes the guardian toward the plate")
+		eq(guardian.cell, Vector2i(2, 5), "guardian lands on the plate cell")
+		not_ok(plate.pressed,
+				"the plate never presses during the encounter (D-025)")
+		eq(room.resolve_room_encounter(false), "", "encounter releases")
+		ok(plate.pressed,
+				"whoever ends the fight on the plate presses it for real")
+	_teardown(room)
+
+
+func test_group_authored_victory_pays_only_the_fought_enemy() -> void:
+	# S-012 review C2: the in-room fight fields exactly the touched enemy,
+	# so victory pays exactly that enemy's stats - not the whole authored
+	# EncounterData group (the fixture enemy carries forest_pair).
+	var room := _make_room()
+	var enemy := _begin(room)
+	not_null(enemy.encounter, "the fixture enemy carries an authored group")
+	var xp_before: int = SceneManager.total_xp
+	eq(room.resolve_room_encounter(true), "", "victory resolves")
+	eq(SceneManager.total_xp - xp_before, enemy.stats.xp_reward,
+			"victory pays the single fought enemy's XP, not the group's")
+	_teardown(room)

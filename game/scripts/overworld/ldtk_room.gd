@@ -340,6 +340,14 @@ func _adopt_entities(level: Node) -> void:
 				enemy.home_cell = cell
 				# S-009/TK-002: stable encounter identity from authored data.
 				enemy.world_encounter_id = encounter_id_for(enemy.unique_id, cell)
+				# S-003 (D-028, supersedes D-009 routine respawn): a resolved
+				# encounter does not respawn on rebuild or load. Its authored
+				# identity is kept so snapshots keep reporting it resolved.
+				if SceneManager.state.resolved_encounters.get(world_key(),
+						{}).get(enemy.world_encounter_id, false):
+					authored_encounters[enemy.world_encounter_id] = cell
+					node.free()
+					continue
 				if authored_encounters.has(enemy.world_encounter_id):
 					var dup := "duplicate_encounter_id:%s" % enemy.world_encounter_id
 					push_error("LdtkRoom authoring (%s): %s" % [level_path, dup])
@@ -591,6 +599,12 @@ func _exit_tree() -> void:
 		SceneManager.in_encounter = false
 
 
+## S-003: the room's stable world identity for persistence - authored data,
+## never runtime state, so it survives rebuilds and processes.
+func world_key() -> String:
+	return "%s#%s" % [level_path, level_name]
+
+
 ## Enters encounter mode for a live, authored enemy in THIS room instance.
 ## Pure mode/bookkeeping change (D-025): nothing moves, nothing is rebuilt.
 ## Returns "" on success or a named refusal (fail closed, no side effects).
@@ -706,8 +720,17 @@ func resolve_room_encounter(victory: bool) -> String:
 	var encounter_id := active_encounter_id
 	if victory and _active_encounter_enemy != null \
 			and is_instance_valid(_active_encounter_enemy):
-		SceneManager.apply_enemy_rewards(_active_encounter_enemy)
+		# S-012 review C2: the in-room fight currently fields exactly the
+		# touched enemy, so victory pays exactly that enemy's stats. When
+		# encounter groups spawn as in-room units, the group pays instead.
+		SceneManager.apply_victory_rewards(_active_encounter_enemy.stats)
 		_active_encounter_enemy.defeated()
+		# S-003 (D-028): a resolved encounter stays resolved forever - across
+		# room rebuilds and save/load - under its stable authored identity.
+		var resolved: Dictionary = SceneManager.state.resolved_encounters.get(
+				world_key(), {})
+		resolved[encounter_id] = true
+		SceneManager.state.resolved_encounters[world_key()] = resolved
 	if room_encounter != null:
 		# TK-004: combat damage is real - persist unit HP into the session
 		# before the controller goes away (defeat rules own revival).
@@ -718,6 +741,10 @@ func resolve_room_encounter(victory: bool) -> String:
 	active_encounter_id = ""
 	_active_encounter_enemy = null
 	SceneManager.in_encounter = false
+	# S-012 review C1: plates froze during the encounter; whoever ended the
+	# fight standing on one presses it now.
+	for plate in plates:
+		plate.refresh_after_encounter()
 	_hide_encounter_banner()
 	encounter_resolved.emit(encounter_id, victory)
 	SceneManager.encounter_finished.emit(victory)
@@ -733,6 +760,61 @@ func _seed_material_state() -> void:
 			var cell := Vector2i(x, y)
 			cells[cell] = {"tags": material_tags(cell), "statuses": {}}
 	material_state = {"width": width, "height": height, "cells": cells}
+	# S-003: a persisted material snapshot is this room's truth as of its
+	# last committed reaction; it replaces the authored seed wholesale.
+	# Loading is fail-closed - any malformed entry is ignored entirely and
+	# the authored state stands.
+	var persisted: Variant = SceneManager.state.world_materials.get(world_key())
+	if not persisted is Dictionary:
+		return
+	var parsed := _parse_persisted_materials(persisted)
+	if parsed.is_empty() and not (persisted as Dictionary).is_empty():
+		push_warning("LdtkRoom (%s): invalid persisted material state ignored"
+				% world_key())
+		return
+	for cell in material_state["cells"]:
+		material_state["cells"][cell] = {"tags": [], "statuses": {}}
+	for cell in parsed:
+		material_state["cells"][cell] = parsed[cell]
+
+
+## Fail-closed parse of a persisted material snapshot ({"x,y": {tags,
+## statuses}}). Returns {} when ANY entry is malformed or out of bounds.
+func _parse_persisted_materials(persisted: Dictionary) -> Dictionary:
+	var out := {}
+	for key in persisted:
+		var parts: PackedStringArray = str(key).split(",")
+		if parts.size() != 2 or not parts[0].is_valid_int() \
+				or not parts[1].is_valid_int():
+			return {}
+		var cell := Vector2i(int(parts[0]), int(parts[1]))
+		if not in_bounds(cell):
+			return {}
+		var entry: Variant = persisted[key]
+		if not entry is Dictionary or not entry.get("tags") is Array \
+				or not entry.get("statuses") is Dictionary:
+			return {}
+		var tags: Array = []
+		for tag in entry["tags"]:
+			if not tag is String:
+				return {}
+			tags.append(tag)
+		out[cell] = {"tags": tags,
+				"statuses": (entry["statuses"] as Dictionary).duplicate(true)}
+	return out
+
+
+## S-003: write the room's current material truth into the session (and so
+## into saves) as a JSON-safe snapshot keyed by this room's world identity.
+func _persist_material_state() -> void:
+	var out := {}
+	for cell in material_state["cells"]:
+		var data: Dictionary = material_state["cells"][cell]
+		if data["tags"].is_empty() and data["statuses"].is_empty():
+			continue
+		out["%d,%d" % [cell.x, cell.y]] = {"tags": data["tags"].duplicate(),
+				"statuses": data["statuses"].duplicate(true)}
+	SceneManager.state.world_materials[world_key()] = out
 
 
 ## S-011 preview seam: runs the promoted ReactionCore against the live state
@@ -754,6 +836,7 @@ func commit_reaction(result: Dictionary) -> String:
 			or int(after.get("height", -1)) != height:
 		return "invalid_reaction_result"
 	material_state = (after as Dictionary).duplicate(true)
+	_persist_material_state()
 	return ""
 
 

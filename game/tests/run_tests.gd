@@ -55,6 +55,7 @@ const SUITES := [
 	"res://tests/test_room_reaction_state.gd",
 	"res://tests/test_reaction_caster.gd",
 	"res://tests/test_room_encounter_intent.gd",
+	"res://tests/test_world_persistence.gd",
 ]
 
 

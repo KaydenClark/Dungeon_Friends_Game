@@ -40,7 +40,20 @@ func watch_room() -> void:
 
 func _on_cell_changed(c: Vector2i) -> void:
 	if c == cell:
+		# S-012 review C1: combat movement inside an in-room encounter is
+		# tactical repositioning, not puzzle input - plates freeze while the
+		# encounter runs and re-evaluate when it releases (LdtkRoom calls
+		# _refresh via refresh_after_encounter), so puzzle state stays
+		# untouched mid-fight (D-025) while the world stays honest after.
+		if SceneManager.in_encounter:
+			return
 		_refresh()
+
+
+## Re-evaluate after an encounter releases: whoever actually ended the fight
+## standing on the plate presses it for real.
+func refresh_after_encounter() -> void:
+	_refresh()
 
 
 func _refresh() -> void:

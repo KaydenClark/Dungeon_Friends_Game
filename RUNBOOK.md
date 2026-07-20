@@ -575,7 +575,7 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
-per-suite tally (currently `UNIT TESTS: 46 suites, 365 tests, 2465 checks, 0
+per-suite tally (currently `UNIT TESTS: 47 suites, 370 tests, 2494 checks, 0
 failed`). The runner fails any test that records zero checks - a test aborted
 by a runtime script error can no longer masquerade as a pass (S-009/TK-004
 runner guard). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a
@@ -662,6 +662,23 @@ victory/retreat in the same room instance, input gating, v1-parity rewards,
 puzzle-state continuity, snapshot mode projection, and the opt-in
 `SceneManager.unified_encounters` flag staying false by default). Add a
 suite path to the `SUITES` list in `run_tests.gd` to register new tests.
+
+For the S-003 two-process world-persistence proof (resolved encounters and
+environmental burns survive rebuild AND quit/relaunch/load from disk while
+wedged blocks still reset; both phases must exit `0`):
+
+```bash
+cd game
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path . scenes/dev/world_persistence_battery.tscn -- --phase=save \
+&& /Applications/Godot.app/Contents/MacOS/Godot --headless --path . scenes/dev/world_persistence_battery.tscn -- --phase=load
+```
+
+For the windowed S-003 owner demo (two captures with the material overlay):
+
+```bash
+cd game
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/world_persistence_demo.tscn -- --out=/tmp/world-persistence
+```
 
 For the S-012/TK-005 deterministic combat replay (two scripted fights on
 fresh sessions must produce byte-identical event logs; four captures: ENTER
