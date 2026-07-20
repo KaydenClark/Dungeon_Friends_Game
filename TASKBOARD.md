@@ -14,6 +14,7 @@ proof ledger. Run `node tools/spec-workbench.mjs next --json` to select work and
 | [S-010](specs/S-010-production-party-formations/SPEC.md) | Acceptance / owner gate | claude-engineer | none | TK-004 closed with proof. | Complete TK-005. |
 | [S-011](specs/S-011-production-reaction-vocabulary/SPEC.md) | Acceptance / owner gate | claude-engineer | none | TK-004 closed with proof. | Complete TK-005. |
 | [S-012](specs/S-012-production-deterministic-combat/SPEC.md) | Acceptance / owner gate | claude-engineer | none | TK-005 closed with proof. | Complete TK-006. |
+| [S-013](specs/S-013-finite-progression-and-recruitment/SPEC.md) | TK-002: Add a failing finite-source reward ledger and implement exact no-grind XP/reward accounting. (ready) | claude-engineer | TK-001 | TK-001 closed with proof. | Complete TK-002. |
 <!-- hot-specs:end -->
 
 ## Collision And Owner Gates

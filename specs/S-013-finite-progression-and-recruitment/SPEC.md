@@ -3,14 +3,14 @@
 > Generated from LLM Workbench v2.3. This stable path never moves.
 
 **Spec ID:** S-013
-**Status:** planned
+**Status:** active
 **Priority:** 2
-**Owner:** Kayden
-**Updated:** 2026-07-17
+**Owner:** claude-engineer
+**Updated:** 2026-07-20
 **Catalog description:** Define and implement finite no-grind progression, defeat/revive rules, one real recruit, equipment/economy seams, and the character surface.
-**Blockers:** S-003, S-012
-**Latest event:** Live v1 XP/items/defeat state and legacy T-056/T-070/T-071/T-076 evidence were reconciled; the finite-XP fork is unresolved.
-**Next gate:** An Engineer resolves TK-001's progression fork per Blueprint canon under D-038 (decisions recorded as flagged Blueprint rows), then implements; the owner balance verdict batches into the S-004 thesis replay.
+**Blockers:** none
+**Latest event:** TK-001 closed with proof.
+**Next gate:** Complete TK-002.
 
 ## Outcome
 
@@ -69,8 +69,8 @@ provenance.
 
 | Ticket | Slice | Status | Blockers | Proof |
 |---|---|---|---|---|
-| TK-001 | Resolve the progression fork per Blueprint canon under D-038: record defeat penalty, revive/downed-member, currency, equipment, and real-recruit scope as flagged Blueprint decision rows for the S-004 batch review. | ready | none | pending |
-| TK-002 | Add a failing finite-source reward ledger and implement exact no-grind XP/reward accounting. | ready | S-003, S-012, TK-001 | pending |
+| TK-001 | Resolve the progression fork per Blueprint canon under D-038: record defeat penalty, revive/downed-member, currency, equipment, and real-recruit scope as flagged Blueprint decision rows for the S-004 batch review. | done | none | progression fork resolved as flagged Blueprint row D-043 grounded in D-028 (finite economy, flagged D-008 review), D-033 (roster/kit scope), and the tuned D-014/D-015 checkpoint feel: XP-loss penalty retired (soft-lock risk), KO+self-revive-at-1HP downed rule, no thesis currency, item-flag equipment surface, one real recruit replacing companion_test; docs-only slice, no behavior change, doctor green |
+| TK-002 | Add a failing finite-source reward ledger and implement exact no-grind XP/reward accounting. | ready | TK-001 | pending |
 | TK-003 | Implement one real recruit data contract with world verb, combat kit, passive/reaction, and stable save identity. | ready | TK-002 | pending |
 | TK-004 | Implement the minimum character/equipment/currency surface required by the accepted progression contract. | ready | TK-003 | pending |
 | TK-005 | Run and capture the finite-progression and recruitment demo with finite-source accounting proof. | ready | TK-004 | pending |
@@ -110,6 +110,7 @@ cd game
 |---|---|---|---|---|---|
 | 2026-07-17 | spec | Legacy progression/recruit/art/economy work consolidated | GameState, SaveData, Progression, items, character resources, tests, and asset notes inspected | new stable progression spec | owner fork, dependencies, all slices |
 | 2026-07-19 | TK-001/TK-006 | D-038 owner-approval consolidation: TK-001's progression fork becomes Engineer-resolved per Blueprint canon with flagged decision rows; TK-006's balance verdict batches into the S-004 thesis replay | Kayden chat directive 2026-07-19; Blueprint D-038 row | this spec, Blueprint | TK-001 through TK-005 |
+| 2026-07-20 | TK-001 | Ticket closed | progression fork resolved as flagged Blueprint row D-043 grounded in D-028 (finite economy, flagged D-008 review), D-033 (roster/kit scope), and the tuned D-014/D-015 checkpoint feel: XP-loss penalty retired (soft-lock risk), KO+self-revive-at-1HP downed rule, no thesis currency, item-flag equipment surface, one real recruit replacing companion_test; docs-only slice, no behavior change, doctor green | Blueprint D-043 flagged row; spec Decisions And Contracts already anticipated this path | TK-002 finite-source ledger implements the accepted contract (including removing the 25% XP penalty in code); TK-003 real recruit; TK-004 minimum surface; TK-005 demo |
 
 ## Completion Result
 
