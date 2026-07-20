@@ -237,3 +237,35 @@ func test_production_planner_parity() -> void:
 			"line offset two behind the leader unchanged")
 	eq(snapshot.get("deployment_cells", {}).get(&"friend_d"), Vector2i(-3, 0),
 			"line offset three behind the leader unchanged")
+
+
+func test_roster_sized_deployment_accepts_two_to_four_members() -> void:
+	# S-010/TK-004 (D-040): the production roster starts at two members and
+	# grows to four; deployment sizes to the roster. One member and five
+	# members stay refused.
+	var layout = _layout()
+	not_null(layout, "party formation layout exists")
+	if layout == null:
+		return
+	var walkable := _open_cells(5)
+	var elevations := _flat_elevations(walkable)
+	var pair_ids := [&"hero", &"buddy"]
+	var pair_cells := {&"hero": Vector2i.ZERO, &"buddy": Vector2i(-1, 0)}
+	var snapshot: Dictionary = layout.plan_deployment(&"line", &"hero",
+			Vector2i.RIGHT, pair_ids, pair_cells, walkable, [], [], [],
+			elevations)
+	eq(snapshot.get("deployment_cells", {}).size(), 2,
+			"a two-member roster deploys both members")
+	eq(snapshot.get("deployment_cells", {}).get(&"hero"), Vector2i.ZERO,
+			"leader stays anchored for a pair")
+	eq(snapshot.get("deployment_cells", {}).get(&"buddy"), Vector2i(-1, 0),
+			"pair line deployment uses the first offset")
+	eq(layout.plan_deployment(&"line", &"hero", Vector2i.RIGHT, [&"hero"],
+			{&"hero": Vector2i.ZERO}, walkable, [], [], [], elevations), {},
+			"a solo roster has nothing to deploy (refused)")
+	var five := [&"a", &"b", &"c", &"d", &"e"]
+	var five_cells := {&"a": Vector2i.ZERO, &"b": Vector2i(-1, 0),
+			&"c": Vector2i(-2, 0), &"d": Vector2i(-3, 0), &"e": Vector2i(0, -1)}
+	eq(layout.plan_deployment(&"line", &"a", Vector2i.RIGHT, five, five_cells,
+			walkable, [], [], [], elevations), {},
+			"more members than the party cap stays refused")

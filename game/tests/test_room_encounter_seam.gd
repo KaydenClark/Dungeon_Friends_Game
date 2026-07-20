@@ -178,3 +178,50 @@ func test_stale_active_id_fails_closed_in_snapshot() -> void:
 				"the invariant names the seam bug")
 	room.active_encounter_id = ""
 	_teardown(room)
+
+
+func test_encounter_deploys_followers_as_occupants() -> void:
+	# S-010/TK-004 (D-037): followers snap to legal deployment cells and
+	# become real occupying tactical units for the encounter, then return to
+	# pass-through on resolution.
+	var room := _make_room()
+	SceneManager.unified_encounters = true
+	var enemy := _enemy_at(room, Vector2i(9, 5))
+	eq(room.begin_room_encounter(enemy), "", "encounter begins")
+	ok(room.party_deployed, "party deployment applied on entry")
+	var follower: PartyFollower = room.party_followers[0]
+	eq(room.get_occupant(follower.cell), follower,
+			"deployed follower occupies its cell")
+	not_ok(room.is_walkable(follower.cell),
+			"a deployed follower body-blocks (D-020/D-037)")
+	ne(follower.cell, room.player.cell, "deployment cell distinct from leader")
+	ne(follower.cell, enemy.cell, "deployment avoids enemy cells")
+	var data: Dictionary = WorldState.snapshot_ldtk_room(room)
+	not_ok(data.has("error"), "deployed snapshot has no error")
+	if not data.has("error"):
+		eq(data["actors"]["companion_test"]["cell"], follower.cell,
+				"deployed follower actor at its occupied cell")
+		eq(data["mode"], "encounter", "snapshot still in encounter mode")
+	eq(room.resolve_room_encounter(true), "", "victory resolves")
+	not_ok(room.party_deployed, "deployment released on resolution")
+	is_null(room.get_occupant(follower.cell),
+			"the follower left the occupancy map")
+	ok(room.is_walkable(follower.cell), "follower is pass-through again")
+	_teardown(room)
+
+
+func test_solo_roster_needs_no_deployment() -> void:
+	SceneManager.reset_session_state()
+	SceneManager.flags = {}
+	SceneManager.state.party_roster = ["hero"] as Array[String]
+	var room := LdtkRoom.new()
+	room.level_path = FIXTURE
+	add_child(room)
+	SceneManager.unified_encounters = true
+	eq(room.party_followers.size(), 0, "solo roster spawns no followers")
+	var enemy := _enemy_at(room, Vector2i(9, 5))
+	eq(room.begin_room_encounter(enemy), "",
+			"a solo leader still enters encounters")
+	not_ok(room.party_deployed, "nothing to deploy for a solo roster")
+	eq(room.resolve_room_encounter(true), "", "solo encounter resolves")
+	_teardown(room)

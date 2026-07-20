@@ -58,6 +58,10 @@ func selected_formation() -> StringName:
 	return _formation
 
 
+func facing() -> Vector2i:
+	return _facing
+
+
 ## Selects a formation from the promoted planner's accepted set. Followers
 ## reform immediately onto any open offset cells; blocked offsets keep their
 ## current (possibly compressed) cells until movement frees them.

@@ -65,7 +65,41 @@ func _run() -> void:
 	await _frames(8)
 	await _shot("2-leader-switched")
 
+	# Choke compression: walk up beside the top wall, then step down - the
+	# spaced offset (two cells behind the DOWN facing) lands in the wall row,
+	# so the follower compresses onto the breadcrumb trail.
+	room.teleport(room.player, Vector2i(6, 1))
+	await _frames(5)
+	room.player.try_step(Vector2i.DOWN)
+	await room.player.move_finished
+	await _frames(5)
+	_check(room.party_trail.formation_state() == &"compressed",
+			"walled offset compresses the spaced formation")
+	await _shot("3-choke-compressed")
+
+	# Encounter deployment: bump the slime - the follower snaps to a legal
+	# deployment cell and becomes a real occupant (D-037).
+	SceneManager.unified_encounters = true
+	room.teleport(room.player, Vector2i(8, 5))
+	await _frames(5)
+	room.player.try_step(Vector2i.RIGHT)
+	await _frames(10)
+	_check(room.active_encounter_id == "enc_9_5", "bump entered the encounter")
+	_check(room.party_deployed, "party deployed on entry")
+	var deployed_follower: PartyFollower = room.party_followers[0]
+	_check(room.get_occupant(deployed_follower.cell) == deployed_follower,
+			"follower occupies its deployment cell")
+	await _shot("4-deployed")
+
+	_check(room.resolve_room_encounter(true) == "", "victory resolves")
+	_check(not room.party_deployed, "deployment released")
+	_check(room.get_occupant(deployed_follower.cell) == null,
+			"follower is pass-through again")
+	await _frames(8)
+	await _shot("5-victory-passthrough")
+
 	SceneManager.ui_busy = false
+	SceneManager.unified_encounters = false
 	SceneManager.reset_session_state()
 	SceneManager.flags = {}
 	print("PARTY FORMATION DEMO: %s" % ("FAIL" if _failed else "done"))

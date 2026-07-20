@@ -12,7 +12,7 @@ proof ledger. Run `node tools/spec-workbench.mjs next --json` to select work and
 | Spec | Current slice | Owner | Blocker | Latest meaningful event | Next gate |
 |---|---|---|---|---|---|
 | [S-003](specs/S-003-persistent-world-resolution/SPEC.md) | TK-001: Add a failing two-process battery for resolved encounter, environment, and movable reset. (ready) | unassigned | S-009, S-011, S-012 | Canon reconciliation separated dev-scene reaction proof from the production world and encounter state this persistence contract must serialize. | Complete the production-state contracts in S-009, S-011, and S-012, then claim TK-001 and prove the two-process battery red. |
-| [S-010](specs/S-010-production-party-formations/SPEC.md) | TK-004: Consume legal deployment in the production encounter seam and capture the formation/choke/deployment demo. (ready) | claude-engineer | TK-003 | TK-003 closed with proof. | Complete TK-004. |
+| [S-010](specs/S-010-production-party-formations/SPEC.md) | Acceptance / owner gate | claude-engineer | none | TK-004 closed with proof. | Complete TK-005. |
 <!-- hot-specs:end -->
 
 ## Collision And Owner Gates

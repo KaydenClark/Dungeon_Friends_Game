@@ -65,7 +65,8 @@ func preferred_member_cells(
 		facing: Vector2i,
 		member_ids: Array) -> Dictionary:
 	var offsets := preferred_offsets(formation_id, facing)
-	if offsets.size() != PARTY_SIZE - 1 or not _valid_member_ids(member_ids, leader_id):
+	if offsets.size() < member_ids.size() - 1 \
+			or not _valid_member_ids(member_ids, leader_id):
 		return {}
 	var preferred := {leader_id: leader_cell}
 	var follower_index := 0
@@ -104,7 +105,7 @@ func plan_deployment(
 		return {}
 	var reachable := _reachable_cells(
 			leader_cell, legal, elevation_by_cell, allowed_elevation_transitions)
-	if reachable.size() < PARTY_SIZE:
+	if reachable.size() < member_ids.size():
 		return {}
 	var preferred := preferred_member_cells(
 			formation_id, leader_id, leader_cell, facing, member_ids)
@@ -133,8 +134,13 @@ func plan_deployment(
 	}
 
 
+## S-010/TK-004 generalization (D-040): the roster grows from two members to
+## four as friends are recruited, so deployment accepts 2..PARTY_SIZE members
+## (first N-1 formation offsets apply). Four-member behavior is unchanged and
+## stays pinned by the original T-096 suite.
 func _valid_member_ids(member_ids: Array, leader_id: StringName) -> bool:
-	if member_ids.size() != PARTY_SIZE or not member_ids.has(leader_id):
+	if member_ids.size() < 2 or member_ids.size() > PARTY_SIZE \
+			or not member_ids.has(leader_id):
 		return false
 	var unique := {}
 	for value in member_ids:

@@ -262,6 +262,9 @@ static func snapshot_ldtk_room(room: LdtkRoom) -> Dictionary:
 				return {"error": "enemy_without_encounter_id:%s" % cell}
 			actor_map[node] = {"id": node.world_encounter_id, "kind": "enemy"}
 			live_enemies[node.world_encounter_id] = cell
+		elif node is PartyFollower:
+			# TK-004: a deployed follower is a real occupying party actor.
+			actor_map[node] = {"id": node.member_id, "kind": "party"}
 		elif node is NPC:
 			actor_map[node] = {"id": "npc_%d_%d" % [cell.x, cell.y],
 					"kind": "npc"}
@@ -273,7 +276,14 @@ static func snapshot_ldtk_room(room: LdtkRoom) -> Dictionary:
 		return {"error": "actor_id_collision"}
 	if actor_map.values().any(func(m): return m["id"] == leader_id):
 		var members := [leader_id]
-		if room.party_trail != null:
+		if room.party_deployed:
+			# Deployed followers already came through occupancy as actors.
+			for follower in room.party_followers:
+				if not data["actors"].has(follower.member_id):
+					return {"error":
+							"party_snapshot_unplaceable:%s" % follower.member_id}
+				members.append(follower.member_id)
+		elif room.party_trail != null:
 			var occupied := {}
 			for id in data["actors"]:
 				occupied[data["actors"][id]["cell"]] = true

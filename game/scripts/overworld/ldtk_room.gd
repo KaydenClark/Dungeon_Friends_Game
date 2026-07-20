@@ -82,6 +82,9 @@ var active_encounter_id := ""
 var _active_encounter_enemy: OverworldEnemy
 var _encounter_banner: CanvasLayer
 var _party_toast: CanvasLayer
+## S-010/TK-004 (D-037): true while followers hold real occupancy on their
+## legal deployment cells for the active encounter.
+var party_deployed := false
 
 signal encounter_started(encounter_id: String)
 signal encounter_resolved(encounter_id: String, victory: bool)
@@ -568,6 +571,7 @@ func _show_party_toast(text: String) -> void:
 ## without an in_encounter guard).
 func _exit_tree() -> void:
 	if active_encounter_id != "":
+		_release_party_deployment()
 		active_encounter_id = ""
 		_active_encounter_enemy = null
 		SceneManager.in_encounter = false
@@ -587,12 +591,79 @@ func begin_room_encounter(enemy: OverworldEnemy) -> String:
 	if enemy.world_encounter_id == "" \
 			or not authored_encounters.has(enemy.world_encounter_id):
 		return "unknown_encounter"
+	# S-010/TK-004: deploy the party BEFORE committing any encounter state -
+	# a failed deployment refuses entry with no side effects (fail closed).
+	var deployment_error := _deploy_party_for_encounter()
+	if deployment_error != "":
+		return deployment_error
 	active_encounter_id = enemy.world_encounter_id
 	_active_encounter_enemy = enemy
 	SceneManager.in_encounter = true
 	_show_encounter_banner()
 	encounter_started.emit(active_encounter_id)
 	return ""
+
+
+## Snap followers onto the promoted planner's legal deployment cells and make
+## them real occupants (D-037: body-blocking tactical units). Returns "" or
+## "deployment_failed" with nothing applied.
+func _deploy_party_for_encounter() -> String:
+	if party_trail == null or party_followers.is_empty() or player == null:
+		return ""   # solo leader: nothing to deploy
+	# The planner speaks StringName member ids (T-096 contract).
+	var member_ids: Array = [StringName(party_leader_id)]
+	var member_cells := {StringName(party_leader_id): player.cell}
+	for follower in party_followers:
+		member_ids.append(StringName(follower.member_id))
+		member_cells[StringName(follower.member_id)] = follower.cell
+	var walkable_cells: Array[Vector2i] = []
+	var enemy_cells: Array[Vector2i] = []
+	var prop_cells: Array[Vector2i] = []
+	for y in height:
+		for x in width:
+			var cell := Vector2i(x, y)
+			if not blocked.has(cell) and not pits.has(cell):
+				walkable_cells.append(cell)
+	for cell in occupants:
+		var node: Node2D = occupants[cell]
+		if node is OverworldEnemy:
+			enemy_cells.append(cell)
+		elif node != player:
+			prop_cells.append(cell)
+	var elevations := {}
+	for cell in walkable_cells:
+		elevations[cell] = elevation_at(cell)
+	var plan: Dictionary = PartyFormationLayout.new().plan_deployment(
+			party_formation(), StringName(party_leader_id),
+			party_trail.facing(), member_ids, member_cells, walkable_cells,
+			[], enemy_cells, prop_cells, elevations, [])
+	var deployed: Dictionary = plan.get("deployment_cells", {})
+	if deployed.size() != member_ids.size():
+		return "deployment_failed"
+	for follower in party_followers:
+		var cell: Vector2i = deployed[StringName(follower.member_id)]
+		follower.glide_to(cell)
+		occupy(follower, cell)
+	party_deployed = true
+	return ""
+
+
+## Followers return to render-only pass-through after the encounter; the
+## trail resumes from wherever the fight left everyone.
+func _release_party_deployment() -> void:
+	if not party_deployed:
+		return
+	party_deployed = false
+	var follower_order: Array = []
+	var follower_cells := {}
+	for follower in party_followers:
+		if not is_instance_valid(follower):
+			continue
+		vacate(follower)
+		follower_order.append(follower.member_id)
+		follower_cells[follower.member_id] = follower.cell
+	if party_trail != null and player != null:
+		party_trail.assume(player.cell, follower_cells, follower_order)
 
 
 ## Resolves the active encounter in place. Victory runs the same reward and
@@ -607,6 +678,7 @@ func resolve_room_encounter(victory: bool) -> String:
 			and is_instance_valid(_active_encounter_enemy):
 		SceneManager.apply_enemy_rewards(_active_encounter_enemy)
 		_active_encounter_enemy.defeated()
+	_release_party_deployment()
 	active_encounter_id = ""
 	_active_encounter_enemy = null
 	SceneManager.in_encounter = false
