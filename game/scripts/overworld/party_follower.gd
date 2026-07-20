@@ -7,6 +7,7 @@ extends GridActor
 ## driven by the room's PartyTrail model, not try_step.
 
 var member_id := ""
+var _glide: Tween
 
 
 func setup(id: String, stats: CharacterStats, grid: RoomGrid,
@@ -31,9 +32,13 @@ func glide_to(target: Vector2i, instant := false) -> void:
 	if absi(step.x) + absi(step.y) == 1:
 		set_facing(step)
 	cell = target
+	# A frame hitch can let glides overlap; the stale tween would fight the
+	# new one over `position` (TK-003 review F1), so kill it first.
+	if _glide != null and _glide.is_valid():
+		_glide.kill()
 	var target_pos: Vector2 = room.cell_to_pos(target)
 	if instant:
 		position = target_pos
 		return
-	var tw := create_tween()
-	tw.tween_property(self, "position", target_pos, move_time)
+	_glide = create_tween()
+	_glide.tween_property(self, "position", target_pos, move_time)

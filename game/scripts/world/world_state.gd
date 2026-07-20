@@ -292,6 +292,15 @@ static func snapshot_ldtk_room(room: LdtkRoom) -> Dictionary:
 			out_encounters[id] = {"status": "resolved",
 					"cells": [room.authored_encounters[id]]}
 	data["encounters"] = out_encounters
+	# TK-004: project the room's live in-room encounter mode. The active
+	# encounter must be a live authored one; anything else is a seam bug and
+	# fails closed through validate() below.
+	if room.active_encounter_id != "":
+		data["mode"] = "encounter"
+		data["active_encounter"] = room.active_encounter_id
+		if out_encounters.has(room.active_encounter_id) \
+				and out_encounters[room.active_encounter_id]["status"] == "unresolved":
+			out_encounters[room.active_encounter_id]["status"] = "active"
 	var error := validate(data)
 	if error != "":
 		return {"error": error}

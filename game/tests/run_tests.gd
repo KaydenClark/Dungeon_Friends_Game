@@ -51,6 +51,7 @@ const SUITES := [
 	"res://tests/test_ldtk_world_authoring.gd",
 	"res://tests/test_party_trail.gd",
 	"res://tests/test_production_party.gd",
+	"res://tests/test_room_encounter_seam.gd",
 ]
 
 
@@ -83,10 +84,17 @@ func _ready() -> void:
 
 		for m_name in method_names:
 			suite.set_context("%s.%s" % [suite_name, m_name])
+			var checks_before: int = suite.checks
 			# await handles both plain and coroutine test methods (the timing
 			# suites await real timers); a synchronous test just returns at once.
 			await suite.call(m_name)
 			tests_run += 1
+			# A test that recorded zero checks almost certainly aborted on a
+			# runtime script error before its first assertion. Without this
+			# guard such a test silently counts as passing (found while
+			# red-running S-009/TK-004).
+			if suite.checks == checks_before:
+				suite._fail("test ran zero checks (aborted by a script error?)")
 
 		total_checks += suite.checks
 		for f in suite.failures:

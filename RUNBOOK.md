@@ -554,8 +554,10 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
-per-suite tally (currently `UNIT TESTS: 42 suites, 315 tests, 2164 checks, 0
-failed`). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a
+per-suite tally (currently `UNIT TESTS: 43 suites, 321 tests, 2205 checks, 0
+failed`). The runner fails any test that records zero checks - a test aborted
+by a runtime script error can no longer masquerade as a pass (S-009/TK-004
+runner guard). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a
 few seconds (pure logic and controlled clocks, no real-time waits, unlike the
 slice smoke test; the tutorial soft-lock solver adds a second or two). Run
 this after any change to combat math, the grid/pathfinding model, `GridActor`
@@ -633,8 +635,21 @@ model - distinct walkable follower cells, single-file chokes, teleport
 reseeds, deterministic snapshot projection with fail-closed refusal), and
 `test_production_party` (S-009/TK-003: roster-driven render-only followers
 in the production LdtkRoom - never occupants, never pressing plates, leader
-pass-through, party actors in the world snapshot, teleport reseeds). Add a
+pass-through, party actors in the world snapshot, teleport reseeds), and
+`test_room_encounter_seam` (S-009/TK-004: in-room encounter mode entry/
+victory/retreat in the same room instance, input gating, v1-parity rewards,
+puzzle-state continuity, snapshot mode projection, and the opt-in
+`SceneManager.unified_encounters` flag staying false by default). Add a
 suite path to the `SUITES` list in `run_tests.gd` to register new tests.
+
+For the S-009/TK-004 windowed proof (three captures: exploration with pushed
+block, in-room encounter with banner and gated input, victory with the same
+room state; prints 12 PASS lines, exit `0`):
+
+```bash
+cd game
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/unified_seam_demo.tscn -- --out=/tmp/seam-demo
+```
 
 For a one-command S-009/TK-002 world-state demo (prints the fixture room's
 neutral snapshot - authored elevation/materials, stable encounters, a defeat

@@ -73,6 +73,17 @@ var authored_encounters := {}
 var party_leader_id := ""
 var party_followers: Array = []
 var party_trail: PartyTrail
+## S-009/TK-004 in-room encounter mode seam (D-025/D-036). Non-empty while an
+## encounter is active in THIS room instance; the room, camera, positions,
+## and puzzle state never change on entry or resolution. Exploration input is
+## gated through SceneManager.in_encounter, and a minimal banner announces
+## the mode change (the full D-036 audio/visual sting is S-012 polish).
+var active_encounter_id := ""
+var _active_encounter_enemy: OverworldEnemy
+var _encounter_banner: CanvasLayer
+
+signal encounter_started(encounter_id: String)
+signal encounter_resolved(encounter_id: String, victory: bool)
 
 
 func _ready() -> void:
@@ -426,6 +437,76 @@ func teleport(node: Node2D, to: Vector2i) -> void:
 	super.teleport(node, to)
 	if node == player:
 		_sync_party(true)
+
+
+## Enters encounter mode for a live, authored enemy in THIS room instance.
+## Pure mode/bookkeeping change (D-025): nothing moves, nothing is rebuilt.
+## Returns "" on success or a named refusal (fail closed, no side effects).
+func begin_room_encounter(enemy: OverworldEnemy) -> String:
+	if active_encounter_id != "":
+		return "already_in_encounter"
+	if SceneManager.transitioning:
+		return "encounter_blocked"
+	if enemy == null or not is_instance_valid(enemy) \
+			or not is_instance_valid(self) or enemy.room != self:
+		return "unknown_encounter"
+	if enemy.world_encounter_id == "" \
+			or not authored_encounters.has(enemy.world_encounter_id):
+		return "unknown_encounter"
+	active_encounter_id = enemy.world_encounter_id
+	_active_encounter_enemy = enemy
+	SceneManager.in_encounter = true
+	_show_encounter_banner()
+	encounter_started.emit(active_encounter_id)
+	return ""
+
+
+## Resolves the active encounter in place. Victory runs the same reward and
+## defeat bookkeeping as the v1 route; a non-victory (retreat/interrupt)
+## simply releases the mode with the encounter still unresolved. Room,
+## camera, positions, and puzzle state are untouched either way.
+func resolve_room_encounter(victory: bool) -> String:
+	if active_encounter_id == "":
+		return "no_active_encounter"
+	var encounter_id := active_encounter_id
+	if victory and _active_encounter_enemy != null \
+			and is_instance_valid(_active_encounter_enemy):
+		SceneManager.apply_enemy_rewards(_active_encounter_enemy)
+		_active_encounter_enemy.defeated()
+	active_encounter_id = ""
+	_active_encounter_enemy = null
+	SceneManager.in_encounter = false
+	_hide_encounter_banner()
+	encounter_resolved.emit(encounter_id, victory)
+	SceneManager.encounter_finished.emit(victory)
+	return ""
+
+
+## Minimal D-036 mode cue: a readable banner, no scene or camera change.
+func _show_encounter_banner() -> void:
+	if _encounter_banner != null:
+		return
+	_encounter_banner = CanvasLayer.new()
+	_encounter_banner.layer = 50
+	var label := Label.new()
+	label.text = "ENCOUNTER - TURN-BASED MODE"
+	label.add_theme_font_size_override("font_size", 28)
+	label.add_theme_color_override("font_color", Color(1.0, 0.9, 0.4))
+	label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	label.add_theme_constant_override("outline_size", 8)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	label.offset_top = 40
+	label.offset_bottom = 90
+	_encounter_banner.add_child(label)
+	add_child(_encounter_banner)
+
+
+func _hide_encounter_banner() -> void:
+	if _encounter_banner == null:
+		return
+	_encounter_banner.queue_free()
+	_encounter_banner = null
 
 
 func _on_player_moved() -> void:
