@@ -502,6 +502,10 @@ func _spawn_party() -> void:
 	# the previous follower actors and reseed at the leader's live cell.
 	for old in party_followers:
 		if old != null and is_instance_valid(old):
+			# Defensive: exploration followers are render-only (D-029), but
+			# unregister is a no-op for unregistered nodes and guarantees no
+			# freed node can linger in occupancy.
+			unregister(old)
 			old.queue_free()
 	party_followers = []
 	party_trail = null

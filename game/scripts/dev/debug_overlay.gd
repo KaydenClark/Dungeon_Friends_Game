@@ -27,8 +27,8 @@ var open := false
 ## Number keys reserved for warps before the grant keys start at 6. If the
 ## registry ever outgrows this, the overlay needs a paging rework - warn
 ## loudly instead of silently dropping rooms.
-const MAX_WARPS := 5
-const WARP_KEYS := [KEY_1, KEY_2, KEY_3, KEY_4, KEY_5]
+const MAX_WARPS := 6
+const WARP_KEYS := [KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6]
 
 
 ## The warp list is the registry, in registry order (T-049).

@@ -12,8 +12,9 @@ extends LdtkRoom
 const HEART_CELLS: Array[Vector2i] = [Vector2i(14, 4), Vector2i(15, 4),
 		Vector2i(15, 5), Vector2i(14, 6)]
 
-## Where the forest-side return drops the player (one cell north of the
-## forest's south doorway).
+## Where a FRESH forest drops the player when the grove has no suspended
+## room beneath it (a save loaded straight into the grove): one cell north
+## of the forest's south doorway.
 const FOREST_RETURN := Vector2i(10, 17)
 
 
@@ -43,7 +44,14 @@ func _on_grove_encounter_resolved(encounter_id: String,
 
 
 func _on_doorway(fields: Dictionary) -> void:
-	if str(fields.get("TargetRoom", "")) == "forest":
+	if str(fields.get("TargetRoom", "")) != "forest":
+		return
+	# The forest normally waits suspended beneath this room: resume it (the
+	# grove frees, so the next entry rebuilds fresh from persisted truth).
+	# Only a save loaded straight into the grove has no room beneath.
+	if SceneManager.room_stack.is_empty():
 		var forest := ForestRoom.new()
 		forest.spawn_override = FOREST_RETURN
 		SceneManager.enter_room(forest)
+	else:
+		SceneManager.exit_room()

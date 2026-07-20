@@ -712,6 +712,27 @@ cd game
 The committed S-004 batch-review artifacts live under
 `docs/screenshots/s014-first-session/`.
 
+For the S-004/TK-003 thesis demo (the WHOLE v2 loop in the real game, under
+a minute: boot, walk the forest's south doorway into the Withered Grove,
+recruit Wren on dialogue, grow Moss's herb bed - no combat, open the vine
+gate from its trellis, beat the grove guardian in-room, watch the grove
+heart regrow, prove the save round trip, then walk out and back in to show
+everything persisted; seven verified captures; exit `0` = all PASS):
+
+```bash
+cd game
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/thesis_demo.tscn --resolution 1280x720 -- --out=/abs/dir
+```
+
+The committed batch-review captures live under `docs/screenshots/s004-thesis/`.
+To play the same route by hand, launch the game normally and walk south from
+the forest spawn to the doorway at the bottom of the map:
+
+```bash
+cd game
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/main.tscn
+```
+
 For the S-013 finite-progression and recruitment demo (Wren recruits once,
 casts her field verb, wins the slime exactly once, and the ledger refuses
 every double-pay; three captures; exit `0` = all PASS):
