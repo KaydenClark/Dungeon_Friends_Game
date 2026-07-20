@@ -130,6 +130,11 @@ func _process(delta: float) -> void:
 			and room is LdtkRoom:
 		(room as LdtkRoom).cycle_party_formation()
 		return
+	# S-013/TK-004: 5/R1 casts the leader's field verb at the faced cell.
+	if not moving and Input.is_action_just_pressed("cast_ability") \
+			and room is LdtkRoom:
+		(room as LdtkRoom).cast_leader_reaction()
+		return
 	var dir := _read_dir()
 	if dir == Vector2i.ZERO:
 		_reset_hold()

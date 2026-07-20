@@ -120,7 +120,9 @@ prompts show keyboard keys only until T-079 supplies controller glyphs):
   (controller Y, the D-019 character action) switches the controlled leader
   to the next visible party member - control, camera, and sprites swap in
   place. Both persist for the session; the formation choice also persists
-  into saves (older saves default to line).
+  into saves (older saves default to line). **5** (controller R1) casts the
+  LEADER's field verb (S-013: Wren's Verdant Growth grows a vine) at the
+  faced cell, spending MP - switch leaders with F to switch verbs.
 - **Combat (v2 default since S-012/TK-004):** bumping an enemy enters the
   unified in-room encounter - same room, same camera, banner cue, party
   deployed in your selected formation, and the enemy's exact current intent
@@ -128,7 +130,8 @@ prompts show keyboard keys only until T-079 supplies controller glyphs):
   active unit (budgeted), **1** attack, **2** bash (stun-cancels the
   intention), **3** shove (push-cancels), **4** guard (protects front +
   flanks for a round), **Z** undoes un-acted movement, **Tab** switches the
-  acting unit, **Q** ends the party phase (the intention resolves, the
+  acting unit, **5** (controller R1) casts the acting unit's field verb at
+  the cell toward the enemy, **Q** ends the party phase (the intention resolves, the
   environment ticks, the next round declares). Victory pays the usual
   rewards in place; a party wipe hands over to the T-041 checkpoint-defeat
   rules. The v1 arena route remains reachable via
@@ -575,7 +578,7 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
-per-suite tally (currently `UNIT TESTS: 49 suites, 379 tests, 2534 checks, 0
+per-suite tally (currently `UNIT TESTS: 49 suites, 382 tests, 2550 checks, 0
 failed`). The runner fails any test that records zero checks - a test aborted
 by a runtime script error can no longer masquerade as a pass (S-009/TK-004
 runner guard). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a

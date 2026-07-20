@@ -605,6 +605,41 @@ func world_key() -> String:
 	return "%s#%s" % [level_path, level_name]
 
 
+## S-013/TK-004: the exploration cast control (key 5 / R1). Casts the
+## LEADER's first reaction ability at the faced cell through the shared
+## seam, spending MP. Fail-closed with named, toasted refusals; the whole
+## kit stays data-driven (whoever leads casts their own verb).
+func cast_leader_reaction() -> Dictionary:
+	if player == null:
+		return {"valid": false, "error": "no_leader"}
+	var stats := SceneManager.character_stats_for(party_leader_id)
+	var ability := _first_reaction_ability(stats)
+	if ability == null:
+		_show_party_toast("%s HAS NO FIELD VERB" % party_leader_id.to_upper())
+		return {"valid": false, "error": "not_a_reaction_ability"}
+	var max_mp: int = stats.max_mp if stats != null else 0
+	var mp: int = int(SceneManager.state.party_mp.get(party_leader_id, max_mp))
+	if mp < ability.mp_cost:
+		_show_party_toast("NOT ENOUGH MP")
+		return {"valid": false, "error": "not_enough_mp"}
+	var target: Vector2i = player.cell + player.facing
+	var result := ReactionCaster.cast(self, ability, target, player.facing,
+			"exploration")
+	if result.get("valid", false):
+		SceneManager.state.party_mp[party_leader_id] = mp - ability.mp_cost
+		_show_party_toast("%s!" % ability.display_name.to_upper())
+	return result
+
+
+func _first_reaction_ability(stats: CharacterStats) -> AbilityData:
+	if stats == null:
+		return null
+	for ability in stats.starting_abilities:
+		if ability != null and ability.reaction_verb != "":
+			return ability
+	return null
+
+
 ## Enters encounter mode for a live, authored enemy in THIS room instance.
 ## Pure mode/bookkeeping change (D-025): nothing moves, nothing is rebuilt.
 ## Returns "" on success or a named refusal (fail closed, no side effects).

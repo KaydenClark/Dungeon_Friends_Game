@@ -14,6 +14,7 @@ const BASENAMES := {
 	"cancel": "cancel",
 	"character_menu": "character",
 	"formation_cycle": "formation",
+	"cast_ability": "cast",
 	"menu": "menu",
 }
 

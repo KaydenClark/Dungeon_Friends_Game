@@ -99,3 +99,72 @@ func test_recruit_identity_survives_save_load() -> void:
 		eq(loaded.reward_ledger.get("recruit#wren", false), true,
 				"the recruitment source stays claimed after load")
 	_fresh()
+
+
+func test_leader_casts_the_field_verb_in_exploration() -> void:
+	# S-013/TK-004: the cast control is data-driven - whoever leads casts
+	# their own verb at the faced cell, spending MP through the shared seam.
+	_fresh()
+	ok(SceneManager.recruit_member("wren"), "wren recruits")
+	SceneManager.state.party_leader = "wren"
+	var room := LdtkRoom.new()
+	room.level_path = FIXTURE
+	add_child(room)
+	eq(room.party_leader_id, "wren", "wren leads")
+	var target: Vector2i = room.player.cell + room.player.facing
+	var result: Dictionary = room.cast_leader_reaction()
+	eq(result.get("valid"), true, "the leader's grow verb casts")
+	ok(room.material_state["cells"][target]["tags"].has("vine"),
+			"a vine grows at the faced cell")
+	eq(int(SceneManager.state.party_mp.get("wren", -1)),
+			SceneManager.character_stats_for("wren").max_mp - 1,
+			"the cast spends exactly its MP cost")
+	room.queue_free()
+	_fresh()
+
+
+func test_verbless_leader_and_empty_mp_fail_closed() -> void:
+	_fresh()
+	var room := LdtkRoom.new()
+	room.level_path = FIXTURE
+	add_child(room)
+	var result: Dictionary = room.cast_leader_reaction()
+	eq(str(result.get("error")), "not_a_reaction_ability",
+			"the hero has no field verb yet - named refusal")
+	room.queue_free()
+	SceneManager.reset_session_state()
+	ok(SceneManager.recruit_member("wren"), "wren recruits")
+	SceneManager.state.party_leader = "wren"
+	SceneManager.state.party_mp["wren"] = 0
+	var broke := LdtkRoom.new()
+	broke.level_path = FIXTURE
+	add_child(broke)
+	eq(str(broke.cast_leader_reaction().get("error")), "not_enough_mp",
+			"an empty MP pool refuses the cast")
+	broke.queue_free()
+	_fresh()
+
+
+func test_active_unit_casts_in_encounters() -> void:
+	_fresh()
+	ok(SceneManager.recruit_member("wren"), "wren recruits")
+	var room := LdtkRoom.new()
+	room.level_path = FIXTURE
+	add_child(room)
+	for enemy in room.enemies:
+		if enemy.cell == Vector2i(9, 5):
+			eq(room.begin_room_encounter(enemy), "", "encounter begins")
+	var controller = room.room_encounter
+	not_null(controller, "controller running")
+	if controller != null:
+		ok(controller.set_active_unit("wren"), "wren takes the turn")
+		var result: Dictionary = controller.cast_reaction()
+		eq(result.get("valid"), true, "wren casts grow mid-encounter")
+		eq(str(result["metadata"]["context"]), "encounter",
+				"the cast carries encounter context metadata")
+		not_ok(controller.can_act("wren"), "casting consumes the action")
+		eq(str(controller.cast_reaction().get("error")), "already_acted",
+				"one cast per round")
+		room.resolve_room_encounter(false)
+	room.queue_free()
+	_fresh()

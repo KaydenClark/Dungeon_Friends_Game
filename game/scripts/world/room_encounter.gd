@@ -286,6 +286,36 @@ func write_back_party_hp() -> void:
 				int(state["units"][id]["hp"]))
 
 
+## S-013/TK-004: cast the active unit's first reaction ability at the cell
+## toward the enemy through the same seam exploration uses (D-031 context
+## parity). Consumes the unit's action and MP; fail-closed refusals.
+func cast_reaction() -> Dictionary:
+	if not can_act(active_unit_id):
+		return {"valid": false, "error": "already_acted"}
+	var stats := SceneManager.character_stats_for(active_unit_id)
+	var ability: AbilityData = null
+	if stats != null:
+		for candidate in stats.starting_abilities:
+			if candidate != null and candidate.reaction_verb != "":
+				ability = candidate
+				break
+	if ability == null:
+		return {"valid": false, "error": "not_a_reaction_ability"}
+	var max_mp: int = stats.max_mp
+	var mp: int = int(SceneManager.state.party_mp.get(active_unit_id, max_mp))
+	if mp < ability.mp_cost:
+		return {"valid": false, "error": "not_enough_mp"}
+	var facing := _facing_toward_enemy()
+	var target: Vector2i = state["units"][active_unit_id]["cell"] + facing
+	var result := ReactionCaster.cast(room, ability, target, facing,
+			"encounter")
+	if result.get("valid", false):
+		SceneManager.state.party_mp[active_unit_id] = mp - ability.mp_cost
+		_turns[active_unit_id]["acted"] = true
+		_refresh_panel()
+	return result
+
+
 ## Ends the party phase (D-027 steps 4-5): the declared enemy intention
 ## resolves against whoever remains in its cells (canceled intentions
 ## resolve to nothing), the environment ticks exact statuses and effect
@@ -471,6 +501,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				shove(enemy_id)
 			KEY_4:
 				guard(_facing_toward_enemy())
+			KEY_5:
+				cast_reaction()
 			KEY_TAB:
 				cycle_active_unit()
 			KEY_Z:
