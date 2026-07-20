@@ -48,6 +48,11 @@ func _run() -> void:
 	print("SLICE SMOKE TEST: begin")
 	SceneManager.rng.seed = 1234
 	SceneManager.auto_combat = true
+	# This smoke IS the v1-fallback proof (S-009/S-012 acceptance: the v1
+	# route stays green until the S-004 owner replay accepts retirement).
+	# The unified in-room route is the production default since S-012/TK-004
+	# and has its own deterministic replay proof.
+	SceneManager.unified_encounters = false
 	# Scratch save dir BEFORE main boots: a real save in user://saves would
 	# otherwise pop the T-040 Continue/New Game prompt and stall the run.
 	# Clear residue first too: an interrupted prior smoke must not make the

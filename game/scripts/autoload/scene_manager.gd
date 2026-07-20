@@ -57,9 +57,11 @@ var last_ui_close_ms := 0
 var in_encounter := false
 ## S-009/TK-004 (D-025): when true, touching an enemy enters the in-room
 ## encounter mode seam on the current LdtkRoom instead of the v1 zoom/arena
-## CombatScene. Deliberately opt-in and false by default - S-012 flips the
-## default once real combat resolution replaces the v1 route with proof.
-var unified_encounters := false
+## CombatScene. S-012/TK-004 flipped the default: unified in-room intent
+## combat IS the production route (D-042 staged retirement). The v1 path
+## stays reachable by setting this false (the slice smoke test pins it so)
+## and fully recoverable in git until the S-004 owner replay accepts.
+var unified_encounters := true
 var current_dialogue: DialogueBox
 var _combat_camera: Camera2D
 var _combat_camera_zoom := Vector2.ONE
@@ -252,11 +254,20 @@ func start_encounter(enemy: OverworldEnemy) -> void:
 	# and could seed its arena from the wrong room.
 	if in_encounter or transitioning:
 		return
-	# S-009/TK-004: the unified in-room seam takes the encounter when enabled.
-	# It needs no world_container (no scene swap ever happens), so it routes
-	# before the v1 guard. Any refusal (already active, unknown identity)
-	# falls through to nothing rather than the v1 arena, so a half-configured
-	# room cannot double-start.
+	if skip_combat:
+		# Dev-tools shortcut (T-030): instant victory on either route -
+		# checked before the unified seam so the overlay toggle keeps
+		# working after the S-012 default flip.
+		var skip_msg := _apply_enemy_rewards(enemy)
+		enemy.defeated()
+		encounter_finished.emit(true)
+		await show_dialogue(["(Dev: combat skipped.)", skip_msg])
+		return
+	# S-009/TK-004: the unified in-room seam - the production default since
+	# S-012/TK-004. It needs no world_container (no scene swap ever
+	# happens), so it routes before the v1 guard. Any refusal (already
+	# active, unknown identity) falls through to nothing rather than the v1
+	# arena, so a half-configured room cannot double-start.
 	if unified_encounters and enemy.room is LdtkRoom:
 		var seam_error := (enemy.room as LdtkRoom).begin_room_encounter(enemy)
 		if seam_error == "deployment_failed":
@@ -265,13 +276,6 @@ func start_encounter(enemy: OverworldEnemy) -> void:
 			await show_dialogue(["(There's no room for the party to form up here!)"])
 		return
 	if world_container == null:
-		return
-	if skip_combat:
-		# Dev-tools shortcut (T-030): instant victory, no combat scene.
-		var skip_msg := _apply_enemy_rewards(enemy)
-		enemy.defeated()
-		encounter_finished.emit(true)
-		await show_dialogue(["(Dev: combat skipped.)", skip_msg])
 		return
 	in_encounter = true
 	await _zoom_into_encounter()

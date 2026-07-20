@@ -20,7 +20,7 @@ func _make_room() -> LdtkRoom:
 
 func _teardown(room: LdtkRoom) -> void:
 	room.queue_free()
-	SceneManager.unified_encounters = false
+	SceneManager.unified_encounters = true
 	SceneManager.in_encounter = false
 	SceneManager.reset_session_state()
 	SceneManager.flags = {}

@@ -23,7 +23,7 @@ func _make_room() -> LdtkRoom:
 
 func _teardown(room: LdtkRoom) -> void:
 	room.queue_free()
-	SceneManager.unified_encounters = false
+	SceneManager.unified_encounters = true
 	SceneManager.in_encounter = false
 	SceneManager.reset_session_state()
 	SceneManager.flags = {}
@@ -36,9 +36,12 @@ func _enemy_at(room: LdtkRoom, cell: Vector2i) -> OverworldEnemy:
 	return null
 
 
-func test_v1_route_stays_default() -> void:
-	not_ok(SceneManager.unified_encounters,
-			"unified encounters are opt-in until S-012 accepts replacement")
+func test_unified_route_is_the_default() -> void:
+	# S-012/TK-004 (D-042): in-room intent combat is the production route;
+	# the v1 arena path stays reachable by flipping the flag false (the
+	# slice smoke test pins it so) until the S-004 owner replay accepts.
+	ok(SceneManager.unified_encounters,
+			"unified in-room encounters are the production default")
 
 
 func test_entry_gates_input_in_the_same_room() -> void:
@@ -157,7 +160,7 @@ func test_freed_room_releases_the_input_gate() -> void:
 	room.free()
 	not_ok(SceneManager.in_encounter,
 			"freeing a room mid-encounter releases the gate")
-	SceneManager.unified_encounters = false
+	SceneManager.unified_encounters = true
 	SceneManager.reset_session_state()
 	SceneManager.flags = {}
 

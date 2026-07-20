@@ -121,6 +121,19 @@ prompts show keyboard keys only until T-079 supplies controller glyphs):
   to the next visible party member - control, camera, and sprites swap in
   place. Both persist for the session; the formation choice also persists
   into saves (older saves default to line).
+- **Combat (v2 default since S-012/TK-004):** bumping an enemy enters the
+  unified in-room encounter - same room, same camera, banner cue, party
+  deployed in your selected formation, and the enemy's exact current intent
+  plus verbs-only forecast in the top-right panel. WASD/arrows step the
+  active unit (budgeted), **1** attack, **2** bash (stun-cancels the
+  intention), **3** shove (push-cancels), **4** guard (protects front +
+  flanks for a round), **Z** undoes un-acted movement, **Tab** switches the
+  acting unit, **Q** ends the party phase (the intention resolves, the
+  environment ticks, the next round declares). Victory pays the usual
+  rewards in place; a party wipe hands over to the T-041 checkpoint-defeat
+  rules. The v1 arena route remains reachable via
+  `SceneManager.unified_encounters = false` (the slice smoke test runs it)
+  until the S-004 replay accepts retirement.
 - Space/B remains reserved for a future traversal item, but no shipped room
   requires manual jumping. The tutorial route uses mechanisms instead.
 - Loop: talk to the quest NPC -> bump a slime to enter an authored,
@@ -562,7 +575,7 @@ cd game
 ```
 
 Expected result: exit `0` and a final `UNIT TESTS: PASS` line, preceded by a
-per-suite tally (currently `UNIT TESTS: 46 suites, 361 tests, 2442 checks, 0
+per-suite tally (currently `UNIT TESTS: 46 suites, 365 tests, 2465 checks, 0
 failed`). The runner fails any test that records zero checks - a test aborted
 by a runtime script error can no longer masquerade as a pass (S-009/TK-004
 runner guard). Any `CHECK FAILED:` line or exit `1` is a real failure. Runs in a

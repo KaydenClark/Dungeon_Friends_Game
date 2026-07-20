@@ -29,6 +29,8 @@ var round_number := 0
 ## the next round.
 var active_unit_id := ""
 var _turns := {}
+## Round-start cells so an un-acted unit's movement can be undone exactly.
+var _round_start_cells := {}
 var _enemy_node: OverworldEnemy
 var _panel: CanvasLayer
 var _intent_label: Label
@@ -90,9 +92,11 @@ func _party_unit(id: String, cell: Vector2i) -> Dictionary:
 func begin_round() -> Dictionary:
 	round_number += 1
 	_turns = {}
+	_round_start_cells = {}
 	for id in party_unit_ids():
 		var unit: Dictionary = state["units"][id]
 		_turns[id] = {"moves": int(unit.get("move_range", 3)), "acted": false}
+		_round_start_cells[id] = unit["cell"]
 	if active_unit_id == "" or not _turns.has(active_unit_id):
 		active_unit_id = room.party_leader_id
 	if plan.is_empty() or IntentLogic.plan_needs_rebuild(state, enemy_id, plan):
@@ -253,9 +257,38 @@ func guard(facing: Vector2i) -> bool:
 	return true
 
 
-## Ends the party phase: the declared enemy intention resolves against
-## whoever remains in its cells (canceled intentions resolve to nothing),
-## the consumed plan step pops, and the next round declares.
+## TK-004: undo an un-acted unit's movement back to its round-start cell,
+## refunding the budget. Acting locks the position (D-026: commitments are
+## exact; free repositioning ends at the action).
+func undo_move(id := active_unit_id) -> bool:
+	if not _turns.has(id) or _turns[id]["acted"]:
+		return false
+	var unit: Dictionary = state["units"][id]
+	var start: Vector2i = _round_start_cells.get(id, unit["cell"])
+	if start == unit["cell"]:
+		return false
+	if state["blocked"].has(start) or not unit_at(start).is_empty():
+		return false
+	unit["cell"] = start
+	_turns[id]["moves"] = int(unit.get("move_range", 3))
+	_sync_party_node(id)
+	_refresh_panel()
+	return true
+
+
+## TK-004: persist combat HP into the session so damage taken in an
+## encounter is real afterwards (clamped at zero; defeat rules own revival).
+func write_back_party_hp() -> void:
+	for id in party_unit_ids():
+		SceneManager.state.party_hp[id] = maxi(0,
+				int(state["units"][id]["hp"]))
+
+
+## Ends the party phase (D-027 steps 4-5): the declared enemy intention
+## resolves against whoever remains in its cells (canceled intentions
+## resolve to nothing), the environment ticks exact statuses and effect
+## durations, and either the fight ends (environmental kill, party wipe) or
+## the consumed plan step pops and the next round declares.
 func end_party_turn() -> Dictionary:
 	var events: Array = []
 	if not current_intent.is_empty() \
@@ -265,11 +298,32 @@ func end_party_turn() -> Dictionary:
 	for event: Dictionary in events:
 		if not event.get("blocked", false):
 			party_damage += int(event.get("damage", 0))
+	var env_events: Array = IntentLogic.environment_tick(state)
+	var summary := {"party_damage": party_damage, "events": events,
+			"environment": env_events, "round": round_number}
+	if state["units"].has(enemy_id) \
+			and int(state["units"][enemy_id]["hp"]) <= 0:
+		summary["victory"] = true
+		room.resolve_room_encounter(true)
+		return summary
+	var party_alive := false
+	for id in party_unit_ids():
+		if int(state["units"][id]["hp"]) > 0:
+			party_alive = true
+	if not party_alive:
+		# Party wipe: the encounter releases and the v1 checkpoint-defeat
+		# rules take over (respawn, XP penalty - D-014/D-015 via T-041).
+		summary["defeat"] = true
+		write_back_party_hp()
+		room.resolve_room_encounter(false)
+		if SceneManager.current_room != null:
+			SceneManager.handle_defeat()
+		return summary
 	if not plan.is_empty():
 		plan.pop_front()
 	begin_round()
-	return {"party_damage": party_damage, "events": events,
-			"round": round_number}
+	summary["round"] = round_number
+	return summary
 
 
 func _adjacent_units(a_id: String, b_id: String) -> bool:
@@ -417,6 +471,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				guard(_facing_toward_enemy())
 			KEY_TAB:
 				cycle_active_unit()
+			KEY_Z:
+				undo_move()
 			_:
 				return
 	else:

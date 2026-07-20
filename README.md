@@ -14,10 +14,14 @@ HD/ultrawide resolutions. Steam-first.
 > meets BG3" split-mode concept to a unified model - one persistent world,
 > one shared environmental vocabulary, a visible party, deterministic
 > telegraphed encounters that permanently resolve problems. See
-> `BLUEPRINT.md` -> V2 Systems. **The playable build described below is still
-> the v1 slice** (separate d10 battle mode, single avatar, respawning
-> enemies); the stable capability chain in `S-008` through `S-015`, plus the
-> preserved `S-002` through `S-005` gates, replaces it piece by piece.
+> `BLUEPRINT.md` -> V2 Systems. **As of S-012/TK-004 the default combat route
+> is the v2 unified in-room intent encounter**: bumping an enemy freezes
+> exploration in place, the visible party deploys in formation, the enemy
+> telegraphs exact intents with a verbs-only forecast, and victory or defeat
+> resolves in the same room with no arena, zoom, or scene swap. The v1 slice
+> below (separate d10 battle mode, arena selection) remains reachable by
+> setting `SceneManager.unified_encounters = false` and stays green under the
+> slice smoke test until the S-004 owner replay accepts its retirement.
 
 A solo, AI-assisted Godot 4.7 project. The world starts in a fantasy forest
 and later expands through a river valley, mountains, and the city beneath the

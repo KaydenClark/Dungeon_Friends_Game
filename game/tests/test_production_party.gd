@@ -181,7 +181,7 @@ func test_leader_switch_refused_during_encounter() -> void:
 			"leader switching is refused inside an encounter")
 	eq(room.party_leader_id, "hero", "identity unchanged after refusal")
 	room.resolve_room_encounter(false)
-	SceneManager.unified_encounters = false
+	SceneManager.unified_encounters = true
 	_teardown(room)
 
 

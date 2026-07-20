@@ -709,6 +709,9 @@ func resolve_room_encounter(victory: bool) -> String:
 		SceneManager.apply_enemy_rewards(_active_encounter_enemy)
 		_active_encounter_enemy.defeated()
 	if room_encounter != null:
+		# TK-004: combat damage is real - persist unit HP into the session
+		# before the controller goes away (defeat rules own revival).
+		room_encounter.write_back_party_hp()
 		room_encounter.queue_free()
 		room_encounter = null
 	_release_party_deployment()
