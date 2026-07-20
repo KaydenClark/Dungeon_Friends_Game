@@ -130,3 +130,134 @@ func test_solo_leader_encounter_still_gets_a_controller() -> void:
 		var units: Dictionary = room.room_encounter.state["units"]
 		eq(units.size(), 2, "solo roster fields exactly leader + enemy")
 	_teardown(room)
+
+
+func test_party_units_act_in_any_order_with_legal_movement() -> void:
+	var room := _make_room()
+	_begin(room)
+	var controller = room.room_encounter
+	eq(controller.party_unit_ids(), ["hero", "companion_test"],
+			"party units listed leader-first")
+	eq(controller.active_unit_id, "hero", "the leader starts active")
+	# Any order: switch to the follower before the leader acts (D-027).
+	ok(controller.set_active_unit("companion_test"), "follower can act first")
+	var follower_cell: Vector2i = controller.state["units"]["companion_test"]["cell"]
+	var open_dir := Vector2i.ZERO
+	for dir in [Vector2i.UP, Vector2i.LEFT, Vector2i.DOWN, Vector2i.RIGHT]:
+		var dest: Vector2i = follower_cell + dir
+		if not controller.state["blocked"].has(dest) \
+				and controller.unit_at(dest).is_empty() \
+				and room.in_bounds(dest):
+			open_dir = dir
+			break
+	ne(open_dir, Vector2i.ZERO, "an open step exists")
+	ok(controller.move_active(open_dir), "follower steps to an open cell")
+	eq(controller.state["units"]["companion_test"]["cell"],
+			follower_cell + open_dir, "domain cell moved")
+	eq(room.get_occupant(follower_cell + open_dir),
+			room.party_followers[0], "room occupancy follows the combat move")
+	# Moving into a wall is refused.
+	controller.set_active_unit("hero")
+	var hero_cell: Vector2i = controller.state["units"]["hero"]["cell"]
+	var wall_dir := Vector2i.ZERO
+	for dir in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+		if controller.state["blocked"].has(hero_cell + dir):
+			wall_dir = dir
+			break
+	if wall_dir != Vector2i.ZERO:
+		not_ok(controller.move_active(wall_dir), "walls refuse combat moves")
+	_teardown(room)
+
+
+func test_attack_preview_equals_result_and_kill_wins() -> void:
+	var room := _make_room()
+	var enemy := _begin(room)
+	var controller = room.room_encounter
+	# Re-enter beside the enemy so the leader is adjacent from round one.
+	room.resolve_room_encounter(false)
+	room.teleport(room.player, Vector2i(8, 5))
+	eq(room.begin_room_encounter(enemy), "", "re-entry beside the enemy")
+	controller = room.room_encounter
+	var xp_before: int = SceneManager.total_xp
+	var hero_stats := SceneManager.character_stats_for("hero")
+	var expected: int = maxi(1, hero_stats.attack - enemy.stats.defense)
+	var preview: Dictionary = controller.attack_preview("enc_9_5")
+	eq(int(preview["damage"]), expected, "exact first-cut damage previewed")
+	var result: Dictionary = controller.attack("enc_9_5")
+	eq(int(result["damage"]), expected, "resolve applies exactly the preview")
+	# The hero has acted this round; a second attack is refused.
+	eq(str(controller.attack("enc_9_5").get("error", "")), "already_acted",
+			"one action per unit per round")
+	# Finish the fight across rounds.
+	var guard_rounds := 0
+	while room.active_encounter_id != "" and guard_rounds < 30:
+		controller = room.room_encounter
+		if controller == null:
+			break
+		controller.set_active_unit("hero")
+		controller.attack("enc_9_5")
+		if room.active_encounter_id == "":
+			break
+		controller.end_party_turn()
+		guard_rounds += 1
+	eq(room.active_encounter_id, "", "killing the enemy wins the encounter")
+	ok(SceneManager.total_xp > xp_before, "victory paid the v1 reward path")
+	_teardown(room)
+
+
+func test_shove_cancels_the_declared_intent() -> void:
+	var room := _make_room()
+	var enemy := _begin(room)
+	var controller = room.room_encounter
+	room.resolve_room_encounter(false)
+	room.teleport(room.player, Vector2i(8, 5))
+	eq(room.begin_room_encounter(enemy), "", "re-entry beside the enemy")
+	controller = room.room_encounter
+	not_ok(controller.current_intent.get("canceled", false),
+			"intent starts live")
+	var enemy_cell: Vector2i = controller.state["units"]["enc_9_5"]["cell"]
+	var push_dir: Vector2i = enemy_cell \
+			- controller.state["units"]["hero"]["cell"]
+	ok(controller.shove("enc_9_5"), "adjacent shove succeeds")
+	eq(controller.state["units"]["enc_9_5"]["cell"],
+			enemy_cell + push_dir, "shove pushes away from the shover")
+	eq(enemy.cell, enemy_cell + push_dir,
+			"the room enemy node follows the push")
+	ok(controller.current_intent.get("canceled", false),
+			"a push cancels the declared intention (D-026)")
+	var summary: Dictionary = controller.end_party_turn()
+	eq(int(summary.get("party_damage", -1)), 0,
+			"a canceled intention resolves to zero damage")
+	_teardown(room)
+
+
+func test_guard_raises_protected_cells_and_consumes_the_action() -> void:
+	var room := _make_room()
+	_begin(room)
+	var controller = room.room_encounter
+	ok(controller.guard(Vector2i.RIGHT), "the active unit can guard")
+	var effects: Array = controller.state.get("effects", [])
+	eq(effects.size(), 1, "one guard effect raised")
+	if effects.size() == 1:
+		eq(effects[0]["kind"], "guarded_cells", "guard is the generic effect")
+		eq((effects[0]["cells"] as Array).size(), 3,
+				"front + front-left + front-right protected (D-037)")
+	eq(str(controller.attack("enc_9_5").get("error", "")), "already_acted",
+			"guarding consumes the unit's action")
+	_teardown(room)
+
+
+func test_end_party_turn_starts_the_next_round() -> void:
+	var room := _make_room()
+	_begin(room)
+	var controller = room.room_encounter
+	eq(controller.round_number, 1, "rounds start at one")
+	controller.set_active_unit("hero")
+	controller.guard(Vector2i.RIGHT)
+	var summary: Dictionary = controller.end_party_turn()
+	ok(summary is Dictionary, "round resolution returns a summary")
+	eq(controller.round_number, 2, "the next round begins")
+	not_ok(controller.current_intent.is_empty(),
+			"the next round declares a fresh intent")
+	ok(controller.can_act("hero"), "budgets reset for the new round")
+	_teardown(room)

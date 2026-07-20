@@ -462,7 +462,9 @@ func _sync_party(instant := false) -> void:
 ## beside the leader instead of leaving followers stranded across the room.
 func teleport(node: Node2D, to: Vector2i) -> void:
 	super.teleport(node, to)
-	if node == player:
+	# During an encounter the followers hold DEPLOYED combat cells; the
+	# exploration trail must not fight the combat controller over them.
+	if node == player and active_encounter_id == "":
 		_sync_party(true)
 
 

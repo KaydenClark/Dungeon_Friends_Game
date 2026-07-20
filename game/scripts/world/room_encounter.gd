@@ -22,6 +22,13 @@ var state := {}
 var enemy_id := ""
 var plan: Array = []
 var current_intent := {}
+var round_number := 0
+## S-012/TK-003 party turn bookkeeping: id -> {"moves": int, "acted": bool}.
+## Every party unit gets its move budget and one action per round, spent in
+## any order (D-027); end_party_turn resolves the enemy intent and starts
+## the next round.
+var active_unit_id := ""
+var _turns := {}
 var _enemy_node: OverworldEnemy
 var _panel: CanvasLayer
 var _intent_label: Label
@@ -72,13 +79,22 @@ func _party_unit(id: String, cell: Vector2i) -> Dictionary:
 			"max_hp": max_hp,
 			"atk": stats.attack if stats != null else 1,
 			"df": stats.defense if stats != null else 0,
+			"move_range": stats.move_range if stats != null else 3,
 			"side": "party", "statuses": {}}
 
 
 ## D-027 round start: refill (preserving telegraphed verbs) or rebuild the
 ## plan, then declare the current intent with exact outcomes. A declared
 ## "move" executes in the domain, so the room's enemy node follows it.
+## Party budgets and actions reset with every round.
 func begin_round() -> Dictionary:
+	round_number += 1
+	_turns = {}
+	for id in party_unit_ids():
+		var unit: Dictionary = state["units"][id]
+		_turns[id] = {"moves": int(unit.get("move_range", 3)), "acted": false}
+	if active_unit_id == "" or not _turns.has(active_unit_id):
+		active_unit_id = room.party_leader_id
 	if plan.is_empty() or IntentLogic.plan_needs_rebuild(state, enemy_id, plan):
 		plan = IntentLogic.make_plan(state, enemy_id)
 	else:
@@ -91,6 +107,187 @@ func begin_round() -> Dictionary:
 	_sync_enemy_node()
 	_refresh_panel()
 	return current_intent
+
+
+## --- party turn (TK-003) ----------------------------------------------------
+
+## Living party units, leader first, roster order after.
+func party_unit_ids() -> Array:
+	var ids: Array = []
+	if state["units"].has(room.party_leader_id):
+		ids.append(room.party_leader_id)
+	for follower in room.party_followers:
+		if state["units"].has(follower.member_id):
+			ids.append(follower.member_id)
+	return ids
+
+
+func can_act(id: String) -> bool:
+	return _turns.has(id) and not _turns[id]["acted"] \
+			and state["units"].has(id) and int(state["units"][id]["hp"]) > 0
+
+
+func moves_left(id: String) -> int:
+	return int(_turns.get(id, {}).get("moves", 0))
+
+
+func set_active_unit(id: String) -> bool:
+	if not _turns.has(id) or not state["units"].has(id):
+		return false
+	active_unit_id = id
+	_refresh_panel()
+	return true
+
+
+func cycle_active_unit() -> String:
+	var ids := party_unit_ids()
+	var index := ids.find(active_unit_id)
+	if index >= 0 and ids.size() > 1:
+		set_active_unit(ids[(index + 1) % ids.size()])
+	return active_unit_id
+
+
+func unit_at(cell: Vector2i) -> Dictionary:
+	for id in state["units"]:
+		var unit: Dictionary = state["units"][id]
+		if unit["cell"] == cell and int(unit["hp"]) > 0:
+			return unit
+	return {}
+
+
+## One legal cardinal step for the active party unit; spends move budget and
+## keeps room occupancy/visuals in sync.
+func move_active(dir: Vector2i) -> bool:
+	if absi(dir.x) + absi(dir.y) != 1 or not _turns.has(active_unit_id):
+		return false
+	if moves_left(active_unit_id) <= 0:
+		return false
+	var unit: Dictionary = state["units"][active_unit_id]
+	var dest: Vector2i = unit["cell"] + dir
+	if dest.x < 0 or dest.y < 0 or dest.x >= int(state["width"]) \
+			or dest.y >= int(state["height"]):
+		return false
+	if state["blocked"].has(dest) or not unit_at(dest).is_empty():
+		return false
+	unit["cell"] = dest
+	_turns[active_unit_id]["moves"] = moves_left(active_unit_id) - 1
+	_sync_party_node(active_unit_id)
+	_refresh_panel()
+	return true
+
+
+## Exact full-detail attack preview for the active unit (D-026).
+func attack_preview(target_id: String) -> Dictionary:
+	if not state["units"].has(target_id) \
+			or not state["units"].has(active_unit_id):
+		return {"valid": false, "error": "unknown_unit"}
+	if not _adjacent_units(active_unit_id, target_id):
+		return {"valid": false, "error": "out_of_range"}
+	var shown := IntentLogic.player_attack_preview(state, active_unit_id,
+			target_id, {"power": 0})
+	shown["valid"] = true
+	return shown
+
+
+## Basic attack: applies exactly the preview; a kill wins the encounter in
+## place through the seam's existing victory path.
+func attack(target_id: String) -> Dictionary:
+	if not can_act(active_unit_id):
+		return {"valid": false, "error": "already_acted"}
+	var shown := attack_preview(target_id)
+	if not shown.get("valid", false):
+		return shown
+	var result := IntentLogic.player_attack_resolve(state, active_unit_id,
+			target_id, {"power": 0})
+	result["valid"] = true
+	_turns[active_unit_id]["acted"] = true
+	if int(state["units"][target_id]["hp"]) <= 0 and target_id == enemy_id:
+		_refresh_panel()
+		room.resolve_room_encounter(true)
+		return result
+	_refresh_panel()
+	return result
+
+
+## Shove: push the adjacent target one cell straight away; pushing the
+## intent's owner cancels its declared intention (D-026 counterplay).
+func shove(target_id: String) -> bool:
+	if not can_act(active_unit_id) or not state["units"].has(target_id):
+		return false
+	if not _adjacent_units(active_unit_id, target_id):
+		return false
+	var dir: Vector2i = state["units"][target_id]["cell"] \
+			- state["units"][active_unit_id]["cell"]
+	if not IntentLogic.push_unit(state, target_id, dir, current_intent):
+		return false
+	_turns[active_unit_id]["acted"] = true
+	if target_id == enemy_id:
+		_sync_enemy_node()
+	else:
+		_sync_party_node(target_id)
+	_refresh_panel()
+	return true
+
+
+## Bash: stun the adjacent enemy for one round, canceling its intention.
+func bash(target_id: String) -> bool:
+	if not can_act(active_unit_id) or target_id != enemy_id:
+		return false
+	if not _adjacent_units(active_unit_id, target_id):
+		return false
+	IntentLogic.stun_enemy(state, current_intent)
+	_turns[active_unit_id]["acted"] = true
+	_refresh_panel()
+	return true
+
+
+## Guard: raise the front/front-left/front-right protected cells for exactly
+## one round (D-037 body-blocking as deliberate counterplay).
+func guard(facing: Vector2i) -> bool:
+	if not can_act(active_unit_id) \
+			or absi(facing.x) + absi(facing.y) != 1:
+		return false
+	IntentLogic.apply_guard(state, active_unit_id, facing, 1)
+	_turns[active_unit_id]["acted"] = true
+	_refresh_panel()
+	return true
+
+
+## Ends the party phase: the declared enemy intention resolves against
+## whoever remains in its cells (canceled intentions resolve to nothing),
+## the consumed plan step pops, and the next round declares.
+func end_party_turn() -> Dictionary:
+	var events: Array = []
+	if not current_intent.is_empty() \
+			and not current_intent.get("canceled", false):
+		events = IntentLogic.resolve(state, current_intent)
+	var party_damage := 0
+	for event: Dictionary in events:
+		if not event.get("blocked", false):
+			party_damage += int(event.get("damage", 0))
+	if not plan.is_empty():
+		plan.pop_front()
+	begin_round()
+	return {"party_damage": party_damage, "events": events,
+			"round": round_number}
+
+
+func _adjacent_units(a_id: String, b_id: String) -> bool:
+	return IntentLogic.manhattan(state["units"][a_id]["cell"],
+			state["units"][b_id]["cell"]) == 1
+
+
+func _sync_party_node(id: String) -> void:
+	if room == null:
+		return
+	var cell: Vector2i = state["units"][id]["cell"]
+	if id == room.party_leader_id:
+		if room.player != null and room.player.cell != cell:
+			room.teleport(room.player, cell)
+		return
+	for follower in room.party_followers:
+		if follower.member_id == id and follower.cell != cell:
+			room.teleport(follower, cell)
 
 
 ## The ONLY future information the UI may show: the verb sequence (D-026).
@@ -167,6 +364,13 @@ func _refresh_panel() -> void:
 	var verbs := forecast()
 	if not verbs.is_empty():
 		lines.append("NEXT: %s" % ", ".join(PackedStringArray(verbs)))
+	for id in party_unit_ids():
+		var unit: Dictionary = state["units"][id]
+		var marker := ">" if id == active_unit_id else " "
+		lines.append("%s %s %d/%d  mv %d%s" % [marker, str(id).to_upper(),
+				int(unit["hp"]), int(unit["max_hp"]), moves_left(id),
+				"  (acted)" if not can_act(id) else ""])
+	lines.append("WASD move - 1 atk 2 bash 3 shove 4 guard - TAB unit - Q end")
 	_intent_label.text = "\n".join(lines)
 	if _highlights != null and is_instance_valid(_highlights):
 		_highlights.queue_redraw()
@@ -182,6 +386,53 @@ func _draw_highlights() -> void:
 				Color(1.0, 0.35, 0.2, 0.28))
 		_highlights.draw_rect(Rect2(pos - Vector2(28, 28), Vector2(56, 56)),
 				Color(1.0, 0.5, 0.2, 0.9), false, 3.0)
+
+
+## Encounter-mode controls (D-019 anchors reused): movement actions step the
+## active unit, 1-4 are the counterplay verbs aimed at the enemy, Tab cycles
+## the acting unit, cancel (Q) ends the party phase.
+func _unhandled_input(event: InputEvent) -> void:
+	if room == null or room.room_encounter != self \
+			or not SceneManager.in_encounter:
+		return
+	if event.is_action_pressed("move_up"):
+		move_active(Vector2i.UP)
+	elif event.is_action_pressed("move_down"):
+		move_active(Vector2i.DOWN)
+	elif event.is_action_pressed("move_left"):
+		move_active(Vector2i.LEFT)
+	elif event.is_action_pressed("move_right"):
+		move_active(Vector2i.RIGHT)
+	elif event.is_action_pressed("cancel"):
+		end_party_turn()
+	elif event is InputEventKey and event.pressed and not event.echo:
+		match (event as InputEventKey).physical_keycode:
+			KEY_1:
+				attack(enemy_id)
+			KEY_2:
+				bash(enemy_id)
+			KEY_3:
+				shove(enemy_id)
+			KEY_4:
+				guard(_facing_toward_enemy())
+			KEY_TAB:
+				cycle_active_unit()
+			_:
+				return
+	else:
+		return
+	get_viewport().set_input_as_handled()
+
+
+func _facing_toward_enemy() -> Vector2i:
+	if not state["units"].has(enemy_id) \
+			or not state["units"].has(active_unit_id):
+		return Vector2i.RIGHT
+	var delta: Vector2i = state["units"][enemy_id]["cell"] \
+			- state["units"][active_unit_id]["cell"]
+	if absi(delta.x) >= absi(delta.y):
+		return Vector2i(signi(delta.x) if delta.x != 0 else 1, 0)
+	return Vector2i(0, signi(delta.y))
 
 
 func _exit_tree() -> void:
