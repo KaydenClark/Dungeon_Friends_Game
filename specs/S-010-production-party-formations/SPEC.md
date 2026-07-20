@@ -10,7 +10,7 @@
 **Catalog description:** Graduate line, square, and spaced party formations into production exploration, leader switching, save state, and legal encounter deployment.
 **Blockers:** S-009
 **Latest event:** T-096's pure planner and visible-party model are green but explicitly dev-only.
-**Next gate:** Complete S-009, then an Engineer claims TK-001; Kayden owns the blocked TK-005 formation-feel verdict.
+**Next gate:** Complete S-009, then an Engineer claims TK-001; the owner feel verdict batches into the S-004 thesis replay per D-038.
 
 ## Outcome
 
@@ -62,7 +62,7 @@ production rooms.
 | TK-002 | Integrate selection, leader switching, choke compression, and reformation into production exploration. | ready | TK-001 | pending |
 | TK-003 | Persist formation identity and expose the smallest production selector/control surface. | ready | TK-002 | pending |
 | TK-004 | Consume legal deployment in the production encounter seam and capture the formation/choke/deployment demo. | ready | TK-003 | pending |
-| TK-005 | Record Kayden's formation, choke, and deployment-feel verdict. | blocked | TK-004 | pending |
+| TK-005 | Owner formation/choke/deployment-feel verdict - consolidated into the S-004 thesis replay per D-038 (2026-07-19); TK-004's demo artifact feeds that batch review. | deferred | S-004 | owner verdict batches at S-004 per D-038 |
 
 ## Acceptance Criteria
 
@@ -70,7 +70,7 @@ production rooms.
 - [ ] Followers remain pass-through and effect-free outside encounters.
 - [ ] Selection survives leader, room, and save transitions.
 - [ ] Deployment returns four distinct reachable legal cells.
-- [ ] Kayden accepts exploration and encounter spacing feel.
+- [ ] Formation/choke/deployment demo captured for the S-004 batch review; the owner spacing-feel verdict rides that replay (D-038).
 
 ## Testing Seams
 
@@ -97,6 +97,7 @@ cd game
 | Date | Ticket | Event | Verification | Docs | Remaining gap |
 |---|---|---|---|---|---|
 | 2026-07-17 | spec | Legacy T-096 promoted into a production capability | planner/model/tests and prior 36-suite/244-test proof inspected | new stable formation spec | all slices and owner verdict |
+| 2026-07-19 | TK-005 | D-038 owner-approval consolidation: the feel verdict batches into the S-004 thesis replay; TK-005 deferred to that gate | Kayden chat directive 2026-07-19; Blueprint D-038 row | this spec, Blueprint | TK-001 through TK-004 |
 
 ## Completion Result
 

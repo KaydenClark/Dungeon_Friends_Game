@@ -8,9 +8,9 @@
 **Owner:** Kayden
 **Updated:** 2026-07-17
 **Catalog description:** Graduate the accepted preview-first material/effect engine into production world cells, authored data, friend verbs, and encounter callers.
-**Blockers:** S-002, S-009
-**Latest event:** ReactionCore and its same-path gray-box consumer are green; production RoomGrid and AbilityData do not consume them.
-**Next gate:** Accept S-002 and complete S-009, then an Engineer claims TK-001; Kayden owns the blocked TK-005 production-vocabulary verdict.
+**Blockers:** S-009
+**Latest event:** S-002's fun verdict landed 2026-07-19; ReactionCore and its same-path gray-box consumer are green; production RoomGrid and AbilityData do not consume them yet.
+**Next gate:** Complete S-009, then an Engineer claims TK-001; the owner production-vocabulary verdict batches into the S-004 thesis replay per D-038.
 
 ## Outcome
 
@@ -59,11 +59,11 @@ state.
 
 | Ticket | Slice | Status | Blockers | Proof |
 |---|---|---|---|---|
-| TK-001 | Promote ReactionCore schemas and rules behind a production API with exact dev-parity red/green coverage. | ready | S-002, S-009 | pending |
+| TK-001 | Promote ReactionCore schemas and rules behind a production API with exact dev-parity red/green coverage. | ready | S-009 | pending |
 | TK-002 | Add validated material/effect state to RoomGrid and the LDtk authoring/import path. | ready | TK-001 | pending |
 | TK-003 | Route production friend abilities and puzzle/encounter callers through one preview/commit seam. | ready | TK-002 | pending |
 | TK-004 | Capture and verify a production same-state exploration/encounter replay. | ready | TK-003 | pending |
-| TK-005 | Record Kayden's production shared-vocabulary verdict. | blocked | TK-004 | pending |
+| TK-005 | Owner production shared-vocabulary verdict - consolidated into the S-004 thesis replay per D-038 (2026-07-19); TK-004's replay capture feeds that batch review. | deferred | S-004 | owner verdict batches at S-004 per D-038 |
 
 ## Acceptance Criteria
 
@@ -71,7 +71,7 @@ state.
 - [ ] One API serves exploration and encounter callers.
 - [ ] Preview and commit match including state, damage, movement, and cancels.
 - [ ] Authoring/load failures are explicit and fail closed.
-- [ ] Kayden accepts the production vocabulary replay.
+- [ ] Production same-state replay captured for the S-004 batch review; the owner vocabulary verdict rides that replay (D-038).
 
 ## Testing Seams
 
@@ -99,6 +99,7 @@ cd game
 | Date | Ticket | Event | Verification | Docs | Remaining gap |
 |---|---|---|---|---|---|
 | 2026-07-17 | spec | Production half split from S-002 prototype gate | live RoomGrid/AbilityData/puzzles compared with ReactionCore and room bridge | new stable production-reaction spec | dependencies and all slices |
+| 2026-07-19 | TK-005 | S-002 fun verdict cleared the prototype blocker; D-038 batches the production-vocabulary verdict into the S-004 thesis replay; TK-005 deferred to that gate | Kayden chat directive 2026-07-19; Blueprint D-038 row | this spec, Blueprint | TK-001 through TK-004 |
 
 ## Completion Result
 

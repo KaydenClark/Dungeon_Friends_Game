@@ -3,14 +3,14 @@
 > Generated from LLM Workbench v2.3. This stable path never moves.
 
 **Spec ID:** S-009
-**Status:** planned
+**Status:** active
 **Priority:** 1
-**Owner:** unassigned
-**Updated:** 2026-07-17
+**Owner:** claude-engineer
+**Updated:** 2026-07-19
 **Catalog description:** Replace the split production world/battle spine with one neutral room-state and party/encounter lifecycle without deleting the green v1 fallback early.
-**Blockers:** S-002
-**Latest event:** Live source confirms the unified-world contract is proven only in dev scenes; production still swaps into CombatScene.
-**Next gate:** Complete the S-002 fun gate, then activate TK-001.
+**Blockers:** none
+**Latest event:** S-002's fun gate passed (2026-07-19) and D-038 consolidated intermediate owner verdicts into the S-004 replay; this spec is now the active head of the production chain.
+**Next gate:** Engineer claims TK-001 and proves the neutral world-state contract red, then green.
 
 ## Outcome
 
@@ -54,13 +54,13 @@ height, party visibility, room continuity, intent, and reactions.
 
 ## Dependencies And Blockers
 
-- `S-002` accepted shared-vocabulary direction.
+- `S-002` accepted shared-vocabulary direction - **cleared 2026-07-19 (fun verdict recorded).**
 
 ## Vertical Implementation Slices
 
 | Ticket | Slice | Status | Blockers | Proof |
 |---|---|---|---|---|
-| TK-001 | Define the neutral production world-state contract with failing parity/validation tests. | ready | S-002 | pending |
+| TK-001 | Define the neutral production world-state contract with failing parity/validation tests. | ready | none | pending |
 | TK-002 | Extend RoomGrid/LDtk authoring with elevation, materials, stable encounter IDs, and fail-closed adapters. | ready | TK-001 | pending |
 | TK-003 | Graduate leader plus visible pass-through followers into the production room lifecycle. | ready | TK-002 | pending |
 | TK-004 | Add the in-room encounter mode seam and prove room/camera/positions/puzzle state survive entry and victory. | ready | TK-003 | pending |
@@ -98,6 +98,7 @@ cd game
 | Date | Ticket | Event | Verification | Docs | Remaining gap |
 |---|---|---|---|---|---|
 | 2026-07-17 | spec | Production gap extracted from D-024/D-025 and live source | SceneManager, RoomGrid, LDtk, main, and dev inheritance inspected | new stable runtime spec | all slices and S-002 |
+| 2026-07-19 | spec | Activated: S-002 fun verdict recorded; D-038 owner-approval consolidation applied across the production chain | spec doctor green after activation and rerender | Blueprint D-038 row; hot board rerendered | TK-001 through TK-004 |
 
 ## Completion Result
 

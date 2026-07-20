@@ -10,7 +10,7 @@
 **Catalog description:** Make the opening unified-world journey readable, controllable, recoverable, controller-complete, and understandable without coaching.
 **Blockers:** S-003, S-009, S-010, S-011, S-012, S-013
 **Latest event:** Legacy visual, movement, input, save, combat-UX, asset, and bug rows were consolidated under one production experience owner.
-**Next gate:** Complete the production capability chain, then an Engineer claims TK-001; Kayden owns the blocked TK-006 opening-journey verdict.
+**Next gate:** Complete the production capability chain, then an Engineer claims TK-001; the owner opening-journey verdict batches into the S-004 thesis replay per D-038.
 
 ## Outcome
 
@@ -66,7 +66,7 @@ no production unified-world onboarding.
 | TK-003 | Close movement/facing/aggro, move-undo, focus/blocked-input, save failure, defeat, and party-status recovery gaps. | ready | TK-002 | pending |
 | TK-004 | Complete controller navigation/glyph parity and the minimum coherent visual/audio asset pass for the opening route. | ready | TK-003 | pending |
 | TK-005 | Run and capture keyboard and controller first-session replays at the supported resolutions. | ready | TK-004 | pending |
-| TK-006 | Record Kayden's complete opening-journey verdict. | blocked | TK-005 | pending |
+| TK-006 | Owner complete opening-journey verdict - consolidated into the S-004 thesis replay per D-038 (2026-07-19); TK-005's first-session replays feed that batch review. | deferred | S-004 | owner verdict batches at S-004 per D-038 |
 
 ## Acceptance Criteria
 
@@ -75,7 +75,7 @@ no production unified-world onboarding.
 - [ ] No required action depends on dev-only input or prior explanation.
 - [ ] Failure and recovery preserve data and communicate next action.
 - [ ] 1280x720, 1920x1080, and 3440x1440 checks pass where applicable.
-- [ ] Kayden accepts the complete opening journey.
+- [ ] Keyboard and controller first-session replays captured for the S-004 batch review; the owner opening-journey verdict rides that replay (D-038).
 
 ## Testing Seams
 
@@ -103,6 +103,7 @@ cd game
 | Date | Ticket | Event | Verification | Docs | Remaining gap |
 |---|---|---|---|---|---|
 | 2026-07-17 | spec | Legacy T-028/T-051..T-059 and B-08..B-19 UX residue consolidated | source, tests, asset plans, playtests, and bug rows inspected | new stable player-experience spec | dependencies and all slices |
+| 2026-07-19 | TK-006 | D-038 owner-approval consolidation: the opening-journey verdict batches into the S-004 thesis replay; TK-006 deferred to that gate | Kayden chat directive 2026-07-19; Blueprint D-038 row | this spec, Blueprint | TK-001 through TK-005 |
 
 ## Completion Result
 

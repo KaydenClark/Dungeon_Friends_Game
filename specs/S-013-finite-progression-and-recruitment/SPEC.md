@@ -10,7 +10,7 @@
 **Catalog description:** Define and implement finite no-grind progression, defeat/revive rules, one real recruit, equipment/economy seams, and the character surface.
 **Blockers:** S-003, S-012
 **Latest event:** Live v1 XP/items/defeat state and legacy T-056/T-070/T-071/T-076 evidence were reconciled; the finite-XP fork is unresolved.
-**Next gate:** Kayden resolves blocked TK-001 before an Engineer changes progression behavior; Kayden later owns the blocked TK-006 balance verdict.
+**Next gate:** An Engineer resolves TK-001's progression fork per Blueprint canon under D-038 (decisions recorded as flagged Blueprint rows), then implements; the owner balance verdict batches into the S-004 thesis replay.
 
 ## Outcome
 
@@ -47,8 +47,11 @@ provenance.
 - D-028 and D-033 govern.
 - The temporary Buddy contract does not become a recruit by inertia.
 - Random respawn-farm drop design from T-070 is retired.
-- Kayden chooses the defeat penalty, revive rule, currency role, and minimum
-  equipment scope before implementation.
+- The defeat penalty, revive rule, currency role, and minimum equipment scope
+  are resolved before implementation. Per D-038 (2026-07-19) an Engineer makes
+  these calls from Blueprint canon (D-028's finite economy plus the flagged
+  D-008 review), records them as flagged Blueprint decision rows, and Kayden
+  reviews them in the S-004 batch replay.
 
 ## Non-Goals
 
@@ -59,18 +62,19 @@ provenance.
 
 - `S-003` persistent resolved state.
 - `S-012` production deterministic encounters.
-- Kayden progression decisions.
+- Progression-fork decisions recorded per D-038 (Engineer-resolved, flagged for
+  the S-004 batch review).
 
 ## Vertical Implementation Slices
 
 | Ticket | Slice | Status | Blockers | Proof |
 |---|---|---|---|---|
-| TK-001 | Record Kayden's defeat penalty, revive/downed-member, currency, equipment, and real-recruit scope decisions. | blocked | none | pending |
+| TK-001 | Resolve the progression fork per Blueprint canon under D-038: record defeat penalty, revive/downed-member, currency, equipment, and real-recruit scope as flagged Blueprint decision rows for the S-004 batch review. | ready | none | pending |
 | TK-002 | Add a failing finite-source reward ledger and implement exact no-grind XP/reward accounting. | ready | S-003, S-012, TK-001 | pending |
 | TK-003 | Implement one real recruit data contract with world verb, combat kit, passive/reaction, and stable save identity. | ready | TK-002 | pending |
 | TK-004 | Implement the minimum character/equipment/currency surface required by the accepted progression contract. | ready | TK-003 | pending |
 | TK-005 | Run and capture the finite-progression and recruitment demo with finite-source accounting proof. | ready | TK-004 | pending |
-| TK-006 | Record Kayden's progression-balance and replay-pressure verdict. | blocked | TK-005 | pending |
+| TK-006 | Owner progression-balance and replay-pressure verdict - consolidated into the S-004 thesis replay per D-038 (2026-07-19); TK-005's demo feeds that batch review. | deferred | S-004 | owner verdict batches at S-004 per D-038 |
 
 ## Acceptance Criteria
 
@@ -78,7 +82,7 @@ provenance.
 - [ ] Defeat and downed-member recovery cannot create an unrecoverable state.
 - [ ] One real recruit satisfies D-033 and round-trips through save/load.
 - [ ] Character/equipment UI exposes only implemented, meaningful choices.
-- [ ] Kayden accepts the progression and replay pressure.
+- [ ] Finite-progression and recruitment demo captured for the S-004 batch review; the owner balance verdict rides that replay (D-038).
 
 ## Testing Seams
 
@@ -105,6 +109,7 @@ cd game
 | Date | Ticket | Event | Verification | Docs | Remaining gap |
 |---|---|---|---|---|---|
 | 2026-07-17 | spec | Legacy progression/recruit/art/economy work consolidated | GameState, SaveData, Progression, items, character resources, tests, and asset notes inspected | new stable progression spec | owner fork, dependencies, all slices |
+| 2026-07-19 | TK-001/TK-006 | D-038 owner-approval consolidation: TK-001's progression fork becomes Engineer-resolved per Blueprint canon with flagged decision rows; TK-006's balance verdict batches into the S-004 thesis replay | Kayden chat directive 2026-07-19; Blueprint D-038 row | this spec, Blueprint | TK-001 through TK-005 |
 
 ## Completion Result
 
