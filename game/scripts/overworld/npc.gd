@@ -12,6 +12,17 @@ var cell := Vector2i.ZERO
 @export var color := Color(0.93, 0.78, 0.25)
 ## When true, interacting fully restores the hero's HP before the dialogue.
 @export var heals := false
+## S-004/TK-002 (D-044) recruit-on-dialogue: when set, finishing this NPC's
+## dialogue recruits that roster id through the fail-closed finite
+## SceneManager.recruit_member and the NPC departs into the party. Adoption
+## validates the id and downgrades unknowns to plain talkers.
+@export var recruit_id := ""
+## S-004/TK-002 (D-044) watched-cell resolution: when the watched cell gains
+## the `vine` tag, `lines` swaps to `resolved_lines` and `resolved_flag` is
+## recorded - a non-combat problem resolved through the shared vocabulary.
+@export var watch_cell := Vector2i(-1, -1)
+@export var resolved_lines := PackedStringArray()
+@export var resolved_flag := ""
 
 
 func _ready() -> void:
@@ -27,4 +38,14 @@ func _ready() -> void:
 func interact() -> void:
 	if heals:
 		SceneManager.heal_hero_to_full()
-	SceneManager.show_dialogue(lines)
+	if recruit_id == "":
+		SceneManager.show_dialogue(lines)
+		return
+	# Recruit-on-dialogue (D-044): the join happens when the dialogue ends,
+	# through the fail-closed finite recruit. On refusal (unknown id, dup,
+	# full party) the NPC simply stays a talker.
+	await SceneManager.show_dialogue(lines)
+	if not is_inside_tree() or not SceneManager.recruit_member(recruit_id):
+		return
+	if room is LdtkRoom:
+		(room as LdtkRoom).npc_departed(self)

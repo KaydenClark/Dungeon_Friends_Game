@@ -54,6 +54,10 @@ var blocks: Array = []
 var chests: Array = []
 var levers: Array = []
 var crystals: Array = []
+## S-004/TK-002 (D-044): every adopted NPC, and every vine gate, so the
+## material-watcher pass and the route logic can reach them.
+var npcs: Array[NPC] = []
+var vine_gates: Array[VineGate] = []
 ## Doorway marker cells -> their LDtk fields ({TargetRoom, SpawnX, SpawnY}).
 var doorways := {}
 var spawn_cell := Vector2i.ZERO
@@ -161,6 +165,9 @@ func _build() -> void:
 	_seed_material_state()
 	_build_material_overlay()
 	_adopt_entities(level)
+	# S-004/TK-002: gates and watched NPCs answer the RESTORED material
+	# truth too, so a persisted vine keeps its gate open across rebuilds.
+	_refresh_material_watchers()
 	_spawn_player()
 	puzzle = PuzzleController.new()
 	puzzle.plates = plates
@@ -345,9 +352,24 @@ func _adopt_entities(level: Node) -> void:
 				node.free()
 			"Npc":
 				var p_npc: NPC = node
+				# S-004/TK-002 (D-044): a recruited friend's NPC never
+				# re-spawns - the roster is the persistent truth.
+				if p_npc.recruit_id != "" \
+						and SceneManager.state.party_roster.has(p_npc.recruit_id):
+					node.free()
+					continue
+				# Fail-closed: an unknown recruit id is a named authoring
+				# error and the NPC downgrades to a plain talker.
+				if p_npc.recruit_id != "" \
+						and SceneManager.character_stats_for(p_npc.recruit_id) == null:
+					var bad := "unknown_recruit_id:%s" % p_npc.recruit_id
+					push_error("LdtkRoom authoring (%s): %s" % [level_path, bad])
+					authoring_errors.append(bad)
+					p_npc.recruit_id = ""
 				p_npc.room = self
 				p_npc.cell = cell
 				register(p_npc, cell)
+				npcs.append(p_npc)
 				if p_npc.heals and healer == null:
 					healer = p_npc
 				elif not p_npc.heals and npc == null:
@@ -422,6 +444,24 @@ func _adopt_entities(level: Node) -> void:
 				crystal.cell = cell
 				register(crystal, cell)
 				crystals.append(crystal)
+			"VineGate":
+				# S-004/TK-002 (D-044): blocks like a wall while closed; the
+				# material-watcher pass opens it when its trellis cell grows
+				# a vine. An invalid trellis fails closed: named authoring
+				# error, gate simply never opens.
+				var gate: VineGate = node
+				var gate_error := VineGate.authoring_error(gate.trellis,
+						width, height)
+				if gate_error != "":
+					push_error("LdtkRoom authoring (%s): %s"
+							% [level_path, gate_error])
+					authoring_errors.append(gate_error)
+					gate.trellis = Vector2i(-1, -1)
+				gate.room = self
+				gate.cell = cell
+				set_blocked(cell, true)
+				register(gate, cell)
+				vine_gates.append(gate)
 			_:
 				node.free()
 
@@ -458,16 +498,22 @@ func _spawn_party() -> void:
 		party_leader_id = "hero" if roster.is_empty() else roster[0]
 	if party_leader_id != "hero" and player != null:
 		player.apply_character(SceneManager.character_stats_for(party_leader_id))
+	# Reentrant (S-004/TK-002: a mid-room recruit regrows the party): free
+	# the previous follower actors and reseed at the leader's live cell.
+	for old in party_followers:
+		if old != null and is_instance_valid(old):
+			old.queue_free()
 	party_followers = []
 	party_trail = null
 	if roster.size() <= 1:
 		return
+	var seed_cell := spawn_cell if player == null else player.cell
 	var follower_ids := []
 	for id in roster:
 		if id != party_leader_id:
 			follower_ids.append(id)
 	party_trail = PartyTrail.new()
-	party_trail.setup(follower_ids, spawn_cell,
+	party_trail.setup(follower_ids, seed_cell,
 			func(c: Vector2i) -> bool: return is_walkable(c))
 	party_trail.set_formation(StringName(SceneManager.state.party_formation))
 	var seeded: Dictionary = party_trail.follower_cells()
@@ -955,7 +1001,53 @@ func commit_reaction(result: Dictionary) -> String:
 	_persist_material_state()
 	if _material_overlay != null and is_instance_valid(_material_overlay):
 		_material_overlay.queue_redraw()
+	_refresh_material_watchers()
 	return ""
+
+
+## S-004/TK-002 (D-044): everything that answers the material truth outside
+## combat, evaluated after every commit AND once per build (so persisted
+## state re-applies). Idempotent: an open gate stays open, resolved lines
+## stay resolved.
+func _refresh_material_watchers() -> void:
+	for gate in vine_gates:
+		if gate.open or gate.trellis == Vector2i(-1, -1):
+			continue
+		if _material_tags_at(gate.trellis).has("vine"):
+			gate.set_open(true)
+			set_blocked(gate.cell, false)
+			unregister(gate)
+	for watcher in npcs:
+		if watcher.watch_cell == Vector2i(-1, -1) \
+				or watcher.resolved_lines.is_empty() \
+				or watcher.lines == watcher.resolved_lines:
+			continue
+		if _material_tags_at(watcher.watch_cell).has("vine"):
+			watcher.lines = watcher.resolved_lines
+			if watcher.resolved_flag != "":
+				SceneManager.flags[watcher.resolved_flag] = true
+
+
+func _material_tags_at(cell: Vector2i) -> Array:
+	var cells: Dictionary = material_state.get("cells", {})
+	if not cells.has(cell):
+		return []
+	return (cells[cell] as Dictionary).get("tags", [])
+
+
+## S-004/TK-002 (D-044): a recruited friend's NPC leaves the board and the
+## party toast announces the join.
+func npc_departed(departed: NPC) -> void:
+	unregister(departed)
+	npcs.erase(departed)
+	if npc == departed:
+		npc = null
+	var stats := SceneManager.character_stats_for(departed.recruit_id)
+	if stats != null:
+		_show_party_toast("%s JOINED THE EXPEDITION!"
+				% stats.display_name.to_upper())
+	_spawn_party()
+	departed.queue_free()
 
 
 ## Minimal D-036 mode cue: a readable banner, no scene or camera change.

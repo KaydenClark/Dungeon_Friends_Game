@@ -16,6 +16,10 @@ func _init() -> void:
 
 
 func _on_doorway(fields: Dictionary) -> void:
-	if str(fields.get("TargetRoom", "")) == "tutorial_hub":
-		SceneManager.flags["entered_dungeon"] = true
-		SceneManager.enter_room(TutorialHubRoom.new())
+	match str(fields.get("TargetRoom", "")):
+		"tutorial_hub":
+			SceneManager.flags["entered_dungeon"] = true
+			SceneManager.enter_room(TutorialHubRoom.new())
+		"withered_grove":
+			# S-004/TK-002 (D-044): the thesis route's grove, south edge.
+			SceneManager.enter_room(GroveRoom.new())

@@ -2064,6 +2064,47 @@
        ],
        "__worldX": 224,
        "__worldY": 80
+      },
+      {
+       "__identifier": "Doorway",
+       "__grid": [
+        10,
+        18
+       ],
+       "__pivot": [
+        0,
+        0
+       ],
+       "__tags": [],
+       "__tile": null,
+       "__smartColor": "#FFCC00",
+       "__worldX": null,
+       "__worldY": null,
+       "iid": "00000000-0000-0000-0000-000000000215",
+       "width": 16,
+       "height": 16,
+       "defUid": 18,
+       "px": [
+        160,
+        288
+       ],
+       "fieldInstances": [
+        {
+         "__identifier": "TargetRoom",
+         "__type": "String",
+         "__value": "withered_grove",
+         "__tile": null,
+         "defUid": 1010,
+         "realEditorValues": [
+          {
+           "id": "V_String",
+           "params": [
+            "withered_grove"
+           ]
+          }
+         ]
+        }
+       ]
       }
      ]
     },

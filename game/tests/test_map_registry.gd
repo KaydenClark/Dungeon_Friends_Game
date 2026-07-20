@@ -7,9 +7,11 @@ extends "res://tests/gd_test.gd"
 ## through this.
 
 
-func test_ids_are_the_five_built_rooms() -> void:
-	eq(MapRegistry.ids(), ["forest", "tutorial_hub", "tutorial_chest",
-			"tutorial_pit", "tutorial_fight"], "registry lists the built rooms in stable order")
+func test_ids_are_the_built_rooms() -> void:
+	# S-004/TK-002 added the Withered Grove (D-044 thesis route).
+	eq(MapRegistry.ids(), ["forest", "withered_grove", "tutorial_hub",
+			"tutorial_chest", "tutorial_pit", "tutorial_fight"],
+			"registry lists the built rooms in stable order")
 
 
 func test_every_registered_id_builds_its_room() -> void:

@@ -12,6 +12,7 @@ extends Object
 static func _entries() -> Array[Dictionary]:
 	return [
 		{"id": "forest", "label": "Forest", "type": ForestRoom},
+		{"id": "withered_grove", "label": "Withered Grove", "type": GroveRoom},
 		{"id": "tutorial_hub", "label": "Tutorial Hub", "type": TutorialHubRoom},
 		{"id": "tutorial_chest", "label": "Chest Room", "type": TutorialChestRoom},
 		{"id": "tutorial_pit", "label": "Pit Room", "type": TutorialPitRoom},

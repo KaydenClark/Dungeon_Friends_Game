@@ -10,7 +10,12 @@
 ##
 ## Entity-layer conventions (the contract level authors follow):
 ##   PlayerSpawn                  -> Marker2D (cell only)
-##   Npc        {Lines: Array<String>, Heals: Bool, ColorHex: String}
+##   Npc        {Lines: Array<String>, Heals: Bool, ColorHex: String,
+##               RecruitId: String (S-004: recruit-on-dialogue roster id),
+##               WatchCellX/WatchCellY: Int (S-004: watched cell; -1 = none),
+##               ResolvedLines: Array<String>, ResolvedFlag: String}
+##   VineGate   {TrellisX: Int, TrellisY: Int} - blocks until its trellis
+##               cell grows a vine (S-004/D-044)
 ##   Enemy      {StatsId: String, EncounterId: String, IsBoss: Bool, LeashRadius: Int, UniqueId: String}
 ##   LockedDoor {KeyId: String, LinkId: String}
 ##   PushableBlock {LinkId: String, Movable: Bool (default true; false = fixed brick)}
@@ -32,6 +37,7 @@ const PlateScript = preload("res://scripts/puzzles/pressure_plate.gd")
 const ChestScript = preload("res://scripts/puzzles/chest.gd")
 const LeverScript = preload("res://scripts/puzzles/lever.gd")
 const CrystalScript = preload("res://scripts/puzzles/save_crystal.gd")
+const GateScript = preload("res://scripts/overworld/vine_gate.gd")
 
 
 func post_import(entity_layer: LDTKEntityLayer) -> LDTKEntityLayer:
@@ -65,6 +71,15 @@ func _spawn(entity: Dictionary) -> Node2D:
 			var hex := str(fields.get("ColorHex", ""))
 			if hex != "":
 				npc.color = Color.from_string(hex, npc.color)
+			# S-004/TK-002 (D-044) optional route fields.
+			npc.recruit_id = str(fields.get("RecruitId", ""))
+			npc.watch_cell = Vector2i(int(fields.get("WatchCellX", -1)),
+					int(fields.get("WatchCellY", -1)))
+			var resolved := PackedStringArray()
+			for line in fields.get("ResolvedLines", []):
+				resolved.append(str(line))
+			npc.resolved_lines = resolved
+			npc.resolved_flag = str(fields.get("ResolvedFlag", ""))
 			return npc
 		"Enemy":
 			var enemy: Node2D = EnemyScript.new()
@@ -104,6 +119,11 @@ func _spawn(entity: Dictionary) -> Node2D:
 			return lever
 		"SaveCrystal":
 			return CrystalScript.new()
+		"VineGate":
+			var gate: Node2D = GateScript.new()
+			gate.trellis = Vector2i(int(fields.get("TrellisX", -1)),
+					int(fields.get("TrellisY", -1)))
+			return gate
 	push_warning("entities_post_import: unknown entity '%s' - spawning a marker"
 			% entity.identifier)
 	return Marker2D.new()
