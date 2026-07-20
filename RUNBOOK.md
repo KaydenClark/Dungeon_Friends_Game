@@ -663,6 +663,15 @@ puzzle-state continuity, snapshot mode projection, and the opt-in
 `SceneManager.unified_encounters` flag staying false by default). Add a
 suite path to the `SUITES` list in `run_tests.gd` to register new tests.
 
+For the S-012/TK-005 deterministic combat replay (two scripted fights on
+fresh sessions must produce byte-identical event logs; four captures: ENTER
+cue, intent+forecast, shove counterplay, victory; exit `0` = all PASS):
+
+```bash
+cd game
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/encounter_replay_demo.tscn -- --out=/tmp/combat-replay
+```
+
 For the S-011/TK-004 same-state reaction replay (four captures: authored
 materials, exploration burn, encounter casts through the same seam, victory
 continuity; plus a context-swapped parity replay; exit `0` = all PASS):
