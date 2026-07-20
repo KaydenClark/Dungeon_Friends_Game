@@ -31,7 +31,7 @@ extends "res://scripts/dev/unified_encounter_spike.gd"
 ##   godot --path game scenes/dev/intent_prototype_spike.tscn \
 ##       --resolution 1280x720 -- --out=<dir>
 
-const IntentLogic := preload("res://scripts/dev/intent_logic.gd")
+const IntentLogic := preload("res://scripts/world/intent_logic.gd")
 const SolSnapshotAdapter := preload("res://scripts/dev/sol_snapshot_adapter.gd")
 const FormationLayoutScript := preload("res://scripts/world/party_formation_layout.gd")
 const MOVE_BUDGET := 3

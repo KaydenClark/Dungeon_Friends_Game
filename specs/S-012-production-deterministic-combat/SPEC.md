@@ -3,14 +3,14 @@
 > Generated from LLM Workbench v2.3. This stable path never moves.
 
 **Spec ID:** S-012
-**Status:** planned
+**Status:** active
 **Priority:** 1
-**Owner:** Kayden
-**Updated:** 2026-07-17
+**Owner:** claude-engineer
+**Updated:** 2026-07-20
 **Catalog description:** Replace v1 d10 arena combat with production same-room intent rounds, exact previews, four-unit any-order actions, and environmental resolution.
-**Blockers:** S-009, S-010, S-011
-**Latest event:** Intent/guard/cue behavior is proven in dev; production CombatScene still rolls d10 and swaps to authored arenas.
-**Next gate:** Complete S-009 through S-011, then an Engineer claims TK-001; the owner combat-feel/retirement verdict batches into the S-004 thesis replay per D-038.
+**Blockers:** none
+**Latest event:** TK-001 closed with proof.
+**Next gate:** Complete TK-002.
 
 ## Outcome
 
@@ -62,7 +62,7 @@ initiative, and zooms away from the world.
 
 | Ticket | Slice | Status | Blockers | Proof |
 |---|---|---|---|---|
-| TK-001 | Promote the pure intent/preview domain with dev-parity and zero-RNG tests. | ready | S-009, S-010, S-011 | pending |
+| TK-001 | Promote the pure intent/preview domain with dev-parity and zero-RNG tests. | done | none | red: test_intent_logic failed to load against the production path pre-move; green: unit 45 suites/351 tests/2368 checks PASS with 0 script errors; slice smoke 134/134; --import clean; parity test pins the intent spike loads the exact production script, the retired dev path stays absent, and the domain source is structurally zero-RNG (no randi/randf/randomize/rand_range) |
 | TK-002 | Implement local ENTER, forecast, exact current intent, and encounter-mode lifecycle in a production room. | ready | TK-001 | pending |
 | TK-003 | Integrate four-unit any-order actions, occupancy, movement, push/stun, and guarded-cell counterplay. | ready | TK-002 | pending |
 | TK-004 | Integrate environmental resolution, move undo, rewards, defeat, and staged retirement of d10/arena/zoom code. | ready | TK-003 | pending |
@@ -106,6 +106,8 @@ cd game
 |---|---|---|---|---|---|
 | 2026-07-17 | spec | Production combat migration extracted from T-090/T-092/T-097 and live source | CombatScene, TurnManager, SceneManager, IntentLogic, and tests inspected | new stable combat spec | dependencies and all slices |
 | 2026-07-19 | TK-006 | D-038 owner-approval consolidation: the combat-feel/retirement verdict batches into the S-004 thesis replay; TK-006 deferred to that gate; retired v1 code stays git-recoverable until it passes | Kayden chat directive 2026-07-19; Blueprint D-038 row | this spec, Blueprint | TK-001 through TK-005 |
+| 2026-07-20 | spec | Activated: S-009 complete; S-010 and S-011 build slices (TK-001..TK-004) closed with proof, their owner feel/vocabulary verdicts batched at the S-004 thesis replay per D-038 - TK-001's spec-level blockers cleared for build eligibility on that basis | S-009 completion evidence; S-010/S-011 ticket proofs; spec doctor green after activation and rerender | spec header + TK-001 blocker row updated; hot board rerendered | TK-001 through TK-006 |
+| 2026-07-20 | TK-001 | Ticket closed | red: test_intent_logic failed to load against the production path pre-move; green: unit 45 suites/351 tests/2368 checks PASS with 0 script errors; slice smoke 134/134; --import clean; parity test pins the intent spike loads the exact production script, the retired dev path stays absent, and the domain source is structurally zero-RNG (no randi/randf/randomize/rand_range) | RUNBOOK tally; intent_logic.gd header records the promotion contract | TK-002 production ENTER/forecast lifecycle, TK-003 four-unit actions, TK-004 environmental resolution + v1 retirement, TK-005 deterministic replay |
 
 ## Completion Result
 

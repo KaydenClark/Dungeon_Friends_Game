@@ -7,7 +7,7 @@ extends "res://tests/gd_test.gd"
 ## It must never contain reaction rules of its own.
 
 const ReactionRoomLogic := preload("res://scripts/dev/reaction_room_logic.gd")
-const IntentLogic := preload("res://scripts/dev/intent_logic.gd")
+const IntentLogic := preload("res://scripts/world/intent_logic.gd")
 
 
 func _cell(tags: Array = [], statuses := {}) -> Dictionary:

@@ -7,7 +7,7 @@ extends "res://tests/gd_test.gd"
 ## rebuild on target/head invalidation, party_ids, the generic guarded_cells
 ## effect, and the Sol deployment-snapshot adapter seam.
 
-const IntentLogic := preload("res://scripts/dev/intent_logic.gd")
+const IntentLogic := preload("res://scripts/world/intent_logic.gd")
 const SolAdapter := preload("res://scripts/dev/sol_snapshot_adapter.gd")
 
 
@@ -404,3 +404,23 @@ func test_sol_snapshot_adapter_maps_ids_to_cells() -> void:
 	not_ok(cells.has("ghost"), "ids missing from the snapshot are ignored")
 	eq(SolAdapter.encounter_start_cells({}, ["hero"]), {},
 			"an empty snapshot deploys nothing")
+
+
+func test_production_intent_parity() -> void:
+	# S-012/TK-001: one intent domain, one script, zero RNG. The promoted
+	# core lives in the production world namespace, the retired dev path is
+	# gone, dev consumers load the exact production script, and the source
+	# contains no random calls (D-026 determinism is structural, not luck).
+	not_ok(ResourceLoader.exists("res://scripts/dev/intent_logic.gd"),
+			"the retired dev copy is gone")
+	var production: GDScript = load("res://scripts/world/intent_logic.gd")
+	not_null(production, "production intent domain loads")
+	var spike: GDScript = load("res://scripts/dev/intent_prototype_spike.gd")
+	if spike != null:
+		eq(spike.get_script_constant_map().get("IntentLogic"), production,
+				"the intent spike consumes the production domain")
+	if production != null:
+		var source: String = production.source_code
+		for banned in ["randi", "randf", "randomize", "rand_range"]:
+			not_ok(source.contains(banned),
+					"intent domain has no %s call (zero-RNG)" % banned)

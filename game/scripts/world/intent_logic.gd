@@ -1,4 +1,9 @@
 extends RefCounted
+## S-012/TK-001 promoted this pure intent/preview domain unchanged from the
+## T-092/T-097 dev spike into the production world namespace; the suite pins
+## the full contract at the production path plus zero-RNG structure, and dev
+## consumers route through this exact script - no divergent copy.
+##
 ## T-092 pivot spike: deterministic intent-round combat core (D-026/D-027).
 ## Pure, scene-independent logic so the preview=result contract is directly
 ## red/green testable (tests/test_intent_logic.gd). Spike code - graduating
