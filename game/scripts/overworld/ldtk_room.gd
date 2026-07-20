@@ -638,6 +638,11 @@ func _deploy_party_for_encounter() -> String:
 			enemy_cells.append(cell)
 		elif node != player:
 			prop_cells.append(cell)
+	# S-010 review C1: plates are not occupants, but a follower deployed onto
+	# one WOULD press it via occupy(). "Followers never hold plates" (D-029)
+	# survives into encounters: plate cells are excluded like props.
+	for plate in plates:
+		prop_cells.append(plate.cell)
 	var elevations := {}
 	for cell in walkable_cells:
 		elevations[cell] = elevation_at(cell)

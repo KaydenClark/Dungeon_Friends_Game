@@ -22,3 +22,7 @@ enum TargetType { ENEMY, ALLY, SELF }
 ## the schema doesn't churn, consumed by nothing at MVP.
 @export var element: String = ""
 @export var overworld_use := false
+## S-011/TK-003 (D-031): when non-empty, using this ability routes through
+## the shared reaction seam (ReactionCaster -> room preview/commit) with this
+## verb instead of bespoke effect code. Must be one of ReactionCore.VERBS.
+@export var reaction_verb: String = ""

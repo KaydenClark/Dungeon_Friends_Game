@@ -225,3 +225,26 @@ func test_solo_roster_needs_no_deployment() -> void:
 	not_ok(room.party_deployed, "nothing to deploy for a solo roster")
 	eq(room.resolve_room_encounter(true), "", "solo encounter resolves")
 	_teardown(room)
+
+
+func test_deployment_never_presses_plates() -> void:
+	# S-010 review C1: cramped deployment beside the plate corridor must not
+	# park a follower on a plate cell - "followers never hold plates" (D-029)
+	# survives into encounters.
+	# Leader beside the plate with the preferred offset in a wall and the
+	# plate as the nearest fallback cell: without the exclusion the planner
+	# would deploy the follower onto the plate and press it.
+	var room := _make_room()
+	SceneManager.unified_encounters = true
+	var guardian := _enemy_at(room, Vector2i(5, 6))
+	room.teleport(guardian, Vector2i(2, 3))
+	room.teleport(room.player, Vector2i(2, 4))
+	var plate: PressurePlate = room.plates[0]
+	eq(room.begin_room_encounter(guardian), "", "plate-side encounter begins")
+	ok(room.party_deployed, "party deployed beside the plate")
+	for follower in room.party_followers:
+		ne(follower.cell, plate.cell,
+				"no follower deploys onto the plate cell")
+	not_ok(plate.pressed, "deployment never presses the plate")
+	eq(room.resolve_room_encounter(false), "", "encounter releases")
+	_teardown(room)

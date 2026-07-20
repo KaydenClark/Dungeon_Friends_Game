@@ -53,6 +53,7 @@ const SUITES := [
 	"res://tests/test_production_party.gd",
 	"res://tests/test_room_encounter_seam.gd",
 	"res://tests/test_room_reaction_state.gd",
+	"res://tests/test_reaction_caster.gd",
 ]
 
 

@@ -258,7 +258,11 @@ func start_encounter(enemy: OverworldEnemy) -> void:
 	# falls through to nothing rather than the v1 arena, so a half-configured
 	# room cannot double-start.
 	if unified_encounters and enemy.room is LdtkRoom:
-		(enemy.room as LdtkRoom).begin_room_encounter(enemy)
+		var seam_error := (enemy.room as LdtkRoom).begin_room_encounter(enemy)
+		if seam_error == "deployment_failed":
+			# S-010 review C2: a refused deployment must never be silent
+			# dead input - tell the player why nothing happened.
+			await show_dialogue(["(There's no room for the party to form up here!)"])
 		return
 	if world_container == null:
 		return
