@@ -683,6 +683,17 @@ cd game
 /Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/world_persistence_demo.tscn -- --out=/tmp/world-persistence
 ```
 
+For the S-014/TK-001 production readability matrix (four verified non-black
+exact-size captures per review size - party formation, cast toast, encounter
+intent/HUD, post-victory world - plus explicit GAP lines for the known
+presentation debts; run 1920 with --fullscreen per the macOS drawable note):
+
+```bash
+cd game
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/opening_readability_matrix.tscn --resolution 1280x720 -- --out=/tmp/matrix-1280
+/Applications/Godot.app/Contents/MacOS/Godot --fullscreen --path . scenes/dev/opening_readability_matrix.tscn --resolution 1920x1080 -- --out=/tmp/matrix-1920
+```
+
 For the S-013 finite-progression and recruitment demo (Wren recruits once,
 casts her field verb, wins the slime exactly once, and the ledger refuses
 every double-pay; three captures; exit `0` = all PASS):

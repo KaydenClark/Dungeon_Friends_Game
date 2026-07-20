@@ -3,14 +3,14 @@
 > Generated from LLM Workbench v2.3. This stable path never moves.
 
 **Spec ID:** S-014
-**Status:** planned
+**Status:** active
 **Priority:** 2
-**Owner:** Kayden
-**Updated:** 2026-07-17
+**Owner:** claude-engineer
+**Updated:** 2026-07-20
 **Catalog description:** Make the opening unified-world journey readable, controllable, recoverable, controller-complete, and understandable without coaching.
-**Blockers:** S-003, S-009, S-010, S-011, S-012, S-013
-**Latest event:** Legacy visual, movement, input, save, combat-UX, asset, and bug rows were consolidated under one production experience owner.
-**Next gate:** Complete the production capability chain, then an Engineer claims TK-001; the owner opening-journey verdict batches into the S-004 thesis replay per D-038.
+**Blockers:** none
+**Latest event:** TK-001 closed with proof.
+**Next gate:** Complete TK-002.
 
 ## Outcome
 
@@ -61,7 +61,7 @@ no production unified-world onboarding.
 
 | Ticket | Slice | Status | Blockers | Proof |
 |---|---|---|---|---|
-| TK-001 | Build the production readability/accessibility matrix for party, height, materials, intents, HUD, and supported resolutions. | ready | S-003, S-009, S-010, S-011, S-012, S-013 | pending |
+| TK-001 | Build the production readability/accessibility matrix for party, height, materials, intents, HUD, and supported resolutions. | done | none | windowed matrix green at both review sizes (1280x720 windowed, 1920x1080 fullscreen per the documented macOS drawable limit): four captures each under docs/screenshots/s014-readability verified exact-size and non-black (party formation, Wren's cast toast, full encounter intent/HUD, post-victory world) plus three explicit GAP findings recorded (no production elevation lift, material VFX debug-only, keyboard-only prompts pre-T-079) |
 | TK-002 | Implement the shortest no-coaching onboarding for controls, formation, friend verb, puzzle, and encounter entry. | ready | TK-001 | pending |
 | TK-003 | Close movement/facing/aggro, move-undo, focus/blocked-input, save failure, defeat, and party-status recovery gaps. | ready | TK-002 | pending |
 | TK-004 | Complete controller navigation/glyph parity and the minimum coherent visual/audio asset pass for the opening route. | ready | TK-003 | pending |
@@ -104,6 +104,7 @@ cd game
 |---|---|---|---|---|---|
 | 2026-07-17 | spec | Legacy T-028/T-051..T-059 and B-08..B-19 UX residue consolidated | source, tests, asset plans, playtests, and bug rows inspected | new stable player-experience spec | dependencies and all slices |
 | 2026-07-19 | TK-006 | D-038 owner-approval consolidation: the opening-journey verdict batches into the S-004 thesis replay; TK-006 deferred to that gate | Kayden chat directive 2026-07-19; Blueprint D-038 row | this spec, Blueprint | TK-001 through TK-005 |
+| 2026-07-20 | TK-001 | Ticket closed | windowed matrix green at both review sizes (1280x720 windowed, 1920x1080 fullscreen per the documented macOS drawable limit): four captures each under docs/screenshots/s014-readability verified exact-size and non-black (party formation, Wren's cast toast, full encounter intent/HUD, post-victory world) plus three explicit GAP findings recorded (no production elevation lift, material VFX debug-only, keyboard-only prompts pre-T-079) | RUNBOOK matrix commands; gaps recorded in the matrix output and this evidence row | TK-002 onboarding, TK-003 gap closure, TK-004 controller/asset pass, TK-005 first-session replays; the three GAP findings feed TK-004 and the S-004 art scope |
 
 ## Completion Result
 

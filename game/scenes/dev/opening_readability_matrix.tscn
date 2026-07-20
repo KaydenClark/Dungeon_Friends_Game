@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/dev/opening_readability_matrix.gd" id="1_matrix"]
+
+[node name="OpeningReadabilityMatrix" type="Node"]
+script = ExtResource("1_matrix")

@@ -41,7 +41,7 @@ normal execution.
 | [S-011 - Production Reaction Vocabulary](specs/S-011-production-reaction-vocabulary/SPEC.md) | Graduate the accepted preview-first material/effect engine into production world cells, authored data, friend verbs, and encounter callers. | active |
 | [S-012 - Production Deterministic Combat](specs/S-012-production-deterministic-combat/SPEC.md) | Replace v1 d10 arena combat with production same-room intent rounds, exact previews, four-unit any-order actions, and environmental resolution. | active |
 | [S-013 - Finite Progression And Recruitment](specs/S-013-finite-progression-and-recruitment/SPEC.md) | Define and implement finite no-grind progression, defeat/revive rules, one real recruit, equipment/economy seams, and the character surface. | active |
-| [S-014 - Opening Player Experience](specs/S-014-opening-player-experience/SPEC.md) | Make the opening unified-world journey readable, controllable, recoverable, controller-complete, and understandable without coaching. | planned |
+| [S-014 - Opening Player Experience](specs/S-014-opening-player-experience/SPEC.md) | Make the opening unified-world journey readable, controllable, recoverable, controller-complete, and understandable without coaching. | active |
 | [S-015 - Steam Release Proof](specs/S-015-steam-release-proof/SPEC.md) | Produce a reproducible, license-safe, controller-checked Steam-first release candidate and owner approval without authorizing publication. | planned |
 <!-- spec-catalog:end -->
 
