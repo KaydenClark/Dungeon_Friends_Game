@@ -1,0 +1,39 @@
+[remap]
+
+importer="ldtk.import"
+type="PackedScene"
+uid="uid://cv5ngjmcvh541"
+path="res://.godot/imported/entity_bad_declaration_room.ldtk-5a03d4ed58953e5264b3ab5e434155a5.scn"
+
+[deps]
+
+files=["res://assets/levels/tilesets/tileset_16px.res", "res://assets/levels/levels/EntityBadDeclarationRoom.scn", "res://.godot/imported/entity_bad_declaration_room.ldtk-5a03d4ed58953e5264b3ab5e434155a5.scn"]
+
+source_file="res://assets/levels/entity_bad_declaration_room.ldtk"
+dest_files=["res://.godot/imported/entity_bad_declaration_room.ldtk-5a03d4ed58953e5264b3ab5e434155a5.scn", "res://assets/levels/tilesets/tileset_16px.res", "res://assets/levels/levels/EntityBadDeclarationRoom.scn", "res://.godot/imported/entity_bad_declaration_room.ldtk-5a03d4ed58953e5264b3ab5e434155a5.scn"]
+
+[params]
+
+World=""
+group_world_layers=false
+Level=""
+pack_levels=true
+level_save_extension=0
+Layer=""
+layers_always_visible=false
+Tileset=""
+tileset_custom_data=false
+integer_grid_tilesets=false
+atlas_texture_type=0
+tileset_save_extension=0
+Entity=""
+resolve_entityrefs=true
+use_entity_placeholders=false
+Post Import=""
+tileset_post_import=""
+entities_post_import="res://scripts/ldtk/entities_post_import.gd"
+level_post_import=""
+world_post_import=""
+Debug=""
+force_tileset_reimport=false
+verbose_output=false

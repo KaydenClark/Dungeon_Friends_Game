@@ -14,18 +14,29 @@ const ART_GRID := 16
 
 ## S-009/TK-002 authoring contract for the neutral world-state seam.
 ## An optional `Elevation` IntGrid layer authors integer cell elevation: its
-## values MUST be declared ascending from 1, so the imported atlas.x index
-## maps as elevation = index + 1 (the importer stores only the value index -
-## see addons/ldtk-importer/src/layer.gd create_intgrid_layer).
+## values MUST be declared contiguous ascending from 1, so the imported
+## atlas.x index maps as elevation = index + 1 (the importer stores only the
+## value index - see addons/ldtk-importer/src/layer.gd create_intgrid_layer).
 ## An optional `Material` IntGrid layer authors initial material tags: its
-## values MUST be declared in MATERIAL_TAGS order (vine, flammable, channel,
-## smoke - the authorable subset of the D-031 ReactionCore vocabulary;
-## transient states like wet/fire/ice are never authored).
-## Any unknown value or duplicate encounter id is recorded in
-## `authoring_errors` and the world-state adapter fails closed; the v1 room
-## build itself stays green (S-009: v1 remains runnable until replacement).
+## values MUST be declared contiguous from 1 with identifiers naming
+## MATERIAL_TAGS in order (vine, flammable, channel, smoke - the authorable
+## subset of the D-031 ReactionCore vocabulary; transient states like
+## wet/fire/ice are never authored).
+## Because the import discards the declared values, the declarations are
+## re-validated against the source .ldtk at build time (declaration_errors):
+## a reordered or gapped declaration fails closed instead of silently
+## re-meaning painted cells. Exported builds strip .ldtk sources, so that
+## check runs in dev/CI where authoring happens; frozen exports carry
+## already-validated data.
+## Any declaration violation, unknown value, or duplicate encounter id is
+## recorded in `authoring_errors` and the world-state adapter fails closed;
+## the v1 room build itself stays green (S-009: v1 remains runnable until
+## replacement).
 const MATERIAL_TAGS := ["vine", "flammable", "channel", "smoke"]
 const MAX_ELEVATION := 8
+
+## level_path -> Array of declaration errors, parsed once per source file.
+static var _declaration_cache := {}
 
 var level_path := ""
 ## Which level to use from a multi-level world ("" = the first level).
@@ -159,12 +170,53 @@ static func encounter_id_for(unique_id: String, cell: Vector2i) -> String:
 	return "enc_%d_%d" % [cell.x, cell.y]
 
 
+## Validates the source .ldtk's Elevation/Material IntGrid declarations
+## against the positional authoring contract above. Returns [] when valid or
+## when the source file is unavailable (exported builds; see the header note).
+static func declaration_errors(path: String) -> Array:
+	if _declaration_cache.has(path):
+		return _declaration_cache[path]
+	var errors := []
+	if FileAccess.file_exists(path):
+		var parsed: Variant = JSON.parse_string(
+				FileAccess.get_file_as_string(path))
+		if parsed is Dictionary:
+			errors = _declaration_errors_from(parsed)
+		else:
+			errors.append("ldtk_source_unreadable:%s" % path)
+	_declaration_cache[path] = errors
+	return errors
+
+
+static func _declaration_errors_from(data: Dictionary) -> Array:
+	var errors := []
+	var defs: Dictionary = data.get("defs", {})
+	for layer in defs.get("layers", []):
+		var ident := str(layer.get("identifier", ""))
+		if ident != "Elevation" and ident != "Material":
+			continue
+		var values: Array = layer.get("intGridValues", [])
+		for i in values.size():
+			var value := int(values[i].get("value", -1))
+			var name := str(values[i].get("identifier", "")).to_lower()
+			if ident == "Elevation":
+				if value != i + 1 or value > MAX_ELEVATION:
+					errors.append("elevation_declaration_invalid:value_%d" % value)
+			else:
+				if value != i + 1 or i >= MATERIAL_TAGS.size() \
+						or name != MATERIAL_TAGS[i]:
+					errors.append("material_declaration_mismatch:value_%d" % value)
+	return errors
+
+
 ## Adopts the optional Elevation/Material IntGrid layers into the RoomGrid
 ## world-state extensions. Fail closed: any invalid authored value voids BOTH
 ## stores (no partial or guessed adoption) and records a named error; the v1
 ## room build continues unaffected.
 func _apply_authoring_layers(level: Node) -> void:
 	var errors: Array[String] = []
+	for declaration_error in declaration_errors(level_path):
+		errors.append(str(declaration_error))
 	var elevation_indices := _intgrid_value_indices(level, "Elevation-values")
 	for cell: Vector2i in elevation_indices:
 		if not in_bounds(cell):

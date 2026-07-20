@@ -14,6 +14,7 @@ extends "res://tests/gd_test.gd"
 const WorldState := preload("res://scripts/world/world_state.gd")
 const FIXTURE := "res://assets/levels/entity_test_room.ldtk"
 const BAD_FIXTURE := "res://assets/levels/entity_bad_authoring_room.ldtk"
+const BAD_DECLARATION_FIXTURE := "res://assets/levels/entity_bad_declaration_room.ldtk"
 
 
 func _make_room(level_path := FIXTURE) -> LdtkRoom:
@@ -170,6 +171,50 @@ func test_existing_room_without_layers_has_no_invented_data() -> void:
 	SceneManager.reset_session_state()
 
 
+func test_bad_declaration_fails_closed() -> void:
+	# Legal LDtk edits - reordering Material values or leaving a gap in the
+	# Elevation values - shift the imported atlas indices. The positional
+	# mapping would silently lie, so the declarations themselves are validated
+	# against the authoring contract and the room fails closed instead.
+	var room := _make_room(BAD_DECLARATION_FIXTURE)
+	not_ok(room.authoring_errors.is_empty(), "bad declarations are detected")
+	var has_material := false
+	var has_elevation := false
+	for error in room.authoring_errors:
+		if error.begins_with("material_declaration_mismatch"):
+			has_material = true
+		if error.begins_with("elevation_declaration_invalid"):
+			has_elevation = true
+	ok(has_material, "reordered Material declaration named")
+	ok(has_elevation, "non-contiguous Elevation declaration named")
+	eq(room.elevation, {}, "fail closed: no elevation adopted")
+	eq(room.materials, {}, "fail closed: no materials adopted")
+	var data: Dictionary = WorldState.snapshot_ldtk_room(room)
+	ok(data.has("error"), "snapshot adapter refuses bad declarations")
+	room.queue_free()
+	SceneManager.flags = {}
+
+
+func test_actor_id_collision_fails_closed() -> void:
+	# Defense in depth for the adapter: an authored UniqueId that collides
+	# with a reserved actor id ("player", an NPC id, an object id) must never
+	# silently overwrite another actor in the snapshot.
+	var room := _make_room()
+	var pair := _find_enemy_at(room, Vector2i(9, 5))
+	not_null(pair, "fixture enemy present")
+	if pair != null:
+		room.authored_encounters.erase(pair.world_encounter_id)
+		pair.world_encounter_id = "player"
+		room.authored_encounters["player"] = Vector2i(9, 5)
+		var data: Dictionary = WorldState.snapshot_ldtk_room(room)
+		ok(data.has("error"), "colliding actor ids refuse the snapshot")
+		if data.has("error"):
+			ok(str(data["error"]).begins_with("actor_id_collision"),
+					"collision error is named")
+	room.queue_free()
+	SceneManager.flags = {}
+
+
 func test_bad_authoring_fails_closed() -> void:
 	var room := _make_room(BAD_FIXTURE)
 	# The bad fixture authors an unknown fifth material value AND two enemies
@@ -192,7 +237,8 @@ func test_bad_authoring_fails_closed() -> void:
 	ok(data.has("error"), "snapshot adapter refuses a bad-authored room")
 	if data.has("error"):
 		ok(str(data["error"]).begins_with("unknown_material_value") \
-				or str(data["error"]).begins_with("duplicate_encounter_id"),
+				or str(data["error"]).begins_with("duplicate_encounter_id") \
+				or str(data["error"]).begins_with("material_declaration_mismatch"),
 				"snapshot error names the authoring problem")
 	room.queue_free()
 	SceneManager.flags = {}

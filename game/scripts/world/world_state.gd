@@ -257,6 +257,11 @@ static func snapshot_ldtk_room(room: LdtkRoom) -> Dictionary:
 			actor_map[node] = {"id": "npc_%d_%d" % [cell.x, cell.y],
 					"kind": "npc"}
 	var data := snapshot_room_grid(room, actor_map)
+	# Defense in depth: every occupant must survive as exactly one actor. A
+	# reserved-id collision (e.g. an authored UniqueId of "player" or an NPC
+	# cell id) would silently overwrite an actor in the keyed dictionary.
+	if data["actors"].size() != room.occupants.size():
+		return {"error": "actor_id_collision"}
 	if actor_map.values().any(func(m): return m["id"] == "player"):
 		data["party"] = {"leader": "player", "members": ["player"]}
 	var out_encounters := {}
