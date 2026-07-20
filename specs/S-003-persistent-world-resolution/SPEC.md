@@ -5,12 +5,12 @@
 **Spec ID:** S-003
 **Status:** active
 **Priority:** 1
-**Owner:** unassigned
-**Updated:** 2026-07-17
+**Owner:** claude-engineer
+**Updated:** 2026-07-20
 **Catalog description:** Persist resolved encounters and environmental changes across leave, save, quit, relaunch, and load without losing soft-lock recovery.
-**Blockers:** S-009, S-011, S-012
-**Latest event:** Canon reconciliation separated dev-scene reaction proof from the production world and encounter state this persistence contract must serialize.
-**Next gate:** Complete the production-state contracts in S-009, S-011, and S-012, then claim TK-001 and prove the two-process battery red.
+**Blockers:** none
+**Latest event:** TK-001 closed with proof.
+**Next gate:** Complete TK-002.
 
 ## Outcome
 
@@ -60,7 +60,7 @@ environmental state.
 
 | Ticket | Slice | Status | Blockers | Proof |
 |---|---|---|---|---|
-| TK-001 | Add a failing two-process battery for resolved encounter, environment, and movable reset. | ready | S-009, S-011, S-012 | pending |
+| TK-001 | Add a failing two-process battery for resolved encounter, environment, and movable reset. | done | none | battery exists and fails red for exactly the expected reasons: save phase 8/10 with 'resolved encounter stays resolved on rebuild (D-028)' and 'environmental burn survives the rebuild' failing while the D-023 block-reset escape valve passes; resolution/burn are produced through the real seams (begin/resolve_room_encounter, ReactionCaster); --import clean |
 | TK-002 | Persist stable encounter IDs and neutral environmental state with fail-closed loading. | ready | TK-001 | pending |
 | TK-003 | Run the full suite and owner-visible persistence demo. | ready | TK-002 | pending |
 
@@ -101,6 +101,7 @@ cd game
 |---|---|---|---|---|---|
 | 2026-07-13 | spec | Migrated from legacy T-091 | existing v1 save/load battery and current schema inspected | v2.3 controls and spec created | S-002 owner gate and all implementation slices |
 | 2026-07-17 | spec | Reconciled persistence with the production capability chain | source and current schema inspected; dev-only proof kept distinct from production state | dependencies corrected to S-009, S-011, and S-012 | all implementation slices |
+| 2026-07-20 | TK-001 | Ticket closed | battery exists and fails red for exactly the expected reasons: save phase 8/10 with 'resolved encounter stays resolved on rebuild (D-028)' and 'environmental burn survives the rebuild' failing while the D-023 block-reset escape valve passes; resolution/burn are produced through the real seams (begin/resolve_room_encounter, ReactionCaster); --import clean | battery header documents the two-process contract; Docs checked; no other update needed (red slice) | TK-002 persists stable encounter ids + material state with fail-closed loading and turns this battery green; TK-003 full suite + owner demo |
 
 ## Completion Result
 
