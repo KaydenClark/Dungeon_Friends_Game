@@ -650,6 +650,15 @@ puzzle-state continuity, snapshot mode projection, and the opt-in
 `SceneManager.unified_encounters` flag staying false by default). Add a
 suite path to the `SUITES` list in `run_tests.gd` to register new tests.
 
+For the S-011/TK-004 same-state reaction replay (four captures: authored
+materials, exploration burn, encounter casts through the same seam, victory
+continuity; plus a context-swapped parity replay; exit `0` = all PASS):
+
+```bash
+cd game
+/Applications/Godot.app/Contents/MacOS/Godot --path . scenes/dev/reaction_replay_demo.tscn -- --out=/tmp/reaction-replay
+```
+
 For the S-009/TK-004 windowed proof (three captures: exploration with pushed
 block, in-room encounter with banner and gated input, victory with the same
 room state; prints 12 PASS lines, exit `0`):
