@@ -86,6 +86,9 @@ var _party_toast: CanvasLayer
 ## S-010/TK-004 (D-037): true while followers hold real occupancy on their
 ## legal deployment cells for the active encounter.
 var party_deployed := false
+## S-012/TK-002: the production intent-round controller for the active
+## in-room encounter; null outside encounters.
+var room_encounter: RoomEncounter
 ## S-011/TK-002 (D-031): the room's LIVE material/effect state - exactly the
 ## {width, height, cells: {tags, statuses}} shape ReactionCore consumes.
 ## Seeded once at build from the validated authored Material layer; mutated
@@ -579,6 +582,7 @@ func _show_party_toast(text: String) -> void:
 ## without an in_encounter guard).
 func _exit_tree() -> void:
 	if active_encounter_id != "":
+		room_encounter = null   # freed with the room's children
 		_release_party_deployment()
 		active_encounter_id = ""
 		_active_encounter_enemy = null
@@ -604,6 +608,17 @@ func begin_room_encounter(enemy: OverworldEnemy) -> String:
 	var deployment_error := _deploy_party_for_encounter()
 	if deployment_error != "":
 		return deployment_error
+	# S-012/TK-002: the intent-round controller mirrors the room into the
+	# promoted domain and declares round one. A failed setup undoes the
+	# deployment and refuses entry (fail closed, no side effects).
+	var controller := RoomEncounter.new()
+	var setup_error := controller.setup(self, enemy)
+	if setup_error != "":
+		controller.free()
+		_release_party_deployment()
+		return setup_error
+	room_encounter = controller
+	add_child(controller)
 	active_encounter_id = enemy.world_encounter_id
 	_active_encounter_enemy = enemy
 	SceneManager.in_encounter = true
@@ -691,6 +706,9 @@ func resolve_room_encounter(victory: bool) -> String:
 			and is_instance_valid(_active_encounter_enemy):
 		SceneManager.apply_enemy_rewards(_active_encounter_enemy)
 		_active_encounter_enemy.defeated()
+	if room_encounter != null:
+		room_encounter.queue_free()
+		room_encounter = null
 	_release_party_deployment()
 	active_encounter_id = ""
 	_active_encounter_enemy = null

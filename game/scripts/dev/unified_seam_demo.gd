@@ -64,6 +64,13 @@ func _run() -> void:
 	_check(SceneManager.in_encounter, "exploration input gated")
 	_check(room.player.cell == Vector2i(8, 5), "leader never moved")
 	_check(room.player.camera == camera, "same camera node, no zoom")
+	# Wait out the D-036 ENTER beat so the S-012 intent panel and cell
+	# highlights are visible in the capture.
+	await _frames(45)
+	_check(room.room_encounter != null, "intent controller running")
+	if room.room_encounter != null:
+		_check(not room.room_encounter.current_intent.is_empty(),
+				"enemy intent declared")
 	await _shot("2-encounter")
 
 	_check(room.resolve_room_encounter(true) == "", "victory resolves in place")
