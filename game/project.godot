@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Dungeon Friends"
-run/main_scene="res://scenes/main.tscn"
+run/main_scene="res://scenes/dev/visible_party_exploration_spike.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
 
 [autoload]
