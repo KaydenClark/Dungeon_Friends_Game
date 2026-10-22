@@ -1,0 +1,33 @@
+# --- Godot 4 ---
+.godot/
+.import/
+export.cfg
+export_credentials.cfg
+
+# --- Mono/C# (only relevant if the project ever adds C#) ---
+.mono/
+data_*/
+
+# --- Exported builds (don't commit binaries) ---
+game/builds/
+*.exe
+*.app/
+*.apk
+*.aab
+*.dmg
+*.pck
+*.zip
+
+# --- Android signing: NEVER commit these ---
+*.keystore
+*.jks
+
+# If export_presets.cfg ever contains embedded signing passwords, uncomment:
+# game/export_presets.cfg
+
+# --- macOS ---
+.DS_Store
+
+# --- Editor/OS cruft ---
+*.tmp
+*.bak

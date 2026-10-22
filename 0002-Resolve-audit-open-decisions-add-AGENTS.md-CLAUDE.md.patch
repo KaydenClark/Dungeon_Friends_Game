@@ -1,0 +1,408 @@
+From 4bf339760e7a9e714e375dec7490d60858464cac Mon Sep 17 00:00:00 2001
+From: Kayden Clark <kaydenclark725@gmail.com>
+Date: Thu, 11 Jun 2026 18:23:10 +0000
+Subject: [PATCH 2/2] Resolve audit open decisions; add
+ AGENTS.md/CLAUDE.md/.gitignore
+
+- 240x160 GBA-like base resolution (3:2), nearest-neighbor, integer scaling,
+  unrestricted palette - resolves Doc A vs Doc B disagreement (decision 1)
+- Drop global SCREEN_TEXTURE palette-swap shader from MVP entirely; sidesteps
+  godot/godot#79914 on Compatibility renderer; cosmetic CRT shader moved to
+  stretch goals (decision 2)
+- Aseprite chosen as primary art tool for Lua/CLI scripting -> AI-agent
+  (Claude/Codex) batch sprite export automation; Pixelorama as free fallback,
+  Pixen rejected (decision 3); added audit section 8.1 pros/cons table
+- Audio: Furnace -> .ogg -> simple AudioStreamPlayer manager; literal
+  4-channel hardware-emulation engine with channel-stealing dropped, not
+  deferred (decision 4)
+- Repo layout: /game holds the Godot project; docs/, AGENTS.md, CLAUDE.md,
+  .gitignore, README.md live at repo root (decision 5)
+- AGENTS.md: canonical cross-agent (Claude/Codex) project reference
+- CLAUDE.md: thin Claude-specific pointer to AGENTS.md
+- .gitignore: Godot build artifacts, Android keystores/signing files, macOS
+  cruft
+
+Propagated across audited_research.md (sections 8, 8.1, 10) and Gameplan.md
+(header, sections 1, 3.2, 4, 6, 13-19).
+---
+ .gitignore                        | 33 ++++++++++++++
+ AGENTS.md                         | 57 ++++++++++++++++++++++++
+ CLAUDE.md                         | 10 +++++
+ docs/README.md                    |  4 +-
+ docs/planning/Gameplan.md         | 72 ++++++++++++++++++-------------
+ docs/research/audited_research.md | 30 ++++++++-----
+ 6 files changed, 166 insertions(+), 40 deletions(-)
+ create mode 100644 .gitignore
+ create mode 100644 AGENTS.md
+ create mode 100644 CLAUDE.md
+
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..039e65a
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,33 @@
++# --- Godot 4 ---
++.godot/
++.import/
++export.cfg
++export_credentials.cfg
++
++# --- Mono/C# (only relevant if the project ever adds C#) ---
++.mono/
++data_*/
++
++# --- Exported builds (don't commit binaries) ---
++game/builds/
++*.exe
++*.app/
++*.apk
++*.aab
++*.dmg
++*.pck
++*.zip
++
++# --- Android signing: NEVER commit these ---
++*.keystore
++*.jks
++
++# If export_presets.cfg ever contains embedded signing passwords, uncomment:
++# game/export_presets.cfg
++
++# --- macOS ---
++.DS_Store
++
++# --- Editor/OS cruft ---
++*.tmp
++*.bak
+diff --git a/AGENTS.md b/AGENTS.md
+new file mode 100644
+index 0000000..600932f
+--- /dev/null
++++ b/AGENTS.md
+@@ -0,0 +1,57 @@
++# Agent Instructions — Dungeon Friends
++
++This file is the canonical reference for any AI agent (Claude, Codex, or other) working in this repo. Read this before making changes. For the full design/architecture rationale, read `docs/planning/Gameplan.md` and `docs/research/audited_research.md` — this file is a quick-reference summary, those are the source of truth for *why*.
++
++## Project summary
++
++A GBA-like (not GBC-like) 2D top-down adventure RPG: grid-based overworld + dungeons (Zelda-style puzzles: pushable blocks, switches, locked doors), turn-based party combat, recruitable party members. Built in Godot 4.6.x / GDScript, targeting macOS, Windows, and Android. Solo developer (Kayden), heavily AI-assisted.
++
++## Repo layout
++
++- `/game` — the Godot project. `game/project.godot` is the project root. Open this in Godot 4.6+.
++- `/docs` — planning and research docs. Start with `docs/planning/Gameplan.md`.
++- `/AGENTS.md`, `/CLAUDE.md` — this file and its Claude-specific pointer.
++
++Inside `/game`:
++
++```
++game/
++├── addons/ldtk-importer/   # heygleeson's LDtk importer (do not hand-edit)
++├── assets/
++│   ├── art/                # Aseprite source files, exported sprite sheets, _scripts/ for batch export
++│   ├── audio/               # Furnace exports (.ogg)
++│   └── levels/world.ldtk    # single LDtk project, all levels
++├── data/                     # .tres Resource instances (characters/, enemies/, items/, abilities/, encounters/)
++├── scenes/                   # .tscn files
++├── scripts/                  # .gd files, mirrors scenes/ + data class defs in scripts/data/
++└── shaders/
++```
++
++## Locked technical decisions (do not relitigate without flagging to Kayden)
++
++- **Engine/renderer**: Godot 4.6.x, GDScript, **Mobile** renderer.
++- **Resolution**: **240x160** base resolution (GBA-like, 3:2), nearest-neighbor filtering, integer scaling, viewport stretch mode, `keep` aspect.
++- **Palette**: unrestricted — do not add a global 4-color palette shader or `SCREEN_TEXTURE` post-process. (This was deliberately removed; see audit §4.1 and §8 decision #2.)
++- **Tilemaps**: use `TileMapLayer`, never the deprecated `TileMap` node.
++- **Pathfinding**: `AStarGrid2D` with `diagonal_mode = DIAGONAL_MODE_NEVER`, Manhattan heuristic.
++- **Movement**: grid-snapped via `Tween`, never raw `velocity`-based free movement.
++- **Data**: all stats/items/abilities are `Resource` (`.tres`) subclasses defined in `scripts/data/`. Never hardcode balance numbers in scene scripts.
++- **Architecture**: single Autoload (`SceneManager`). No other autoloads — additional global state goes on `SceneManager`'s `GameState`/`SaveData` resource, not new singletons.
++- **Combat**: two-layer FSM (Battle FSM + per-entity FSM) + `TurnManager`, ordered by `speed` stat.
++- **Audio**: Furnace Tracker → `.ogg` → simple `AudioStreamPlayer`/`AudioStreamPlayer2D`. No literal hardware-channel-emulation engine — that idea was deliberately dropped, not deferred.
++- **Art tool**: Aseprite primary (Lua/CLI scriptable — scripts live in `game/assets/art/_scripts/`). Pixelorama is an acceptable free fallback for one-off edits.
++- **Enemies**: visible on the overworld map, synchronized-turn movement (move when player moves), trigger combat on contact. No random/invisible encounters.
++
++## MVP vs. Stretch
++
++Before adding *any* new system (equipment, elemental damage, traversal abilities, resource gauges, roguelike mode, etc.), check `docs/planning/Gameplan.md` §16 (MVP Scope) and §17 (Stretch Goals, sequenced). If a request would add something from §17 out of order, flag it to Kayden rather than just building it — the sequencing exists to manage scope on a solo project.
++
++## Conventions
++
++- Milestones are sized to 2-3 hour chunks (Gameplan §15) — when picking up work, prefer completing one milestone cleanly over partially starting several.
++- Commit messages: describe what changed and why, referencing the Gameplan section/milestone where relevant (e.g., "M2.1: implement PushableBlock + PressurePlate").
++- Don't commit Android keystores (`.jks`/`.keystore`) or signing passwords. See `.gitignore`.
++
++## Running the project
++
++Open `game/project.godot` in the Godot 4.6+ editor and press F5 (or run a specific scene with F6). There is no separate build step for development — exports (macOS/Windows/Android) are configured via the Godot editor's Export dialog per `docs/planning/Gameplan.md` §14.
+diff --git a/CLAUDE.md b/CLAUDE.md
+new file mode 100644
+index 0000000..6180ab3
+--- /dev/null
++++ b/CLAUDE.md
+@@ -0,0 +1,10 @@
++# Claude Instructions — Dungeon Friends
++
++Read `AGENTS.md` first — it has the canonical project summary, repo layout, locked technical decisions, and conventions shared by all agents (Claude and Codex).
++
++A few Claude-specific notes on top of that:
++
++- For multi-step work (a milestone from `docs/planning/Gameplan.md` §15, or any task touching several files), use the task list (TaskCreate/TaskUpdate) to track progress.
++- When a milestone involves new gameplay systems, sanity-check against `docs/planning/Gameplan.md` §16/§17 (MVP vs. Stretch) before building — see AGENTS.md "MVP vs. Stretch."
++- If you're about to make an architectural change that contradicts a "locked technical decision" in AGENTS.md, stop and flag it to Kayden rather than proceeding — those decisions were made deliberately after an audit (`docs/research/audited_research.md`) and changing them has ripple effects across the data model, scene structure, and milestones.
++- Source-of-truth order when in doubt: `AGENTS.md` (quick reference) → `docs/planning/Gameplan.md` (full rationale) → `docs/research/audited_research.md` (why the toolchain/architecture choices were made).
+diff --git a/docs/README.md b/docs/README.md
+index 855a510..ae4c3a9 100644
+--- a/docs/README.md
++++ b/docs/README.md
+@@ -1,6 +1,8 @@
+ # Dungeon Friends — Docs Index
+ 
+-- [Research Audit](research/audited_research.md) — fact-check of the two Gemini research docs (tools/engine choices and design/architecture claims), with confidence ratings and a final toolchain recommendation.
++- [Research Audit](research/audited_research.md) — fact-check of the two Gemini research docs (tools/engine choices and design/architecture claims), with confidence ratings and a final toolchain recommendation. All open decisions resolved as of 2026-06-11 (§8).
+ - [Gameplan](planning/Gameplan.md) — architecture and development plan: vision, systems design, data models, repo/scene structure, milestones (2-3 hr chunks), MVP scope, and stretch goals.
+ 
+ Read the audit first — the Gameplan's technical decisions (engine renderer, level editor, data architecture, combat/overworld systems) are based on its findings.
++
++For AI-agent (Claude/Codex) working conventions, see [`/AGENTS.md`](../AGENTS.md) and [`/CLAUDE.md`](../CLAUDE.md) at the repo root.
+diff --git a/docs/planning/Gameplan.md b/docs/planning/Gameplan.md
+index 2ed32f1..81f1107 100644
+--- a/docs/planning/Gameplan.md
++++ b/docs/planning/Gameplan.md
+@@ -1,9 +1,10 @@
+ # Dungeon Friends — Gameplan
+ 
+-Status: Draft v1, 2026-06-10
++Status: Draft v2, 2026-06-11 — all 5 open decisions from the audit resolved (see audit §8)
+ Companion document: `docs/research/audited_research.md` (read that first — this plan builds on its conclusions)
+ Engine target: Godot 4.6.x (GDScript), Mobile renderer
+ Platforms: macOS, Windows, Android (desktop-first development)
++Base resolution: 240x160 (GBA-like, 3:2), nearest-neighbor filtering, integer scaling, unrestricted palette
+ 
+ ---
+ 
+@@ -11,7 +12,7 @@ Platforms: macOS, Windows, Android (desktop-first development)
+ 
+ A Game Boy-*inspired* (not Game Boy-accurate) 2D top-down adventure RPG. The player explores a grid-based overworld and dungeons in the structural tradition of classic Zelda games — block-pushing, switches, locked doors, key items that unlock new areas — while recruiting party members ("Dungeon Friends") who fight alongside them in turn-based combat encounters.
+ 
+-Tone: readable, chunky, retro-pixel, low-color-count. Not a hardware recreation — a *modern* small game wearing retro clothes. "Gameboy-like" describes the silhouette (resolution, palette restraint, grid movement, tile-based dungeons), not a literal emulation target.
++Tone: readable, chunky, retro-pixel, **GBA-like** rather than GBC-like — richer color than a literal Game Boy, but still low-resolution, grid-based, and tile-based. Not a hardware recreation — a *modern* small game wearing retro clothes. "Retro" describes the silhouette (resolution, grid movement, tile-based dungeons), not a literal emulation target or a forced color-count limit.
+ 
+ Design pillars (in priority order):
+ 1. **Movement and puzzles must feel precise.** Every action snaps to the grid. No floaty physics.
+@@ -63,14 +64,14 @@ Main (persistent root)
+ 
+ **Why only one Autoload:** the audit confirms Resource-based data (`.tres` files for character/enemy/item stats) decouples data from nodes. With Resources doing the data-decoupling job, SceneManager only needs to hold *transient* state (current map path, player spawn point, active party array reference, pending encounter data) — not become a junk drawer of global variables. `GameState` (party roster, inventory, flags, position) is itself a `Resource` held *by* SceneManager, which makes save/load trivial (see §12).
+ 
+-### 3.2 Rendering configuration (locks in Milestone 1)
++### 3.2 Rendering configuration (locked — resolved 2026-06-11)
+ 
+ - Project Settings → Rendering → Renderer: **Mobile**
+ - Default Texture Filter: **Nearest**
+-- Stretch Mode: **viewport**, Aspect: **keep** or **expand** (decide after first sprites are drawn)
++- Stretch Mode: **viewport**, Aspect: **keep** (revisit `expand` only if 240x160 pillarboxes badly on common phone aspect ratios)
+ - Stretch Scale Mode: **integer**
+-- Base resolution: **placeholder 320x180** (16:9, multiple of 20x20 — adjust after Open Decision #1 from the audit is resolved; could land on 256x224 (4:3.5-ish, GBA-like) or stay 320x180)
+-- Optional 4-8 color palette shader: implement as a `CanvasLayer` + `ColorRect` + `ShaderMaterial` reading `SCREEN_TEXTURE`, but **test it on a real Android device early** (Milestone 1) because of the Compatibility-renderer artifact noted in the audit. If it misbehaves on Mobile renderer too, fall back to per-sprite/material palette shaders.
++- Base resolution: **240x160** (GBA-native, 3:2 aspect ratio). Resolved in favor of "GBA-like, not GBC-like" — Kayden isn't targeting a literal Game Boy look, and 240x160 gives more screen real estate than 160x144 while staying low-res and grid-friendly (240 = 15 × 16px tiles, 160 = 10 × 16px tiles).
++- Palette: **unrestricted**. No forced 4-color palette and **no global `SCREEN_TEXTURE` palette-swap shader in MVP** — this was the source of the Compatibility-renderer bug risk (audit §4.1), and it's no longer needed once the palette isn't artificially constrained. Author sprites/tiles with whatever colors look good. A CRT/scanline-style cosmetic shader remains a possible Stretch Goal (see §17), tested per-platform with a settings toggle.
+ 
+ ### 3.3 Core engineering patterns (all confirmed sound in the audit)
+ 
+@@ -84,10 +85,14 @@ Main (persistent root)
+ 
+ ## 4. Repo Structure Proposal
+ 
++Resolved (decision #5, 2026-06-11): Godot project lives entirely under `/game`; everything else useful for AI-agent collaboration (planning docs, agent instructions, conventions) lives at repo root, so as much of the project as is reasonably safe is visible on GitHub.
++
+ ```
+ Dungeon_Friends_Game/
+ ├── README.md
+-├── .gitignore                  # Godot-specific (.godot/, *.translation, export presets w/ secrets)
++├── CLAUDE.md                    # Claude-specific entry point (points at AGENTS.md + Gameplan)
++├── AGENTS.md                    # canonical agent instructions: stack, conventions, where things live
++├── .gitignore                  # Godot-specific (.godot/, exports, keystores/secrets — see note below)
+ ├── docs/
+ │   ├── README.md                # index (this commit adds it)
+ │   ├── research/
+@@ -133,7 +138,9 @@ Dungeon_Friends_Game/
+         └── palette_swap.gdshader
+ ```
+ 
+-Rationale: keeping the Godot project in a `game/` subfolder (rather than repo root) keeps `docs/` cleanly separate and avoids ever mixing documentation tooling with Godot's `.godot/` cache. If you'd rather keep `project.godot` at repo root for simplicity (one less path to think about), that's a reasonable alternative — flagged as an **open decision**, default proposal above keeps things tidy as the docs/ folder grows.
++Rationale: keeping the Godot project in a `game/` subfolder keeps `docs/`, `CLAUDE.md`, and `AGENTS.md` cleanly separate and avoids ever mixing documentation/agent-config with Godot's `.godot/` cache.
++
++**What's safe to commit vs. not:** almost everything here is safe — source code, scenes, resources, art source files, docs, and agent config are all plain text or binary assets with no secrets. The two things that must NOT be committed are: (1) Android release **keystores** (`.jks`/`.keystore` files) and (2) `export_presets.cfg` if it ever has signing passwords pasted directly into it (Godot supports leaving these blank and entering them per-export instead — prefer that). `.gitignore` covers both; see CLAUDE.md/AGENTS.md for the convention once `game/` exists.
+ 
+ ---
+ 
+@@ -263,9 +270,10 @@ class_name MapMeta
+ @export var display_name: String
+ @export var music_track: AudioStream
+ @export var encounter_table: Array[EncounterData]   # which enemies can spawn here
+-@export var default_palette: Array[Color]            # for the palette shader (overworld vs dungeon mood)
+ ```
+ 
++(No `default_palette` field — the global palette-swap shader was dropped from MVP, see §3.2. If a per-area cosmetic shader is added later as a Stretch Goal, add the field back then.)
++
+ ### EncounterData (`extends Resource`)
+ ```
+ class_name EncounterData
+@@ -390,18 +398,20 @@ Use Godot's **Input Map** (Project Settings → Input Map) as the single source
+ ## 13. Art and Audio Pipeline
+ 
+ ### Art
+-1. Author sprites/tiles in **Aseprite** (or Pixelorama), strictly on the chosen pixel grid (8x8 or 16x16 base unit), at the locked palette (§3.2 / Open Decision #1).
+-2. Export tilesets as PNG sprite sheets, sized as exact multiples of the grid unit (per audit's confirmed best practice — prevents sub-pixel artifacting).
+-3. Import tilesets into **LDtk**, build levels there (IntGrid for collision/logic, AutoLayers for visual tiling).
+-4. Export `.ldtk` → import into Godot via `heygleeson/godot-ldtk-importer` → `TileMapLayer` nodes + entity scenes generated automatically.
+-5. Character/enemy sprite sheets import directly into Godot as `SpriteFrames` resources for `AnimatedSprite2D`.
+-6. Project Settings: Default Texture Filter = Nearest (locked in Milestone 1, §3.2).
++1. Author sprites/tiles in **Aseprite** (resolved primary tool, decision #3 — see audit §8.1 for the pros/cons table), at the 240x160 base resolution (§3.2), on a 16x16 grid unit, with no palette restriction.
++2. Use Aseprite's **Lua scripting + CLI batch mode** (`aseprite -b script.lua`) to script repetitive asset-pipeline work — slicing sprite sheets, batch-exporting animation frames, regenerating exports after edits — so Claude/Codex can drive the art pipeline without manual GUI steps. Keep these scripts in `game/assets/art/_scripts/`.
++3. Export tilesets as PNG sprite sheets, sized as exact multiples of the grid unit (per audit's confirmed best practice — prevents sub-pixel artifacting).
++4. Import tilesets into **LDtk**, build levels there (IntGrid for collision/logic, AutoLayers for visual tiling).
++5. Export `.ldtk` → import into Godot via `heygleeson/godot-ldtk-importer` → `TileMapLayer` nodes + entity scenes generated automatically.
++6. Character/enemy sprite sheets import directly into Godot as `SpriteFrames` resources for `AnimatedSprite2D`.
++7. Project Settings: Default Texture Filter = Nearest (locked in §3.2).
++8. Pixelorama remains available as a free fallback for quick edits if Aseprite isn't on hand.
+ 
+ ### Audio
+-1. Compose music/SFX in **Furnace Tracker**, targeting the Game Boy DMG chip emulation (2 pulse + 1 wave + 1 noise) for an authentic *sound*, without necessarily building the literal channel-stealing engine architecture from Doc B (that's a Stretch Goal — see §16).
++1. Compose music/SFX in **Furnace Tracker** for a chiptune *sound* (resolved decision #4 — authenticity of *sound*, not of *engine architecture*).
+ 2. Render/export tracks as `.ogg` (good compression, low CPU decode cost — confirmed sensible for Android per audit).
+ 3. Import into Godot as `AudioStream` resources; play via `AudioStreamPlayer` (music) and `AudioStreamPlayer2D` (positional SFX, if any).
+-4. MVP audio manager: a single `MusicPlayer` autoload-adjacent node (owned by `SceneManager`) that crossfades between tracks on map change, plus a simple `SFXPlayer` pool for one-shot sounds. The "4-channel hardware simulation with music-ducking for SFX" (Doc B) is a nice authenticity touch but **explicitly deferred to Stretch Goals** — it's polish, not core functionality.
++4. Audio manager: a single `MusicPlayer` node (owned by `SceneManager`) that crossfades between tracks on map change, plus a simple `SFXPlayer` pool for one-shot sounds. **This is the permanent design, not a placeholder** — the literal "4-channel hardware engine with channel-stealing" architecture from Doc B has been dropped entirely (decision #4), not deferred. Revisit only if a specific authenticity itch comes up later, and even then treat it as a low-priority "nice to have," not a planned item.
+ 
+ ---
+ 
+@@ -424,7 +434,7 @@ Set this up **early** (Milestone 2-3), not at the end — confirming all three e
+ - Configure Godot Editor Settings → Export → Android with the SDK/JDK paths.
+ - Generate a debug build first (uses Godot's debug keystore automatically) to validate the export pipeline works end-to-end.
+ - For any release build: generate a release keystore via `keytool`, configure in the Android export preset.
+-- **Test on a real Android device early** (Milestone 2-3) — this is also when you validate the touch input layer (§11) and the palette shader renderer choice (§3.2 / audit §4.1).
++- **Test on a real Android device early** (Milestone 2-3) — this is also when you validate the touch input layer (§11) and confirm Mobile renderer performance on real hardware (the `SCREEN_TEXTURE`/Compatibility-renderer concern from audit §4.1 no longer applies since the MVP doesn't use a global palette shader, §3.2).
+ 
+ ---
+ 
+@@ -438,10 +448,10 @@ Each milestone is sized for a single AI-assisted working session. Milestones are
+ - **M0.3**: Set up export presets for macOS, Windows, Android (debug). Produce one trivial build per platform to confirm the pipeline works end-to-end. Test on real Android device if available.
+ 
+ ### Phase 1 — Movement & World Skeleton
+-- **M1.1**: Resolve Open Decision #1 (base resolution/palette). Draw a tiny test tileset (floor, wall, 1 character) in Aseprite/Pixelorama at the locked grid size.
++- **M1.1**: Draw a tiny test tileset (floor, wall, 1 character) in Aseprite at 240x160 base resolution / 16x16 grid (per locked §3.2 settings). Set up the Aseprite batch-export script (`game/assets/art/_scripts/`).
+ - **M1.2**: Build a minimal LDtk project (one small room) with a Wall IntGrid layer; install `heygleeson/godot-ldtk-importer`; import into Godot, confirm `TileMapLayer` + collision generate correctly.
+ - **M1.3**: Implement grid-snapped player movement (Tween-based, raycast-checked) per §3.3. Player can walk around the test room and collide with walls.
+-- **M1.4**: Implement the palette-swap shader prototype; test on Mobile renderer (desktop) and on a real Android device. Resolve audit's Compatibility-renderer concern here, before building more on top of it.
++- **M1.4**: Confirm the 240x160 viewport + integer scaling looks correct at common desktop and phone aspect ratios (test `keep` vs `expand` aspect with the test tileset). No palette shader work needed here — that's been removed from MVP (§3.2).
+ 
+ ### Phase 2 — Puzzle Primitives & Room Transitions
+ - **M2.1**: Implement `PushableBlock` + `PressurePlate` + simple `PuzzleController` wiring (§9). Build one test puzzle room.
+@@ -486,9 +496,11 @@ The MVP is **everything in Phases 0-6 above**, summarized:
+ - Save/load with multiple slots, persisted flags and defeated-enemy state.
+ - Keyboard + controller + Android touch input all working.
+ - Builds run on macOS, Windows, and Android.
+-- Game Boy-inspired visuals (locked resolution/palette) and Furnace-composed music/SFX for this one dungeon.
++- GBA-like visuals (240x160, integer-scaled, unrestricted palette) and Furnace-composed music/SFX for this one dungeon.
+ 
+-**Explicitly NOT in MVP** (see Stretch Goals): equipment system, elemental counters, traversal/Psynergy-style abilities, Ikari/Djinn-style resource mechanics, telegraphed "perfect information" combat UI, roguelike postgame, literal 4-channel audio engine, multiple dungeons/full overworld.
++**Explicitly NOT in MVP** (see Stretch Goals): equipment system, elemental counters, traversal/Psynergy-style abilities, Ikari/Djinn-style resource mechanics, telegraphed "perfect information" combat UI, roguelike postgame, multiple dungeons/full overworld, any global palette/CRT shader.
++
++**Explicitly dropped, not just deferred**: the literal 4-channel hardware-emulation audio engine (channel-stealing for SFX) — see decision #4 in the audit, §8.
+ 
+ ---
+ 
+@@ -502,29 +514,31 @@ Ordered roughly by "smallest addition for the value" — each builds additively
+ 4. **Traversal/Psynergy-style abilities** (Golden Sun-inspired, Doc B): mark certain `AbilityData` as `overworld_use = true`; player can trigger them outside combat to interact with tagged overworld objects (push pillar, freeze water, clear debris). Builds on the puzzle primitives in §9.
+ 5. **Ikari/Djinn-style resource mechanics** (Doc B): a secondary combat resource gauge tied to equipment or party-collection mechanics, enabling a powerful "unleash" action with a temporary stat penalty. This is the most architecturally involved stretch item — tackle only after 1-4 are stable.
+ 6. **More dungeons + full overworld map**: pure content work using the established pipeline — each new dungeon is "more of Phase 6," not new systems.
+-7. **Authentic 4-channel audio engine** (Doc B's music-ducking-for-SFX): build the layered `AudioStreamPlayer` manager described in the audit. Pure audio-system polish, no gameplay dependency.
++7. **Cosmetic CRT/scanline/color-grading shader** (optional, replaces the dropped global palette-swap shader): a `CanvasLayer` + `ColorRect` + `ShaderMaterial` post-process for screen-space visual flavor. Test per-platform with a settings toggle to disable if it misbehaves on any device — this was the source of the original `SCREEN_TEXTURE`/Compatibility-renderer concern (audit §4.1), so treat it as purely optional polish, never load-bearing.
+ 8. **Roguelike postgame** ("Ancient Cave," Doc B): randomized dungeon generator + stripped-stats mode. Large, separate system — only attempt once the core game is feature-complete and you want a long-tail replayability feature.
+ 
++Note: the "literal 4-channel hardware audio engine" item from the original sequencing has been **removed** (decision #4, audit §8) — not deferred, dropped.
++
+ ---
+ 
+ ## 18. Risks and Mitigations
+ 
+ | Risk | Likelihood | Impact | Mitigation |
+ |---|---|---|---|
+-| `SCREEN_TEXTURE` palette shader misbehaves on target Android hardware (audit §4.1) | Medium | Medium (visual only) | Prototype + test on real Android device in Milestone 1.4, before building more art around the assumption it works. Fallback: per-material shaders. |
+ | Scope creep from Doc B's full feature list | High | High | This Gameplan's MVP/Stretch split (§16/§17) is the guardrail — revisit it before adding any new system, and resist adding stretch features mid-Phase. |
+ | Solo + AI-assisted dev underestimates UI work (menus, inventory, party management) | Medium | Medium | UI-heavy phases (4, 5) are scheduled with dedicated milestones rather than bundled into "just add combat" — UI is consistently the most underestimated part of RPGs. |
+ | Android export friction (SDK/JDK setup, device-specific quirks) | Medium | Medium | Address in Phase 0 (M0.3), not deferred to the end — surface problems while the codebase is still trivial. |
+ | LDtk importer (`heygleeson/godot-ldtk-importer`) is a community plugin — could have breaking changes on Godot updates | Low-Medium | Medium | Pin the Godot version per project (4.6.x) and the importer version; check the importer's GitHub issues before any Godot engine upgrade. |
+-| Base resolution/palette decision (Open Decision #1) made too late, requiring re-export of existing art | Medium | Medium | Lock this in Milestone 1.1, before producing more than placeholder art. |
+-| "Authentic GB constraint" scope creep (audit §5.3) — spending time on hardware-accuracy that doesn't serve gameplay | Medium | Low-Medium | Treat all literal-GB-hardware items (10-sprite flicker, channel-stealing audio, exact 160x144) as Stretch Goals only, per §17. |
++| 240x160 doesn't read well on some target screen (e.g., heavy pillarboxing on certain phone aspect ratios) | Low-Medium | Low | Validate in Milestone 1.4 with the test tileset, before producing more than placeholder art. Integer scaling + `keep` aspect is the default; `expand` is the fallback. |
++| "Authentic GB constraint" scope creep (audit §5.3) — spending time on hardware-accuracy that doesn't serve gameplay | Low (mostly resolved by dropping GB-accuracy targets, decisions #1/#2/#4) | Low | Any remaining literal-hardware ideas (e.g., the CRT shader, §17 #7) are optional cosmetic Stretch Goals only, never load-bearing. |
++| Aseprite CLI/Lua automation has a learning curve before it pays off | Low | Low | Start with simple batch-export scripts in Milestone 1.1; expand only as repetitive tasks emerge. Pixelorama remains a no-cost manual fallback. |
+ 
+ ---
+ 
+ ## 19. Concrete Next Steps
+ 
+-1. Review and resolve the **5 open decisions** in `audited_research.md` §8 (especially #1, base resolution/palette — it gates Milestone 1).
++1. All 5 open decisions from `audited_research.md` §8 are resolved (2026-06-11) — no remaining blockers to starting Phase 0.
+ 2. Merge or review this branch (`research-audit-and-gameplan`) — see PR/branch info at the end of this work's summary.
+-3. Start **Phase 0** (M0.2/M0.3): create the Godot 4.6 project skeleton inside `game/`, configure rendering settings per §3.2, and get a trivial build running on all three target platforms.
++3. Start **Phase 0** (M0.2/M0.3): create the Godot 4.6 project skeleton inside `game/`, configure rendering settings per §3.2 (240x160, Mobile renderer, integer scaling, no palette shader), and get a trivial build running on all three target platforms.
+ 4. Once Phase 0 is green, proceed through Phases 1-6 in order — each milestone is sized to be a self-contained AI-assisted session with a clear "done" condition (stated in §15).
+-5. Re-run a lighter audit pass after Phase 1 (M1.4) specifically on the palette shader / renderer decision, since that's the one technical open question that needs real-device validation rather than just a planning decision.
++5. Set up `CLAUDE.md`/`AGENTS.md` conventions (repo root) before Phase 0 so Claude/Codex sessions start with consistent project context from the first commit.
+diff --git a/docs/research/audited_research.md b/docs/research/audited_research.md
+index 9857f69..be1856f 100644
+--- a/docs/research/audited_research.md
++++ b/docs/research/audited_research.md
+@@ -115,13 +115,23 @@ Both documents are AI-generated literature reviews with "Works cited" sections.
+ 
+ ---
+ 
+-## 8. Open Decisions (Need Kayden's Input)
++## 8. Open Decisions — RESOLVED (2026-06-11)
+ 
+-1. **Exact base resolution and palette depth.** Literal 160x144 / 4-color, or a wider "GB-inspired" resolution (e.g., 256x224, 320x180) with a slightly larger palette (8-16 colors)? This affects every art asset going forward, so it should be locked early (Milestone 1) but it's a creative call, not a technical one.
+-2. **Renderer choice (Mobile vs Compatibility).** Recommend prototyping the palette shader on both early to see if the Compatibility renderer's `SCREEN_TEXTURE` bug actually affects you, since it determines minimum Android device support.
+-3. **Aseprite vs Pixelorama vs Pixen** — a $20 spend vs free tools. Functionally either works; this is a workflow-feel preference.
+-4. **How "authentic" the audio should be** — full Furnace/4-channel-DMG emulation, or just chiptune-*styled* music without strict channel limits? Affects whether you need to build a channel-stealing audio manager (Doc B's design) at all.
+-5. **Scope sequencing for the big design-doc gameplay systems** (visible synchronized enemies, elemental traversal abilities, Ikari/Djinn-style resource systems, roguelike postgame) — the Gameplan proposes an order, but final call on what's MVP vs. stretch is yours.
++All five were resolved in a follow-up conversation. Recorded here for the historical record; the Gameplan reflects the resolutions directly.
++
++1. **Base resolution/palette — RESOLVED: GBA-like, not GBC-like.** Kayden isn't attached to a literal Game Boy look and prefers a GBA-style aesthetic. Decision: **240x160 base resolution** (GBA's native 3:2 res), nearest-neighbor filtering, integer scaling, viewport stretch. Palette is **not** artificially restricted to 4 colors — GBA-era games used 15-bit color (32,768), so author sprites/tiles with whatever palette looks good and let the art establish the retro feel, rather than enforcing a hard color-count limit. This also resolves the Doc A vs Doc B resolution disagreement (§4.7) in favor of "wider, GBA-like" over "literal 160x144."
++2. **Renderer/palette-shader fallback — RESOLVED: drop the global palette-swap shader from MVP entirely.** Since the game isn't targeting a fixed 4-color palette (see #1 above), the `SCREEN_TEXTURE`-based palette-swap post-process (the thing that risked the Compatibility-renderer bug, audit §4.1) is no longer needed for the core look. **Mobile renderer, no `SCREEN_TEXTURE` dependency in MVP** — sidesteps godot/godot#79914 entirely. A CRT/scanline/color-grading shader remains a possible cosmetic Stretch Goal, built and tested per-platform with a settings toggle so it can be disabled if it misbehaves on any device.
++3. **Aseprite vs Pixelorama vs Pixen — RESOLVED: Aseprite primary.** Since Claude/Codex are doing most of the asset-pipeline work, the deciding factor is automation: Aseprite has a Lua scripting API and a CLI (`aseprite --batch script.lua`) that an AI agent can invoke directly to slice sprite sheets, batch-export layers/animations, and regenerate assets after edits — Pixelorama and Pixen are GUI-only with no equivalent automation surface. The $20 one-time cost is trivial against the time saved by scriptable exports. Pixelorama remains a fine zero-cost fallback if Aseprite is ever unavailable, but Aseprite is the default. See the pros/cons table below.
++4. **Audio authenticity — RESOLVED: compose in Furnace for the *sound*, skip the literal hardware-engine architecture.** Use Furnace Tracker (free, GB/GBA-capable chip emulation) to compose music/SFX that *sound* chiptune, export to `.ogg`, and play them through a simple `AudioStreamPlayer`/`AudioStreamPlayer2D` setup (already in Gameplan §13). The "literal 4-channel hardware engine with channel-stealing for SFX" (Doc B) is **dropped from Stretch Goals entirely** — it was always pure internal-architecture authenticity with no player-facing benefit, and is even less relevant now that the project isn't targeting literal GB hardware constraints (see #1).
++5. **Scope sequencing for big design-doc systems — RESOLVED: accept the Gameplan's proposed order** (equipment → elemental counters → telegraphed combat UI → traversal abilities → Djinn/Ikari-style resources → more content → roguelike postgame), per Gameplan §17. No changes requested.
++
++### 8.1 Art tool pros/cons (decision #3 detail)
++
++| Tool | Pros | Cons | Verdict |
++|---|---|---|---|
++| **Aseprite** | Lua scripting API + CLI batch mode (`aseprite -b`) — Claude/Codex can script sprite-sheet slicing, animation export, and palette changes without a human at the GUI; industry-standard `.aseprite` format with first-class animation/onion-skin tools; $20 one-time. | Closed source; small one-time cost. | **Primary.** The automation surface is decisive for an AI-assisted workflow. |
++| **Pixelorama** | Free, open source (MIT), built in Godot so its file/project model feels familiar; built-in tilemap and pixel-scaling algorithms (cleanEdge, OmniScale). | GUI-only — no CLI/scripting hook for agents to drive exports; less mature animation/export tooling than Aseprite. | **Fallback.** Use if Aseprite is unavailable or for quick one-off edits; not the primary pipeline tool. |
++| **Pixen** | Native Mac app, actively maintained (Pixen 6), nice Sidecar/iPad workflow if drawing by hand. | Mac-only; no scripting/CLI automation; smaller community/less AI-training-data coverage for troubleshooting. | **Not recommended** for this project — automation matters more than native-Mac polish here. |
+ 
+ ---
+ 
+@@ -158,9 +168,9 @@ Both documents are AI-generated literature reviews with "Works cited" sections.
+ 
+ | Decision | Final Recommendation | Confidence |
+ |---|---|---|
+-| **Engine** | Godot 4.6.x, GDScript, Mobile renderer | High |
++| **Engine** | Godot 4.6.x, GDScript, Mobile renderer, no `SCREEN_TEXTURE` palette shader in MVP | High |
+ | **Level editor** | LDtk + heygleeson/godot-ldtk-importer | High |
+-| **Pixel art workflow** | Aseprite (or Pixelorama if avoiding cost) | High |
+-| **Audio workflow** | Furnace Tracker, exported to .ogg | High |
++| **Pixel art workflow** | Aseprite (primary, scriptable via Lua/CLI for AI-driven pipelines), Pixelorama as free fallback | High |
++| **Audio workflow** | Furnace Tracker, exported to .ogg, simple AudioStreamPlayer manager (no literal hardware-channel emulation) | High |
+ | **Target platforms** | macOS, Windows, Android (desktop-first dev, Android validated early) | High |
+-| **Aesthetic target** | "Gameboy-like, modern retro" — inspiration not hard constraint; final resolution/palette to be locked in Milestone 1 | Medium (open decision) |
++| **Aesthetic target** | **GBA-like, not GBC-like**: 240x160 base resolution, nearest-neighbor filtering, integer scaling, viewport stretch, unrestricted palette (no forced 4-color limit) | High (resolved 2026-06-11) |
+-- 
+2.34.1
+
